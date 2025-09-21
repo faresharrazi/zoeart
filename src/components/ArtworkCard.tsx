@@ -22,8 +22,8 @@ const ArtworkCard = ({
   };
 
   return (
-    <div className="group cursor-pointer" onClick={handleClick}>
-      <div className="relative overflow-hidden bg-gradient-card shadow-elegant hover:shadow-artwork transition-all duration-500 ease-out">
+    <div className="group cursor-pointer h-full" onClick={handleClick}>
+      <div className="relative overflow-hidden bg-gradient-card shadow-elegant hover:shadow-artwork transition-all duration-500 ease-out h-full flex flex-col">
         <div className="aspect-square overflow-hidden">
           <img
             src={image}
@@ -32,7 +32,7 @@ const ArtworkCard = ({
           />
         </div>
 
-        <div className="p-6 space-y-3">
+        <div className="p-6 space-y-3 flex-grow flex flex-col">
           <h3 className="text-xl font-bold text-foreground group-hover:text-gallery-gold transition-smooth">
             {title}
           </h3>
@@ -43,7 +43,7 @@ const ArtworkCard = ({
             </p>
           </div>
           {description && (
-            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 mt-auto">
               {description}
             </p>
           )}

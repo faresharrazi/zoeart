@@ -5,126 +5,46 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Image } from "lucide-react";
-import MediaSelector from "./MediaSelector";
-
-interface Artist {
-  id: string;
-  name: string;
-  specialty: string;
-  bio: string;
-  education: string;
-  exhibitions: string;
-  profileImage: string;
-  socialMedia: {
-    instagram?: string;
-    twitter?: string;
-    website?: string;
-    email?: string;
-  };
-}
-
-const mockArtists: Artist[] = [
-  {
-    id: "1",
-    name: "Elena Rodriguez",
-    specialty: "Abstract Expressionism",
-    bio: "Elena Rodriguez is a contemporary abstract artist whose work explores the intersection of emotion and movement. Born in Barcelona, she has exhibited internationally and is known for her dynamic use of color and form.",
-    education: "MFA Fine Arts, Barcelona Academy of Art",
-    exhibitions:
-      "Solo: Gallery Modern (2023), Group: Contemporary Visions (2024)",
-    profileImage: "/src/assets/artist-elena-rodriguez.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/elenarodriguezart",
-      twitter: "https://twitter.com/elenarodriguezart",
-      website: "https://elenarodriguezart.com",
-      email: "elena@elenarodriguezart.com",
-    },
-  },
-  {
-    id: "2",
-    name: "Marcus Chen",
-    specialty: "Geometric Minimalism",
-    bio: "Marcus Chen creates minimalist works that examine the relationship between structure and space. His precise geometric compositions have been featured in major galleries across Asia and Europe.",
-    education: "BFA Visual Arts, Central Saint Martins",
-    exhibitions: "Solo: White Cube London (2023), Venice Biennale (2024)",
-    profileImage: "/src/assets/artist-marcus-chen.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/marcuschenart",
-      website: "https://marcuschenart.com",
-      email: "hello@marcuschenart.com",
-    },
-  },
-  {
-    id: "3",
-    name: "Sarah Williams",
-    specialty: "Contemporary Portraiture",
-    bio: "Sarah Williams is renowned for her deeply psychological portraits that capture the complexity of human emotion. Her work bridges traditional portraiture with contemporary artistic expression.",
-    education: "MFA Painting, Yale School of Art",
-    exhibitions: "Solo: Metropolitan Museum (2023), Whitney Biennial (2024)",
-    profileImage: "/src/assets/artist-sarah-williams.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/sarahwilliamsart",
-      twitter: "https://twitter.com/sarahwilliamsart",
-      website: "https://sarahwilliamsportrait.com",
-      email: "sarah@sarahwilliamsportrait.com",
-    },
-  },
-  {
-    id: "4",
-    name: "David Thompson",
-    specialty: "Abstract Landscape",
-    bio: "David Thompson's abstract landscapes celebrate the raw energy of natural forms. His bold brushwork and earth-tone palette create compositions that are both powerful and meditative.",
-    education: "BFA Landscape Painting, Rhode Island School of Design",
-    exhibitions:
-      "Solo: National Gallery (2023), Group: Nature Reimagined (2024)",
-    profileImage: "/src/assets/artist-david-thompson.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/davidthompsonart",
-      website: "https://davidthompsonlandscapes.com",
-    },
-  },
-  {
-    id: "5",
-    name: "Luna Park",
-    specialty: "Contemporary Landscape",
-    bio: "Luna Park reimagines traditional landscape painting for the contemporary world. Her stylized interpretations blend realism with modern artistic sensibilities.",
-    education: "MFA Contemporary Art, California Institute of the Arts",
-    exhibitions: "Solo: LACMA (2023), Group: New Landscapes (2024)",
-    profileImage: "/src/assets/artist-luna-park.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/lunaparkart",
-      twitter: "https://twitter.com/lunaparkart",
-      website: "https://lunaparkart.com",
-      email: "luna@lunaparkart.com",
-    },
-  },
-  {
-    id: "6",
-    name: "Alex Rivera",
-    specialty: "Sculptural Installation",
-    bio: "Alex Rivera pushes the boundaries of sculptural art through innovative use of materials and space. Their installations challenge viewers' perceptions through light, form, and transparency.",
-    education: "MFA Sculpture, Parsons School of Design",
-    exhibitions: "Solo: Guggenheim (2024), Group: Material Explorations (2024)",
-    profileImage: "/src/assets/artist-alex-rivera.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/alexriverasculpture",
-      website: "https://alexriverasculpture.com",
-      email: "alex@alexriverasculpture.com",
-    },
-  },
-];
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Image,
+  Loader2,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import {
+  useArtists,
+  type Artist,
+  type ArtistFormData,
+} from "@/hooks/use-artists";
+import { fileService } from "@/lib/database";
 
 const ArtistManagement = () => {
-  const [artists, setArtists] = useState<Artist[]>(mockArtists);
+  const { artists, loading, createArtist, updateArtist, deleteArtist } =
+    useArtists();
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Artist>>({});
-  const [showMediaSelector, setShowMediaSelector] = useState(false);
+  const [formData, setFormData] = useState<Partial<ArtistFormData>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleEdit = (artist: Artist) => {
-    setFormData(artist);
+    setFormData({
+      name: artist.name,
+      specialty: artist.specialty,
+      bio: artist.bio,
+      education: artist.education,
+      exhibitions: artist.exhibitions,
+      profile_image: artist.profile_image,
+      instagram: artist.instagram,
+      twitter: artist.twitter,
+      website: artist.website,
+      email: artist.email,
+      is_visible: artist.is_visible,
+    });
     setEditingId(artist.id);
     setIsEditing(true);
   };
@@ -136,14 +56,18 @@ const ArtistManagement = () => {
       bio: "",
       education: "",
       exhibitions: "",
-      profileImage: "",
-      socialMedia: {},
+      profile_image: null,
+      instagram: null,
+      twitter: null,
+      website: null,
+      email: null,
+      is_visible: true,
     });
     setEditingId(null);
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.specialty) {
       toast({
         title: "Error",
@@ -153,44 +77,58 @@ const ArtistManagement = () => {
       return;
     }
 
-    if (editingId) {
-      // Update existing artist
-      setArtists(
-        artists.map((artist) =>
-          artist.id === editingId
-            ? ({ ...artist, ...formData } as Artist)
-            : artist
-        )
-      );
-      toast({
-        title: "Success",
-        description: "Artist updated successfully",
-      });
-    } else {
-      // Add new artist
-      const newArtist: Artist = {
-        ...formData,
-        id: Date.now().toString(),
-        socialMedia: formData.socialMedia || {},
-      } as Artist;
+    try {
+      setIsSubmitting(true);
 
-      setArtists([...artists, newArtist]);
-      toast({
-        title: "Success",
-        description: "New artist added successfully",
-      });
+      if (editingId) {
+        await updateArtist(editingId, formData);
+      } else {
+        await createArtist(formData as ArtistFormData);
+      }
+
+      setIsEditing(false);
+      setFormData({});
+    } catch (error) {
+      // Error handling is done in the hook
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsEditing(false);
-    setFormData({});
   };
 
-  const handleDelete = (id: string) => {
-    setArtists(artists.filter((artist) => artist.id !== id));
-    toast({
-      title: "Success",
-      description: "Artist deleted successfully",
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteArtist(id);
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  };
+
+  const handleVisibilityToggle = async (
+    id: string,
+    currentVisibility: boolean
+  ) => {
+    try {
+      await updateArtist(id, { is_visible: !currentVisibility });
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      const imageUrl = await fileService.uploadImage(file, "artists");
+      setFormData((prev) => ({ ...prev, profile_image: imageUrl }));
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload image",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isEditing) {
@@ -235,10 +173,10 @@ const ArtistManagement = () => {
                   Profile Image
                 </label>
                 <div className="space-y-2">
-                  {formData.profileImage ? (
+                  {formData.profile_image ? (
                     <div className="flex items-center space-x-4">
                       <Avatar className="w-20 h-20">
-                        <AvatarImage src={formData.profileImage} />
+                        <AvatarImage src={formData.profile_image} />
                         <AvatarFallback>
                           {formData.name
                             ?.split(" ")
@@ -246,25 +184,60 @@ const ArtistManagement = () => {
                             .join("") || "A"}
                         </AvatarFallback>
                       </Avatar>
+                      <div className="space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowMediaSelector(true)}
+                        >
+                          <Image className="w-4 h-4 mr-2" />
+                          Change Image
+                        </Button>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file);
+                          }}
+                          className="hidden"
+                          id="image-upload"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() =>
+                            document.getElementById("image-upload")?.click()
+                          }
+                        >
+                          Upload New
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file);
+                        }}
+                        className="hidden"
+                        id="image-upload-new"
+                      />
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => setShowMediaSelector(true)}
+                        onClick={() =>
+                          document.getElementById("image-upload-new")?.click()
+                        }
+                        className="w-full py-8 border-dashed"
                       >
-                        <Image className="w-4 h-4 mr-2" />
-                        Change Image
+                        <Image className="w-6 h-6 mr-2" />
+                        Upload Profile Image
                       </Button>
                     </div>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowMediaSelector(true)}
-                      className="w-full py-8 border-dashed"
-                    >
-                      <Image className="w-6 h-6 mr-2" />
-                      Select or Upload Profile Image
-                    </Button>
                   )}
                 </div>
               </div>
@@ -319,14 +292,11 @@ const ArtistManagement = () => {
                     Instagram
                   </label>
                   <Input
-                    value={formData.socialMedia?.instagram || ""}
+                    value={formData.instagram || ""}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        socialMedia: {
-                          ...formData.socialMedia,
-                          instagram: e.target.value,
-                        },
+                        instagram: e.target.value,
                       })
                     }
                     placeholder="https://instagram.com/username"
@@ -337,14 +307,11 @@ const ArtistManagement = () => {
                     Website
                   </label>
                   <Input
-                    value={formData.socialMedia?.website || ""}
+                    value={formData.website || ""}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        socialMedia: {
-                          ...formData.socialMedia,
-                          website: e.target.value,
-                        },
+                        website: e.target.value,
                       })
                     }
                     placeholder="https://artistwebsite.com"
@@ -355,14 +322,11 @@ const ArtistManagement = () => {
                     Twitter
                   </label>
                   <Input
-                    value={formData.socialMedia?.twitter || ""}
+                    value={formData.twitter || ""}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        socialMedia: {
-                          ...formData.socialMedia,
-                          twitter: e.target.value,
-                        },
+                        twitter: e.target.value,
                       })
                     }
                     placeholder="https://twitter.com/username"
@@ -373,30 +337,66 @@ const ArtistManagement = () => {
                     Email
                   </label>
                   <Input
-                    value={formData.socialMedia?.email || ""}
+                    value={formData.email || ""}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        socialMedia: {
-                          ...formData.socialMedia,
-                          email: e.target.value,
-                        },
+                        email: e.target.value,
                       })
                     }
                     placeholder="artist@email.com"
                   />
                 </div>
               </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_visible"
+                  checked={formData.is_visible || false}
+                  onChange={(e) =>
+                    setFormData({ ...formData, is_visible: e.target.checked })
+                  }
+                  className="rounded"
+                />
+                <label htmlFor="is_visible" className="text-sm font-medium">
+                  Visible on website
+                </label>
+              </div>
             </div>
 
             <Button
               onClick={handleSave}
+              disabled={isSubmitting}
               className="bg-gallery-gold hover:bg-gallery-gold/90"
             >
+              {isSubmitting && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
               {editingId ? "Update Artist" : "Add Artist"}
             </Button>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Artist Management</h2>
+          <Button
+            onClick={handleAdd}
+            className="bg-gallery-gold hover:bg-gallery-gold/90"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Artist
+          </Button>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-gallery-gold" />
+        </div>
       </div>
     );
   }
@@ -420,7 +420,10 @@ const ArtistManagement = () => {
             <CardContent className="p-6">
               <div className="flex items-start space-x-4 mb-4">
                 <Avatar className="w-16 h-16">
-                  <AvatarImage src={artist.profileImage} alt={artist.name} />
+                  <AvatarImage
+                    src={artist.profile_image || ""}
+                    alt={artist.name}
+                  />
                   <AvatarFallback>
                     {artist.name
                       .split(" ")
@@ -469,6 +472,24 @@ const ArtistManagement = () => {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={() =>
+                    handleVisibilityToggle(artist.id, artist.is_visible)
+                  }
+                  className={
+                    artist.is_visible
+                      ? "text-green-600 hover:text-green-700"
+                      : "text-gray-400 hover:text-gray-600"
+                  }
+                >
+                  {artist.is_visible ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <XCircle className="w-4 h-4" />
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() => handleEdit(artist)}
                 >
                   <Edit className="w-4 h-4" />
@@ -486,18 +507,6 @@ const ArtistManagement = () => {
           </Card>
         ))}
       </div>
-
-      {showMediaSelector && (
-        <MediaSelector
-          selectedImage={formData.profileImage}
-          onSelect={(imageUrl) => {
-            setFormData({ ...formData, profileImage: imageUrl });
-            setShowMediaSelector(false);
-          }}
-          onClose={() => setShowMediaSelector(false)}
-          type="artist"
-        />
-      )}
     </div>
   );
 };

@@ -11,102 +11,60 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, X } from "lucide-react";
-import abstractArt1 from "@/assets/artwork-abstract-1.jpg";
-import geometricArt1 from "@/assets/artwork-geometric-1.jpg";
-import portraitArt1 from "@/assets/artwork-portrait-1.jpg";
-import abstractArt2 from "@/assets/artwork-abstract-2.jpg";
-import landscapeArt1 from "@/assets/artwork-landscape-1.jpg";
-import sculptureArt1 from "@/assets/artwork-sculpture-1.jpg";
-
-const allArtworks = [
-  {
-    title: "Fluid Dynamics",
-    artist: "Elena Rodriguez",
-    year: 2024,
-    medium: "Acrylic on Canvas",
-    image: abstractArt1,
-    slug: "fluid-dynamics",
-    description:
-      "An exploration of movement and form through organic shapes that dance across the canvas in harmonious blues and gold.",
-    category: "Abstract",
-  },
-  {
-    title: "Intersection",
-    artist: "Marcus Chen",
-    year: 2023,
-    medium: "Mixed Media",
-    image: geometricArt1,
-    slug: "intersection",
-    description:
-      "A minimalist composition examining the relationship between structure and space in contemporary urban environments.",
-    category: "Geometric",
-  },
-  {
-    title: "Silent Contemplation",
-    artist: "Sarah Williams",
-    year: 2024,
-    medium: "Oil on Canvas",
-    image: portraitArt1,
-    slug: "silent-contemplation",
-    description:
-      "A powerful portrait capturing the quiet strength and introspective nature of the human spirit.",
-    category: "Portrait",
-  },
-  {
-    title: "Earth Rhythms",
-    artist: "David Thompson",
-    year: 2023,
-    medium: "Acrylic on Canvas",
-    image: abstractArt2,
-    slug: "earth-rhythms",
-    description:
-      "Bold brushstrokes and earth tones create a dynamic composition celebrating the raw energy of nature.",
-    category: "Abstract",
-  },
-  {
-    title: "Mountain Dreams",
-    artist: "Luna Park",
-    year: 2024,
-    medium: "Oil on Canvas",
-    image: landscapeArt1,
-    slug: "mountain-dreams",
-    description:
-      "A contemporary interpretation of natural landscapes, blending realism with stylized forms and golden highlights.",
-    category: "Landscape",
-  },
-  {
-    title: "Modern Forms",
-    artist: "Alex Rivera",
-    year: 2024,
-    medium: "Steel & Glass Installation",
-    image: sculptureArt1,
-    slug: "modern-forms",
-    description:
-      "An innovative sculptural piece that challenges perception through the interplay of light, metal, and transparency.",
-    category: "Sculpture",
-  },
-];
+import { Search, Filter, X, Loader2 } from "lucide-react";
+import { usePublicArtworks } from "@/hooks/use-public-artworks";
 
 const Collection = () => {
+  const { artworks, loading, error } = usePublicArtworks();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMedium, setSelectedMedium] = useState("all");
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("title");
 
+  // Convert database format to component format
+  const formattedArtworks = useMemo(() => {
+    return artworks.map((artwork) => ({
+      title: artwork.title,
+      artist: artwork.artists?.name || "Unknown Artist",
+      year: artwork.year,
+      medium: artwork.medium,
+      image: artwork.image || "/placeholder-artwork.jpg",
+      slug: artwork.slug,
+      description: artwork.description || "",
+      category: artwork.medium, // Using medium as category for now
+    }));
+  }, [artworks]);
+
   // Get unique values for filters
-  const mediums = [...new Set(allArtworks.map((artwork) => artwork.medium))];
-  const years = [...new Set(allArtworks.map((artwork) => artwork.year))].sort(
-    (a, b) => b - a
-  );
-  const categories = [
-    ...new Set(allArtworks.map((artwork) => artwork.category)),
-  ];
+  const mediums =
+    formattedArtworks.length > 0
+      ? [
+          ...new Set(
+            formattedArtworks.map((artwork) => artwork.medium).filter(Boolean)
+          ),
+        ]
+      : [];
+  const years =
+    formattedArtworks.length > 0
+      ? [
+          ...new Set(
+            formattedArtworks.map((artwork) => artwork.year).filter(Boolean)
+          ),
+        ].sort((a, b) => b - a)
+      : [];
+  const categories =
+    formattedArtworks.length > 0
+      ? [
+          ...new Set(
+            formattedArtworks.map((artwork) => artwork.category).filter(Boolean)
+          ),
+        ]
+      : [];
 
   // Filter and sort artworks
   const filteredAndSortedArtworks = useMemo(() => {
-    let filtered = allArtworks.filter((artwork) => {
+    let filtered = formattedArtworks.filter((artwork) => {
       const matchesSearch =
         artwork.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         artwork.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -139,7 +97,14 @@ const Collection = () => {
     });
 
     return filtered;
-  }, [searchTerm, selectedMedium, selectedYear, selectedCategory, sortBy]);
+  }, [
+    formattedArtworks,
+    searchTerm,
+    selectedMedium,
+    selectedYear,
+    selectedCategory,
+    sortBy,
+  ]);
 
   const clearAllFilters = () => {
     setSearchTerm("");
@@ -154,6 +119,44 @@ const Collection = () => {
     selectedMedium !== "all" ||
     selectedYear !== "all" ||
     selectedCategory !== "all";
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="pt-24 pb-16 bg-gradient-hero">
+          <div className="container mx-auto px-6 text-center">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              Complete <span className="text-gallery-gold">Collection</span>
+            </h1>
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-gallery-gold" />
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="pt-24 pb-16 bg-gradient-hero">
+          <div className="container mx-auto px-6 text-center">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              Complete <span className="text-gallery-gold">Collection</span>
+            </h1>
+            <p className="text-red-400 text-xl">
+              Error loading collection: {error}
+            </p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -196,50 +199,62 @@ const Collection = () => {
                 </span>
               </div>
 
-              <Select
-                value={selectedCategory}
-                onValueChange={setSelectedCategory}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {categories.length > 0 && (
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category || "unknown"}>
+                        {category || "Unknown"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
 
-              <Select value={selectedMedium} onValueChange={setSelectedMedium}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Medium" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Mediums</SelectItem>
-                  {mediums.map((medium) => (
-                    <SelectItem key={medium} value={medium}>
-                      {medium}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {mediums.length > 0 && (
+                <Select
+                  value={selectedMedium}
+                  onValueChange={setSelectedMedium}
+                >
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Medium" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Mediums</SelectItem>
+                    {mediums.map((medium) => (
+                      <SelectItem key={medium} value={medium || "unknown"}>
+                        {medium || "Unknown"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
 
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-24">
-                  <SelectValue placeholder="Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
-                  {years.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {years.length > 0 && (
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-24">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Years</SelectItem>
+                    {years.map((year) => (
+                      <SelectItem
+                        key={year}
+                        value={year?.toString() || "unknown"}
+                      >
+                        {year || "Unknown"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
 
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-32">
@@ -269,8 +284,8 @@ const Collection = () => {
 
           {/* Results Summary */}
           <div className="mt-4 text-sm text-muted-foreground">
-            Showing {filteredAndSortedArtworks.length} of {allArtworks.length}{" "}
-            artworks
+            Showing {filteredAndSortedArtworks.length} of{" "}
+            {formattedArtworks.length} artworks
             {hasActiveFilters && (
               <span className="ml-2 text-gallery-gold">• Filters applied</span>
             )}

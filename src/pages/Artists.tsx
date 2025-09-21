@@ -3,108 +3,50 @@ import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Instagram, Twitter, Globe, Mail } from "lucide-react";
-
-// Import artist profile images
-import elenaProfileImage from "@/assets/artist-elena-rodriguez.jpg";
-import marcusProfileImage from "@/assets/artist-marcus-chen.jpg";
-import sarahProfileImage from "@/assets/artist-sarah-williams.jpg";
-import davidProfileImage from "@/assets/artist-david-thompson.jpg";
-import lunaProfileImage from "@/assets/artist-luna-park.jpg";
-import alexProfileImage from "@/assets/artist-alex-rivera.jpg";
-
-const artists = [
-  {
-    name: "Elena Rodriguez",
-    profileImage: elenaProfileImage,
-    specialty: "Abstract Expressionism",
-    bio: "Elena Rodriguez is a contemporary abstract artist whose work explores the intersection of emotion and movement. Born in Barcelona, she has exhibited internationally and is known for her dynamic use of color and form.",
-    artworks: ["Fluid Dynamics"],
-    education: "MFA Fine Arts, Barcelona Academy of Art",
-    exhibitions:
-      "Solo: Gallery Modern (2023), Group: Contemporary Visions (2024)",
-    socialMedia: {
-      instagram: "https://instagram.com/elenarodriguezart",
-      twitter: "https://twitter.com/elenarodriguezart",
-      website: "https://elenarodriguezart.com",
-      email: "elena@elenarodriguezart.com",
-    },
-  },
-  {
-    name: "Marcus Chen",
-    profileImage: marcusProfileImage,
-    specialty: "Geometric Minimalism",
-    bio: "Marcus Chen creates minimalist works that examine the relationship between structure and space. His precise geometric compositions have been featured in major galleries across Asia and Europe.",
-    artworks: ["Intersection"],
-    education: "BFA Visual Arts, Central Saint Martins",
-    exhibitions: "Solo: White Cube London (2023), Venice Biennale (2024)",
-    socialMedia: {
-      instagram: "https://instagram.com/marcuschenart",
-      website: "https://marcuschenart.com",
-      email: "hello@marcuschenart.com",
-    },
-  },
-  {
-    name: "Sarah Williams",
-    profileImage: sarahProfileImage,
-    specialty: "Contemporary Portraiture",
-    bio: "Sarah Williams is renowned for her deeply psychological portraits that capture the complexity of human emotion. Her work bridges traditional portraiture with contemporary artistic expression.",
-    artworks: ["Silent Contemplation"],
-    education: "MFA Painting, Yale School of Art",
-    exhibitions: "Solo: Metropolitan Museum (2023), Whitney Biennial (2024)",
-    socialMedia: {
-      instagram: "https://instagram.com/sarahwilliamsart",
-      twitter: "https://twitter.com/sarahwilliamsart",
-      website: "https://sarahwilliamsportrait.com",
-      email: "sarah@sarahwilliamsportrait.com",
-    },
-  },
-  {
-    name: "David Thompson",
-    profileImage: davidProfileImage,
-    specialty: "Abstract Landscape",
-    bio: "David Thompson's abstract landscapes celebrate the raw energy of natural forms. His bold brushwork and earth-tone palette create compositions that are both powerful and meditative.",
-    artworks: ["Earth Rhythms"],
-    education: "BFA Landscape Painting, Rhode Island School of Design",
-    exhibitions:
-      "Solo: National Gallery (2023), Group: Nature Reimagined (2024)",
-    socialMedia: {
-      instagram: "https://instagram.com/davidthompsonart",
-      website: "https://davidthompsonlandscapes.com",
-    },
-  },
-  {
-    name: "Luna Park",
-    profileImage: lunaProfileImage,
-    specialty: "Contemporary Landscape",
-    bio: "Luna Park reimagines traditional landscape painting for the contemporary world. Her stylized interpretations blend realism with modern artistic sensibilities.",
-    artworks: ["Mountain Dreams"],
-    education: "MFA Contemporary Art, California Institute of the Arts",
-    exhibitions: "Solo: LACMA (2023), Group: New Landscapes (2024)",
-    socialMedia: {
-      instagram: "https://instagram.com/lunaparkart",
-      twitter: "https://twitter.com/lunaparkart",
-      website: "https://lunaparkart.com",
-      email: "luna@lunaparkart.com",
-    },
-  },
-  {
-    name: "Alex Rivera",
-    profileImage: alexProfileImage,
-    specialty: "Sculptural Installation",
-    bio: "Alex Rivera pushes the boundaries of sculptural art through innovative use of materials and space. Their installations challenge viewers' perceptions through light, form, and transparency.",
-    artworks: ["Modern Forms"],
-    education: "MFA Sculpture, Parsons School of Design",
-    exhibitions: "Solo: Guggenheim (2024), Group: Material Explorations (2024)",
-    socialMedia: {
-      instagram: "https://instagram.com/alexriverasculpture",
-      website: "https://alexriverasculpture.com",
-      email: "alex@alexriverasculpture.com",
-    },
-  },
-];
+import { Instagram, Twitter, Globe, Mail, Loader2 } from "lucide-react";
+import { usePublicArtists } from "@/hooks/use-public-artists";
 
 const Artists = () => {
+  const { artists, loading, error } = usePublicArtists();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="pt-24 pb-16 bg-gradient-hero">
+          <div className="container mx-auto px-6 text-center">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              Featured <span className="text-gallery-gold">Artists</span>
+            </h1>
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-gallery-gold" />
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="pt-24 pb-16 bg-gradient-hero">
+          <div className="container mx-auto px-6 text-center">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              Featured <span className="text-gallery-gold">Artists</span>
+            </h1>
+            <p className="text-red-400 text-xl">
+              Error loading artists: {error}
+            </p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -130,13 +72,13 @@ const Artists = () => {
             {artists.map((artist, index) => (
               <Card
                 key={index}
-                className="shadow-elegant hover:shadow-artwork transition-all duration-300"
+                className="shadow-elegant hover:shadow-artwork transition-all duration-300 h-full flex flex-col"
               >
-                <CardContent className="p-8">
+                <CardContent className="p-8 flex-grow flex flex-col">
                   <div className="flex items-start space-x-6 mb-6">
                     <Avatar className="w-20 h-20 ring-2 ring-gallery-gold/20">
                       <AvatarImage
-                        src={artist.profileImage}
+                        src={artist.profile_image || "/placeholder-artist.jpg"}
                         alt={artist.name}
                         className="object-cover"
                       />
@@ -157,27 +99,19 @@ const Artists = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <p className="text-muted-foreground leading-relaxed">
+                  <div className="space-y-4 flex-grow">
+                    <p className="text-muted-foreground leading-relaxed line-clamp-4">
                       {artist.bio}
                     </p>
 
                     <div className="space-y-3">
                       <div>
                         <h4 className="font-semibold text-gallery-charcoal mb-1">
-                          Featured Works
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {artist.artworks.join(", ")}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="font-semibold text-gallery-charcoal mb-1">
                           Education
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {artist.education}
+                          {artist.education ||
+                            "Education information not available."}
                         </p>
                       </div>
 
@@ -186,67 +120,61 @@ const Artists = () => {
                           Recent Exhibitions
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {artist.exhibitions}
+                          {artist.exhibitions ||
+                            "Exhibition information not available."}
                         </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Social Media Links */}
-                  <div className="pt-4 border-t border-gallery-light-grey">
+                  <div className="pt-4 border-t border-gallery-light-grey mt-auto">
                     <h4 className="font-semibold text-gallery-charcoal mb-3">
                       Connect with the Artist
                     </h4>
                     <div className="flex flex-wrap gap-3">
-                      {artist.socialMedia.instagram && (
+                      {artist.instagram && (
                         <Button
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
                           onClick={() =>
-                            window.open(artist.socialMedia.instagram, "_blank")
+                            window.open(artist.instagram, "_blank")
                           }
                         >
                           <Instagram className="w-4 h-4" />
                           Instagram
                         </Button>
                       )}
-                      {artist.socialMedia.twitter && (
+                      {artist.twitter && (
                         <Button
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
-                          onClick={() =>
-                            window.open(artist.socialMedia.twitter, "_blank")
-                          }
+                          onClick={() => window.open(artist.twitter, "_blank")}
                         >
                           <Twitter className="w-4 h-4" />
                           Twitter
                         </Button>
                       )}
-                      {artist.socialMedia.website && (
+                      {artist.website && (
                         <Button
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
-                          onClick={() =>
-                            window.open(artist.socialMedia.website, "_blank")
-                          }
+                          onClick={() => window.open(artist.website, "_blank")}
                         >
                           <Globe className="w-4 h-4" />
                           Website
                         </Button>
                       )}
-                      {artist.socialMedia.email && (
+                      {artist.email && (
                         <Button
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
                           onClick={() =>
-                            window.open(
-                              `mailto:${artist.socialMedia.email}`,
-                              "_blank"
-                            )
+                            window.open(`mailto:${artist.email}`, "_blank")
                           }
                         >
                           <Mail className="w-4 h-4" />

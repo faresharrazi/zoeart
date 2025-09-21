@@ -1,111 +1,62 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Image } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Image,
+  Loader2,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import MediaSelector from "./MediaSelector";
-
-// Mock data structure - replace with real API calls later
-interface Artwork {
-  id: string;
-  title: string;
-  artist: string;
-  year: number;
-  medium: string;
-  description: string;
-  image: string;
-  slug: string;
-  status: "available" | "sold" | "reserved";
-}
-
-const mockArtworks: Artwork[] = [
-  {
-    id: "1",
-    title: "Fluid Dynamics",
-    artist: "Elena Rodriguez",
-    year: 2024,
-    medium: "Acrylic on Canvas",
-    description:
-      "An exploration of movement and form through organic shapes that dance across the canvas in harmonious blues and gold.",
-    image: "/src/assets/artwork-abstract-1.jpg",
-    slug: "fluid-dynamics",
-    status: "available",
-  },
-  {
-    id: "2",
-    title: "Intersection",
-    artist: "Marcus Chen",
-    year: 2023,
-    medium: "Mixed Media",
-    description:
-      "A minimalist composition examining the relationship between structure and space in contemporary urban environments.",
-    image: "/src/assets/artwork-geometric-1.jpg",
-    slug: "intersection",
-    status: "available",
-  },
-  {
-    id: "3",
-    title: "Silent Contemplation",
-    artist: "Sarah Williams",
-    year: 2024,
-    medium: "Oil on Canvas",
-    description:
-      "A powerful portrait capturing the quiet strength and introspective nature of the human spirit.",
-    image: "/src/assets/artwork-portrait-1.jpg",
-    slug: "silent-contemplation",
-    status: "available",
-  },
-  {
-    id: "4",
-    title: "Earth Rhythms",
-    artist: "David Thompson",
-    year: 2023,
-    medium: "Acrylic on Canvas",
-    description:
-      "Bold brushstrokes and earth tones create a dynamic composition celebrating the raw energy of nature.",
-    image: "/src/assets/artwork-abstract-2.jpg",
-    slug: "earth-rhythms",
-    status: "available",
-  },
-  {
-    id: "5",
-    title: "Mountain Dreams",
-    artist: "Luna Park",
-    year: 2024,
-    medium: "Oil on Canvas",
-    description:
-      "A contemporary interpretation of natural landscapes, blending realism with stylized forms and golden highlights.",
-    image: "/src/assets/artwork-landscape-1.jpg",
-    slug: "mountain-dreams",
-    status: "available",
-  },
-  {
-    id: "6",
-    title: "Modern Forms",
-    artist: "Alex Rivera",
-    year: 2024,
-    medium: "Steel & Glass Installation",
-    description:
-      "An innovative sculptural piece that challenges perception through the interplay of light, metal, and transparency.",
-    image: "/src/assets/artwork-sculpture-1.jpg",
-    slug: "modern-forms",
-    status: "available",
-  },
-];
+import {
+  useArtworks,
+  type Artwork,
+  type ArtworkFormData,
+} from "@/hooks/use-artworks";
+import { useArtists } from "@/hooks/use-artists";
+import { fileService } from "@/lib/database";
 
 const ArtworkManagement = () => {
-  const [artworks, setArtworks] = useState<Artwork[]>(mockArtworks);
+  const { artworks, loading, createArtwork, updateArtwork, deleteArtwork } =
+    useArtworks();
+  const { artists } = useArtists();
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Artwork>>({});
+  const [formData, setFormData] = useState<Partial<ArtworkFormData>>({});
   const [showMediaSelector, setShowMediaSelector] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleEdit = (artwork: Artwork) => {
-    setFormData(artwork);
+    setFormData({
+      title: artwork.title,
+      artist_id: artwork.artist_id,
+      year: artwork.year,
+      medium: artwork.medium,
+      description: artwork.description || "",
+      image: artwork.image,
+      slug: artwork.slug,
+      status: artwork.status,
+      dimensions: artwork.dimensions,
+      technique: artwork.technique,
+      provenance: artwork.provenance,
+      is_visible: artwork.is_visible,
+    });
     setEditingId(artwork.id);
     setIsEditing(true);
   };
@@ -113,20 +64,24 @@ const ArtworkManagement = () => {
   const handleAdd = () => {
     setFormData({
       title: "",
-      artist: "",
+      artist_id: "",
       year: new Date().getFullYear(),
       medium: "",
       description: "",
-      image: "",
+      image: null,
       slug: "",
       status: "available",
+      dimensions: null,
+      technique: null,
+      provenance: null,
+      is_visible: true,
     });
     setEditingId(null);
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    if (!formData.title || !formData.artist) {
+  const handleSave = async () => {
+    if (!formData.title || !formData.artist_id) {
       toast({
         title: "Error",
         description: "Title and Artist are required fields",
@@ -135,44 +90,60 @@ const ArtworkManagement = () => {
       return;
     }
 
-    if (editingId) {
-      // Update existing artwork
-      setArtworks(
-        artworks.map((artwork) =>
-          artwork.id === editingId
-            ? ({ ...artwork, ...formData } as Artwork)
-            : artwork
-        )
-      );
-      toast({
-        title: "Success",
-        description: "Artwork updated successfully",
-      });
-    } else {
-      // Add new artwork
-      const newArtwork: Artwork = {
-        ...formData,
-        id: Date.now().toString(),
-        slug: formData.title?.toLowerCase().replace(/\s+/g, "-") || "",
-      } as Artwork;
+    try {
+      setIsSubmitting(true);
 
-      setArtworks([...artworks, newArtwork]);
-      toast({
-        title: "Success",
-        description: "New artwork added successfully",
-      });
+      if (editingId) {
+        await updateArtwork(editingId, formData);
+      } else {
+        // Generate slug from title
+        const slug = formData.title.toLowerCase().replace(/\s+/g, "-");
+        await createArtwork({ ...formData, slug } as ArtworkFormData);
+      }
+
+      setIsEditing(false);
+      setFormData({});
+    } catch (error) {
+      // Error handling is done in the hook
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsEditing(false);
-    setFormData({});
   };
 
-  const handleDelete = (id: string) => {
-    setArtworks(artworks.filter((artwork) => artwork.id !== id));
-    toast({
-      title: "Success",
-      description: "Artwork deleted successfully",
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteArtwork(id);
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  };
+
+  const handleVisibilityToggle = async (
+    id: string,
+    currentVisibility: boolean
+  ) => {
+    try {
+      await updateArtwork(id, { is_visible: !currentVisibility });
+    } catch (error) {
+      // Error handling is done in the hook
+    }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      const imageUrl = await fileService.uploadImage(file, "artworks");
+      setFormData((prev) => ({ ...prev, image: imageUrl }));
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload image",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -219,13 +190,23 @@ const ArtworkManagement = () => {
                 <label className="block text-sm font-medium mb-2">
                   Artist *
                 </label>
-                <Input
-                  value={formData.artist || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, artist: e.target.value })
+                <Select
+                  value={formData.artist_id || ""}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, artist_id: value })
                   }
-                  placeholder="Enter artist name"
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an artist" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {artists.map((artist) => (
+                      <SelectItem key={artist.id} value={artist.id}>
+                        {artist.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Year</label>
@@ -250,17 +231,71 @@ const ArtworkManagement = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Status</label>
-                <select
+                <Select
                   value={formData.status || "available"}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value as any })
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, status: value as any })
                   }
-                  className="w-full p-2 border border-input bg-background rounded-md"
                 >
-                  <option value="available">Available</option>
-                  <option value="sold">Sold</option>
-                  <option value="reserved">Reserved</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="sold">Sold</SelectItem>
+                    <SelectItem value="reserved">Reserved</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_visible"
+                  checked={formData.is_visible || false}
+                  onChange={(e) =>
+                    setFormData({ ...formData, is_visible: e.target.checked })
+                  }
+                  className="rounded"
+                />
+                <label htmlFor="is_visible" className="text-sm font-medium">
+                  Visible on website
+                </label>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Dimensions
+                </label>
+                <Input
+                  value={formData.dimensions || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, dimensions: e.target.value })
+                  }
+                  placeholder="e.g., 48 x 60 inches"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Technique
+                </label>
+                <Input
+                  value={formData.technique || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, technique: e.target.value })
+                  }
+                  placeholder="e.g., Oil on Canvas, Acrylic"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Provenance
+                </label>
+                <Input
+                  value={formData.provenance || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, provenance: e.target.value })
+                  }
+                  placeholder="e.g., Created in artist's studio, 2024"
+                />
               </div>
             </div>
 
@@ -290,38 +325,100 @@ const ArtworkManagement = () => {
                       alt="Selected artwork"
                       className="w-32 h-32 object-cover rounded border"
                     />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowMediaSelector(true)}
-                      className="mt-2"
-                    >
-                      <Image className="w-4 h-4 mr-2" />
-                      Change Image
-                    </Button>
+                    <div className="mt-2 space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowMediaSelector(true)}
+                      >
+                        <Image className="w-4 h-4 mr-2" />
+                        Change Image
+                      </Button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file);
+                        }}
+                        className="hidden"
+                        id="artwork-image-upload"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          document
+                            .getElementById("artwork-image-upload")
+                            ?.click()
+                        }
+                      >
+                        Upload New
+                      </Button>
+                    </div>
                   </div>
                 ) : (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowMediaSelector(true)}
-                    className="w-full py-8 border-dashed"
-                  >
-                    <Image className="w-6 h-6 mr-2" />
-                    Select or Upload Image
-                  </Button>
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload(file);
+                      }}
+                      className="hidden"
+                      id="artwork-image-upload-new"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        document
+                          .getElementById("artwork-image-upload-new")
+                          ?.click()
+                      }
+                      className="w-full py-8 border-dashed"
+                    >
+                      <Image className="w-6 h-6 mr-2" />
+                      Upload Artwork Image
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
 
             <Button
               onClick={handleSave}
+              disabled={isSubmitting}
               className="bg-gallery-gold hover:bg-gallery-gold/90"
             >
+              {isSubmitting && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
               {editingId ? "Update Artwork" : "Add Artwork"}
             </Button>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Artwork Management</h2>
+          <Button
+            onClick={handleAdd}
+            className="bg-gallery-gold hover:bg-gallery-gold/90"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Artwork
+          </Button>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-gallery-gold" />
+        </div>
       </div>
     );
   }
@@ -344,7 +441,7 @@ const ArtworkManagement = () => {
           <Card key={artwork.id} className="overflow-hidden">
             <div className="aspect-square overflow-hidden">
               <img
-                src={artwork.image}
+                src={artwork.image || "/placeholder-artwork.jpg"}
                 alt={artwork.title}
                 className="w-full h-full object-cover"
               />
@@ -356,7 +453,9 @@ const ArtworkManagement = () => {
                   {artwork.status}
                 </Badge>
               </div>
-              <p className="text-muted-foreground mb-1">{artwork.artist}</p>
+              <p className="text-muted-foreground mb-1">
+                {artwork.artists?.name || "Unknown Artist"}
+              </p>
               <p className="text-sm text-muted-foreground mb-2">
                 {artwork.year} • {artwork.medium}
               </p>
@@ -370,6 +469,24 @@ const ArtworkManagement = () => {
                   }
                 >
                   <Eye className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    handleVisibilityToggle(artwork.id, artwork.is_visible)
+                  }
+                  className={
+                    artwork.is_visible
+                      ? "text-green-600 hover:text-green-700"
+                      : "text-gray-400 hover:text-gray-600"
+                  }
+                >
+                  {artwork.is_visible ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <XCircle className="w-4 h-4" />
+                  )}
                 </Button>
                 <Button
                   size="sm"
@@ -394,7 +511,7 @@ const ArtworkManagement = () => {
 
       {showMediaSelector && (
         <MediaSelector
-          selectedImage={formData.image}
+          selectedImage={formData.image || ""}
           onSelect={(imageUrl) => {
             setFormData({ ...formData, image: imageUrl });
             setShowMediaSelector(false);

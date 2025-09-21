@@ -6,6 +6,8 @@ import ArtistManagement from "./ArtistManagement";
 import ExhibitionManagement from "./ExhibitionManagement";
 import PageContentManagement from "./PageContentManagement";
 import MediaLibrary from "./MediaLibrary";
+import DatabaseTest from "../DatabaseTest";
+import MediaSelectorTest from "./MediaSelectorTest";
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -28,6 +30,10 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
         return <PageContentManagement />;
       case "media":
         return <MediaLibrary />;
+      case "test":
+        return <DatabaseTest />;
+      case "media-test":
+        return <MediaSelectorTest />;
       default:
         return <AdminOverview />;
     }

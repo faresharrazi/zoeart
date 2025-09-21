@@ -9,6 +9,8 @@ import {
   Home,
   Menu,
   X,
+  TestTube,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,6 +28,8 @@ const menuItems = [
   { id: "exhibitions", label: "Exhibitions", icon: Calendar },
   { id: "pages", label: "Page Content", icon: FileText },
   { id: "media", label: "Media Library", icon: Image },
+  { id: "test", label: "Database Test", icon: TestTube },
+  { id: "media-test", label: "Upload Test", icon: Upload },
 ];
 
 const AdminSidebar = ({

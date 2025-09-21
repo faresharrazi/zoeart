@@ -17,6 +17,7 @@ CREATE TABLE artists (
   twitter VARCHAR(255),
   website VARCHAR(255),
   email VARCHAR(255),
+  is_visible BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -35,6 +36,7 @@ CREATE TABLE artworks (
   dimensions VARCHAR(100),
   technique TEXT,
   provenance TEXT,
+  is_visible BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -43,11 +45,15 @@ CREATE TABLE artworks (
 CREATE TABLE exhibitions (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
-  status VARCHAR(20) DEFAULT 'upcoming' CHECK (status IN ('current', 'upcoming', 'past')),
+  status VARCHAR(20) DEFAULT 'upcoming' CHECK (status IN ('upcoming', 'past')),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   description TEXT,
   location VARCHAR(255),
+  curator VARCHAR(255),
+  featured_image TEXT,
+  gallery_images TEXT[],
+  is_visible BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
