@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import ExhibitionGallery from "@/components/ExhibitionGallery";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,14 @@ import {
   Users,
   Image as ImageIcon,
 } from "lucide-react";
+
+// Import image assets
+import abstractArt1 from "@/assets/artwork-abstract-1.jpg";
+import abstractArt2 from "@/assets/artwork-abstract-2.jpg";
+import geometricArt1 from "@/assets/artwork-geometric-1.jpg";
+import landscapeArt1 from "@/assets/artwork-landscape-1.jpg";
+import portraitArt1 from "@/assets/artwork-portrait-1.jpg";
+import sculptureArt1 from "@/assets/artwork-sculpture-1.jpg";
 
 const exhibitions = [
   {
@@ -26,12 +35,7 @@ const exhibitions = [
     location: "Main Gallery, Floors 1-2",
     curator: "Dr. Sarah Chen",
     featuredImage: "/api/placeholder/800/400",
-    galleryImages: [
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-    ],
+    galleryImages: [abstractArt1, abstractArt2, geometricArt1, landscapeArt1],
     call_for_artists: true,
     cta_link: "https://forms.google.com/example1",
   },
@@ -48,11 +52,7 @@ const exhibitions = [
     location: "Sculpture Hall & Garden",
     curator: "Alex Martinez",
     featuredImage: "/api/placeholder/800/400",
-    galleryImages: [
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-    ],
+    galleryImages: [sculptureArt1, geometricArt1, landscapeArt1],
     call_for_artists: false,
     cta_link: "",
   },
@@ -70,11 +70,11 @@ const exhibitions = [
     curator: "Elena Rodriguez",
     featuredImage: "/api/placeholder/800/400",
     galleryImages: [
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
+      abstractArt1,
+      abstractArt2,
+      geometricArt1,
+      landscapeArt1,
+      portraitArt1,
     ],
     call_for_artists: true,
     cta_link: "https://forms.google.com/example3",
@@ -93,12 +93,12 @@ const exhibitions = [
     curator: "Dr. Michael Torres",
     featuredImage: "/api/placeholder/800/400",
     galleryImages: [
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
-      "/api/placeholder/400/300",
+      portraitArt1,
+      abstractArt1,
+      landscapeArt1,
+      geometricArt1,
+      sculptureArt1,
+      abstractArt2,
     ],
     call_for_artists: false,
     cta_link: "",
@@ -133,13 +133,13 @@ const ExhibitionDetail = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Current":
-        return "bg-gallery-gold text-foreground";
+        return "!bg-theme-primary !text-white";
       case "Upcoming":
-        return "bg-blue-500 text-white";
+        return "!bg-theme-primary !text-white";
       case "Past":
-        return "bg-gray-500 text-white";
+        return "!bg-theme-text-muted !text-white";
       default:
-        return "bg-gray-500 text-white";
+        return "!bg-theme-primary !text-white";
     }
   };
 
@@ -148,101 +148,98 @@ const ExhibitionDetail = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-gradient-hero">
-        <div className="container mx-auto px-6">
+      <section className="pt-24 pb-16 relative overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${
+              exhibition.featuredImage || "/src/assets/artwork-abstract-1.jpg"
+            })`,
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+
+        <div className="container mx-auto px-6 relative z-10">
           <Button
             variant="outline"
             onClick={() => navigate("/exhibitions")}
-            className="mb-8 border-white/80 text-white bg-white/10 hover:bg-white hover:text-foreground backdrop-blur-sm"
+            className="mb-8 border-white/80 text-white bg-white/10 backdrop-blur-sm"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Exhibitions
           </Button>
 
-          <div className="text-white">
-            <div className="flex items-center gap-4 mb-6">
-              <Badge
-                className={`${getStatusColor(
-                  exhibition.status
-                )} text-lg px-4 py-2`}
-              >
-                {exhibition.status}
-              </Badge>
-            </div>
-
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              {exhibition.title}
-            </h1>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Calendar className="w-6 h-6 text-gallery-gold" />
-                  <span className="text-xl text-gray-200">
-                    {exhibition.dates}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <MapPin className="w-6 h-6 text-gallery-gold" />
-                  <span className="text-xl text-gray-200">
-                    {exhibition.location}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Users className="w-6 h-6 text-gallery-gold" />
-                  <span className="text-xl text-gray-200">
-                    Curated by {exhibition.curator}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <ImageIcon className="w-6 h-6 text-gallery-gold" />
-                  <span className="text-xl text-gray-200">
-                    {exhibition.artworks} artworks
-                  </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Users className="w-6 h-6 text-gallery-gold" />
-                  <span className="text-xl text-gray-200">
-                    {exhibition.artists.length} artists
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-xl text-gray-200 leading-relaxed max-w-4xl mb-8">
-              {exhibition.description}
-            </p>
-
-            {exhibition.call_for_artists && (
-              <div className="flex justify-center">
-                <Button
-                  size="lg"
-                  className="bg-gallery-gold hover:bg-gallery-gold/90 text-foreground font-semibold px-8 py-3 text-lg transition-smooth"
-                  onClick={() => window.open(exhibition.cta_link, "_blank")}
+          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
+            <div className="text-white">
+              <div className="flex items-center gap-4 mb-6">
+                <Badge
+                  className={`${getStatusColor(
+                    exhibition.status
+                  )} text-lg px-4 py-2`}
                 >
-                  Join as an Artist
-                </Button>
+                  {exhibition.status}
+                </Badge>
               </div>
-            )}
-          </div>
-        </div>
-      </section>
 
-      {/* Featured Image */}
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-6">
-          <div className="aspect-[16/9] bg-gradient-to-br from-gallery-gold/20 to-gallery-gold/5 rounded-lg overflow-hidden">
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <div className="w-24 h-24 mx-auto mb-4 bg-gallery-gold/20 rounded-full flex items-center justify-center">
-                  <ImageIcon className="w-12 h-12 text-gallery-gold" />
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 drop-shadow-lg">
+                {exhibition.title}
+              </h1>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="w-6 h-6 text-white" />
+                    <span className="text-xl text-white">
+                      {exhibition.dates}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <MapPin className="w-6 h-6 text-white" />
+                    <span className="text-xl text-white">
+                      {exhibition.location}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Users className="w-6 h-6 text-white" />
+                    <span className="text-xl text-white">
+                      Curated by {exhibition.curator}
+                    </span>
+                  </div>
                 </div>
-                <p className="text-lg">Exhibition Featured Image</p>
-                <p className="text-sm mt-2">800x400 placeholder</p>
+
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <ImageIcon className="w-6 h-6 text-white" />
+                    <span className="text-xl text-white">
+                      {exhibition.artworks} artworks
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Users className="w-6 h-6 text-white" />
+                    <span className="text-xl text-white">
+                      {exhibition.artists.length} artists
+                    </span>
+                  </div>
+                </div>
               </div>
+
+              <p className="text-xl text-white/95 leading-relaxed max-w-4xl mb-8 drop-shadow-md">
+                {exhibition.description}
+              </p>
+
+              {exhibition.call_for_artists && (
+                <div className="flex justify-center">
+                  <Button
+                    size="lg"
+                    variant="default"
+                    className="font-semibold px-8 py-3 text-lg shadow-lg"
+                    onClick={() => window.open(exhibition.cta_link, "_blank")}
+                  >
+                    Join as an Artist
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -263,8 +260,8 @@ const ExhibitionDetail = () => {
                 <div className="space-y-4">
                   {exhibition.artists.map((artist, index) => (
                     <div key={index} className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gallery-gold/10 rounded-lg flex items-center justify-center">
-                        <Users className="w-6 h-6 text-gallery-gold" />
+                      <div className="w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
+                        <Users className="w-6 h-6 text-palette-medium-blue" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-foreground">
@@ -290,8 +287,8 @@ const ExhibitionDetail = () => {
               <CardContent>
                 <div className="space-y-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gallery-gold/10 rounded-lg flex items-center justify-center">
-                      <Calendar className="w-6 h-6 text-gallery-gold" />
+                    <div className="w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
+                      <Calendar className="w-6 h-6 text-palette-medium-blue" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">
@@ -304,8 +301,8 @@ const ExhibitionDetail = () => {
                   </div>
 
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gallery-gold/10 rounded-lg flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-gallery-gold" />
+                    <div className="w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
+                      <MapPin className="w-6 h-6 text-palette-medium-blue" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">
@@ -318,8 +315,8 @@ const ExhibitionDetail = () => {
                   </div>
 
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gallery-gold/10 rounded-lg flex items-center justify-center">
-                      <Users className="w-6 h-6 text-gallery-gold" />
+                    <div className="w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
+                      <Users className="w-6 h-6 text-palette-medium-blue" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">
@@ -332,8 +329,8 @@ const ExhibitionDetail = () => {
                   </div>
 
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gallery-gold/10 rounded-lg flex items-center justify-center">
-                      <ImageIcon className="w-6 h-6 text-gallery-gold" />
+                    <div className="w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-palette-medium-blue" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">
@@ -352,30 +349,10 @@ const ExhibitionDetail = () => {
       </section>
 
       {/* Gallery Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
-            Exhibition Gallery
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {exhibition.galleryImages.map((image, index) => (
-              <div
-                key={index}
-                className="aspect-square bg-gradient-to-br from-gallery-gold/20 to-gallery-gold/5 rounded-lg overflow-hidden"
-              >
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-gallery-gold/20 rounded-full flex items-center justify-center">
-                      <ImageIcon className="w-8 h-8 text-gallery-gold" />
-                    </div>
-                    <p className="text-sm">Gallery Image {index + 1}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ExhibitionGallery
+        title={`${exhibition.title} Gallery`}
+        images={exhibition.galleryImages || []}
+      />
 
       <Footer />
     </div>

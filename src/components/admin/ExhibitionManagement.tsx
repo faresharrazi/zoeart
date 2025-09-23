@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Eye, Calendar, Image } from "lucide-react";
 import MediaSelector from "./MediaSelector";
+import FeaturedImageSelector from "./FeaturedImageSelector";
 
 interface Exhibition {
   id: string;
@@ -272,44 +273,20 @@ const ExhibitionManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Featured Image
-              </label>
-              <div className="space-y-2">
-                {formData.featuredImage ? (
-                  <div className="space-y-2">
-                    <img
-                      src={formData.featuredImage}
-                      alt="Featured exhibition image"
-                      className="w-full h-32 object-cover rounded border"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowMediaSelector(true)}
-                    >
-                      <Image className="w-4 h-4 mr-2" />
-                      Change Image
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowMediaSelector(true)}
-                    className="w-full py-8 border-dashed"
-                  >
-                    <Image className="w-6 h-6 mr-2" />
-                    Select or Upload Featured Image
-                  </Button>
-                )}
-              </div>
+              <FeaturedImageSelector
+                images={formData.galleryImages || []}
+                featuredImage={formData.featuredImage || null}
+                onFeaturedImageChange={(imageUrl) => {
+                  setFormData({ ...formData, featuredImage: imageUrl });
+                }}
+                onImageUpload={async (file) => {
+                  // Mock upload function - in real app, this would upload to your storage
+                  return URL.createObjectURL(file);
+                }}
+              />
             </div>
 
-            <Button
-              onClick={handleSave}
-              className="bg-gallery-gold hover:bg-gallery-gold/90"
-            >
+            <Button onClick={handleSave} className="">
               {editingId ? "Update Exhibition" : "Add Exhibition"}
             </Button>
           </CardContent>
@@ -322,10 +299,7 @@ const ExhibitionManagement = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Exhibition Management</h2>
-        <Button
-          onClick={handleAdd}
-          className="bg-gallery-gold hover:bg-gallery-gold/90"
-        >
+        <Button onClick={handleAdd} className="">
           <Plus className="w-4 h-4 mr-2" />
           Add Exhibition
         </Button>

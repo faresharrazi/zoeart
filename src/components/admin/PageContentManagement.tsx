@@ -156,7 +156,7 @@ const PageContentManagement = () => {
       <div className="space-y-8">
         {Object.entries(groupedContent).map(([page, contents]) => (
           <div key={page}>
-            <h3 className="text-xl font-semibold mb-4 text-gallery-gold">
+            <h3 className="text-xl font-semibold mb-4 text-theme-text-primary">
               {getPageDisplayName(page)}
             </h3>
 
@@ -259,10 +259,7 @@ const PageContentManagement = () => {
                         )}
 
                         <div className="flex space-x-2">
-                          <Button
-                            onClick={handleSave}
-                            className="bg-gallery-gold hover:bg-gallery-gold/90"
-                          >
+                          <Button onClick={handleSave} className="">
                             <Save className="w-4 h-4 mr-2" />
                             Save Changes
                           </Button>

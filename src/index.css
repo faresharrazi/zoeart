@@ -36,13 +36,40 @@ All colors MUST be HSL.
     --input: 0 0% 95%;
     --ring: 0 0% 20%;
 
+    /* Aether Art Space Theme System - Consistent Palette */
+    --theme-primary: 220 15% 25%; /* #393E46 - Main brand color (dark gray) */
+    --theme-primary-text: 0 0% 97%; /* #F7F7F7 - Text on primary */
+    --theme-primary-hover: 220 15% 35%; /* Darker gray for hover */
+    --theme-background: 0 0% 97%; /* #F7F7F7 - Main background (light gray) */
+    --theme-surface: 0 0% 93%; /* #EEEEEE - Card/surface backgrounds */
+    --theme-overlay: 220 15% 25%; /* #393E46 - Dark overlay */
+    --theme-text-primary: 220 15% 25%; /* #393E46 - Main text (dark gray) */
+    --theme-text-secondary: 220 15% 25%; /* #393E46 - Secondary text */
+    --theme-text-on-dark: 0 0% 97%; /* #F7F7F7 - Text on dark backgrounds */
+    --theme-text-muted: 220 8% 60%; /* #929AAB - Muted text (medium gray) */
+    --theme-border: 0 0% 85%; /* Light gray border */
+    --theme-border-hover: 220 15% 25%; /* #393E46 - Border hover */
+    --theme-focus: 220 15% 25%; /* #393E46 - Focus ring */
+    --theme-success: 142 76% 36%; /* #10B981 - Success */
+    --theme-warning: 38 92% 50%; /* #F59E0B - Warning */
+    --theme-error: 0 84% 60%; /* #EF4444 - Error */
+
+    /* Legacy gallery colors (will be replaced by palette) */
     --gallery-gold: 45 100% 51%;
     --gallery-charcoal: 0 0% 15%;
     --gallery-light-grey: 0 0% 96%;
     --gallery-medium-grey: 0 0% 75%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 5%), hsl(0 0% 15%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 98%), hsl(0 0% 95%));
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(var(--palette-dark-navy)),
+      hsl(var(--palette-medium-blue))
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(var(--palette-white)),
+      hsl(var(--palette-light-blue))
+    );
 
     --shadow-elegant: 0 10px 40px -10px hsl(0 0% 0% / 0.1);
     --shadow-artwork: 0 20px 60px -10px hsl(0 0% 0% / 0.15);
@@ -66,6 +93,63 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* Theme utility classes - automatically use theme variables */
+  .theme-primary {
+    color: hsl(var(--theme-primary));
+  }
+  .theme-primary-bg {
+    background-color: hsl(var(--theme-primary));
+  }
+  .theme-primary-text {
+    color: hsl(var(--theme-primary-text));
+  }
+  .theme-primary-hover:hover {
+    background-color: hsl(var(--theme-primary-hover));
+  }
+
+  .theme-background {
+    background-color: hsl(var(--theme-background));
+  }
+  .theme-surface {
+    background-color: hsl(var(--theme-surface));
+  }
+  .theme-overlay {
+    background-color: hsl(var(--theme-overlay));
+  }
+
+  .theme-text-primary {
+    color: hsl(var(--theme-text-primary));
+  }
+  .theme-text-secondary {
+    color: hsl(var(--theme-text-secondary));
+  }
+  .theme-text-on-dark {
+    color: hsl(var(--theme-text-on-dark));
+  }
+  .theme-text-muted {
+    color: hsl(var(--theme-text-muted));
+  }
+
+  .theme-border {
+    border-color: hsl(var(--theme-border));
+  }
+  .theme-border-hover:hover {
+    border-color: hsl(var(--theme-border-hover));
+  }
+  .theme-focus:focus {
+    ring-color: hsl(var(--theme-focus));
+  }
+
+  .theme-success {
+    color: hsl(var(--theme-success));
+  }
+  .theme-warning {
+    color: hsl(var(--theme-warning));
+  }
+  .theme-error {
+    color: hsl(var(--theme-error));
   }
 
   .dark {

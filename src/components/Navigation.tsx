@@ -15,42 +15,42 @@ const Navigation = () => {
   }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-theme-background/95 backdrop-blur-sm border-b border-theme-border">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="text-2xl font-bold tracking-tight">
-            <a href="/" className="hover:text-gallery-gold transition-smooth">
+            <a href="/" className="hover:text-theme-primary transition-smooth">
               Aether Art Space
             </a>
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <a
               href="/exhibitions"
-              className="text-muted-foreground hover:text-foreground transition-smooth"
+              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
             >
               Exhibitions
             </a>
             <a
               href="/artists"
-              className="text-muted-foreground hover:text-foreground transition-smooth"
+              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
             >
               Artists
             </a>
             <a
               href="/collection"
-              className="text-muted-foreground hover:text-foreground transition-smooth"
+              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
             >
               Gallery
             </a>
             <a
               href="/about"
-              className="text-muted-foreground hover:text-foreground transition-smooth"
+              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
             >
               About
             </a>
             <a
               href="/contact"
-              className="text-muted-foreground hover:text-foreground transition-smooth"
+              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
             >
               Contact
             </a>
@@ -60,7 +60,6 @@ const Navigation = () => {
             {isAdminSubdomain && (
               <Button
                 variant="outline"
-                className="hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold transition-smooth"
                 onClick={() => (window.location.href = "/admin")}
               >
                 Admin Login
@@ -83,39 +82,39 @@ const Navigation = () => {
 
         {/* Mobile menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-background/95 backdrop-blur-sm border-t border-border">
+          <div className="md:hidden bg-theme-background/95 backdrop-blur-sm border-t border-theme-border">
             <div className="container mx-auto px-6 py-4 space-y-4">
               <a
                 href="/exhibitions"
-                className="block text-muted-foreground hover:text-foreground transition-smooth"
+                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Exhibitions
               </a>
               <a
                 href="/artists"
-                className="block text-muted-foreground hover:text-foreground transition-smooth"
+                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Artists
               </a>
               <a
                 href="/collection"
-                className="block text-muted-foreground hover:text-foreground transition-smooth"
+                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Gallery
               </a>
               <a
                 href="/about"
-                className="block text-muted-foreground hover:text-foreground transition-smooth"
+                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 About
               </a>
               <a
                 href="/contact"
-                className="block text-muted-foreground hover:text-foreground transition-smooth"
+                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Contact

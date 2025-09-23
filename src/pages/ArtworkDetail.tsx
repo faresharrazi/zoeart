@@ -146,7 +146,7 @@ const ArtworkDetail = () => {
             <Button
               onClick={() => navigate("/")}
               variant="outline"
-              className="hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
+              className="hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Gallery
@@ -192,7 +192,7 @@ const ArtworkDetail = () => {
                   {artwork.title}
                 </h1>
                 <div className="space-y-2">
-                  <p className="text-2xl font-semibold text-gallery-gold">
+                  <p className="text-2xl font-semibold text-theme-primary">
                     {artwork.artist}
                   </p>
                   <p className="text-lg text-muted-foreground">

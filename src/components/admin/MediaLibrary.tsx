@@ -167,10 +167,7 @@ const MediaLibrary = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Media Library</h2>
-        <Button
-          onClick={handleUpload}
-          className="bg-gallery-gold hover:bg-gallery-gold/90"
-        >
+        <Button onClick={handleUpload} className="">
           <Upload className="w-4 h-4 mr-2" />
           Upload Files
         </Button>
@@ -204,7 +201,7 @@ const MediaLibrary = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredFiles.map((file) => (
           <Card key={file.id} className="overflow-hidden">
-            <div className="aspect-square overflow-hidden bg-gallery-light-grey">
+            <div className="aspect-square overflow-hidden bg-theme-surface">
               {file.type === "image" ? (
                 <img
                   src={file.url}

@@ -389,10 +389,7 @@ const ArtistManagement = () => {
               </div>
             </div>
 
-            <Button
-              onClick={handleSave}
-              className="bg-gallery-gold hover:bg-gallery-gold/90"
-            >
+            <Button onClick={handleSave} className="">
               {editingId ? "Update Artist" : "Add Artist"}
             </Button>
           </CardContent>
@@ -405,10 +402,7 @@ const ArtistManagement = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Artist Management</h2>
-        <Button
-          onClick={handleAdd}
-          className="bg-gallery-gold hover:bg-gallery-gold/90"
-        >
+        <Button onClick={handleAdd} className="">
           <Plus className="w-4 h-4 mr-2" />
           Add Artist
         </Button>
@@ -430,7 +424,7 @@ const ArtistManagement = () => {
                 </Avatar>
                 <div className="flex-1">
                   <h3 className="text-xl font-semibold">{artist.name}</h3>
-                  <p className="text-gallery-gold font-medium">
+                  <p className="text-theme-text-muted font-medium">
                     {artist.specialty}
                   </p>
                 </div>

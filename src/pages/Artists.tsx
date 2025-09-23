@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Instagram, Twitter, Globe, Mail } from "lucide-react";
+import { Instagram, Mail, Globe } from "lucide-react";
 
 // Import artist profile images
 import elenaProfileImage from "@/assets/artist-elena-rodriguez.jpg";
@@ -126,21 +126,31 @@ const Artists = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-gradient-hero">
-        <div className="container mx-auto px-6 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Featured <span className="text-gallery-gold">Artists</span>
-          </h1>
-          <p className="text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
-            Meet the visionary artists whose works define our contemporary
-            collection. Each brings a unique perspective and mastery of their
-            craft to create pieces that inspire and provoke.
-          </p>
+      <section className="pt-24 pb-16 bg-gradient-hero relative">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url('/src/assets/gallery-hero3.jpg')` }}
+        />
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/40" />
+
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+              Featured <span className="text-white">Artists</span>
+            </h1>
+            <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+              Meet the visionary artists whose works define our contemporary
+              collection. Each brings a unique perspective and mastery of their
+              craft to create pieces that inspire and provoke.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* Artists Grid */}
-      <section className="py-20 bg-gallery-light-grey">
+      <section className="py-20 bg-theme-background">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {artists.map((artist, index) => (
@@ -151,13 +161,13 @@ const Artists = () => {
               >
                 <CardContent className="p-8">
                   <div className="flex items-start space-x-6 mb-6">
-                    <Avatar className="w-20 h-20 ring-2 ring-gallery-gold/20">
+                    <Avatar className="w-20 h-20 ring-2 ring-theme-primary/20">
                       <AvatarImage
                         src={artist.profileImage}
                         alt={artist.name}
                         className="object-cover"
                       />
-                      <AvatarFallback className="bg-gallery-gold/10 text-gallery-gold font-semibold text-lg">
+                      <AvatarFallback className="bg-theme-primary/10 text-theme-primary font-semibold text-lg">
                         {artist.name
                           .split(" ")
                           .map((n) => n[0])
@@ -168,7 +178,7 @@ const Artists = () => {
                       <h3 className="text-2xl font-bold text-foreground mb-2">
                         {artist.name}
                       </h3>
-                      <p className="text-gallery-gold font-semibold text-lg">
+                      <p className="text-theme-primary font-semibold text-lg">
                         {artist.specialty}
                       </p>
                     </div>
@@ -179,89 +189,39 @@ const Artists = () => {
                       {artist.bio}
                     </p>
 
-                    <div className="space-y-3">
-                      <div>
-                        <h4 className="font-semibold text-gallery-charcoal mb-1">
-                          Featured Works
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {artist.artworks.join(", ")}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="font-semibold text-gallery-charcoal mb-1">
-                          Education
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {artist.education}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="font-semibold text-gallery-charcoal mb-1">
-                          Recent Exhibitions
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {artist.exhibitions}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Social Media Links */}
-                  <div className="pt-4 border-t border-gallery-light-grey">
-                    <h4 className="font-semibold text-gallery-charcoal mb-3">
-                      Connect with the Artist
-                    </h4>
-                    <div className="flex flex-wrap gap-3">
+                    {/* Social Media Icons */}
+                    <div className="flex flex-wrap gap-2">
                       {artist.socialMedia.instagram && (
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
+                          className="w-8 h-8 p-0 hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
                           onClick={(e) => {
                             e.stopPropagation();
                             window.open(artist.socialMedia.instagram, "_blank");
                           }}
                         >
-                          <Instagram className="w-4 h-4" />
-                          Instagram
-                        </Button>
-                      )}
-                      {artist.socialMedia.twitter && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(artist.socialMedia.twitter, "_blank");
-                          }}
-                        >
-                          <Twitter className="w-4 h-4" />
-                          Twitter
+                          <Instagram className="w-3 h-3" />
                         </Button>
                       )}
                       {artist.socialMedia.website && (
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
+                          className="w-8 h-8 p-0 hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
                           onClick={(e) => {
                             e.stopPropagation();
                             window.open(artist.socialMedia.website, "_blank");
                           }}
                         >
-                          <Globe className="w-4 h-4" />
-                          Website
+                          <Globe className="w-3 h-3" />
                         </Button>
                       )}
                       {artist.socialMedia.email && (
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
+                          className="w-8 h-8 p-0 hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
                           onClick={(e) => {
                             e.stopPropagation();
                             window.open(
@@ -270,8 +230,7 @@ const Artists = () => {
                             );
                           }}
                         >
-                          <Mail className="w-4 h-4" />
-                          Email
+                          <Mail className="w-3 h-3" />
                         </Button>
                       )}
                     </div>

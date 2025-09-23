@@ -314,10 +314,7 @@ const ArtworkManagement = () => {
               </div>
             </div>
 
-            <Button
-              onClick={handleSave}
-              className="bg-gallery-gold hover:bg-gallery-gold/90"
-            >
+            <Button onClick={handleSave} className="">
               {editingId ? "Update Artwork" : "Add Artwork"}
             </Button>
           </CardContent>
@@ -330,10 +327,7 @@ const ArtworkManagement = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Artwork Management</h2>
-        <Button
-          onClick={handleAdd}
-          className="bg-gallery-gold hover:bg-gallery-gold/90"
-        >
+        <Button onClick={handleAdd} className="">
           <Plus className="w-4 h-4 mr-2" />
           Add Artwork
         </Button>

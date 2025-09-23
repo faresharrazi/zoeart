@@ -1,16 +1,14 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar, MapPin } from "lucide-react";
+import ExhibitionCard from "@/components/ExhibitionCard";
 
 const exhibitions = [
   {
     id: 1,
     slug: "contemporary-visions-2024",
     title: "Contemporary Visions 2024",
-    status: "Current",
+    curator: "Dr. Sarah Chen",
+    status: "Upcoming",
     dates: "March 15 - June 30, 2024",
     description:
       "A comprehensive survey of contemporary art featuring works that challenge conventional perspectives and explore new visual languages. This exhibition brings together six exceptional artists whose diverse practices reflect the complexity of our modern world.",
@@ -19,11 +17,27 @@ const exhibitions = [
     location: "Main Gallery, Floors 1-2",
     call_for_artists: true,
     cta_link: "https://forms.google.com/example1",
+    featuredImage: "/src/assets/artwork-abstract-1.jpg",
+    galleryImages: [
+      "/src/assets/artwork-abstract-1.jpg",
+      "/src/assets/artwork-abstract-2.jpg",
+      "/src/assets/artwork-geometric-1.jpg",
+      "/src/assets/artwork-landscape-1.jpg",
+      "/src/assets/artwork-portrait-1.jpg",
+      "/src/assets/artwork-sculpture-1.jpg",
+      "/src/assets/gallery-hero.jpg",
+      "/src/assets/gallery-hero2.jpg",
+      "/src/assets/gallery-hero3.jpg",
+      "/src/assets/artist-alex-rivera.jpg",
+      "/src/assets/artist-david-thompson.jpg",
+      "/src/assets/artist-elena-rodriguez.jpg",
+    ],
   },
   {
     id: 2,
     slug: "material-explorations",
     title: "Material Explorations",
+    curator: "Alex Martinez",
     status: "Upcoming",
     dates: "July 15 - October 30, 2024",
     description:
@@ -33,11 +47,23 @@ const exhibitions = [
     location: "Sculpture Hall & Garden",
     call_for_artists: false,
     cta_link: "",
+    featuredImage: "/src/assets/artwork-sculpture-1.jpg",
+    galleryImages: [
+      "/src/assets/artwork-sculpture-1.jpg",
+      "/src/assets/artwork-geometric-1.jpg",
+      "/src/assets/artwork-abstract-1.jpg",
+      "/src/assets/artwork-landscape-1.jpg",
+      "/src/assets/gallery-hero.jpg",
+      "/src/assets/gallery-hero2.jpg",
+      "/src/assets/artist-david-thompson.jpg",
+      "/src/assets/artist-alex-rivera.jpg",
+    ],
   },
   {
     id: 3,
     slug: "intimate-reflections",
     title: "Intimate Reflections",
+    curator: "Elena Rodriguez",
     status: "Upcoming",
     dates: "November 10, 2024 - February 15, 2025",
     description:
@@ -47,11 +73,23 @@ const exhibitions = [
     location: "Gallery 3",
     call_for_artists: true,
     cta_link: "https://forms.google.com/example3",
+    featuredImage: "/src/assets/artwork-portrait-1.jpg",
+    galleryImages: [
+      "/src/assets/artwork-portrait-1.jpg",
+      "/src/assets/artwork-abstract-2.jpg",
+      "/src/assets/artwork-landscape-1.jpg",
+      "/src/assets/artwork-sculpture-1.jpg",
+      "/src/assets/gallery-hero3.jpg",
+      "/src/assets/artist-elena-rodriguez.jpg",
+      "/src/assets/artist-luna-park.jpg",
+      "/src/assets/artist-sarah-williams.jpg",
+    ],
   },
   {
     id: 4,
     slug: "abstract-futures",
     title: "Abstract Futures",
+    curator: "Dr. Michael Torres",
     status: "Past",
     dates: "September 20 - December 15, 2023",
     description:
@@ -61,13 +99,25 @@ const exhibitions = [
     location: "Main Gallery, All Floors",
     call_for_artists: false,
     cta_link: "",
+    featuredImage: "/src/assets/artwork-geometric-1.jpg",
+    galleryImages: [
+      "/src/assets/artwork-geometric-1.jpg",
+      "/src/assets/artwork-abstract-1.jpg",
+      "/src/assets/artwork-abstract-2.jpg",
+      "/src/assets/artwork-landscape-1.jpg",
+      "/src/assets/artwork-portrait-1.jpg",
+      "/src/assets/artwork-sculpture-1.jpg",
+      "/src/assets/gallery-hero.jpg",
+      "/src/assets/gallery-hero2.jpg",
+      "/src/assets/gallery-hero3.jpg",
+      "/src/assets/artist-elena-rodriguez.jpg",
+      "/src/assets/artist-marcus-chen.jpg",
+      "/src/assets/artist-david-thompson.jpg",
+    ],
   },
 ];
 
 const Exhibitions = () => {
-  const currentExhibitions = exhibitions.filter(
-    (ex) => ex.status === "Current"
-  );
   const upcomingExhibitions = exhibitions.filter(
     (ex) => ex.status === "Upcoming"
   );
@@ -82,239 +132,59 @@ const Exhibitions = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-gradient-hero">
-        <div className="container mx-auto px-6 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Gallery <span className="text-gallery-gold">Exhibitions</span>
-          </h1>
-          <p className="text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
-            Discover our curated exhibitions that showcase the finest in
-            contemporary art. From solo presentations to thematic group shows,
-            each exhibition offers a unique journey through artistic vision.
-          </p>
+      <section className="pt-24 pb-16 bg-gradient-hero relative">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url('/src/assets/gallery-hero2.jpg')` }}
+        />
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/40" />
+
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+              Gallery <span className="text-white">Exhibitions</span>
+            </h1>
+            <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+              Discover our curated exhibitions that showcase the finest in
+              contemporary art. From solo presentations to thematic group shows,
+              each exhibition offers a unique journey through artistic vision.
+            </p>
+          </div>
         </div>
       </section>
 
-      <div className="bg-gallery-light-grey py-20">
+      <div className="bg-theme-background py-20">
         <div className="container mx-auto px-6 space-y-16">
-          {/* Current Exhibitions */}
-          <section>
-            <h2 className="text-3xl font-bold mb-8 text-foreground">
-              Current Exhibitions
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {currentExhibitions.map((exhibition, index) => (
-                <Card
-                  key={index}
-                  className="group hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gallery-gold/30 overflow-hidden cursor-pointer"
-                  onClick={() => handleExhibitionClick(exhibition.slug)}
-                >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-gallery-gold/20 to-gallery-gold/5 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    <div className="absolute top-4 left-4">
-                      <Badge className="bg-gallery-gold text-foreground font-semibold">
-                        {exhibition.status}
-                      </Badge>
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center text-muted-foreground">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gallery-gold/20 rounded-full flex items-center justify-center">
-                          <Calendar className="w-8 h-8 text-gallery-gold" />
-                        </div>
-                        <p className="text-sm">Exhibition Image</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-gallery-gold transition-colors">
-                          {exhibition.title}
-                        </h3>
-                        <p className="text-sm text-gallery-gold font-medium">
-                          Curated by Dr. Sarah Chen
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          {exhibition.dates}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4 mr-2" />
-                          {exhibition.location}
-                        </div>
-                      </div>
-
-                      <p className="text-muted-foreground text-sm line-clamp-3">
-                        {exhibition.description}
-                      </p>
-
-                      {exhibition.call_for_artists && (
-                        <Button
-                          variant="outline"
-                          className="w-full group-hover:bg-gallery-gold group-hover:text-foreground group-hover:border-gallery-gold transition-all"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(exhibition.cta_link, "_blank");
-                          }}
-                        >
-                          Join as an Artist
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-
           {/* Upcoming Exhibitions */}
           <section>
-            <h2 className="text-3xl font-bold mb-8 text-foreground">
+            <h2 className="text-3xl font-bold mb-8 text-theme-text-primary">
               Upcoming Exhibitions
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {upcomingExhibitions.map((exhibition, index) => (
-                <Card
-                  key={index}
-                  className="group hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gallery-gold/30 overflow-hidden cursor-pointer"
-                  onClick={() => handleExhibitionClick(exhibition.slug)}
-                >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-gallery-gold/20 to-gallery-gold/5 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    <div className="absolute top-4 left-4">
-                      <Badge className="bg-gallery-gold text-foreground font-semibold">
-                        {exhibition.status}
-                      </Badge>
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center text-muted-foreground">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gallery-gold/20 rounded-full flex items-center justify-center">
-                          <Calendar className="w-8 h-8 text-gallery-gold" />
-                        </div>
-                        <p className="text-sm">Exhibition Image</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-gallery-gold transition-colors">
-                          {exhibition.title}
-                        </h3>
-                        <p className="text-sm text-gallery-gold font-medium">
-                          Curated by Dr. Sarah Chen
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          {exhibition.dates}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4 mr-2" />
-                          {exhibition.location}
-                        </div>
-                      </div>
-
-                      <p className="text-muted-foreground text-sm line-clamp-3">
-                        {exhibition.description}
-                      </p>
-
-                      {exhibition.call_for_artists && (
-                        <Button
-                          variant="outline"
-                          className="w-full group-hover:bg-gallery-gold group-hover:text-foreground group-hover:border-gallery-gold transition-all"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(exhibition.cta_link, "_blank");
-                          }}
-                        >
-                          Join as an Artist
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+              {upcomingExhibitions.map((exhibition) => (
+                <ExhibitionCard
+                  key={exhibition.id}
+                  exhibition={exhibition}
+                  onExhibitionClick={handleExhibitionClick}
+                />
               ))}
             </div>
           </section>
 
           {/* Past Exhibitions */}
           <section>
-            <h2 className="text-3xl font-bold mb-8 text-foreground">
+            <h2 className="text-3xl font-bold mb-8 text-theme-text-primary">
               Past Exhibitions
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {pastExhibitions.map((exhibition, index) => (
-                <Card
-                  key={index}
-                  className="group hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gallery-gold/30 overflow-hidden cursor-pointer opacity-90 hover:opacity-100"
-                  onClick={() => handleExhibitionClick(exhibition.slug)}
-                >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-gallery-gold/20 to-gallery-gold/5 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    <div className="absolute top-4 left-4">
-                      <Badge className="bg-gallery-gold text-foreground font-semibold">
-                        {exhibition.status}
-                      </Badge>
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center text-muted-foreground">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gallery-gold/20 rounded-full flex items-center justify-center">
-                          <Calendar className="w-8 h-8 text-gallery-gold" />
-                        </div>
-                        <p className="text-sm">Exhibition Image</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-gallery-gold transition-colors">
-                          {exhibition.title}
-                        </h3>
-                        <p className="text-sm text-gallery-gold font-medium">
-                          Curated by Dr. Michael Torres
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          {exhibition.dates}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4 mr-2" />
-                          {exhibition.location}
-                        </div>
-                      </div>
-
-                      <p className="text-muted-foreground text-sm line-clamp-3">
-                        {exhibition.description}
-                      </p>
-
-                      {exhibition.call_for_artists && (
-                        <Button
-                          variant="outline"
-                          className="w-full group-hover:bg-gallery-gold group-hover:text-foreground group-hover:border-gallery-gold transition-all"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(exhibition.cta_link, "_blank");
-                          }}
-                        >
-                          Join as an Artist
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+              {pastExhibitions.map((exhibition) => (
+                <ExhibitionCard
+                  key={exhibition.id}
+                  exhibition={exhibition}
+                  onExhibitionClick={handleExhibitionClick}
+                />
               ))}
             </div>
           </section>

@@ -160,15 +160,27 @@ const Collection = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-gradient-hero">
-        <div className="container mx-auto px-6 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Complete <span className="text-gallery-gold">Collection</span>
-          </h1>
-          <p className="text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
-            Explore our entire collection of contemporary artworks. Use the
-            search and filter tools to discover pieces that speak to you.
-          </p>
+      <section className="pt-24 pb-16 bg-gradient-hero relative">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/src/assets/artwork-portrait-1.jpg')`,
+          }}
+        />
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/40" />
+
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+              Complete <span className="text-white">Collection</span>
+            </h1>
+            <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+              Explore our entire collection of contemporary artworks. Use the
+              search and filter tools to discover pieces that speak to you.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -272,7 +284,7 @@ const Collection = () => {
             Showing {filteredAndSortedArtworks.length} of {allArtworks.length}{" "}
             artworks
             {hasActiveFilters && (
-              <span className="ml-2 text-gallery-gold">• Filters applied</span>
+              <span className="ml-2 text-white">• Filters applied</span>
             )}
           </div>
         </div>
@@ -296,10 +308,7 @@ const Collection = () => {
                 Try adjusting your search terms or filters to find more
                 artworks.
               </p>
-              <Button
-                onClick={clearAllFilters}
-                className="bg-gallery-gold hover:bg-gallery-gold/90 text-foreground"
-              >
+              <Button onClick={clearAllFilters} variant="default">
                 Clear All Filters
               </Button>
             </div>

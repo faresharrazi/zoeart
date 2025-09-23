@@ -32,11 +32,13 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gallery-light-grey px-6">
+    <div className="min-h-screen flex items-center justify-center bg-theme-background px-6">
       <Card className="w-full max-w-md shadow-elegant">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
-          <p className="text-muted-foreground">
+          <CardTitle className="text-2xl font-bold text-theme-text-primary">
+            Admin Login
+          </CardTitle>
+          <p className="text-theme-text-muted">
             Access the gallery admin panel
           </p>
         </CardHeader>
@@ -45,7 +47,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
             <div>
               <label
                 htmlFor="username"
-                className="block text-sm font-medium mb-2"
+                className="block text-sm font-medium mb-2 text-theme-text-primary"
               >
                 Username
               </label>
@@ -61,7 +63,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium mb-2"
+                className="block text-sm font-medium mb-2 text-theme-text-primary"
               >
                 Password
               </label>
@@ -74,13 +76,10 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
                 required
               />
             </div>
-            <Button
-              type="submit"
-              className="w-full bg-gallery-gold hover:bg-gallery-gold/90 text-foreground"
-            >
+            <Button type="submit" className="w-full">
               Sign In
             </Button>
-            <p className="text-xs text-center text-muted-foreground mt-4">
+            <p className="text-xs text-center text-theme-text-muted mt-4">
               Demo credentials: admin / admin
             </p>
           </form>

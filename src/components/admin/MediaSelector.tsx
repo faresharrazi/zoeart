@@ -191,10 +191,7 @@ const MediaSelector = ({
                 className="pl-10"
               />
             </div>
-            <Button
-              onClick={handleUpload}
-              className="bg-gallery-gold hover:bg-gallery-gold/90"
-            >
+            <Button onClick={handleUpload} className="">
               <Upload className="w-4 h-4 mr-2" />
               Upload New
             </Button>
@@ -218,8 +215,8 @@ const MediaSelector = ({
                 </div>
 
                 {selectedImage === file.url && (
-                  <div className="absolute inset-0 bg-gallery-gold/20 flex items-center justify-center rounded-lg">
-                    <div className="bg-gallery-gold rounded-full p-1">
+                  <div className="absolute inset-0 bg-theme-primary/20 flex items-center justify-center rounded-lg">
+                    <div className="bg-theme-primary rounded-full p-1">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                   </div>
@@ -244,11 +241,7 @@ const MediaSelector = ({
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button
-              onClick={onClose}
-              disabled={!selectedImage}
-              className="bg-gallery-gold hover:bg-gallery-gold/90"
-            >
+            <Button onClick={onClose} disabled={!selectedImage} className="">
               Select Image
             </Button>
           </div>

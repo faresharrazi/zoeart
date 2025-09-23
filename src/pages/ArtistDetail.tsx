@@ -2,18 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ArtworkCard from "@/components/ArtworkCard";
-import {
-  ArrowLeft,
-  Instagram,
-  Twitter,
-  Globe,
-  Mail,
-  Calendar,
-  MapPin,
-} from "lucide-react";
+import { ArrowLeft, Instagram, Globe, Mail } from "lucide-react";
 
 // Import artist profile images
 import elenaProfileImage from "@/assets/artist-elena-rodriguez.jpg";
@@ -295,162 +286,78 @@ const ArtistDetail = () => {
             Back to Artists
           </Button>
 
-          <div className="flex flex-col lg:flex-row items-start gap-12">
-            <div className="lg:w-1/3">
-              <Avatar className="w-48 h-48 ring-4 ring-gallery-gold/20 mx-auto lg:mx-0">
-                <AvatarImage
-                  src={artist.profileImage}
-                  alt={artist.name}
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-gallery-gold/10 text-gallery-gold font-semibold text-4xl">
-                  {artist.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-
-            <div className="lg:w-2/3 text-white">
-              <h1 className="text-5xl md:text-6xl font-bold mb-4">
-                {artist.name}
-              </h1>
-              <p className="text-2xl text-gallery-gold font-semibold mb-6">
-                {artist.specialty}
-              </p>
-              <p className="text-xl text-gray-200 leading-relaxed mb-8">
-                {artist.bio}
-              </p>
-
-              {/* Social Media Links */}
-              <div className="flex flex-wrap gap-4">
-                {artist.socialMedia.instagram && (
-                  <Button
-                    variant="outline"
-                    className="border-white/80 text-white bg-white/10 hover:bg-white hover:text-foreground backdrop-blur-sm"
-                    onClick={() =>
-                      window.open(artist.socialMedia.instagram, "_blank")
-                    }
-                  >
-                    <Instagram className="w-4 h-4 mr-2" />
-                    Instagram
-                  </Button>
-                )}
-                {artist.socialMedia.twitter && (
-                  <Button
-                    variant="outline"
-                    className="border-white/80 text-white bg-white/10 hover:bg-white hover:text-foreground backdrop-blur-sm"
-                    onClick={() =>
-                      window.open(artist.socialMedia.twitter, "_blank")
-                    }
-                  >
-                    <Twitter className="w-4 h-4 mr-2" />
-                    Twitter
-                  </Button>
-                )}
-                {artist.socialMedia.website && (
-                  <Button
-                    variant="outline"
-                    className="border-white/80 text-white bg-white/10 hover:bg-white hover:text-foreground backdrop-blur-sm"
-                    onClick={() =>
-                      window.open(artist.socialMedia.website, "_blank")
-                    }
-                  >
-                    <Globe className="w-4 h-4 mr-2" />
-                    Website
-                  </Button>
-                )}
-                {artist.socialMedia.email && (
-                  <Button
-                    variant="outline"
-                    className="border-white/80 text-white bg-white/10 hover:bg-white hover:text-foreground backdrop-blur-sm"
-                    onClick={() =>
-                      window.open(
-                        `mailto:${artist.socialMedia.email}`,
-                        "_blank"
-                      )
-                    }
-                  >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Email
-                  </Button>
-                )}
+          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
+            <div className="flex flex-col lg:flex-row items-start gap-12">
+              <div className="lg:w-1/3">
+                <Avatar className="w-48 h-48 ring-4 ring-palette-medium-blue/20 mx-auto lg:mx-0">
+                  <AvatarImage
+                    src={artist.profileImage}
+                    alt={artist.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-palette-medium-blue/10 text-palette-medium-blue font-semibold text-4xl">
+                    {artist.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Details Section */}
-      <section className="py-20 bg-gallery-light-grey">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Featured Works */}
-            <Card className="shadow-elegant">
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold text-foreground mb-6">
-                  Featured Works
-                </h2>
-                <div className="space-y-4">
-                  {artist.artworks.map((artwork, index) => (
-                    <div key={index} className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gallery-gold/10 rounded-lg flex items-center justify-center">
-                        <Calendar className="w-8 h-8 text-gallery-gold" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">
-                          {artwork}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Featured in our collection
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+              <div className="lg:w-2/3 text-white">
+                <h1 className="text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
+                  {artist.name}
+                </h1>
+                <p className="text-2xl text-white font-semibold mb-6 drop-shadow-md">
+                  {artist.specialty}
+                </p>
+                <p className="text-xl text-white/95 leading-relaxed mb-8 drop-shadow-md">
+                  {artist.bio}
+                </p>
+
+                {/* Social Media Icons */}
+                <div className="flex flex-wrap gap-2">
+                  {artist.socialMedia.instagram && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-8 h-8 p-0 border-white/80 text-white bg-white/10 hover:bg-white hover:text-foreground backdrop-blur-sm"
+                      onClick={() =>
+                        window.open(artist.socialMedia.instagram, "_blank")
+                      }
+                    >
+                      <Instagram className="w-3 h-3" />
+                    </Button>
+                  )}
+                  {artist.socialMedia.website && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-8 h-8 p-0 border-white/80 text-white bg-white/10 hover:bg-white hover:text-foreground backdrop-blur-sm"
+                      onClick={() =>
+                        window.open(artist.socialMedia.website, "_blank")
+                      }
+                    >
+                      <Globe className="w-3 h-3" />
+                    </Button>
+                  )}
+                  {artist.socialMedia.email && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-8 h-8 p-0 border-white/80 text-white bg-white/10 hover:bg-white hover:text-foreground backdrop-blur-sm"
+                      onClick={() =>
+                        window.open(
+                          `mailto:${artist.socialMedia.email}`,
+                          "_blank"
+                        )
+                      }
+                    >
+                      <Mail className="w-3 h-3" />
+                    </Button>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Education & Exhibitions */}
-            <div className="space-y-8">
-              <Card className="shadow-elegant">
-                <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-6">
-                    Education
-                  </h2>
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gallery-gold/10 rounded-lg flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-gallery-gold" />
-                    </div>
-                    <div>
-                      <p className="text-foreground font-medium">
-                        {artist.education}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-elegant">
-                <CardContent className="p-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-6">
-                    Recent Exhibitions
-                  </h2>
-                  <div className="space-y-4">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-gallery-gold/10 rounded-lg flex items-center justify-center">
-                        <Calendar className="w-6 h-6 text-gallery-gold" />
-                      </div>
-                      <div>
-                        <p className="text-foreground font-medium">
-                          {artist.exhibitions}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              </div>
             </div>
           </div>
         </div>
