@@ -37,6 +37,12 @@ const Navigation = () => {
               Artists
             </a>
             <a
+              href="/collection"
+              className="text-muted-foreground hover:text-foreground transition-smooth"
+            >
+              Gallery
+            </a>
+            <a
               href="/about"
               className="text-muted-foreground hover:text-foreground transition-smooth"
             >
@@ -92,6 +98,13 @@ const Navigation = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Artists
+              </a>
+              <a
+                href="/collection"
+                className="block text-muted-foreground hover:text-foreground transition-smooth"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Gallery
               </a>
               <a
                 href="/about"

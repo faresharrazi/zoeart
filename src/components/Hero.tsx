@@ -24,9 +24,9 @@ const Hero = () => {
           <Button
             size="lg"
             className="bg-gallery-gold hover:bg-gallery-gold/90 text-foreground font-semibold px-8 py-3 text-lg transition-smooth"
-            onClick={() => (window.location.href = "/#recent-exhibitions")}
+            onClick={() => (window.location.href = "/exhibitions")}
           >
-            View Exhibitions
+            Exhibitions
           </Button>
           <Button
             size="lg"
@@ -34,7 +34,7 @@ const Hero = () => {
             className="border-white/80 text-white bg-white/10 hover:bg-white hover:text-foreground backdrop-blur-sm transition-smooth px-8 py-3 text-lg"
             onClick={() => (window.location.href = "/contact")}
           >
-            Contact Us
+            Contact
           </Button>
         </div>
       </div>

@@ -32,6 +32,8 @@ const exhibitions = [
       "/api/placeholder/400/300",
       "/api/placeholder/400/300",
     ],
+    call_for_artists: true,
+    cta_link: "https://forms.google.com/example1",
   },
   {
     id: 2,
@@ -51,6 +53,8 @@ const exhibitions = [
       "/api/placeholder/400/300",
       "/api/placeholder/400/300",
     ],
+    call_for_artists: false,
+    cta_link: "",
   },
   {
     id: 3,
@@ -72,6 +76,8 @@ const exhibitions = [
       "/api/placeholder/400/300",
       "/api/placeholder/400/300",
     ],
+    call_for_artists: true,
+    cta_link: "https://forms.google.com/example3",
   },
   {
     id: 4,
@@ -94,6 +100,8 @@ const exhibitions = [
       "/api/placeholder/400/300",
       "/api/placeholder/400/300",
     ],
+    call_for_artists: false,
+    cta_link: "",
   },
 ];
 
@@ -204,9 +212,21 @@ const ExhibitionDetail = () => {
               </div>
             </div>
 
-            <p className="text-xl text-gray-200 leading-relaxed max-w-4xl">
+            <p className="text-xl text-gray-200 leading-relaxed max-w-4xl mb-8">
               {exhibition.description}
             </p>
+
+            {exhibition.call_for_artists && (
+              <div className="flex justify-center">
+                <Button
+                  size="lg"
+                  className="bg-gallery-gold hover:bg-gallery-gold/90 text-foreground font-semibold px-8 py-3 text-lg transition-smooth"
+                  onClick={() => window.open(exhibition.cta_link, "_blank")}
+                >
+                  Join as an Artist
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>

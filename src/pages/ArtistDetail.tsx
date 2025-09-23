@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import ArtworkCard from "@/components/ArtworkCard";
 import {
   ArrowLeft,
   Instagram,
@@ -21,6 +22,14 @@ import sarahProfileImage from "@/assets/artist-sarah-williams.jpg";
 import davidProfileImage from "@/assets/artist-david-thompson.jpg";
 import lunaProfileImage from "@/assets/artist-luna-park.jpg";
 import alexProfileImage from "@/assets/artist-alex-rivera.jpg";
+
+// Import artwork images
+import abstractArt1 from "@/assets/artwork-abstract-1.jpg";
+import geometricArt1 from "@/assets/artwork-geometric-1.jpg";
+import portraitArt1 from "@/assets/artwork-portrait-1.jpg";
+import abstractArt2 from "@/assets/artwork-abstract-2.jpg";
+import landscapeArt1 from "@/assets/artwork-landscape-1.jpg";
+import sculptureArt1 from "@/assets/artwork-sculpture-1.jpg";
 
 const artists = [
   {
@@ -40,6 +49,26 @@ const artists = [
       website: "https://elenarodriguezart.com",
       email: "elena@elenarodriguezart.com",
     },
+    gallery: [
+      {
+        title: "Fluid Dynamics",
+        year: 2024,
+        medium: "Acrylic on Canvas",
+        image: abstractArt1,
+        slug: "fluid-dynamics",
+        description:
+          "An exploration of movement and form through organic shapes that dance across the canvas in harmonious blues and gold.",
+      },
+      {
+        title: "Emotional Currents",
+        year: 2023,
+        medium: "Mixed Media",
+        image: abstractArt2,
+        slug: "emotional-currents",
+        description:
+          "A powerful expression of inner turmoil and peace through bold brushstrokes and vibrant color combinations.",
+      },
+    ],
   },
   {
     id: 2,
@@ -56,6 +85,26 @@ const artists = [
       website: "https://marcuschenart.com",
       email: "hello@marcuschenart.com",
     },
+    gallery: [
+      {
+        title: "Intersection",
+        year: 2023,
+        medium: "Mixed Media",
+        image: geometricArt1,
+        slug: "intersection",
+        description:
+          "A minimalist composition examining the relationship between structure and space in contemporary urban environments.",
+      },
+      {
+        title: "Geometric Harmony",
+        year: 2024,
+        medium: "Acrylic on Canvas",
+        image: abstractArt1,
+        slug: "geometric-harmony",
+        description:
+          "An exploration of balance and proportion through precise geometric forms and subtle color relationships.",
+      },
+    ],
   },
   {
     id: 3,
@@ -73,6 +122,26 @@ const artists = [
       website: "https://sarahwilliamsportrait.com",
       email: "sarah@sarahwilliamsportrait.com",
     },
+    gallery: [
+      {
+        title: "Silent Contemplation",
+        year: 2024,
+        medium: "Oil on Canvas",
+        image: portraitArt1,
+        slug: "silent-contemplation",
+        description:
+          "A powerful portrait capturing the quiet strength and introspective nature of the human spirit.",
+      },
+      {
+        title: "Inner Light",
+        year: 2023,
+        medium: "Oil on Canvas",
+        image: portraitArt1,
+        slug: "inner-light",
+        description:
+          "A contemporary portrait exploring the interplay of light and shadow in human expression.",
+      },
+    ],
   },
   {
     id: 4,
@@ -89,6 +158,26 @@ const artists = [
       instagram: "https://instagram.com/davidthompsonart",
       website: "https://davidthompsonlandscapes.com",
     },
+    gallery: [
+      {
+        title: "Earth Rhythms",
+        year: 2023,
+        medium: "Acrylic on Canvas",
+        image: abstractArt2,
+        slug: "earth-rhythms",
+        description:
+          "Bold brushstrokes and earth tones create a dynamic composition celebrating the raw energy of nature.",
+      },
+      {
+        title: "Natural Forces",
+        year: 2024,
+        medium: "Oil on Canvas",
+        image: landscapeArt1,
+        slug: "natural-forces",
+        description:
+          "An abstract interpretation of natural landscapes through expressive color and movement.",
+      },
+    ],
   },
   {
     id: 5,
@@ -106,6 +195,26 @@ const artists = [
       website: "https://lunaparkart.com",
       email: "luna@lunaparkart.com",
     },
+    gallery: [
+      {
+        title: "Mountain Dreams",
+        year: 2024,
+        medium: "Oil on Canvas",
+        image: landscapeArt1,
+        slug: "mountain-dreams",
+        description:
+          "A contemporary interpretation of natural landscapes, blending realism with stylized forms and golden highlights.",
+      },
+      {
+        title: "Urban Nature",
+        year: 2023,
+        medium: "Mixed Media",
+        image: landscapeArt1,
+        slug: "urban-nature",
+        description:
+          "Exploring the intersection of urban environments and natural beauty through contemporary landscape painting.",
+      },
+    ],
   },
   {
     id: 6,
@@ -122,6 +231,26 @@ const artists = [
       website: "https://alexriverasculpture.com",
       email: "alex@alexriverasculpture.com",
     },
+    gallery: [
+      {
+        title: "Modern Forms",
+        year: 2024,
+        medium: "Steel & Glass Installation",
+        image: sculptureArt1,
+        slug: "modern-forms",
+        description:
+          "An innovative sculptural piece that challenges perception through the interplay of light, metal, and transparency.",
+      },
+      {
+        title: "Spatial Dynamics",
+        year: 2023,
+        medium: "Mixed Media Installation",
+        image: sculptureArt1,
+        slug: "spatial-dynamics",
+        description:
+          "A large-scale installation exploring the relationship between space, form, and viewer interaction.",
+      },
+    ],
   },
 ];
 
@@ -323,6 +452,29 @@ const ArtistDetail = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Artist Gallery Section */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
+            {artist.name}'s Gallery
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {artist.gallery.map((artwork, index) => (
+              <ArtworkCard
+                key={index}
+                title={artwork.title}
+                artist={artist.name}
+                year={artwork.year}
+                medium={artwork.medium}
+                image={artwork.image}
+                description={artwork.description}
+                slug={artwork.slug}
+              />
+            ))}
           </div>
         </div>
       </section>

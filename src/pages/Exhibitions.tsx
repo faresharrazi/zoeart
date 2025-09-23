@@ -1,7 +1,9 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, MapPin } from "lucide-react";
 
 const exhibitions = [
   {
@@ -15,6 +17,8 @@ const exhibitions = [
     artists: ["Elena Rodriguez", "Marcus Chen", "Sarah Williams"],
     artworks: 12,
     location: "Main Gallery, Floors 1-2",
+    call_for_artists: true,
+    cta_link: "https://forms.google.com/example1",
   },
   {
     id: 2,
@@ -27,6 +31,8 @@ const exhibitions = [
     artists: ["Alex Rivera", "David Thompson"],
     artworks: 8,
     location: "Sculpture Hall & Garden",
+    call_for_artists: false,
+    cta_link: "",
   },
   {
     id: 3,
@@ -39,6 +45,8 @@ const exhibitions = [
     artists: ["Sarah Williams", "Luna Park"],
     artworks: 6,
     location: "Gallery 3",
+    call_for_artists: true,
+    cta_link: "https://forms.google.com/example3",
   },
   {
     id: 4,
@@ -51,6 +59,8 @@ const exhibitions = [
     artists: ["Elena Rodriguez", "Marcus Chen", "David Thompson"],
     artworks: 15,
     location: "Main Gallery, All Floors",
+    call_for_artists: false,
+    cta_link: "",
   },
 ];
 
@@ -92,50 +102,68 @@ const Exhibitions = () => {
             <h2 className="text-3xl font-bold mb-8 text-foreground">
               Current Exhibitions
             </h2>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {currentExhibitions.map((exhibition, index) => (
                 <Card
                   key={index}
-                  className="shadow-elegant border-l-4 border-l-gallery-gold cursor-pointer hover:shadow-artwork transition-all duration-300"
+                  className="group hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gallery-gold/30 overflow-hidden cursor-pointer"
                   onClick={() => handleExhibitionClick(exhibition.slug)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-2xl mb-2">
-                          {exhibition.title}
-                        </CardTitle>
-                        <Badge className="bg-gallery-gold text-foreground hover:bg-gallery-gold/90">
-                          {exhibition.status}
-                        </Badge>
-                      </div>
-                      <div className="text-right text-muted-foreground">
-                        <p className="font-semibold">{exhibition.dates}</p>
-                        <p className="text-sm">{exhibition.location}</p>
+                  <div className="aspect-[4/3] bg-gradient-to-br from-gallery-gold/20 to-gallery-gold/5 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-gallery-gold text-foreground font-semibold">
+                        {exhibition.status}
+                      </Badge>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center text-muted-foreground">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gallery-gold/20 rounded-full flex items-center justify-center">
+                          <Calendar className="w-8 h-8 text-gallery-gold" />
+                        </div>
+                        <p className="text-sm">Exhibition Image</p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed mb-4">
-                      {exhibition.description}
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  </div>
+
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
                       <div>
-                        <h4 className="font-semibold text-gallery-charcoal mb-2">
-                          Featured Artists
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {exhibition.artists.join(", ")}
+                        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-gallery-gold transition-colors">
+                          {exhibition.title}
+                        </h3>
+                        <p className="text-sm text-gallery-gold font-medium">
+                          Curated by Dr. Sarah Chen
                         </p>
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-gallery-charcoal mb-2">
-                          Artworks
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {exhibition.artworks} pieces on display
-                        </p>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          {exhibition.dates}
+                        </div>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          {exhibition.location}
+                        </div>
                       </div>
+
+                      <p className="text-muted-foreground text-sm line-clamp-3">
+                        {exhibition.description}
+                      </p>
+
+                      {exhibition.call_for_artists && (
+                        <Button
+                          variant="outline"
+                          className="w-full group-hover:bg-gallery-gold group-hover:text-foreground group-hover:border-gallery-gold transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(exhibition.cta_link, "_blank");
+                          }}
+                        >
+                          Join as an Artist
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -148,48 +176,68 @@ const Exhibitions = () => {
             <h2 className="text-3xl font-bold mb-8 text-foreground">
               Upcoming Exhibitions
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {upcomingExhibitions.map((exhibition, index) => (
                 <Card
                   key={index}
-                  className="shadow-elegant cursor-pointer hover:shadow-artwork transition-all duration-300"
+                  className="group hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gallery-gold/30 overflow-hidden cursor-pointer"
                   onClick={() => handleExhibitionClick(exhibition.slug)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-xl">
-                        {exhibition.title}
-                      </CardTitle>
-                      <Badge variant="outline">{exhibition.status}</Badge>
+                  <div className="aspect-[4/3] bg-gradient-to-br from-gallery-gold/20 to-gallery-gold/5 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-gallery-gold text-foreground font-semibold">
+                        {exhibition.status}
+                      </Badge>
                     </div>
-                    <p className="text-muted-foreground font-semibold">
-                      {exhibition.dates}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {exhibition.location}
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed mb-4">
-                      {exhibition.description}
-                    </p>
-                    <div className="space-y-2">
-                      <div>
-                        <span className="font-semibold text-gallery-charcoal">
-                          Artists:{" "}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {exhibition.artists.join(", ")}
-                        </span>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center text-muted-foreground">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gallery-gold/20 rounded-full flex items-center justify-center">
+                          <Calendar className="w-8 h-8 text-gallery-gold" />
+                        </div>
+                        <p className="text-sm">Exhibition Image</p>
                       </div>
+                    </div>
+                  </div>
+
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
                       <div>
-                        <span className="font-semibold text-gallery-charcoal">
-                          Works:{" "}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {exhibition.artworks} pieces
-                        </span>
+                        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-gallery-gold transition-colors">
+                          {exhibition.title}
+                        </h3>
+                        <p className="text-sm text-gallery-gold font-medium">
+                          Curated by Dr. Sarah Chen
+                        </p>
                       </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          {exhibition.dates}
+                        </div>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          {exhibition.location}
+                        </div>
+                      </div>
+
+                      <p className="text-muted-foreground text-sm line-clamp-3">
+                        {exhibition.description}
+                      </p>
+
+                      {exhibition.call_for_artists && (
+                        <Button
+                          variant="outline"
+                          className="w-full group-hover:bg-gallery-gold group-hover:text-foreground group-hover:border-gallery-gold transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(exhibition.cta_link, "_blank");
+                          }}
+                        >
+                          Join as an Artist
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -202,30 +250,69 @@ const Exhibitions = () => {
             <h2 className="text-3xl font-bold mb-8 text-foreground">
               Past Exhibitions
             </h2>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {pastExhibitions.map((exhibition, index) => (
                 <Card
                   key={index}
-                  className="shadow-elegant opacity-90 cursor-pointer hover:shadow-artwork hover:opacity-100 transition-all duration-300"
+                  className="group hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gallery-gold/30 overflow-hidden cursor-pointer opacity-90 hover:opacity-100"
                   onClick={() => handleExhibitionClick(exhibition.slug)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-xl">
-                          {exhibition.title}
-                        </CardTitle>
-                        <Badge variant="secondary">{exhibition.status}</Badge>
-                      </div>
-                      <div className="text-right text-muted-foreground">
-                        <p className="font-semibold">{exhibition.dates}</p>
+                  <div className="aspect-[4/3] bg-gradient-to-br from-gallery-gold/20 to-gallery-gold/5 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-gallery-gold text-foreground font-semibold">
+                        {exhibition.status}
+                      </Badge>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center text-muted-foreground">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gallery-gold/20 rounded-full flex items-center justify-center">
+                          <Calendar className="w-8 h-8 text-gallery-gold" />
+                        </div>
+                        <p className="text-sm">Exhibition Image</p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {exhibition.description}
-                    </p>
+                  </div>
+
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-gallery-gold transition-colors">
+                          {exhibition.title}
+                        </h3>
+                        <p className="text-sm text-gallery-gold font-medium">
+                          Curated by Dr. Michael Torres
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          {exhibition.dates}
+                        </div>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          {exhibition.location}
+                        </div>
+                      </div>
+
+                      <p className="text-muted-foreground text-sm line-clamp-3">
+                        {exhibition.description}
+                      </p>
+
+                      {exhibition.call_for_artists && (
+                        <Button
+                          variant="outline"
+                          className="w-full group-hover:bg-gallery-gold group-hover:text-foreground group-hover:border-gallery-gold transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(exhibition.cta_link, "_blank");
+                          }}
+                        >
+                          Join as an Artist
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
