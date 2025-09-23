@@ -4,6 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Eye, Image } from "lucide-react";
 
@@ -93,6 +111,16 @@ const mockArtworks: Artwork[] = [
     images: ["/src/assets/artwork-sculpture-1.jpg"],
     slug: "modern-forms",
   },
+];
+
+// Mock artists data for dropdown
+const mockArtists = [
+  { id: "1", name: "Elena Rodriguez" },
+  { id: "2", name: "Marcus Chen" },
+  { id: "3", name: "Sarah Williams" },
+  { id: "4", name: "David Thompson" },
+  { id: "5", name: "Luna Park" },
+  { id: "6", name: "Alex Rivera" },
 ];
 
 const ArtworkManagement = () => {
@@ -224,13 +252,23 @@ const ArtworkManagement = () => {
                 <label className="block text-sm font-medium mb-2">
                   Artist *
                 </label>
-                <Input
+                <Select
                   value={formData.artist || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, artist: e.target.value })
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, artist: value })
                   }
-                  placeholder="Enter artist name"
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an artist" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockArtists.map((artist) => (
+                      <SelectItem key={artist.id} value={artist.name}>
+                        {artist.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Year</label>
@@ -306,7 +344,7 @@ const ArtworkManagement = () => {
                     ))}
                   </div>
                 )}
-                
+
                 {/* Upload new image */}
                 <div className="border-2 border-dashed border-theme-border rounded-lg p-6 text-center">
                   <input
@@ -373,9 +411,7 @@ const ArtworkManagement = () => {
                 <p className="text-sm text-theme-text-muted mb-1">
                   {artwork.year} • {artwork.medium}
                 </p>
-                <p className="text-sm text-theme-text-muted">
-                  {artwork.size}
-                </p>
+                <p className="text-sm text-theme-text-muted">{artwork.size}</p>
               </div>
 
               <div className="flex space-x-2">
@@ -395,20 +431,42 @@ const ArtworkManagement = () => {
                 >
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleDelete(artwork.id)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Artwork</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete{" "}
+                        <strong>{artwork.title}</strong> by{" "}
+                        <strong>{artwork.artist}</strong>? This action cannot be
+                        undone and will remove all associated data.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(artwork.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete Artwork
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
-
     </div>
   );
 };
