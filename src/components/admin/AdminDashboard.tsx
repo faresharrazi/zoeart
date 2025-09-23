@@ -5,6 +5,7 @@ import AdminOverview from "./AdminOverview";
 import ArtworkManagement from "./ArtworkManagement";
 import ArtistManagement from "./ArtistManagement";
 import ExhibitionManagement from "./ExhibitionManagement";
+import NewsletterManagement from "./NewsletterManagement";
 import PageContentManagement from "./PageContentManagement";
 import MediaLibrary from "./MediaLibrary";
 import PageHeroConfig from "./PageHeroConfig";
@@ -28,6 +29,8 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
         return <ArtistManagement />;
       case "exhibitions":
         return <ExhibitionManagement />;
+      case "newsletter":
+        return <NewsletterManagement />;
       case "pages":
         return <PageContentManagement />;
       case "media":
