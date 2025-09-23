@@ -175,13 +175,6 @@ const ArtworkDetail = () => {
                   </div>
                 </div>
               </Card>
-
-              {/* Zoom Instructions */}
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  Click the image to view in full detail with zoom controls
-                </p>
-              </div>
             </div>
 
             {/* Artwork Details */}
@@ -205,23 +198,8 @@ const ArtworkDetail = () => {
               {/* Description */}
               <Card className="shadow-elegant">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4 text-foreground">
-                    About This Work
-                  </h3>
                   <p className="text-muted-foreground leading-relaxed">
                     {artwork.description}
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Artist Bio */}
-              <Card className="shadow-elegant">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4 text-foreground">
-                    About the Artist
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {artwork.artistBio}
                   </p>
                 </CardContent>
               </Card>
