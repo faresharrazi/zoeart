@@ -15,7 +15,9 @@ import alexProfileImage from "@/assets/artist-alex-rivera.jpg";
 
 const artists = [
   {
+    id: 1,
     name: "Elena Rodriguez",
+    slug: "elena-rodriguez",
     profileImage: elenaProfileImage,
     specialty: "Abstract Expressionism",
     bio: "Elena Rodriguez is a contemporary abstract artist whose work explores the intersection of emotion and movement. Born in Barcelona, she has exhibited internationally and is known for her dynamic use of color and form.",
@@ -31,7 +33,9 @@ const artists = [
     },
   },
   {
+    id: 2,
     name: "Marcus Chen",
+    slug: "marcus-chen",
     profileImage: marcusProfileImage,
     specialty: "Geometric Minimalism",
     bio: "Marcus Chen creates minimalist works that examine the relationship between structure and space. His precise geometric compositions have been featured in major galleries across Asia and Europe.",
@@ -45,7 +49,9 @@ const artists = [
     },
   },
   {
+    id: 3,
     name: "Sarah Williams",
+    slug: "sarah-williams",
     profileImage: sarahProfileImage,
     specialty: "Contemporary Portraiture",
     bio: "Sarah Williams is renowned for her deeply psychological portraits that capture the complexity of human emotion. Her work bridges traditional portraiture with contemporary artistic expression.",
@@ -60,7 +66,9 @@ const artists = [
     },
   },
   {
+    id: 4,
     name: "David Thompson",
+    slug: "david-thompson",
     profileImage: davidProfileImage,
     specialty: "Abstract Landscape",
     bio: "David Thompson's abstract landscapes celebrate the raw energy of natural forms. His bold brushwork and earth-tone palette create compositions that are both powerful and meditative.",
@@ -74,7 +82,9 @@ const artists = [
     },
   },
   {
+    id: 5,
     name: "Luna Park",
+    slug: "luna-park",
     profileImage: lunaProfileImage,
     specialty: "Contemporary Landscape",
     bio: "Luna Park reimagines traditional landscape painting for the contemporary world. Her stylized interpretations blend realism with modern artistic sensibilities.",
@@ -89,7 +99,9 @@ const artists = [
     },
   },
   {
+    id: 6,
     name: "Alex Rivera",
+    slug: "alex-rivera",
     profileImage: alexProfileImage,
     specialty: "Sculptural Installation",
     bio: "Alex Rivera pushes the boundaries of sculptural art through innovative use of materials and space. Their installations challenge viewers' perceptions through light, form, and transparency.",
@@ -105,6 +117,10 @@ const artists = [
 ];
 
 const Artists = () => {
+  const handleArtistClick = (artistSlug: string) => {
+    window.location.href = `/artist/${artistSlug}`;
+  };
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -130,7 +146,8 @@ const Artists = () => {
             {artists.map((artist, index) => (
               <Card
                 key={index}
-                className="shadow-elegant hover:shadow-artwork transition-all duration-300"
+                className="shadow-elegant hover:shadow-artwork transition-all duration-300 cursor-pointer group"
+                onClick={() => handleArtistClick(artist.slug)}
               >
                 <CardContent className="p-8">
                   <div className="flex items-start space-x-6 mb-6">
@@ -203,9 +220,10 @@ const Artists = () => {
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
-                          onClick={() =>
-                            window.open(artist.socialMedia.instagram, "_blank")
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(artist.socialMedia.instagram, "_blank");
+                          }}
                         >
                           <Instagram className="w-4 h-4" />
                           Instagram
@@ -216,9 +234,10 @@ const Artists = () => {
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
-                          onClick={() =>
-                            window.open(artist.socialMedia.twitter, "_blank")
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(artist.socialMedia.twitter, "_blank");
+                          }}
                         >
                           <Twitter className="w-4 h-4" />
                           Twitter
@@ -229,9 +248,10 @@ const Artists = () => {
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
-                          onClick={() =>
-                            window.open(artist.socialMedia.website, "_blank")
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(artist.socialMedia.website, "_blank");
+                          }}
                         >
                           <Globe className="w-4 h-4" />
                           Website
@@ -242,12 +262,13 @@ const Artists = () => {
                           variant="outline"
                           size="sm"
                           className="flex items-center gap-2 hover:bg-gallery-gold hover:text-foreground hover:border-gallery-gold"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             window.open(
                               `mailto:${artist.socialMedia.email}`,
                               "_blank"
-                            )
-                          }
+                            );
+                          }}
                         >
                           <Mail className="w-4 h-4" />
                           Email

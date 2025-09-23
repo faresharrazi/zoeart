@@ -53,6 +53,10 @@ const RecentExhibitions = () => {
     });
   };
 
+  const handleExhibitionClick = (exhibitionId: number) => {
+    window.location.href = `/exhibition/${exhibitionId}`;
+  };
+
   return (
     <section id="recent-exhibitions" className="py-20 bg-gallery-light-grey">
       <div className="container mx-auto px-6">
@@ -71,7 +75,8 @@ const RecentExhibitions = () => {
           {upcomingExhibitions.map((exhibition) => (
             <Card
               key={exhibition.id}
-              className="group hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gallery-gold/30 overflow-hidden"
+              className="group hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-gallery-gold/30 overflow-hidden cursor-pointer"
+              onClick={() => handleExhibitionClick(exhibition.id)}
             >
               <div className="aspect-[4/3] bg-gradient-to-br from-gallery-gold/20 to-gallery-gold/5 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -120,6 +125,10 @@ const RecentExhibitions = () => {
                   <Button
                     variant="outline"
                     className="w-full group-hover:bg-gallery-gold group-hover:text-foreground group-hover:border-gallery-gold transition-all"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleExhibitionClick(exhibition.id);
+                    }}
                   >
                     Learn More
                     <ArrowRight className="w-4 h-4 ml-2" />

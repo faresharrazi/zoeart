@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 
 const exhibitions = [
   {
+    id: 1,
+    slug: "contemporary-visions-2024",
     title: "Contemporary Visions 2024",
     status: "Current",
     dates: "March 15 - June 30, 2024",
@@ -15,6 +17,8 @@ const exhibitions = [
     location: "Main Gallery, Floors 1-2",
   },
   {
+    id: 2,
+    slug: "material-explorations",
     title: "Material Explorations",
     status: "Upcoming",
     dates: "July 15 - October 30, 2024",
@@ -25,6 +29,8 @@ const exhibitions = [
     location: "Sculpture Hall & Garden",
   },
   {
+    id: 3,
+    slug: "intimate-reflections",
     title: "Intimate Reflections",
     status: "Upcoming",
     dates: "November 10, 2024 - February 15, 2025",
@@ -35,6 +41,8 @@ const exhibitions = [
     location: "Gallery 3",
   },
   {
+    id: 4,
+    slug: "abstract-futures",
     title: "Abstract Futures",
     status: "Past",
     dates: "September 20 - December 15, 2023",
@@ -54,6 +62,10 @@ const Exhibitions = () => {
     (ex) => ex.status === "Upcoming"
   );
   const pastExhibitions = exhibitions.filter((ex) => ex.status === "Past");
+
+  const handleExhibitionClick = (exhibitionSlug: string) => {
+    window.location.href = `/exhibition/${exhibitionSlug}`;
+  };
 
   return (
     <div className="min-h-screen">
@@ -84,7 +96,8 @@ const Exhibitions = () => {
               {currentExhibitions.map((exhibition, index) => (
                 <Card
                   key={index}
-                  className="shadow-elegant border-l-4 border-l-gallery-gold"
+                  className="shadow-elegant border-l-4 border-l-gallery-gold cursor-pointer hover:shadow-artwork transition-all duration-300"
+                  onClick={() => handleExhibitionClick(exhibition.slug)}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -137,7 +150,11 @@ const Exhibitions = () => {
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {upcomingExhibitions.map((exhibition, index) => (
-                <Card key={index} className="shadow-elegant">
+                <Card
+                  key={index}
+                  className="shadow-elegant cursor-pointer hover:shadow-artwork transition-all duration-300"
+                  onClick={() => handleExhibitionClick(exhibition.slug)}
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <CardTitle className="text-xl">
@@ -187,7 +204,11 @@ const Exhibitions = () => {
             </h2>
             <div className="grid grid-cols-1 gap-6">
               {pastExhibitions.map((exhibition, index) => (
-                <Card key={index} className="shadow-elegant opacity-90">
+                <Card
+                  key={index}
+                  className="shadow-elegant opacity-90 cursor-pointer hover:shadow-artwork hover:opacity-100 transition-all duration-300"
+                  onClick={() => handleExhibitionClick(exhibition.slug)}
+                >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div>

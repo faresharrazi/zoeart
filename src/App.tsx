@@ -10,6 +10,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Collection from "./pages/Collection";
 import ArtworkDetail from "./pages/ArtworkDetail";
+import ArtistDetail from "./pages/ArtistDetail";
+import ExhibitionDetail from "./pages/ExhibitionDetail";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/artwork/:slug" element={<ArtworkDetail />} />
+          <Route path="/artist/:slug" element={<ArtistDetail />} />
+          <Route path="/exhibition/:slug" element={<ExhibitionDetail />} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
