@@ -225,41 +225,6 @@ const ArtworkDetail = () => {
                   </p>
                 </CardContent>
               </Card>
-
-              {/* Technical Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="shadow-elegant">
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold text-gallery-charcoal mb-2">
-                      Technique
-                    </h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {artwork.technique}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="shadow-elegant">
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold text-gallery-charcoal mb-2">
-                      Exhibition
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      {artwork.exhibition}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Provenance */}
-              <Card className="shadow-elegant">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-bold mb-2 text-foreground">
-                    Provenance
-                  </h3>
-                  <p className="text-muted-foreground">{artwork.provenance}</p>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>
