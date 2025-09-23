@@ -20,15 +20,15 @@ const Navigation = () => {
         <div className="flex items-center justify-between">
           <div className="text-2xl font-bold tracking-tight">
             <a href="/" className="hover:text-gallery-gold transition-smooth">
-              Zωή Art
+              Aether Art Space
             </a>
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <a
-              href="/collection"
+              href="/exhibitions"
               className="text-muted-foreground hover:text-foreground transition-smooth"
             >
-              Gallery
+              Exhibitions
             </a>
             <a
               href="/artists"
@@ -37,16 +37,16 @@ const Navigation = () => {
               Artists
             </a>
             <a
-              href="/exhibitions"
-              className="text-muted-foreground hover:text-foreground transition-smooth"
-            >
-              Exhibitions
-            </a>
-            <a
               href="/about"
               className="text-muted-foreground hover:text-foreground transition-smooth"
             >
               About
+            </a>
+            <a
+              href="/contact"
+              className="text-muted-foreground hover:text-foreground transition-smooth"
+            >
+              Contact
             </a>
           </div>
 
@@ -80,11 +80,11 @@ const Navigation = () => {
           <div className="md:hidden bg-background/95 backdrop-blur-sm border-t border-border">
             <div className="container mx-auto px-6 py-4 space-y-4">
               <a
-                href="/collection"
+                href="/exhibitions"
                 className="block text-muted-foreground hover:text-foreground transition-smooth"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Gallery
+                Exhibitions
               </a>
               <a
                 href="/artists"
@@ -94,18 +94,18 @@ const Navigation = () => {
                 Artists
               </a>
               <a
-                href="/exhibitions"
-                className="block text-muted-foreground hover:text-foreground transition-smooth"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Exhibitions
-              </a>
-              <a
                 href="/about"
                 className="block text-muted-foreground hover:text-foreground transition-smooth"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 About
+              </a>
+              <a
+                href="/contact"
+                className="block text-muted-foreground hover:text-foreground transition-smooth"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Contact
               </a>
             </div>
           </div>

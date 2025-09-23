@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Artists from "./pages/Artists";
 import Exhibitions from "./pages/Exhibitions";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Collection from "./pages/Collection";
 import ArtworkDetail from "./pages/ArtworkDetail";
 import Admin from "./pages/Admin";
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/artists" element={<Artists />} />
           <Route path="/exhibitions" element={<Exhibitions />} />
           <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/artwork/:slug" element={<ArtworkDetail />} />
           <Route path="/admin" element={<Admin />} />
