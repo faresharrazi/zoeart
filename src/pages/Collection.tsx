@@ -106,7 +106,7 @@ const Collection = () => {
 
   // Filter and sort artworks
   const filteredAndSortedArtworks = useMemo(() => {
-    let filtered = allArtworks.filter((artwork) => {
+    const filtered = allArtworks.filter((artwork) => {
       const matchesSearch =
         artwork.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         artwork.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
