@@ -820,7 +820,6 @@ const PageContentManagement = () => {
             {currentData.isVisible ? `Hide ${tabs.find((tab) => tab.id === activeTab)?.label} Page` : `Show ${tabs.find((tab) => tab.id === activeTab)?.label} Page`}
           </Button>
         </div>
-      )}
     </div>
     );
   };
