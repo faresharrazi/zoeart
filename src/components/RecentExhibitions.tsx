@@ -13,7 +13,7 @@ const upcomingExhibitions = [
     location: "Main Gallery",
     description:
       "A comprehensive survey of contemporary art featuring works that challenge conventional perspectives and explore new visual languages. This exhibition brings together six exceptional artists whose diverse practices reflect the complexity of our modern world.",
-    featuredImage: "/src/assets/artwork-abstract-1.jpg",
+    featuredImage: "/artwork-abstract-1.jpg",
     status: "upcoming",
     call_for_artists: true,
     cta_link: "https://forms.google.com/example1",
@@ -29,7 +29,7 @@ const upcomingExhibitions = [
     location: "Digital Gallery",
     description:
       "A groundbreaking exhibition featuring digital art, interactive installations, and virtual reality experiences that push the boundaries of traditional art.",
-    featuredImage: "/src/assets/artwork-geometric-1.jpg",
+    featuredImage: "/artwork-geometric-1.jpg",
     status: "upcoming",
     call_for_artists: false,
     cta_link: "",
@@ -45,7 +45,7 @@ const upcomingExhibitions = [
     location: "Garden Pavilion",
     description:
       "Celebrating the intersection of art and nature through environmental installations, sustainable materials, and eco-conscious artistic practices.",
-    featuredImage: "/src/assets/artwork-landscape-1.jpg",
+    featuredImage: "/artwork-landscape-1.jpg",
     status: "upcoming",
     call_for_artists: true,
     cta_link: "https://forms.google.com/example2",
