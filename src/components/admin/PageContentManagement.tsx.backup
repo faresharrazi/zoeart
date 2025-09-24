@@ -262,7 +262,7 @@ const PageContentManagement = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                Home Page
+                🏠 Home Page
                 <Badge variant="outline">Always Visible</Badge>
               </CardTitle>
               {!isEditing && (
@@ -386,15 +386,33 @@ const PageContentManagement = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                About Page
-                <Badge
-                  variant={currentData.isVisible ? "default" : "secondary"}
-                >
-                  {currentData.isVisible ? "Visible" : "Hidden"}
-                </Badge>
-              </CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  ℹ️ About Page
+                  <Badge
+                    variant={currentData.isVisible ? "default" : "secondary"}
+                  >
+                    {currentData.isVisible ? "Visible" : "Hidden"}
+                  </Badge>
+                </CardTitle>
                 <div className="flex gap-2">
+                  {activeTab !== "home" && (
+                    <Button
+                      variant="outline"
+                      onClick={() => togglePageVisibility("about")}
+                      className={
+                        currentData.isVisible
+                          ? "text-orange-600"
+                          : "text-green-600"
+                      }
+                    >
+                      {currentData.isVisible ? (
+                        <EyeOff className="w-4 h-4 mr-2" />
+                      ) : (
+                        <Eye className="w-4 h-4 mr-2" />
+                      )}
+                      {currentData.isVisible ? "Hide Page" : "Show Page"}
+                    </Button>
+                  )}
                   {!isEditing && (
                     <Button onClick={() => handleEdit("about")}>
                       <Edit className="w-4 h-4 mr-2" />
@@ -549,26 +567,6 @@ const PageContentManagement = () => {
               </Card>
             ))}
           </div>
-          
-          {/* Hide Page Button - Bottom of About Page */}
-          <div className="mt-6 pt-4 border-t border-theme-border">
-            <Button
-              variant="outline"
-              onClick={() => togglePageVisibility("about")}
-              className={`w-full sm:w-auto ${
-                currentData.isVisible
-                  ? "bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300"
-                  : "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
-              }`}
-            >
-              {currentData.isVisible ? (
-                <EyeOff className="w-4 h-4 mr-2" />
-              ) : (
-                <Eye className="w-4 h-4 mr-2" />
-              )}
-              {currentData.isVisible ? "Hide About Page" : "Show About Page"}
-            </Button>
-          </div>
         </div>
       );
     }
@@ -594,6 +592,26 @@ const PageContentManagement = () => {
                 )}
               </CardTitle>
             <div className="flex gap-2">
+              {activeTab !== "home" &&
+                activeTab !== "exhibition" &&
+                activeTab !== "contact" && (
+                  <Button
+                    variant="outline"
+                    onClick={() => togglePageVisibility(activeTab)}
+                    className={
+                      currentData.isVisible
+                        ? "text-orange-600"
+                        : "text-green-600"
+                    }
+                  >
+                    {currentData.isVisible ? (
+                      <EyeOff className="w-4 h-4 mr-2" />
+                    ) : (
+                      <Eye className="w-4 h-4 mr-2" />
+                    )}
+                    {currentData.isVisible ? "Hide Page" : "Show Page"}
+                  </Button>
+                )}
               {!isEditing && (
                 <Button onClick={() => handleEdit(activeTab)}>
                   <Edit className="w-4 h-4 mr-2" />
@@ -667,6 +685,7 @@ const PageContentManagement = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 Contact Information
+                <Badge variant="outline">Used in Footer & Contact Page</Badge>
               </CardTitle>
               {!isEditing && (
                 <Button onClick={() => handleEdit("contactInfo")}>
@@ -798,28 +817,6 @@ const PageContentManagement = () => {
             )}
           </CardContent>
         </Card>
-      )}
-
-      {/* Hide Page Button - Bottom of Other Pages (exhibition, artists, gallery) */}
-      {activeTab !== "home" && activeTab !== "exhibition" && activeTab !== "contact" && (
-        <div className="mt-6 pt-4 border-t border-theme-border">
-          <Button
-            variant="outline"
-            onClick={() => togglePageVisibility(activeTab)}
-            className={`w-full sm:w-auto ${
-              currentData.isVisible
-                ? "bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300"
-                : "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
-            }`}
-          >
-            {currentData.isVisible ? (
-              <EyeOff className="w-4 h-4 mr-2" />
-            ) : (
-              <Eye className="w-4 h-4 mr-2" />
-            )}
-            {currentData.isVisible ? `Hide ${tabs.find((tab) => tab.id === activeTab)?.label} Page` : `Show ${tabs.find((tab) => tab.id === activeTab)?.label} Page`}
-          </Button>
-        </div>
       )}
     </div>
     );
