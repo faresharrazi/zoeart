@@ -1,22 +1,39 @@
 import { Instagram, MapPin, Phone, Mail } from "lucide-react";
+import logoFooter from "@/assets/logo/Aether_art_space_footer_logo.png";
 
 const Footer = () => {
   return (
-    <footer className="bg-theme-primary text-theme-text-on-dark py-16">
+    <footer className="bg-white text-gray-900 py-16 border-t border-gray-200">
       <div className="container mx-auto px-6">
+        {/* Mobile Logo Section */}
+        <div className="md:hidden text-center mb-12 px-4">
+          <img
+            src={logoFooter}
+            alt="Aether Art Space"
+            className="h-40 sm:h-44 w-auto object-contain mx-auto"
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <h3 className="text-3xl font-bold mb-4 text-white">
-              Aether Art Space
-            </h3>
-            <p className="text-theme-text-muted leading-relaxed max-w-md mb-6">
+            {/* Desktop Logo */}
+            <div className="hidden md:block mb-4">
+              <img
+                src={logoFooter}
+                alt="Aether Art Space"
+                className="h-32 w-auto object-contain"
+              />
+            </div>
+            <p className="text-gray-600 leading-relaxed max-w-md mb-6">
               A contemporary art space dedicated to showcasing extraordinary
               works from emerging and established artists. Visit us to
               experience art that challenges, inspires, and transforms.
             </p>
             <div className="mt-6">
-              <p className="text-white font-bold text-lg mb-2">Gallery Hours</p>
-              <p className="text-theme-text-muted text-sm">
+              <p className="text-gray-900 font-bold text-lg mb-2">
+                Gallery Hours
+              </p>
+              <p className="text-gray-600 text-sm">
                 Tuesday - Sunday: 10am - 6pm
                 <br />
                 Closed Mondays
@@ -25,12 +42,14 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="text-xl font-bold mb-4 text-white">Quick Links</h4>
+            <h4 className="text-xl font-bold mb-4 text-gray-900">
+              Quick Links
+            </h4>
             <ul className="space-y-3">
               <li>
                 <a
                   href="/exhibitions"
-                  className="text-theme-text-muted hover:text-white transition-colors duration-200 font-medium"
+                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
                 >
                   Current Exhibitions
                 </a>
@@ -38,7 +57,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/artists"
-                  className="text-theme-text-muted hover:text-white transition-colors duration-200 font-medium"
+                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
                 >
                   Featured Artists
                 </a>
@@ -46,7 +65,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/collection"
-                  className="text-theme-text-muted hover:text-white transition-colors duration-200 font-medium"
+                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
                 >
                   Complete Collection
                 </a>
@@ -54,7 +73,7 @@ const Footer = () => {
               <li>
                 <a
                   href="/about"
-                  className="text-theme-text-muted hover:text-white transition-colors duration-200 font-medium"
+                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
                 >
                   About Gallery
                 </a>
@@ -63,31 +82,31 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="text-xl font-bold mb-4 text-white">Contact</h4>
+            <h4 className="text-xl font-bold mb-4 text-gray-900">Contact</h4>
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-white flex-shrink-0" />
-                <p className="text-theme-text-muted">info@aetherartspace.com</p>
+                <Mail className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                <p className="text-gray-600">info@aetherartspace.com</p>
               </div>
               <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-white flex-shrink-0" />
-                <p className="text-theme-text-muted">+30 210 123 4567</p>
+                <Phone className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                <p className="text-gray-600">+30 210 123 4567</p>
               </div>
               <div className="flex items-center space-x-3">
-                <Instagram className="w-5 h-5 text-white flex-shrink-0" />
+                <Instagram className="w-5 h-5 text-gray-600 flex-shrink-0" />
                 <a
                   href="https://instagram.com/aetherartspace"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-theme-text-muted hover:text-white transition-colors duration-200 font-medium"
+                  className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
                 >
                   @aetherartspace
                 </a>
               </div>
               <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-white mt-0.5 flex-shrink-0" />
+                <MapPin className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-theme-text-muted text-sm">
+                  <p className="text-gray-600 text-sm">
                     123 Art District
                     <br />
                     Athens, Greece 10554
@@ -98,8 +117,8 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-theme-border mt-12 pt-8 text-center">
-          <p className="text-theme-text-muted">
+        <div className="border-t border-gray-200 mt-12 pt-8 text-center">
+          <p className="text-gray-600">
             © 2025 Aether Art Space. All rights reserved.
           </p>
         </div>

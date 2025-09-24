@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import logoMenu from "@/assets/logo/Aether_art_space_menu_logo.png";
 
 const Navigation = () => {
   const [isAdminSubdomain, setIsAdminSubdomain] = useState(false);
@@ -16,11 +17,21 @@ const Navigation = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-theme-background/95 backdrop-blur-sm border-b border-theme-border">
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto px-6 py-5">
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold tracking-tight">
-            <a href="/" className="hover:text-theme-primary transition-smooth">
-              Aether Art Space
+          <div className="flex items-center">
+            <a
+              href="/"
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
+              <img
+                src={logoMenu}
+                alt="Aether Art Space"
+                className="h-10 w-auto md:h-12 md:w-auto object-contain"
+              />
+              <span className="text-xl md:text-2xl font-bold tracking-tight text-theme-text-primary">
+                Aether Art Space
+              </span>
             </a>
           </div>
           <div className="hidden md:flex items-center space-x-8">
@@ -68,7 +79,7 @@ const Navigation = () => {
 
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-2"
+              className="md:hidden p-2 text-theme-text-muted hover:text-theme-text-primary"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
