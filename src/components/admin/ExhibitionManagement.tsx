@@ -5,6 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -16,7 +23,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Calendar, Image } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Calendar,
+  Image,
+  Upload,
+  X,
+} from "lucide-react";
 import MediaSelector from "./MediaSelector";
 import FeaturedImageSelector from "./FeaturedImageSelector";
 
@@ -28,10 +44,31 @@ interface Exhibition {
   endDate: string;
   location: string;
   curator: string;
-  status: "upcoming" | "current" | "past";
+  status: "upcoming" | "past";
   featuredImage?: string;
-  artworks: string[]; // artwork IDs
+  galleryImages: string[]; // multiple gallery images
+  assignedArtists: string[]; // artist IDs
+  assignedArtworks: string[]; // artwork IDs
 }
+
+// Mock data for artists and artworks
+const mockArtists = [
+  { id: "1", name: "Elena Rodriguez", specialty: "Abstract Expressionism" },
+  { id: "2", name: "Marcus Chen", specialty: "Digital Art" },
+  { id: "3", name: "Sarah Williams", specialty: "Contemporary Sculpture" },
+  { id: "4", name: "Alex Rivera", specialty: "Mixed Media" },
+  { id: "5", name: "Luna Park", specialty: "Photography" },
+  { id: "6", name: "David Thompson", specialty: "Oil Painting" },
+];
+
+const mockArtworks = [
+  { id: "1", title: "Fluid Dynamics", artist: "Elena Rodriguez" },
+  { id: "2", title: "Digital Dreams", artist: "Marcus Chen" },
+  { id: "3", title: "Sculptural Forms", artist: "Sarah Williams" },
+  { id: "4", title: "Mixed Perspectives", artist: "Alex Rivera" },
+  { id: "5", title: "Urban Landscapes", artist: "Luna Park" },
+  { id: "6", title: "Classical Revival", artist: "David Thompson" },
+];
 
 const mockExhibitions: Exhibition[] = [
   {
@@ -43,9 +80,15 @@ const mockExhibitions: Exhibition[] = [
     endDate: "2024-06-30",
     location: "Main Gallery, First Floor",
     curator: "Sarah Mitchell",
-    status: "current",
+    status: "upcoming",
     featuredImage: "/src/assets/gallery-hero.jpg",
-    artworks: ["1", "2"],
+    galleryImages: [
+      "/src/assets/artwork-abstract-1.jpg",
+      "/src/assets/artwork-abstract-2.jpg",
+      "/src/assets/artwork-geometric-1.jpg",
+    ],
+    assignedArtists: ["1", "2", "3"],
+    assignedArtworks: ["1", "2", "3"],
   },
   {
     id: "2",
@@ -57,7 +100,13 @@ const mockExhibitions: Exhibition[] = [
     location: "Gallery 2, Second Floor",
     curator: "Michael Chen",
     status: "upcoming",
-    artworks: ["1"],
+    featuredImage: "/src/assets/artwork-geometric-1.jpg",
+    galleryImages: [
+      "/src/assets/artwork-abstract-1.jpg",
+      "/src/assets/artwork-landscape-1.jpg",
+    ],
+    assignedArtists: ["1", "4"],
+    assignedArtworks: ["1", "4"],
   },
   {
     id: "3",
@@ -69,7 +118,13 @@ const mockExhibitions: Exhibition[] = [
     location: "Heritage Gallery",
     curator: "Elena Rodriguez",
     status: "past",
-    artworks: ["2"],
+    featuredImage: "/src/assets/artwork-portrait-1.jpg",
+    galleryImages: [
+      "/src/assets/artwork-portrait-1.jpg",
+      "/src/assets/artwork-sculpture-1.jpg",
+    ],
+    assignedArtists: ["5", "6"],
+    assignedArtworks: ["5", "6"],
   },
 ];
 
@@ -97,35 +152,31 @@ const ExhibitionManagement = () => {
       curator: "",
       status: "upcoming",
       featuredImage: "",
-      artworks: [],
+      galleryImages: [],
+      assignedArtists: [],
+      assignedArtworks: [],
     });
     setEditingId(null);
     setIsEditing(true);
   };
 
   const handleSave = () => {
-    if (!formData.title || !formData.startDate || !formData.endDate) {
+    if (
+      !formData.title ||
+      !formData.startDate ||
+      !formData.endDate ||
+      !formData.status
+    ) {
       toast({
         title: "Error",
-        description: "Title, Start Date, and End Date are required fields",
+        description:
+          "Title, Start Date, End Date, and Status are required fields",
         variant: "destructive",
       });
       return;
     }
 
-    // Auto-determine status based on dates
-    const now = new Date();
-    const start = new Date(formData.startDate!);
-    const end = new Date(formData.endDate!);
-
-    let status: Exhibition["status"] = "upcoming";
-    if (now >= start && now <= end) {
-      status = "current";
-    } else if (now > end) {
-      status = "past";
-    }
-
-    const exhibitionData = { ...formData, status };
+    const exhibitionData = { ...formData };
 
     if (editingId) {
       // Update existing exhibition
@@ -145,7 +196,9 @@ const ExhibitionManagement = () => {
       const newExhibition: Exhibition = {
         ...exhibitionData,
         id: Date.now().toString(),
-        artworks: formData.artworks || [],
+        galleryImages: formData.galleryImages || [],
+        assignedArtists: formData.assignedArtists || [],
+        assignedArtworks: formData.assignedArtworks || [],
       } as Exhibition;
 
       setExhibitions([...exhibitions, newExhibition]);
@@ -169,8 +222,6 @@ const ExhibitionManagement = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "current":
-        return "bg-green-100 text-green-800";
       case "upcoming":
         return "bg-blue-100 text-blue-800";
       case "past":
@@ -186,6 +237,43 @@ const ExhibitionManagement = () => {
       month: "long",
       day: "numeric",
     });
+  };
+
+  // Helper functions for image management
+  const handleImageUpload = async (file: File) => {
+    // Mock upload function - in real app, this would upload to your storage
+    return URL.createObjectURL(file);
+  };
+
+  const handleGalleryImageUpload = async (file: File) => {
+    const imageUrl = await handleImageUpload(file);
+    setFormData({
+      ...formData,
+      galleryImages: [...(formData.galleryImages || []), imageUrl],
+    });
+  };
+
+  const removeGalleryImage = (index: number) => {
+    const newImages =
+      formData.galleryImages?.filter((_, i) => i !== index) || [];
+    setFormData({ ...formData, galleryImages: newImages });
+  };
+
+  // Helper functions for assignments
+  const toggleArtistAssignment = (artistId: string) => {
+    const currentArtists = formData.assignedArtists || [];
+    const newArtists = currentArtists.includes(artistId)
+      ? currentArtists.filter((id) => id !== artistId)
+      : [...currentArtists, artistId];
+    setFormData({ ...formData, assignedArtists: newArtists });
+  };
+
+  const toggleArtworkAssignment = (artworkId: string) => {
+    const currentArtworks = formData.assignedArtworks || [];
+    const newArtworks = currentArtworks.includes(artworkId)
+      ? currentArtworks.filter((id) => id !== artworkId)
+      : [...currentArtworks, artworkId];
+    setFormData({ ...formData, assignedArtworks: newArtworks });
   };
 
   if (isEditing) {
@@ -244,6 +332,26 @@ const ExhibitionManagement = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-2">
+                  Status *
+                </label>
+                <Select
+                  value={formData.status || ""}
+                  onValueChange={(value: "upcoming" | "past") =>
+                    setFormData({ ...formData, status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
                   Location
                 </label>
                 <Input
@@ -283,18 +391,127 @@ const ExhibitionManagement = () => {
               />
             </div>
 
+            {/* Gallery Images Section */}
             <div>
-              <FeaturedImageSelector
-                images={formData.galleryImages || []}
-                featuredImage={formData.featuredImage || null}
-                onFeaturedImageChange={(imageUrl) => {
-                  setFormData({ ...formData, featuredImage: imageUrl });
-                }}
-                onImageUpload={async (file) => {
-                  // Mock upload function - in real app, this would upload to your storage
-                  return URL.createObjectURL(file);
-                }}
-              />
+              <label className="block text-sm font-medium mb-2">
+                Gallery Images
+              </label>
+              <div className="space-y-4">
+                {/* Upload new image */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleGalleryImageUpload(file);
+                      }
+                    }}
+                    className="hidden"
+                    id="gallery-upload"
+                  />
+                  <label
+                    htmlFor="gallery-upload"
+                    className="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-600">
+                      Click to upload gallery images
+                    </span>
+                  </label>
+                </div>
+
+                {/* Display uploaded images */}
+                {formData.galleryImages &&
+                  formData.galleryImages.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {formData.galleryImages.map((image, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={image}
+                            alt={`Gallery image ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg"
+                          />
+                          <button
+                            onClick={() => removeGalleryImage(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              setFormData({ ...formData, featuredImage: image })
+                            }
+                            className={`absolute bottom-1 left-1 px-2 py-1 text-xs rounded ${
+                              formData.featuredImage === image
+                                ? "bg-blue-500 text-white"
+                                : "bg-white text-gray-700"
+                            }`}
+                          >
+                            {formData.featuredImage === image
+                              ? "Featured"
+                              : "Set Featured"}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+              </div>
+            </div>
+
+            {/* Artist Assignment Section */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Assign Artists
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {mockArtists.map((artist) => (
+                  <label
+                    key={artist.id}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={
+                        formData.assignedArtists?.includes(artist.id) || false
+                      }
+                      onChange={() => toggleArtistAssignment(artist.id)}
+                      className="rounded"
+                    />
+                    <span className="text-sm">
+                      {artist.name} ({artist.specialty})
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Artwork Assignment Section */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Assign Artworks
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {mockArtworks.map((artwork) => (
+                  <label
+                    key={artwork.id}
+                    className="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={
+                        formData.assignedArtworks?.includes(artwork.id) || false
+                      }
+                      onChange={() => toggleArtworkAssignment(artwork.id)}
+                      className="rounded"
+                    />
+                    <span className="text-sm">
+                      {artwork.title} by {artwork.artist}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <Button onClick={handleSave} className="">
@@ -360,8 +577,18 @@ const ExhibitionManagement = () => {
                 </p>
 
                 <p className="text-sm text-muted-foreground">
-                  <strong>Artworks:</strong> {exhibition.artworks.length}{" "}
-                  piece(s)
+                  <strong>Gallery Images:</strong>{" "}
+                  {exhibition.galleryImages?.length || 0} image(s)
+                </p>
+
+                <p className="text-sm text-muted-foreground">
+                  <strong>Assigned Artists:</strong>{" "}
+                  {exhibition.assignedArtists?.length || 0} artist(s)
+                </p>
+
+                <p className="text-sm text-muted-foreground">
+                  <strong>Assigned Artworks:</strong>{" "}
+                  {exhibition.assignedArtworks?.length || 0} piece(s)
                 </p>
               </div>
 

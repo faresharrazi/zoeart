@@ -5,11 +5,9 @@ import {
   Users,
   Calendar,
   FileText,
-  Image,
   Home,
   Menu,
   X,
-  Navigation,
   Mail,
   // Settings, // Removed theme management
 } from "lucide-react";
@@ -29,8 +27,6 @@ const menuItems = [
   { id: "exhibitions", label: "Exhibitions", icon: Calendar },
   { id: "newsletter", label: "Newsletter", icon: Mail },
   { id: "pages", label: "Page Content", icon: FileText },
-  { id: "media", label: "Media Library", icon: Image },
-  { id: "navigation", label: "Page Backgrounds", icon: Navigation },
   // { id: "theme", label: "Theme Control", icon: Settings }, // Removed theme management
 ];
 

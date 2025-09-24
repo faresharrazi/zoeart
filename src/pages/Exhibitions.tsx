@@ -1,6 +1,7 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ExhibitionCard from "@/components/ExhibitionCard";
+import { getPageSettings } from "@/lib/pageSettings";
 
 const exhibitions = [
   {
@@ -118,6 +119,7 @@ const exhibitions = [
 ];
 
 const Exhibitions = () => {
+  const pageSettings = getPageSettings();
   const upcomingExhibitions = exhibitions.filter(
     (ex) => ex.status === "Upcoming"
   );
@@ -144,12 +146,10 @@ const Exhibitions = () => {
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
-              Gallery <span className="text-white">Exhibitions</span>
+              {pageSettings.exhibition.title}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-              Discover our curated exhibitions that showcase the finest in
-              contemporary art. From solo presentations to thematic group shows,
-              each exhibition offers a unique journey through artistic vision.
+              {pageSettings.exhibition.description}
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import logoMenu from "@/assets/logo/Aether_art_space_menu_logo.png";
+import { isPageVisible } from "@/lib/pageSettings";
 
 const Navigation = () => {
   const [isAdminSubdomain, setIsAdminSubdomain] = useState(false);
@@ -35,36 +36,46 @@ const Navigation = () => {
             </a>
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            <a
-              href="/exhibitions"
-              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-            >
-              Exhibitions
-            </a>
-            <a
-              href="/artists"
-              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-            >
-              Artists
-            </a>
-            <a
-              href="/collection"
-              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-            >
-              Gallery
-            </a>
-            <a
-              href="/about"
-              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-            >
-              About
-            </a>
-            <a
-              href="/contact"
-              className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-            >
-              Contact
-            </a>
+            {isPageVisible("exhibition") && (
+              <a
+                href="/exhibitions"
+                className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+              >
+                Exhibitions
+              </a>
+            )}
+            {isPageVisible("artists") && (
+              <a
+                href="/artists"
+                className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+              >
+                Artists
+              </a>
+            )}
+            {isPageVisible("gallery") && (
+              <a
+                href="/collection"
+                className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+              >
+                Gallery
+              </a>
+            )}
+            {isPageVisible("about") && (
+              <a
+                href="/about"
+                className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+              >
+                About
+              </a>
+            )}
+            {isPageVisible("contact") && (
+              <a
+                href="/contact"
+                className="text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+              >
+                Contact
+              </a>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
@@ -95,41 +106,51 @@ const Navigation = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-theme-background/95 backdrop-blur-sm border-t border-theme-border">
             <div className="container mx-auto px-6 py-4 space-y-4">
-              <a
-                href="/exhibitions"
-                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Exhibitions
-              </a>
-              <a
-                href="/artists"
-                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Artists
-              </a>
-              <a
-                href="/collection"
-                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Gallery
-              </a>
-              <a
-                href="/about"
-                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                About
-              </a>
-              <a
-                href="/contact"
-                className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Contact
-              </a>
+              {isPageVisible("exhibition") && (
+                <a
+                  href="/exhibitions"
+                  className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Exhibitions
+                </a>
+              )}
+              {isPageVisible("artists") && (
+                <a
+                  href="/artists"
+                  className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Artists
+                </a>
+              )}
+              {isPageVisible("gallery") && (
+                <a
+                  href="/collection"
+                  className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Gallery
+                </a>
+              )}
+              {isPageVisible("about") && (
+                <a
+                  href="/about"
+                  className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  About
+                </a>
+              )}
+              {isPageVisible("contact") && (
+                <a
+                  href="/contact"
+                  className="block text-theme-text-muted hover:text-theme-text-primary transition-smooth"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Contact
+                </a>
+              )}
             </div>
           </div>
         )}

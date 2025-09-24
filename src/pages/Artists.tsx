@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Instagram, Mail, Globe } from "lucide-react";
+import { getPageSettings } from "@/lib/pageSettings";
 
 // Import artist profile images
 import elenaProfileImage from "@/assets/artist-elena-rodriguez.jpg";
@@ -117,6 +118,8 @@ const artists = [
 ];
 
 const Artists = () => {
+  const pageSettings = getPageSettings();
+
   const handleArtistClick = (artistSlug: string) => {
     window.location.href = `/artist/${artistSlug}`;
   };
@@ -138,12 +141,10 @@ const Artists = () => {
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
-              Featured <span className="text-white">Artists</span>
+              {pageSettings.artists.title}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-              Meet the visionary artists whose works define our contemporary
-              collection. Each brings a unique perspective and mastery of their
-              craft to create pieces that inspire and provoke.
+              {pageSettings.artists.description}
             </p>
           </div>
         </div>

@@ -7,8 +7,6 @@ import ArtistManagement from "./ArtistManagement";
 import ExhibitionManagement from "./ExhibitionManagement";
 import NewsletterManagement from "./NewsletterManagement";
 import PageContentManagement from "./PageContentManagement";
-import MediaLibrary from "./MediaLibrary";
-import PageHeroConfig from "./PageHeroConfig";
 // import ThemeControl from "./ThemeControl"; // Removed theme management
 
 interface AdminDashboardProps {
@@ -33,20 +31,6 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
         return <NewsletterManagement />;
       case "pages":
         return <PageContentManagement />;
-      case "media":
-        return <MediaLibrary />;
-      case "navigation":
-        return (
-          <div className="p-8 text-center">
-            <h2 className="text-2xl font-bold text-theme-text-primary mb-4">
-              Page Background Configuration
-            </h2>
-            <p className="text-theme-text-muted">
-              This feature is temporarily disabled. Background images will be
-              configurable soon.
-            </p>
-          </div>
-        );
       // case "theme":
       //   return <ThemeControl />; // Removed theme management
       default:

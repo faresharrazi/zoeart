@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, X } from "lucide-react";
+import { getPageSettings } from "@/lib/pageSettings";
 import abstractArt1 from "@/assets/artwork-abstract-1.jpg";
 import geometricArt1 from "@/assets/artwork-geometric-1.jpg";
 import portraitArt1 from "@/assets/artwork-portrait-1.jpg";
@@ -89,6 +90,7 @@ const allArtworks = [
 ];
 
 const Collection = () => {
+  const pageSettings = getPageSettings();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMedium, setSelectedMedium] = useState("all");
   const [selectedYear, setSelectedYear] = useState("all");
@@ -174,11 +176,10 @@ const Collection = () => {
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
-              Complete <span className="text-white">Collection</span>
+              {pageSettings.gallery.title}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-              Explore our entire collection of contemporary artworks. Use the
-              search and filter tools to discover pieces that speak to you.
+              {pageSettings.gallery.description}
             </p>
           </div>
         </div>
