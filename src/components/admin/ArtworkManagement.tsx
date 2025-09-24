@@ -48,7 +48,7 @@ const mockArtworks: Artwork[] = [
     size: "48 x 60 inches",
     description:
       "An exploration of movement and form through organic shapes that dance across the canvas in harmonious blues and gold.",
-    images: ["/src/assets/artwork-abstract-1.jpg"],
+    images: ["/artwork-abstract-1.jpg"],
     slug: "fluid-dynamics",
   },
   {
@@ -60,7 +60,7 @@ const mockArtworks: Artwork[] = [
     size: "36 x 36 inches",
     description:
       "A minimalist composition examining the relationship between structure and space in contemporary urban environments.",
-    images: ["/src/assets/artwork-geometric-1.jpg"],
+    images: ["/artwork-geometric-1.jpg"],
     slug: "intersection",
   },
   {
@@ -72,7 +72,7 @@ const mockArtworks: Artwork[] = [
     size: "24 x 30 inches",
     description:
       "A powerful portrait capturing the quiet strength and introspective nature of the human spirit.",
-    images: ["/src/assets/artwork-portrait-1.jpg"],
+    images: ["/artwork-portrait-1.jpg"],
     slug: "silent-contemplation",
   },
   {
@@ -84,7 +84,7 @@ const mockArtworks: Artwork[] = [
     size: "40 x 50 inches",
     description:
       "Bold brushstrokes and earth tones create a dynamic composition celebrating the raw energy of nature.",
-    images: ["/src/assets/artwork-abstract-2.jpg"],
+    images: ["/artwork-abstract-2.jpg"],
     slug: "earth-rhythms",
   },
   {
@@ -96,7 +96,7 @@ const mockArtworks: Artwork[] = [
     size: "32 x 40 inches",
     description:
       "A contemporary interpretation of natural landscapes, blending realism with stylized forms and golden highlights.",
-    images: ["/src/assets/artwork-landscape-1.jpg"],
+    images: ["/artwork-landscape-1.jpg"],
     slug: "mountain-dreams",
   },
   {
@@ -108,7 +108,7 @@ const mockArtworks: Artwork[] = [
     size: "60 x 24 x 18 inches",
     description:
       "An innovative sculptural piece that challenges perception through the interplay of light, metal, and transparency.",
-    images: ["/src/assets/artwork-sculpture-1.jpg"],
+    images: ["/artwork-sculpture-1.jpg"],
     slug: "modern-forms",
   },
 ];

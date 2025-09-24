@@ -22,15 +22,15 @@ const NavigationConfig = ({
 
   // Available background images from assets
   const availableImages = [
-    { url: "/src/assets/gallery-hero.jpg", name: "Gallery Hero" },
-    { url: "/src/assets/gallery-hero2.jpg", name: "Gallery Hero 2" },
-    { url: "/src/assets/gallery-hero3.jpg", name: "Gallery Hero 3" },
-    { url: "/src/assets/artwork-abstract-1.jpg", name: "Abstract Art 1" },
-    { url: "/src/assets/artwork-abstract-2.jpg", name: "Abstract Art 2" },
-    { url: "/src/assets/artwork-geometric-1.jpg", name: "Geometric Art" },
-    { url: "/src/assets/artwork-landscape-1.jpg", name: "Landscape Art" },
-    { url: "/src/assets/artwork-portrait-1.jpg", name: "Portrait Art" },
-    { url: "/src/assets/artwork-sculpture-1.jpg", name: "Sculpture Art" },
+    { url: "/gallery-hero.jpg", name: "Gallery Hero" },
+    { url: "/gallery-hero2.jpg", name: "Gallery Hero 2" },
+    { url: "/gallery-hero3.jpg", name: "Gallery Hero 3" },
+    { url: "/artwork-abstract-1.jpg", name: "Abstract Art 1" },
+    { url: "/artwork-abstract-2.jpg", name: "Abstract Art 2" },
+    { url: "/artwork-geometric-1.jpg", name: "Geometric Art" },
+    { url: "/artwork-landscape-1.jpg", name: "Landscape Art" },
+    { url: "/artwork-portrait-1.jpg", name: "Portrait Art" },
+    { url: "/artwork-sculpture-1.jpg", name: "Sculpture Art" },
   ];
 
   const handleFileUpload = async (

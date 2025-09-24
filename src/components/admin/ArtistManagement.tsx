@@ -39,7 +39,7 @@ const mockArtists: Artist[] = [
     name: "Elena Rodriguez",
     specialty: "Abstract Expressionism",
     bio: "Elena Rodriguez is a contemporary abstract artist whose work explores the intersection of emotion and movement. Born in Barcelona, she has exhibited internationally and is known for her dynamic use of color and form.",
-    profileImage: "/src/assets/artist-elena-rodriguez.jpg",
+    profileImage: "/artist-elena-rodriguez.jpg",
     socialMedia: {
       instagram: "https://instagram.com/elenarodriguezart",
       website: "https://elenarodriguezart.com",
@@ -52,7 +52,7 @@ const mockArtists: Artist[] = [
     name: "Marcus Chen",
     specialty: "Geometric Minimalism",
     bio: "Marcus Chen creates minimalist works that examine the relationship between structure and space. His precise geometric compositions have been featured in major galleries across Asia and Europe.",
-    profileImage: "/src/assets/artist-marcus-chen.jpg",
+    profileImage: "/artist-marcus-chen.jpg",
     socialMedia: {
       instagram: "https://instagram.com/marcuschenart",
       website: "https://marcuschenart.com",
@@ -65,7 +65,7 @@ const mockArtists: Artist[] = [
     name: "Sarah Williams",
     specialty: "Contemporary Portraiture",
     bio: "Sarah Williams is renowned for her deeply psychological portraits that capture the complexity of human emotion. Her work bridges traditional portraiture with contemporary artistic expression.",
-    profileImage: "/src/assets/artist-sarah-williams.jpg",
+    profileImage: "/artist-sarah-williams.jpg",
     socialMedia: {
       instagram: "https://instagram.com/sarahwilliamsart",
       website: "https://sarahwilliamsportrait.com",
@@ -78,7 +78,7 @@ const mockArtists: Artist[] = [
     name: "David Thompson",
     specialty: "Abstract Landscape",
     bio: "David Thompson's abstract landscapes celebrate the raw energy of natural forms. His bold brushwork and earth-tone palette create compositions that are both powerful and meditative.",
-    profileImage: "/src/assets/artist-david-thompson.jpg",
+    profileImage: "/artist-david-thompson.jpg",
     socialMedia: {
       instagram: "https://instagram.com/davidthompsonart",
       website: "https://davidthompsonlandscapes.com",
@@ -90,7 +90,7 @@ const mockArtists: Artist[] = [
     name: "Luna Park",
     specialty: "Contemporary Landscape",
     bio: "Luna Park reimagines traditional landscape painting for the contemporary world. Her stylized interpretations blend realism with modern artistic sensibilities.",
-    profileImage: "/src/assets/artist-luna-park.jpg",
+    profileImage: "/artist-luna-park.jpg",
     socialMedia: {
       instagram: "https://instagram.com/lunaparkart",
       website: "https://lunaparkart.com",
@@ -103,7 +103,7 @@ const mockArtists: Artist[] = [
     name: "Alex Rivera",
     specialty: "Sculptural Installation",
     bio: "Alex Rivera pushes the boundaries of sculptural art through innovative use of materials and space. Their installations challenge viewers' perceptions through light, form, and transparency.",
-    profileImage: "/src/assets/artist-alex-rivera.jpg",
+    profileImage: "/artist-alex-rivera.jpg",
     socialMedia: {
       instagram: "https://instagram.com/alexriverasculpture",
       website: "https://alexriverasculpture.com",

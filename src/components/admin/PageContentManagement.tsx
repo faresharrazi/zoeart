@@ -824,13 +824,14 @@ const PageContentManagement = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-theme-text-primary">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-theme-text-primary">
           Page Content Management
         </h2>
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => {
               ensureCorePagesVisible();
               toast({
@@ -839,11 +840,17 @@ const PageContentManagement = () => {
                   "Exhibition and Contact pages refreshed to be visible",
               });
             }}
+            className="w-full sm:w-auto"
           >
             <Eye className="w-4 h-4 mr-2" />
             Refresh Core Pages
           </Button>
-          <Button variant="outline" onClick={() => window.open("/", "_blank")}>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.open("/", "_blank")}
+            className="w-full sm:w-auto"
+          >
             <Eye className="w-4 h-4 mr-2" />
             Preview Site
           </Button>
@@ -852,19 +859,20 @@ const PageContentManagement = () => {
 
       {/* Tab Navigation */}
       <div className="border-b border-theme-border">
-        <nav className="flex space-x-8">
+        <nav className="flex overflow-x-auto space-x-2 sm:space-x-8">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab.id
                   ? "border-theme-primary text-theme-primary"
                   : "border-transparent text-theme-text-muted hover:text-theme-text-primary hover:border-theme-border"
               }`}
             >
-              <span className="mr-2">{tab.icon}</span>
-              {tab.label}
+              <span className="mr-1 sm:mr-2">{tab.icon}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
             </button>
           ))}
         </nav>
