@@ -28,6 +28,12 @@
       "dest": "/dist/index.html"
     }
   ],
+  "rewrites": [
+    {
+      "source": "/((?!api|admin).*)",
+      "destination": "/dist/index.html"
+    }
+  ],
   "env": {
     "NODE_ENV": "production",
     "DATABASE_URL": "postgresql://neondb_owner:npg_dinsL9yt8SbF@ep-empty-wave-agkozpl3-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require",
