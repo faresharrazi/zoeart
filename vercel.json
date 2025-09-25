@@ -17,11 +17,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/server.cjs"
+      "dest": "server.cjs"
     },
     {
       "src": "/admin/(.*)",
-      "dest": "/server.cjs"
+      "dest": "server.cjs"
     },
     {
       "src": "/(.*)",
