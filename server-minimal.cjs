@@ -6,7 +6,8 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const JWT_SECRET =
+  process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 // Middleware
 app.use(cors());
@@ -17,8 +18,9 @@ let pool = null;
 
 function getPool() {
   if (!pool) {
-    const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
-    
+    const connectionString =
+      process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
     if (!connectionString) {
       throw new Error("Database connection string not found");
     }
@@ -51,17 +53,19 @@ app.get("/api/health", (req, res) => {
 // Test database connection
 app.get("/api/test-db", async (req, res) => {
   try {
-    const result = await query("SELECT NOW() as current_time, version() as postgres_version");
+    const result = await query(
+      "SELECT NOW() as current_time, version() as postgres_version"
+    );
     res.json({
       status: "OK",
       message: "Database connected successfully",
-      data: result[0]
+      data: result[0],
     });
   } catch (error) {
     res.status(500).json({
       status: "ERROR",
       message: "Database connection failed",
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -72,7 +76,9 @@ app.post("/api/auth/login", async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res.status(400).json({ error: "Username and password are required" });
+      return res
+        .status(400)
+        .json({ error: "Username and password are required" });
     }
 
     // Find user in database
@@ -127,14 +133,35 @@ app.get("/api/test-users", async (req, res) => {
     res.json({
       status: "OK",
       message: "Users table check",
-      users: users
+      users: users,
     });
   } catch (error) {
     console.error("Users check failed:", error);
     res.status(500).json({
       status: "ERROR",
       message: "Users check failed",
-      error: error.message
+      error: error.message,
+    });
+  }
+});
+
+// Test page content endpoint
+app.get("/api/test-page-content", async (req, res) => {
+  try {
+    const pageContent = await query(
+      "SELECT * FROM page_content ORDER BY page_name"
+    );
+    res.json({
+      status: "OK",
+      message: "Page content table check",
+      pageContent: pageContent,
+    });
+  } catch (error) {
+    console.error("Page content check failed:", error);
+    res.status(500).json({
+      status: "ERROR",
+      message: "Page content check failed",
+      error: error.message,
     });
   }
 });
@@ -181,7 +208,7 @@ app.get("/api/exhibitions", async (req, res) => {
           ? JSON.parse(exhibition.assigned_artworks || "[]")
           : exhibition.assigned_artworks || [],
     }));
-    
+
     res.json(formattedExhibitions);
   } catch (error) {
     console.error("Error fetching exhibitions:", error);
@@ -257,9 +284,10 @@ app.get("/api/page-content", async (req, res) => {
       try {
         acc[page.page_name] = {
           ...page,
-          content: typeof page.content === "string"
-            ? JSON.parse(page.content || "{}")
-            : page.content || {}
+          content:
+            typeof page.content === "string"
+              ? JSON.parse(page.content || "{}")
+              : page.content || {},
         };
       } catch (e) {
         console.error("Error parsing page content for", page.page_name, e);
@@ -278,7 +306,7 @@ app.get("/api/page-content", async (req, res) => {
       hasPages: !!response.pages,
       hasHome: !!response.pages.home,
       hasContactInfo: !!response.contactInfo,
-      keys: Object.keys(response)
+      keys: Object.keys(response),
     });
 
     res.json(response);
@@ -385,25 +413,30 @@ app.put("/api/page-content/:pageName", authenticateToken, async (req, res) => {
 
     const updates = [];
     const values = [];
+    let paramIndex = 1;
 
     if (title !== undefined) {
-      updates.push("title = $1");
+      updates.push(`title = $${paramIndex}`);
       values.push(title || null);
+      paramIndex++;
     }
 
     if (description !== undefined) {
-      updates.push("description = $2");
+      updates.push(`description = $${paramIndex}`);
       values.push(description || null);
+      paramIndex++;
     }
 
     if (content !== undefined) {
-      updates.push("content = $3");
+      updates.push(`content = $${paramIndex}`);
       values.push(content ? JSON.stringify(content) : null);
+      paramIndex++;
     }
 
     if (isVisible !== undefined) {
-      updates.push("is_visible = $4");
+      updates.push(`is_visible = $${paramIndex}`);
       values.push(isVisible ? 1 : 0);
+      paramIndex++;
     }
 
     if (updates.length === 0) {
@@ -414,7 +447,7 @@ app.put("/api/page-content/:pageName", authenticateToken, async (req, res) => {
 
     const updateQuery = `UPDATE page_content SET ${updates.join(
       ", "
-    )} WHERE page_name = $5`;
+    )} WHERE page_name = $${paramIndex}`;
 
     console.log("Update query:", updateQuery);
     console.log("Values:", values);
@@ -429,68 +462,91 @@ app.put("/api/page-content/:pageName", authenticateToken, async (req, res) => {
 });
 
 // Admin page content update endpoint
-app.put("/api/admin/page-content/:pageName", authenticateToken, async (req, res) => {
-  try {
-    const { pageName } = req.params;
-    const { title, description, content, isVisible } = req.body;
+app.put(
+  "/api/admin/page-content/:pageName",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { pageName } = req.params;
+      const { title, description, content, isVisible } = req.body;
 
-    console.log("Admin updating page content for:", pageName);
-    console.log("Update data:", { title, description, content, isVisible });
+      console.log("=== ADMIN PAGE CONTENT UPDATE ===");
+      console.log("Page name:", pageName);
+      console.log("Update data:", { title, description, content, isVisible });
+      console.log("Request headers:", req.headers);
 
-    // Get current page data
-    const currentPage = await query(
-      "SELECT * FROM page_content WHERE page_name = $1",
-      [pageName]
-    );
+      // Get current page data
+      const currentPage = await query(
+        "SELECT * FROM page_content WHERE page_name = $1",
+        [pageName]
+      );
 
-    if (currentPage.length === 0) {
-      return res.status(404).json({ error: "Page not found" });
+      console.log("Current page data:", currentPage);
+
+      if (currentPage.length === 0) {
+        console.log("Page not found in database");
+        return res.status(404).json({ error: "Page not found" });
+      }
+
+      const updates = [];
+      const values = [];
+      let paramIndex = 1;
+
+      if (title !== undefined) {
+        updates.push(`title = $${paramIndex}`);
+        values.push(title || null);
+        paramIndex++;
+      }
+
+      if (description !== undefined) {
+        updates.push(`description = $${paramIndex}`);
+        values.push(description || null);
+        paramIndex++;
+      }
+
+      if (content !== undefined) {
+        updates.push(`content = $${paramIndex}`);
+        values.push(content ? JSON.stringify(content) : null);
+        paramIndex++;
+      }
+
+      if (isVisible !== undefined) {
+        updates.push(`is_visible = $${paramIndex}`);
+        values.push(isVisible ? 1 : 0);
+        paramIndex++;
+      }
+
+      if (updates.length === 0) {
+        console.log("No changes to update");
+        return res.json({ success: true, message: "No changes to update" });
+      }
+
+      values.push(pageName);
+
+      const updateQuery = `UPDATE page_content SET ${updates.join(
+        ", "
+      )} WHERE page_name = $${paramIndex}`;
+
+      console.log("Admin update query:", updateQuery);
+      console.log("Values:", values);
+
+      const result = await query(updateQuery, values);
+      console.log("Update result:", result);
+
+      // Verify the update by fetching the updated data
+      const updatedPage = await query(
+        "SELECT * FROM page_content WHERE page_name = $1",
+        [pageName]
+      );
+      console.log("Updated page data:", updatedPage);
+
+      res.json({ success: true, message: "Page content updated successfully" });
+    } catch (error) {
+      console.error("Error updating page content:", error);
+      res.status(500).json({ error: "Failed to update page content" });
     }
-
-    const updates = [];
-    const values = [];
-
-    if (title !== undefined) {
-      updates.push("title = $1");
-      values.push(title || null);
-    }
-
-    if (description !== undefined) {
-      updates.push("description = $2");
-      values.push(description || null);
-    }
-
-    if (content !== undefined) {
-      updates.push("content = $3");
-      values.push(content ? JSON.stringify(content) : null);
-    }
-
-    if (isVisible !== undefined) {
-      updates.push("is_visible = $4");
-      values.push(isVisible ? 1 : 0);
-    }
-
-    if (updates.length === 0) {
-      return res.json({ success: true, message: "No changes to update" });
-    }
-
-    values.push(pageName);
-
-    const updateQuery = `UPDATE page_content SET ${updates.join(
-      ", "
-    )} WHERE page_name = $5`;
-
-    console.log("Admin update query:", updateQuery);
-    console.log("Values:", values);
-
-    await query(updateQuery, values);
-
-    res.json({ success: true, message: "Page content updated successfully" });
-  } catch (error) {
-    console.error("Error updating page content:", error);
-    res.status(500).json({ error: "Failed to update page content" });
   }
-});
+);
 
 // Update contact info
 app.put("/api/contact-info", authenticateToken, async (req, res) => {
@@ -524,14 +580,19 @@ app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
   try {
     const { title, description, content } = req.body;
 
-    console.log("Updating home settings:", { title, description, content });
+    console.log("=== ADMIN HOME SETTINGS UPDATE ===");
+    console.log("Update data:", { title, description, content });
+    console.log("Request headers:", req.headers);
 
     // Get current home page data
     const currentSettings = await query(
       "SELECT * FROM page_content WHERE page_name = 'home'"
     );
 
+    console.log("Current home settings:", currentSettings);
+
     if (currentSettings.length === 0) {
+      console.log("Home page not found in database");
       return res.status(404).json({ error: "Home page not found" });
     }
 
@@ -545,16 +606,116 @@ app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
       ...content,
     };
 
+    console.log("Current content:", currentContent);
+    console.log("Updated content:", updatedContent);
+
     // Update home settings
-    await query(
+    const result = await query(
       "UPDATE page_content SET title = $1, description = $2, content = $3 WHERE page_name = 'home'",
       [title, description, JSON.stringify(updatedContent)]
     );
+
+    console.log("Update result:", result);
+
+    // Verify the update
+    const updatedSettings = await query(
+      "SELECT * FROM page_content WHERE page_name = 'home'"
+    );
+    console.log("Updated home settings:", updatedSettings);
 
     res.json({ success: true, message: "Home settings updated successfully" });
   } catch (error) {
     console.error("Error updating home settings:", error);
     res.status(500).json({ error: "Failed to update home settings" });
+  }
+});
+
+// Update contact info (admin endpoint)
+app.put("/api/admin/contact-info", authenticateToken, async (req, res) => {
+  try {
+    const { email, phone, instagram, address } = req.body;
+
+    console.log("=== ADMIN CONTACT INFO UPDATE ===");
+    console.log("Update data:", { email, phone, instagram, address });
+    console.log("Request headers:", req.headers);
+
+    // Check if contact info exists
+    const existing = await query("SELECT id FROM contact_info LIMIT 1");
+    console.log("Existing contact info:", existing);
+
+    if (existing.length > 0) {
+      console.log("Updating existing contact info");
+      const result = await query(
+        "UPDATE contact_info SET email = $1, phone = $2, instagram = $3, address = $4 WHERE id = $5",
+        [email, phone, instagram, address, existing[0].id]
+      );
+      console.log("Update result:", result);
+    } else {
+      console.log("Creating new contact info");
+      const result = await query(
+        "INSERT INTO contact_info (email, phone, instagram, address) VALUES ($1, $2, $3, $4)",
+        [email, phone, instagram, address]
+      );
+      console.log("Insert result:", result);
+    }
+
+    // Verify the update
+    const updatedContactInfo = await query(
+      "SELECT * FROM contact_info LIMIT 1"
+    );
+    console.log("Updated contact info:", updatedContactInfo);
+
+    res.json({ success: true, message: "Contact info updated successfully" });
+  } catch (error) {
+    console.error("Error updating contact info:", error);
+    res.status(500).json({ error: "Failed to update contact info" });
+  }
+});
+
+// Get hero images (public endpoint)
+app.get("/api/hero-images", async (req, res) => {
+  try {
+    // For now, return empty array - this can be expanded later
+    res.json([]);
+  } catch (error) {
+    console.error("Error fetching hero images:", error);
+    res.status(500).json({ error: "Failed to fetch hero images" });
+  }
+});
+
+// File upload endpoints (minimal implementation)
+app.post("/api/upload", authenticateToken, async (req, res) => {
+  try {
+    // Minimal file upload implementation
+    res
+      .status(501)
+      .json({ error: "File upload not implemented in minimal server" });
+  } catch (error) {
+    console.error("File upload error:", error);
+    res.status(500).json({ error: "File upload failed" });
+  }
+});
+
+// Get uploaded files (admin only)
+app.get("/api/files", authenticateToken, async (req, res) => {
+  try {
+    // For now, return empty array
+    res.json([]);
+  } catch (error) {
+    console.error("Error fetching files:", error);
+    res.status(500).json({ error: "Failed to fetch files" });
+  }
+});
+
+// Delete uploaded file
+app.delete("/api/files/:id", authenticateToken, async (req, res) => {
+  try {
+    res
+      .status(501)
+      .json({ error: "File deletion not implemented in minimal server" });
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    res.status(500).json({ error: "Failed to delete file" });
   }
 });
 
@@ -609,7 +770,9 @@ app.put("/api/user", authenticateToken, async (req, res) => {
     values.push(userId);
 
     await query(
-      `UPDATE users SET ${updates.join(", ")}, updated_at = NOW() WHERE id = $4`,
+      `UPDATE users SET ${updates.join(
+        ", "
+      )}, updated_at = NOW() WHERE id = $4`,
       values
     );
 
@@ -656,7 +819,7 @@ app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
           ? JSON.parse(exhibition.assigned_artworks || "[]")
           : exhibition.assigned_artworks || [],
     }));
-    
+
     res.json(formattedExhibitions);
   } catch (error) {
     console.error("Error fetching exhibitions:", error);
@@ -734,7 +897,7 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
       assigned_artworks,
       call_for_artists,
       cta_link,
-      is_visible = true
+      is_visible = true,
     } = req.body;
 
     const result = await query(
@@ -758,7 +921,7 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
         JSON.stringify(assigned_artworks || []),
         call_for_artists ? 1 : 0,
         cta_link,
-        is_visible ? 1 : 0
+        is_visible ? 1 : 0,
       ]
     );
 
@@ -788,7 +951,7 @@ app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
       assigned_artworks,
       call_for_artists,
       cta_link,
-      is_visible
+      is_visible,
     } = req.body;
 
     await query(
@@ -813,7 +976,7 @@ app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
         call_for_artists ? 1 : 0,
         cta_link,
         is_visible ? 1 : 0,
-        id
+        id,
       ]
     );
 
@@ -825,16 +988,20 @@ app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
 });
 
 // Delete exhibition
-app.delete("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    await query("DELETE FROM exhibitions WHERE id = $1", [id]);
-    res.json({ success: true, message: "Exhibition deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting exhibition:", error);
-    res.status(500).json({ error: "Failed to delete exhibition" });
+app.delete(
+  "/api/admin/exhibitions/:id",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      await query("DELETE FROM exhibitions WHERE id = $1", [id]);
+      res.json({ success: true, message: "Exhibition deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting exhibition:", error);
+      res.status(500).json({ error: "Failed to delete exhibition" });
+    }
   }
-});
+);
 
 // Create artist
 app.post("/api/admin/artists", authenticateToken, async (req, res) => {
@@ -846,7 +1013,7 @@ app.post("/api/admin/artists", authenticateToken, async (req, res) => {
       bio,
       profile_image,
       social_media,
-      is_visible = true
+      is_visible = true,
     } = req.body;
 
     const result = await query(
@@ -862,7 +1029,7 @@ app.post("/api/admin/artists", authenticateToken, async (req, res) => {
         bio,
         profile_image,
         JSON.stringify(social_media || {}),
-        is_visible ? 1 : 0
+        is_visible ? 1 : 0,
       ]
     );
 
@@ -884,7 +1051,7 @@ app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
       bio,
       profile_image,
       social_media,
-      is_visible
+      is_visible,
     } = req.body;
 
     await query(
@@ -901,7 +1068,7 @@ app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
         profile_image,
         JSON.stringify(social_media || {}),
         is_visible ? 1 : 0,
-        id
+        id,
       ]
     );
 
@@ -936,7 +1103,7 @@ app.post("/api/admin/artworks", authenticateToken, async (req, res) => {
       size,
       description,
       images,
-      is_visible = true
+      is_visible = true,
     } = req.body;
 
     const result = await query(
@@ -954,7 +1121,7 @@ app.post("/api/admin/artworks", authenticateToken, async (req, res) => {
         size,
         description,
         JSON.stringify(images || []),
-        is_visible ? 1 : 0
+        is_visible ? 1 : 0,
       ]
     );
 
@@ -978,7 +1145,7 @@ app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
       size,
       description,
       images,
-      is_visible
+      is_visible,
     } = req.body;
 
     await query(
@@ -997,7 +1164,7 @@ app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
         description,
         JSON.stringify(images || []),
         is_visible ? 1 : 0,
-        id
+        id,
       ]
     );
 
