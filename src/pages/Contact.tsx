@@ -13,7 +13,7 @@ const Contact = () => {
   const { pageData, contactInfo, loading } = usePageDataFromDB();
   const { toast } = useToast();
 
-  const [newsletterData, setNewsletterData] = useState({gn
+  const [newsletterData, setNewsletterData] = useState({
     name: "",
     email: "",
   });
