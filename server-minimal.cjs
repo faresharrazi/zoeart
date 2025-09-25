@@ -519,6 +519,45 @@ app.put("/api/contact-info", authenticateToken, async (req, res) => {
   }
 });
 
+// Update home settings
+app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
+  try {
+    const { title, description, content } = req.body;
+
+    console.log("Updating home settings:", { title, description, content });
+
+    // Get current home page data
+    const currentSettings = await query(
+      "SELECT * FROM page_content WHERE page_name = 'home'"
+    );
+
+    if (currentSettings.length === 0) {
+      return res.status(404).json({ error: "Home page not found" });
+    }
+
+    // Merge with existing content
+    const currentContent =
+      typeof currentSettings[0].content === "string"
+        ? JSON.parse(currentSettings[0].content || "{}")
+        : currentSettings[0].content || {};
+    const updatedContent = {
+      ...currentContent,
+      ...content,
+    };
+
+    // Update home settings
+    await query(
+      "UPDATE page_content SET title = $1, description = $2, content = $3 WHERE page_name = 'home'",
+      [title, description, JSON.stringify(updatedContent)]
+    );
+
+    res.json({ success: true, message: "Home settings updated successfully" });
+  } catch (error) {
+    console.error("Error updating home settings:", error);
+    res.status(500).json({ error: "Failed to update home settings" });
+  }
+});
+
 // Get user info
 app.get("/api/user", authenticateToken, async (req, res) => {
   try {
