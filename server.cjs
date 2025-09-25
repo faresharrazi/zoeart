@@ -60,8 +60,8 @@ let pool = null;
 function getPool() {
   if (!pool) {
     console.log("Environment variables check:");
-    console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
-    console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
+    console.log("DATABASE_URL:", process.env.DATABASE_URL $1 "Set" : "Not set");
+    console.log("POSTGRES_URL:", process.env.POSTGRES_URL $2 "Set" : "Not set");
     console.log("NODE_ENV:", process.env.NODE_ENV);
 
     // Try DATABASE_URL first, then POSTGRES_URL
@@ -120,7 +120,7 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    console.log("Login attempt:", { username, password: password ? "provided" : "missing" });
+    console.log("Login attempt:", { username, password: password $3 "provided" : "missing" });
 
     if (!username || !password) {
       return res
@@ -130,7 +130,7 @@ app.post("/api/auth/login", async (req, res) => {
 
     // Find user in database
     const users = await query(
-      "SELECT id, username, email, password_hash, role FROM users WHERE username = ?",
+      "SELECT id, username, email, password_hash, role FROM users WHERE username = $1",
       [username]
     );
 
@@ -188,15 +188,15 @@ app.get("/api/exhibitions", async (req, res) => {
       ...exhibition,
       gallery_images:
         typeof exhibition.gallery_images === "string"
-          ? JSON.parse(exhibition.gallery_images || "[]")
+          $4 JSON.parse(exhibition.gallery_images || "[]")
           : exhibition.gallery_images || [],
       assigned_artists:
         typeof exhibition.assigned_artists === "string"
-          ? JSON.parse(exhibition.assigned_artists || "[]")
+          $5 JSON.parse(exhibition.assigned_artists || "[]")
           : exhibition.assigned_artists || [],
       assigned_artworks:
         typeof exhibition.assigned_artworks === "string"
-          ? JSON.parse(exhibition.assigned_artworks || "[]")
+          $6 JSON.parse(exhibition.assigned_artworks || "[]")
           : exhibition.assigned_artworks || [],
     }));
     
@@ -211,7 +211,7 @@ app.get("/api/exhibitions", async (req, res) => {
 app.get("/api/exhibitions/:id", async (req, res) => {
   try {
     const exhibitions = await query(
-      `SELECT * FROM exhibitions WHERE id = ? AND is_visible = true`,
+      `SELECT * FROM exhibitions WHERE id = $1 AND is_visible = true`,
       [req.params.id]
     );
     
@@ -247,11 +247,11 @@ app.get("/api/artists", async (req, res) => {
       ...artist,
       social_media:
         typeof artist.social_media === "string"
-          ? JSON.parse(artist.social_media || "{}")
+          $7 JSON.parse(artist.social_media || "{}")
           : artist.social_media || {},
       assigned_artworks:
         typeof artist.assigned_artworks === "string"
-          ? JSON.parse(artist.assigned_artworks || "[]")
+          $8 JSON.parse(artist.assigned_artworks || "[]")
           : artist.assigned_artworks || [],
     }));
     
@@ -266,7 +266,7 @@ app.get("/api/artists", async (req, res) => {
 app.get("/api/artists/:id", async (req, res) => {
   try {
     const artists = await query(
-      `SELECT * FROM artists WHERE id = ? AND is_visible = true`,
+      `SELECT * FROM artists WHERE id = $9 AND is_visible = true`,
       [req.params.id]
     );
     
@@ -303,7 +303,7 @@ app.get("/api/artworks", async (req, res) => {
       ...artwork,
       images:
         typeof artwork.images === "string"
-          ? JSON.parse(artwork.images || "[]")
+          $10 JSON.parse(artwork.images || "[]")
           : artwork.images || [],
     }));
     
@@ -322,7 +322,7 @@ app.get("/api/artworks/:id", async (req, res) => {
       SELECT a.*, ar.name as artist_name
       FROM artworks a
       LEFT JOIN artists ar ON a.artist_id = ar.id
-      WHERE a.id = ? AND a.is_visible = true
+      WHERE a.id = $11 AND a.is_visible = true
     `,
       [req.params.id]
     );
@@ -357,17 +357,17 @@ app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
       gallery_images:
         exhibition.gallery_images &&
         typeof exhibition.gallery_images === "string"
-          ? JSON.parse(exhibition.gallery_images)
+          $12 JSON.parse(exhibition.gallery_images)
           : exhibition.gallery_images || [],
       assigned_artists:
         exhibition.assigned_artists &&
         typeof exhibition.assigned_artists === "string"
-          ? JSON.parse(exhibition.assigned_artists)
+          $13 JSON.parse(exhibition.assigned_artists)
           : exhibition.assigned_artists || [],
       assigned_artworks:
         exhibition.assigned_artworks &&
         typeof exhibition.assigned_artworks === "string"
-          ? JSON.parse(exhibition.assigned_artworks)
+          $14 JSON.parse(exhibition.assigned_artworks)
           : exhibition.assigned_artworks || [],
     }));
 
@@ -402,7 +402,7 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
     const result = await query(
       `
       INSERT INTO exhibitions (title, slug, description, start_date, end_date, location, curator, status, featured_image, gallery_images, call_for_artists, cta_link, is_visible)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES ($15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
     `,
       [
         title,
@@ -455,8 +455,8 @@ app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
     await query(
       `
       UPDATE exhibitions 
-      SET title = ?, slug = ?, description = ?, start_date = ?, end_date = ?, location = ?, curator = ?, status = ?, featured_image = ?, gallery_images = ?, assigned_artists = ?, assigned_artworks = ?, call_for_artists = ?, cta_link = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
+      SET title = $28, slug = $29, description = $30, start_date = $31, end_date = $32, location = $33, curator = $34, status = $35, featured_image = $36, gallery_images = $37, assigned_artists = $38, assigned_artworks = $39, call_for_artists = $40, cta_link = $41, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $42
     `,
       [
         title,
@@ -490,7 +490,7 @@ app.delete(
   async (req, res) => {
   try {
     const { id } = req.params;
-      await query("DELETE FROM exhibitions WHERE id = ?", [id]);
+      await query("DELETE FROM exhibitions WHERE id = $43", [id]);
     res.json({ success: true });
     } catch (error) {
       console.error("Error deleting exhibition:", error);
@@ -511,7 +511,7 @@ app.get("/api/admin/artists", authenticateToken, async (req, res) => {
       ...artist,
       social_media:
         artist.social_media && typeof artist.social_media === "string"
-          ? JSON.parse(artist.social_media)
+          $44 JSON.parse(artist.social_media)
           : artist.social_media || {},
     }));
 
@@ -534,7 +534,7 @@ app.post("/api/admin/artists", async (req, res) => {
     const result = await query(
       `
       INSERT INTO artists (name, slug, specialty, bio, profile_image, social_media, is_visible)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      VALUES ($45, $46, $47, $48, $49, $50, $51)
     `,
       [
         name,
@@ -567,8 +567,8 @@ app.put("/api/admin/artists/:id", async (req, res) => {
     await query(
       `
       UPDATE artists 
-      SET name = ?, slug = ?, specialty = ?, bio = ?, profile_image = ?, social_media = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
+      SET name = $52, slug = $53, specialty = $54, bio = $55, profile_image = $56, social_media = $57, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $58
     `,
       [
         name,
@@ -591,7 +591,7 @@ app.put("/api/admin/artists/:id", async (req, res) => {
 app.delete("/api/admin/artists/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    await query("DELETE FROM artists WHERE id = ?", [id]);
+    await query("DELETE FROM artists WHERE id = $59", [id]);
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting artist:", error);
@@ -613,7 +613,7 @@ app.get("/api/admin/artworks", authenticateToken, async (req, res) => {
       ...artwork,
       images:
         artwork.images && typeof artwork.images === "string"
-          ? JSON.parse(artwork.images)
+          $60 JSON.parse(artwork.images)
           : artwork.images || [],
     }));
 
@@ -637,7 +637,7 @@ app.post("/api/admin/artworks", async (req, res) => {
     const result = await query(
       `
       INSERT INTO artworks (title, slug, artist_id, year, medium, size, description, images, is_visible)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES ($61, $62, $63, $64, $65, $66, $67, $68, $69)
     `,
       [
         title,
@@ -673,8 +673,8 @@ app.put("/api/admin/artworks/:id", async (req, res) => {
     await query(
       `
       UPDATE artworks 
-      SET title = ?, slug = ?, artist_id = ?, year = ?, medium = ?, size = ?, description = ?, images = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
+      SET title = $70, slug = $71, artist_id = $72, year = $73, medium = $74, size = $75, description = $76, images = $77, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $78
     `,
       [
         title,
@@ -699,7 +699,7 @@ app.put("/api/admin/artworks/:id", async (req, res) => {
 app.delete("/api/admin/artworks/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    await query("DELETE FROM artworks WHERE id = ?", [id]);
+    await query("DELETE FROM artworks WHERE id = $79", [id]);
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting artwork:", error);
@@ -718,7 +718,7 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
 
     // Check if email already exists
     const existing = await query(
-      "SELECT id FROM newsletter_subscribers WHERE email = ?",
+      "SELECT id FROM newsletter_subscribers WHERE email = $80",
       [email]
     );
     if (existing.length > 0) {
@@ -728,7 +728,7 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
     const result = await query(
       `
       INSERT INTO newsletter_subscribers (email, name, source, status, subscribed_at)
-      VALUES (?, ?, ?, ?, NOW())
+      VALUES ($81, $82, $83, $84, NOW())
     `,
       [email, name || null, "website", "active"]
     );
@@ -762,7 +762,7 @@ app.get("/api/admin/newsletter", authenticateToken, async (req, res) => {
 app.delete("/api/admin/newsletter/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    await query("DELETE FROM newsletter_subscribers WHERE id = ?", [id]);
+    await query("DELETE FROM newsletter_subscribers WHERE id = $85", [id]);
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting newsletter subscriber:", error);
@@ -793,7 +793,7 @@ app.put("/api/admin/user/:id", authenticateToken, async (req, res) => {
     // Verify current password if changing password
     if (password) {
       const users = await query(
-        "SELECT password_hash FROM users WHERE id = ?",
+        "SELECT password_hash FROM users WHERE id = $86",
         [id]
       );
 
@@ -815,18 +815,18 @@ app.put("/api/admin/user/:id", authenticateToken, async (req, res) => {
     const values = [];
 
     if (username) {
-      updates.push("username = ?");
+      updates.push("username = $87");
       values.push(username);
     }
 
     if (email) {
-      updates.push("email = ?");
+      updates.push("email = $88");
       values.push(email);
     }
 
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
-      updates.push("password_hash = ?");
+      updates.push("password_hash = $89");
       values.push(hashedPassword);
     }
 
@@ -837,7 +837,7 @@ app.put("/api/admin/user/:id", authenticateToken, async (req, res) => {
     values.push(id);
 
     await query(
-      `UPDATE users SET ${updates.join(", ")}, updated_at = NOW() WHERE id = ?`,
+      `UPDATE users SET ${updates.join(", ")}, updated_at = NOW() WHERE id = $90`,
       values
     );
 
@@ -875,7 +875,7 @@ app.post(
       // Save file info to database
       const result = await query(
         `INSERT INTO uploaded_files (original_name, filename, file_path, file_size, mime_type, category, uploaded_by) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       VALUES ($91, $92, $93, $94, $95, $96, $97)`,
         [
           req.file.originalname,
           req.file.filename,
@@ -915,7 +915,7 @@ app.get("/api/files", authenticateToken, async (req, res) => {
     let params = [];
 
     if (category) {
-      queryStr += " WHERE category = ?";
+      queryStr += " WHERE category = $98";
       params.push(category);
     }
 
@@ -948,7 +948,7 @@ app.delete("/api/files/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
 
     // Get file info first
-    const files = await query("SELECT * FROM uploaded_files WHERE id = ?", [
+    const files = await query("SELECT * FROM uploaded_files WHERE id = $99", [
       id,
     ]);
     if (files.length === 0) {
@@ -965,7 +965,7 @@ app.delete("/api/files/:id", authenticateToken, async (req, res) => {
     }
 
     // Delete file record from database
-    await query("DELETE FROM uploaded_files WHERE id = ?", [id]);
+    await query("DELETE FROM uploaded_files WHERE id = $100", [id]);
 
     res.json({ success: true, message: "File deleted successfully" });
   } catch (error) {
@@ -986,7 +986,7 @@ app.get("/api/page-content", async (req, res) => {
         try {
           content =
             typeof page.content === "string"
-              ? JSON.parse(page.content || "{}")
+              $101 JSON.parse(page.content || "{}")
               : page.content || {};
         } catch (e) {
           console.error("Error parsing page content:", e);
@@ -1001,7 +1001,7 @@ app.get("/api/page-content", async (req, res) => {
         };
         return acc;
       }, {}),
-      contactInfo: contactInfo.length > 0 ? contactInfo[0] : {},
+      contactInfo: contactInfo.length > 0 $102 contactInfo[0] : {},
     };
 
     res.json(result);
@@ -1022,7 +1022,7 @@ app.put(
 
       // Get current page data
       const currentPage = await query(
-        "SELECT * FROM page_content WHERE page_name = ?",
+        "SELECT * FROM page_content WHERE page_name = $103",
         [pageName]
       );
 
@@ -1037,23 +1037,23 @@ app.put(
       const values = [];
 
       if (title !== undefined) {
-        updates.push("title = ?");
+        updates.push("title = $104");
         values.push(title || null);
       }
 
       if (description !== undefined) {
-        updates.push("description = ?");
+        updates.push("description = $105");
         values.push(description || null);
       }
 
       if (content !== undefined) {
-        updates.push("content = ?");
-        values.push(content ? JSON.stringify(content) : null);
+        updates.push("content = $106");
+        values.push(content $107 JSON.stringify(content) : null);
       }
 
       if (isVisible !== undefined) {
-        updates.push("is_visible = ?");
-        values.push(isVisible ? 1 : 0);
+        updates.push("is_visible = $108");
+        values.push(isVisible $109 1 : 0);
       }
 
       if (updates.length === 0) {
@@ -1064,7 +1064,7 @@ app.put(
 
       const updateQuery = `UPDATE page_content SET ${updates.join(
         ", "
-      )} WHERE page_name = ?`;
+      )} WHERE page_name = $110`;
 
       await query(updateQuery, values);
 
@@ -1086,12 +1086,12 @@ app.put("/api/admin/contact-info", authenticateToken, async (req, res) => {
 
     if (existing.length > 0) {
       await query(
-        "UPDATE contact_info SET email = ?, phone = ?, instagram = ?, address = ? WHERE id = ?",
+        "UPDATE contact_info SET email = $111, phone = $112, instagram = $113, address = $114 WHERE id = $115",
         [email, phone, instagram, address, existing[0].id]
       );
     } else {
       await query(
-        "INSERT INTO contact_info (email, phone, instagram, address) VALUES (?, ?, ?, ?)",
+        "INSERT INTO contact_info (email, phone, instagram, address) VALUES ($116, $117, $118, $119)",
         [email, phone, instagram, address]
       );
     }
@@ -1125,7 +1125,7 @@ app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
 
     const currentContent =
       typeof currentSettings[0].content === "string"
-        ? JSON.parse(currentSettings[0].content || "{}")
+        $120 JSON.parse(currentSettings[0].content || "{}")
         : currentSettings[0].content || {};
     const updatedContent = {
       ...currentContent,
@@ -1136,7 +1136,7 @@ app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
 
     // Update home settings
     await query(
-      "UPDATE page_content SET title = ?, description = ?, content = ? WHERE page_name = 'home'",
+      "UPDATE page_content SET title = $121, description = $122, content = $123 WHERE page_name = 'home'",
       [title, description, JSON.stringify(updatedContent)]
     );
 
@@ -1156,8 +1156,8 @@ app.get("/api/health", (req, res) => {
 app.get("/api/test-db", async (req, res) => {
   try {
     console.log("Testing database connection...");
-    console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
-    console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
+    console.log("DATABASE_URL:", process.env.DATABASE_URL $124 "Set" : "Not set");
+    console.log("POSTGRES_URL:", process.env.POSTGRES_URL $125 "Set" : "Not set");
     
     const dbPool = getPool();
     const result = await dbPool.query("SELECT NOW() as current_time, version() as postgres_version");
@@ -1172,8 +1172,8 @@ app.get("/api/test-db", async (req, res) => {
       status: "ERROR", 
       message: "Database connection failed",
       error: error.message,
-      databaseUrl: process.env.DATABASE_URL ? "Set" : "Not set",
-      postgresUrl: process.env.POSTGRES_URL ? "Set" : "Not set"
+      databaseUrl: process.env.DATABASE_URL $126 "Set" : "Not set",
+      postgresUrl: process.env.POSTGRES_URL $127 "Set" : "Not set"
     });
   }
 });
