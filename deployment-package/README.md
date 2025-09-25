@@ -6,20 +6,20 @@ This package contains everything needed to deploy your complete Aether Art Space
 
 ### 🗂️ Files Overview
 
-| File | Purpose |
-|------|---------|
-| `index.html` | Main website entry point |
-| `assets/` | CSS, JavaScript, and static assets |
-| `collaborators/` | Partner organization logos |
-| `logo/` | Website logos and branding |
-| `favicon.ico` | Website icon |
-| `server.cjs` | Node.js backend server |
-| `package.json` | Dependencies and scripts |
-| `database-schema.sql` | Complete database structure |
-| `setup-database.sql` | Quick database setup script |
-| `config.example.js` | Configuration template |
-| `start.sh` | Startup script |
-| `DEPLOYMENT_GUIDE.md` | Detailed deployment instructions |
+| File                  | Purpose                            |
+| --------------------- | ---------------------------------- |
+| `index.html`          | Main website entry point           |
+| `assets/`             | CSS, JavaScript, and static assets |
+| `collaborators/`      | Partner organization logos         |
+| `logo/`               | Website logos and branding         |
+| `favicon.ico`         | Website icon                       |
+| `server.cjs`          | Node.js backend server             |
+| `package.json`        | Dependencies and scripts           |
+| `database-schema.sql` | Complete database structure        |
+| `setup-database.sql`  | Quick database setup script        |
+| `config.example.js`   | Configuration template             |
+| `start.sh`            | Startup script                     |
+| `DEPLOYMENT_GUIDE.md` | Detailed deployment instructions   |
 
 ## 🚀 Quick Start
 
@@ -45,6 +45,7 @@ This package contains everything needed to deploy your complete Aether Art Space
 ## 📋 Features Included
 
 ✅ **Frontend Website**
+
 - Responsive design
 - Exhibition galleries
 - Artist profiles
@@ -53,6 +54,7 @@ This package contains everything needed to deploy your complete Aether Art Space
 - Newsletter subscription
 
 ✅ **Admin Panel**
+
 - Exhibition management
 - Artist management
 - Artwork management
@@ -61,12 +63,14 @@ This package contains everything needed to deploy your complete Aether Art Space
 - User authentication
 
 ✅ **Database Integration**
+
 - MySQL database
 - Full CRUD operations
 - Data persistence
 - User management
 
 ✅ **File Management**
+
 - Image uploads
 - Bulk image handling
 - File organization

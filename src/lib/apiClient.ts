@@ -211,69 +211,6 @@ class ApiClient {
     });
   }
 
-  // Exhibition CRUD operations
-  async createExhibition(data: any) {
-    return this.request("/admin/exhibitions", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateExhibition(id: number, data: any) {
-    return this.request(`/admin/exhibitions/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async deleteExhibition(id: number) {
-    return this.request(`/admin/exhibitions/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  // Artist CRUD operations
-  async createArtist(data: any) {
-    return this.request("/admin/artists", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateArtist(id: number, data: any) {
-    return this.request(`/admin/artists/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async deleteArtist(id: number) {
-    return this.request(`/admin/artists/${id}`, {
-      method: "DELETE",
-    });
-  }
-
-  // Artwork CRUD operations
-  async createArtwork(data: any) {
-    return this.request("/admin/artworks", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateArtwork(id: number, data: any) {
-    return this.request(`/admin/artworks/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async deleteArtwork(id: number) {
-    return this.request(`/admin/artworks/${id}`, {
-      method: "DELETE",
-    });
-  }
-
   // Admin user management operations
   async getUsers() {
     return this.request("/admin/user");

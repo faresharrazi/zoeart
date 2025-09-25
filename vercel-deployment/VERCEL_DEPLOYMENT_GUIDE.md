@@ -27,6 +27,7 @@ This guide will help you deploy your complete Aether Art Space website to Vercel
 ### **Step 1: Prepare Your Code**
 
 1. **Create a new GitHub repository**:
+
    - Go to GitHub.com
    - Click "New repository"
    - Name it `aether-art-space`
@@ -46,16 +47,19 @@ This guide will help you deploy your complete Aether Art Space website to Vercel
 1. **Go to Vercel.com** and sign up/login
 2. **Click "New Project"**
 3. **Import from GitHub**:
+
    - Select your `aether-art-space` repository
    - Click "Import"
 
 4. **Configure deployment**:
+
    - **Framework Preset**: Other
    - **Root Directory**: `./vercel-deployment`
    - **Build Command**: `npm run build`
    - **Output Directory**: `./vercel-deployment`
 
 5. **Add Environment Variables**:
+
    ```
    JWT_SECRET=your_super_secure_jwt_secret_here
    NODE_ENV=production
@@ -66,6 +70,7 @@ This guide will help you deploy your complete Aether Art Space website to Vercel
 ### **Step 3: Set Up Vercel Postgres Database**
 
 1. **In your Vercel dashboard**:
+
    - Go to your project
    - Click "Storage" tab
    - Click "Create Database"
@@ -180,7 +185,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
 );
 
 -- Insert default admin user (password: admin123)
-INSERT INTO admin_users (username, password_hash) VALUES 
+INSERT INTO admin_users (username, password_hash) VALUES
 ('admin', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')
 ON CONFLICT (username) DO NOTHING;
 
@@ -208,19 +213,22 @@ ON CONFLICT (id) DO NOTHING;
 ### **Step 5: Connect Your GoDaddy Domain**
 
 1. **In Vercel dashboard**:
+
    - Go to your project
    - Click "Settings" → "Domains"
    - Click "Add Domain"
    - Enter your domain: `yourdomain.com`
 
 2. **Update DNS in GoDaddy**:
+
    - Go to GoDaddy DNS management
    - Add these records:
+
      ```
      Type: A
      Name: @
      Value: 76.76.19.61
-     
+
      Type: CNAME
      Name: www
      Value: cname.vercel-dns.com
@@ -262,14 +270,17 @@ POSTGRES_URL=your_vercel_postgres_connection_string
 ### **Common Issues:**
 
 1. **Build fails**:
+
    - Check `vercel.json` configuration
    - Ensure all dependencies are in `package.json`
 
 2. **Database connection fails**:
+
    - Verify `POSTGRES_URL` environment variable
    - Check database tables are created
 
 3. **Domain not working**:
+
    - Wait 24-48 hours for DNS propagation
    - Check DNS records in GoDaddy
 

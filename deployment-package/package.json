@@ -18,7 +18,12 @@
   "engines": {
     "node": ">=16.0.0"
   },
-  "keywords": ["art", "gallery", "exhibition", "contemporary"],
+  "keywords": [
+    "art",
+    "gallery",
+    "exhibition",
+    "contemporary"
+  ],
   "author": "Aether Art Space",
   "license": "MIT"
 }

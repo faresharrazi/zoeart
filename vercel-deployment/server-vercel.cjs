@@ -22,14 +22,15 @@ let db;
 async function initDB() {
   try {
     // For Vercel Postgres, we'll use the connection string from environment
-    const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
-    
+    const connectionString =
+      process.env.POSTGRES_URL || process.env.DATABASE_URL;
+
     if (connectionString) {
       // Use Vercel Postgres
-      const { Pool } = require('pg');
+      const { Pool } = require("pg");
       db = new Pool({
         connectionString: connectionString,
-        ssl: { rejectUnauthorized: false }
+        ssl: { rejectUnauthorized: false },
       });
       console.log("Connected to Vercel Postgres");
     } else {
@@ -59,13 +60,17 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: "Access token required" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || "your-secret-key", (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: "Invalid token" });
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET || "your-secret-key",
+    (err, user) => {
+      if (err) {
+        return res.status(403).json({ error: "Invalid token" });
+      }
+      req.user = user;
+      next();
     }
-    req.user = user;
-    next();
-  });
+  );
 };
 
 // File upload configuration
@@ -141,7 +146,7 @@ app.get("*", (req, res) => {
   if (req.path.startsWith("/api/")) {
     return res.status(404).json({ error: "API endpoint not found" });
   }
-  
+
   // Serve the React app
   res.sendFile(path.join(__dirname, "index.html"));
 });
