@@ -14,23 +14,17 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "server.cjs"
-    },
-    {
-      "src": "/admin/(.*)",
-      "dest": "server.cjs"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/index.html"
-    }
-  ],
   "rewrites": [
     {
-      "source": "/((?!api|admin).*)",
+      "source": "/api/(.*)",
+      "destination": "server.cjs"
+    },
+    {
+      "source": "/admin/(.*)",
+      "destination": "server.cjs"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/dist/index.html"
     }
   ],

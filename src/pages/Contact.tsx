@@ -13,7 +13,7 @@ const Contact = () => {
   const { pageData, contactInfo, loading } = usePageDataFromDB();
   const { toast } = useToast();
 
-  const [newsletterData, setNewsletterData] = useState({
+  const [newsletterData, setNewsletterData] = useState({gn
     name: "",
     email: "",
   });
@@ -30,16 +30,13 @@ const Contact = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(
-        "http://localhost:3001/api/newsletter/subscribe",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newsletterData),
-        }
-      );
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newsletterData),
+      });
 
       const data = await response.json();
 
