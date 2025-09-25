@@ -396,7 +396,7 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
       ]
     );
 
-    res.json({ id: result.insertId, ...req.body });
+    res.json({ id: result.rows[0].id, ...req.body });
   } catch (error) {
     console.error("Error creating exhibition:", error);
     res.status(500).json({ error: "Failed to create exhibition" });
@@ -522,7 +522,7 @@ app.post("/api/admin/artists", async (req, res) => {
       ]
     );
 
-    res.json({ id: result.insertId, ...req.body });
+    res.json({ id: result.rows[0].id, ...req.body });
   } catch (error) {
     console.error("Error creating artist:", error);
     res.status(500).json({ error: "Failed to create artist" });
@@ -627,7 +627,7 @@ app.post("/api/admin/artworks", async (req, res) => {
       ]
     );
 
-    res.json({ id: result.insertId, ...req.body });
+    res.json({ id: result.rows[0].id, ...req.body });
   } catch (error) {
     console.error("Error creating artwork:", error);
     res.status(500).json({ error: "Failed to create artwork" });
@@ -711,7 +711,7 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
     res.json({
       success: true,
       message: "Successfully subscribed to newsletter",
-      id: result.insertId,
+      id: result.rows[0].id,
     });
   } catch (error) {
     console.error("Error subscribing to newsletter:", error);
@@ -865,7 +865,7 @@ app.post(
       res.json({
         success: true,
         file: {
-          id: result.insertId,
+          id: result.rows[0].id,
           originalName: req.file.originalname,
           filename: req.file.filename,
           filePath: finalPath,
@@ -1125,6 +1125,25 @@ app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "API is running" });
+});
+
+// Database connection test
+app.get("/api/test-db", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW() as current_time, version() as postgres_version");
+    res.json({ 
+      status: "OK", 
+      message: "Database connected successfully",
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error("Database connection test failed:", error);
+    res.status(500).json({ 
+      status: "ERROR", 
+      message: "Database connection failed",
+      error: error.message 
+    });
+  }
 });
 
 // Serve React app for all other routes
