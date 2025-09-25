@@ -17,17 +17,20 @@ export const useHeroImages = () => {
   const fetchHeroImages = async () => {
     try {
       setLoading(true);
+      console.log("Fetching hero images...");
       const images = await apiClient.getHeroImages();
+      console.log("Raw hero images data:", images);
 
       // Map file_path to url and convert snake_case to camelCase
       const mappedImages = images.map((image: any) => ({
         id: image.id,
         originalName: image.original_name,
         filename: image.filename,
-        url: `/${image.file_path}`, // Convert file_path to URL
+        url: `/uploads/${image.category}/${image.filename}`, // Use category and filename
         fileSize: image.file_size,
         mimeType: image.mime_type,
       }));
+      console.log("Mapped hero images:", mappedImages);
       setHeroImages(mappedImages);
     } catch (error) {
       console.error("Error fetching hero images:", error);

@@ -22,14 +22,22 @@ app.use("/uploads", express.static("uploads"));
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    console.log("Multer destination called for file:", file.originalname);
     const uploadPath = `uploads/temp`;
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
+    try {
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+        console.log("Created upload directory:", uploadPath);
+      }
+      cb(null, uploadPath);
+    } catch (error) {
+      console.error("Error creating upload directory:", error);
+      cb(error, null);
     }
-    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     const uniqueName = `${crypto.randomUUID()}-${file.originalname}`;
+    console.log("Generated filename:", uniqueName);
     cb(null, uniqueName);
   },
 });
@@ -40,9 +48,16 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
+    console.log(
+      "File filter called for:",
+      file.originalname,
+      "MIME type:",
+      file.mimetype
+    );
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
+      console.log("File rejected - not an image");
       cb(new Error("Only image files are allowed!"), false);
     }
   },
@@ -82,7 +97,12 @@ async function query(sql, params = []) {
 
 // Health check
 app.get("/api/health", (req, res) => {
-  res.json({ status: "OK", message: "API is running" });
+  res.json({
+    status: "OK",
+    message: "API is running",
+    version: "2.0",
+    features: ["file_upload", "admin_endpoints", "debugging"],
+  });
 });
 
 // Test database connection
@@ -348,17 +368,6 @@ app.get("/api/page-content", async (req, res) => {
   } catch (error) {
     console.error("Error fetching page content:", error);
     res.status(500).json({ error: "Failed to fetch page content" });
-  }
-});
-
-// Get hero images
-app.get("/api/hero-images", async (req, res) => {
-  try {
-    // For now, return empty array - this can be expanded later
-    res.json([]);
-  } catch (error) {
-    console.error("Error fetching hero images:", error);
-    res.status(500).json({ error: "Failed to fetch hero images" });
   }
 });
 
@@ -1141,6 +1150,10 @@ app.delete(
 // Create artist
 app.post("/api/admin/artists", authenticateToken, async (req, res) => {
   try {
+    console.log("=== CREATE ARTIST ===");
+    console.log("Request body:", req.body);
+    console.log("Request headers:", req.headers);
+
     const {
       name,
       slug,
@@ -1150,6 +1163,16 @@ app.post("/api/admin/artists", authenticateToken, async (req, res) => {
       social_media,
       is_visible = true,
     } = req.body;
+
+    console.log("Artist data:", {
+      name,
+      slug,
+      specialty,
+      bio,
+      profile_image,
+      social_media,
+      is_visible,
+    });
 
     const result = await query(
       `
@@ -1168,6 +1191,7 @@ app.post("/api/admin/artists", authenticateToken, async (req, res) => {
       ]
     );
 
+    console.log("Artist created with ID:", result[0].id);
     res.json({ success: true, id: result[0].id });
   } catch (error) {
     console.error("Error creating artist:", error);
