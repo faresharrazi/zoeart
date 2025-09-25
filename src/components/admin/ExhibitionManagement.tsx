@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,10 +35,12 @@ import {
 } from "lucide-react";
 import MediaSelector from "./MediaSelector";
 import FeaturedImageSelector from "./FeaturedImageSelector";
+import { apiClient } from "@/lib/apiClient";
 
 interface Exhibition {
   id: string;
   title: string;
+  slug: string;
   description: string;
   startDate: string;
   endDate: string;
@@ -49,92 +51,69 @@ interface Exhibition {
   galleryImages: string[]; // multiple gallery images
   assignedArtists: string[]; // artist IDs
   assignedArtworks: string[]; // artwork IDs
+  callForArtists?: boolean; // enable/disable CTA button
+  ctaLink?: string; // link for the CTA button
 }
 
-// Mock data for artists and artworks
-const mockArtists = [
-  { id: "1", name: "Elena Rodriguez", specialty: "Abstract Expressionism" },
-  { id: "2", name: "Marcus Chen", specialty: "Digital Art" },
-  { id: "3", name: "Sarah Williams", specialty: "Contemporary Sculpture" },
-  { id: "4", name: "Alex Rivera", specialty: "Mixed Media" },
-  { id: "5", name: "Luna Park", specialty: "Photography" },
-  { id: "6", name: "David Thompson", specialty: "Oil Painting" },
-];
-
-const mockArtworks = [
-  { id: "1", title: "Fluid Dynamics", artist: "Elena Rodriguez" },
-  { id: "2", title: "Digital Dreams", artist: "Marcus Chen" },
-  { id: "3", title: "Sculptural Forms", artist: "Sarah Williams" },
-  { id: "4", title: "Mixed Perspectives", artist: "Alex Rivera" },
-  { id: "5", title: "Urban Landscapes", artist: "Luna Park" },
-  { id: "6", title: "Classical Revival", artist: "David Thompson" },
-];
-
-const mockExhibitions: Exhibition[] = [
-  {
-    id: "1",
-    title: "Contemporary Visions 2024",
-    description:
-      "A curated selection of contemporary works from emerging and established artists exploring themes of identity, technology, and human connection in the digital age.",
-    startDate: "2024-03-15",
-    endDate: "2024-06-30",
-    location: "Main Gallery, First Floor",
-    curator: "Sarah Mitchell",
-    status: "upcoming",
-    featuredImage: "/gallery-hero.jpg",
-    galleryImages: [
-      "/artwork-abstract-1.jpg",
-      "/artwork-abstract-2.jpg",
-      "/artwork-geometric-1.jpg",
-    ],
-    assignedArtists: ["1", "2", "3"],
-    assignedArtworks: ["1", "2", "3"],
-  },
-  {
-    id: "2",
-    title: "Abstract Expressions",
-    description:
-      "An exploration of abstract art featuring works that push the boundaries of form, color, and emotion.",
-    startDate: "2024-07-15",
-    endDate: "2024-10-15",
-    location: "Gallery 2, Second Floor",
-    curator: "Michael Chen",
-    status: "upcoming",
-    featuredImage: "/artwork-geometric-1.jpg",
-    galleryImages: [
-      "/artwork-abstract-1.jpg",
-      "/artwork-landscape-1.jpg",
-    ],
-    assignedArtists: ["1", "4"],
-    assignedArtworks: ["1", "4"],
-  },
-  {
-    id: "3",
-    title: "Portraits of Time",
-    description:
-      "A retrospective look at portraiture through the ages, from classical to contemporary interpretations.",
-    startDate: "2023-10-01",
-    endDate: "2024-01-31",
-    location: "Heritage Gallery",
-    curator: "Elena Rodriguez",
-    status: "past",
-    featuredImage: "/artwork-portrait-1.jpg",
-    galleryImages: [
-      "/artwork-portrait-1.jpg",
-      "/artwork-sculpture-1.jpg",
-    ],
-    assignedArtists: ["5", "6"],
-    assignedArtworks: ["5", "6"],
-  },
-];
+// Data will be fetched from database
 
 const ExhibitionManagement = () => {
-  const [exhibitions, setExhibitions] = useState<Exhibition[]>(mockExhibitions);
+  const [exhibitions, setExhibitions] = useState<Exhibition[]>([]);
+  const [artists, setArtists] = useState<any[]>([]);
+  const [artworks, setArtworks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Exhibition>>({});
   const [showMediaSelector, setShowMediaSelector] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [exhibitionsData, artistsData, artworksData] = await Promise.all([
+          apiClient.getExhibitions(),
+          apiClient.getArtists(),
+          apiClient.getArtworks(),
+        ]);
+
+        // Transform exhibitions data to match interface
+        const transformedExhibitions = exhibitionsData.map(
+          (exhibition: any) => ({
+            id: exhibition.id.toString(),
+            title: exhibition.title,
+            description: exhibition.description || "",
+            startDate: exhibition.start_date,
+            endDate: exhibition.end_date,
+            location: exhibition.location || "",
+            curator: exhibition.curator || "",
+            status: exhibition.status,
+            featuredImage: exhibition.featured_image || "",
+            galleryImages: exhibition.gallery_images || [],
+            assignedArtists: exhibition.assigned_artists || [],
+            assignedArtworks: exhibition.assigned_artworks || [],
+            callForArtists: exhibition.call_for_artists || false,
+            ctaLink: exhibition.cta_link || "",
+          })
+        );
+
+        setExhibitions(transformedExhibitions);
+        setArtists(artistsData);
+        setArtworks(artworksData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load exhibitions data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [toast]);
 
   const handleEdit = (exhibition: Exhibition) => {
     setFormData(exhibition);
@@ -160,7 +139,7 @@ const ExhibitionManagement = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (
       !formData.title ||
       !formData.startDate ||
@@ -176,48 +155,101 @@ const ExhibitionManagement = () => {
       return;
     }
 
-    const exhibitionData = { ...formData };
+    try {
+      const exhibitionData = {
+        title: formData.title,
+        description: formData.description || "",
+        start_date: formData.startDate
+          ? new Date(formData.startDate).toISOString().split("T")[0]
+          : "",
+        end_date: formData.endDate
+          ? new Date(formData.endDate).toISOString().split("T")[0]
+          : "",
+        location: formData.location || "",
+        curator: formData.curator || "",
+        status: formData.status,
+        featured_image: formData.featuredImage || "",
+        gallery_images: JSON.stringify(formData.galleryImages || []),
+        assigned_artists: JSON.stringify(formData.assignedArtists || []),
+        assigned_artworks: JSON.stringify(formData.assignedArtworks || []),
+        call_for_artists: formData.callForArtists || false,
+        cta_link: formData.ctaLink || "",
+      };
 
-    if (editingId) {
-      // Update existing exhibition
-      setExhibitions(
-        exhibitions.map((exhibition) =>
-          exhibition.id === editingId
-            ? ({ ...exhibition, ...exhibitionData } as Exhibition)
-            : exhibition
-        )
-      );
-      toast({
-        title: "Success",
-        description: "Exhibition updated successfully",
-      });
-    } else {
-      // Add new exhibition
-      const newExhibition: Exhibition = {
-        ...exhibitionData,
-        id: Date.now().toString(),
-        galleryImages: formData.galleryImages || [],
-        assignedArtists: formData.assignedArtists || [],
-        assignedArtworks: formData.assignedArtworks || [],
-      } as Exhibition;
+      if (editingId) {
+        // Update existing exhibition
+        await apiClient.updateExhibition(parseInt(editingId), exhibitionData);
+        toast({
+          title: "Success",
+          description: "Exhibition updated successfully",
+        });
+      } else {
+        // Add new exhibition
+        await apiClient.createExhibition(exhibitionData);
+        toast({
+          title: "Success",
+          description: "New exhibition added successfully",
+        });
+      }
 
-      setExhibitions([...exhibitions, newExhibition]);
+      // Refresh data from database
+      const [exhibitionsData, artistsData, artworksData] = await Promise.all([
+        apiClient.getExhibitions(),
+        apiClient.getArtists(),
+        apiClient.getArtworks(),
+      ]);
+
+      // Transform exhibitions data to match interface
+      const transformedExhibitions = exhibitionsData.map((exhibition: any) => ({
+        id: exhibition.id.toString(),
+        title: exhibition.title,
+        slug: exhibition.slug,
+        description: exhibition.description || "",
+        startDate: exhibition.start_date,
+        endDate: exhibition.end_date,
+        location: exhibition.location || "",
+        curator: exhibition.curator || "",
+        status: exhibition.status,
+        featuredImage: exhibition.featured_image || "",
+        galleryImages: exhibition.gallery_images || [],
+        assignedArtists: exhibition.assigned_artists || [],
+        assignedArtworks: exhibition.assigned_artworks || [],
+        callForArtists: exhibition.call_for_artists || false,
+        ctaLink: exhibition.cta_link || "",
+      }));
+
+      setExhibitions(transformedExhibitions);
+      setArtists(artistsData);
+      setArtworks(artworksData);
+
+      setIsEditing(false);
+      setFormData({});
+    } catch (error) {
+      console.error("Error saving exhibition:", error);
       toast({
-        title: "Success",
-        description: "New exhibition added successfully",
+        title: "Error",
+        description: "Failed to save exhibition",
+        variant: "destructive",
       });
     }
-
-    setIsEditing(false);
-    setFormData({});
   };
 
-  const handleDelete = (id: string) => {
-    setExhibitions(exhibitions.filter((exhibition) => exhibition.id !== id));
-    toast({
-      title: "Success",
-      description: "Exhibition deleted successfully",
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      await apiClient.deleteExhibition(parseInt(id));
+      setExhibitions(exhibitions.filter((exhibition) => exhibition.id !== id));
+      toast({
+        title: "Success",
+        description: "Exhibition deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting exhibition:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete exhibition",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -251,6 +283,26 @@ const ExhibitionManagement = () => {
       ...formData,
       galleryImages: [...(formData.galleryImages || []), imageUrl],
     });
+  };
+
+  const handleBulkGalleryImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const uploadPromises = Array.from(files).map((file) =>
+      handleImageUpload(file)
+    );
+    const imageUrls = await Promise.all(uploadPromises);
+
+    setFormData({
+      ...formData,
+      galleryImages: [...(formData.galleryImages || []), ...imageUrls],
+    });
+
+    // Reset the input
+    e.target.value = "";
   };
 
   const removeGalleryImage = (index: number) => {
@@ -391,23 +443,59 @@ const ExhibitionManagement = () => {
               />
             </div>
 
+            {/* Call for Artists Section */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="callForArtists"
+                  checked={formData.callForArtists || false}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      callForArtists: e.target.checked,
+                    })
+                  }
+                  className="rounded"
+                />
+                <label htmlFor="callForArtists" className="text-sm font-medium">
+                  Open Call for Artists
+                </label>
+              </div>
+
+              {formData.callForArtists && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    CTA Link (Google Form, etc.)
+                  </label>
+                  <Input
+                    value={formData.ctaLink || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, ctaLink: e.target.value })
+                    }
+                    placeholder="https://forms.google.com/..."
+                    type="url"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This link will be used for the "Join as an Artist" button
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Gallery Images Section */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Gallery Images
               </label>
               <div className="space-y-4">
-                {/* Upload new image */}
+                {/* Upload new images */}
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleGalleryImageUpload(file);
-                      }
-                    }}
+                    multiple
+                    onChange={handleBulkGalleryImageUpload}
                     className="hidden"
                     id="gallery-upload"
                   />
@@ -417,7 +505,7 @@ const ExhibitionManagement = () => {
                   >
                     <Upload className="w-8 h-8 text-gray-400 mb-2" />
                     <span className="text-sm text-gray-600">
-                      Click to upload gallery images
+                      Click to upload gallery images (multiple files supported)
                     </span>
                   </label>
                 </div>
@@ -466,7 +554,7 @@ const ExhibitionManagement = () => {
                 Assign Artists
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {mockArtists.map((artist) => (
+                {artists.map((artist) => (
                   <label
                     key={artist.id}
                     className="flex items-center space-x-2 cursor-pointer"
@@ -493,7 +581,7 @@ const ExhibitionManagement = () => {
                 Assign Artworks
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {mockArtworks.map((artwork) => (
+                {artworks.map((artwork) => (
                   <label
                     key={artwork.id}
                     className="flex items-center space-x-2 cursor-pointer"
@@ -523,6 +611,20 @@ const ExhibitionManagement = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Exhibition Management</h2>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <span className="ml-3 text-gray-600">Loading exhibitions...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -536,15 +638,43 @@ const ExhibitionManagement = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {exhibitions.map((exhibition) => (
           <Card key={exhibition.id}>
-            {exhibition.featuredImage && (
-              <div className="aspect-video overflow-hidden">
+            <div className="aspect-video overflow-hidden relative">
+              {exhibition.featuredImage ? (
                 <img
                   src={exhibition.featuredImage}
                   alt={exhibition.title}
                   className="w-full h-full object-cover"
                 />
-              </div>
-            )}
+              ) : (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                  <div className="text-center text-gray-400">
+                    <Image className="w-12 h-12 mx-auto mb-2" />
+                    <p className="text-sm">No Featured Image</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Picture Count Badge */}
+              {exhibition.galleryImages &&
+                exhibition.galleryImages.length > 0 && (
+                  <div className="absolute top-2 right-2">
+                    <Badge className="bg-black/70 text-white hover:bg-black/80">
+                      <Image className="w-3 h-3 mr-1" />
+                      {exhibition.galleryImages.length}
+                    </Badge>
+                  </div>
+                )}
+
+              {/* CTA Badge */}
+              {exhibition.callForArtists && (
+                <div className="absolute top-2 left-2">
+                  <Badge className="bg-green-600 text-white hover:bg-green-700">
+                    CTA Active
+                  </Badge>
+                </div>
+              )}
+            </div>
+
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-3">
                 <h3 className="text-xl font-semibold">{exhibition.title}</h3>
@@ -596,7 +726,9 @@ const ExhibitionManagement = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => window.open("/exhibitions", "_blank")}
+                  onClick={() =>
+                    window.open(`/exhibition/${exhibition.slug}`, "_blank")
+                  }
                 >
                   <Eye className="w-4 h-4" />
                 </Button>
@@ -643,6 +775,18 @@ const ExhibitionManagement = () => {
           </Card>
         ))}
       </div>
+
+      {exhibitions.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-gray-500 mb-4">
+            <Calendar className="w-12 h-12 mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">No exhibitions yet</h3>
+            <p className="text-sm">
+              Get started by adding your first exhibition.
+            </p>
+          </div>
+        </div>
+      )}
 
       {showMediaSelector && (
         <MediaSelector

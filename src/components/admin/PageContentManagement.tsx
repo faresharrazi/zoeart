@@ -7,6 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
+import { useHeroImages } from "@/hooks/useHeroImages";
+import FileUpload from "./FileUpload";
+import { apiClient } from "@/lib/apiClient";
 import {
   Save,
   Edit,
@@ -17,15 +21,6 @@ import {
   MapPin,
   Instagram,
 } from "lucide-react";
-import {
-  getPageSettings,
-  getContactInfo,
-  getHomeSettings,
-  updatePageSettings,
-  updateContactInfo,
-  updateHomeSettings,
-  ensureCorePagesVisible,
-} from "@/lib/pageSettings";
 
 interface PageContent {
   id: string;
@@ -55,6 +50,9 @@ interface PageData {
     description: string;
     footerDescription: string;
     galleryHours: string;
+    heroImages: string[];
+    heroImageIds: number[];
+    heroImageFiles?: any[];
   };
   exhibition: {
     title: string;
@@ -88,32 +86,28 @@ interface PageData {
 const PageContentManagement = () => {
   const [activeTab, setActiveTab] = useState<string>("home");
   const [editingPage, setEditingPage] = useState<string | null>(null);
+  const [editingContactInfo, setEditingContactInfo] = useState<boolean>(false);
   const [formData, setFormData] = useState<any>({});
   const { toast } = useToast();
+  const {
+    pageData,
+    contactInfo,
+    loading: pageDataLoading,
+    refreshPageData,
+  } = usePageDataFromDB();
+  const {
+    heroImages,
+    loading: heroImagesLoading,
+    refreshHeroImages,
+  } = useHeroImages();
 
-  // Ensure Exhibition and Contact pages are always visible
-  useEffect(() => {
-    ensureCorePagesVisible();
-  }, []);
+  // Exhibition and Contact pages are always visible (handled in the UI logic)
 
-  // Get fresh data from service
-  const pageSettings = getPageSettings();
-  const contactInfo = getContactInfo();
-  const homeSettings = getHomeSettings();
-
-  const pageData: PageData = {
-    home: homeSettings,
-    exhibition: pageSettings.exhibition,
-    artists: pageSettings.artists,
-    gallery: pageSettings.gallery,
-    about: pageSettings.about,
-    contact: pageSettings.contact,
-    contactInfo: contactInfo,
-  };
+  // Data is now fetched from database via usePageDataFromDB hook
 
   const tabs = [
     { id: "home", label: "Home" },
-    { id: "exhibition", label: "Exhibitions" },
+    { id: "exhibitions", label: "Exhibitions" },
     { id: "artists", label: "Artists" },
     { id: "gallery", label: "Gallery" },
     { id: "about", label: "About" },
@@ -122,35 +116,79 @@ const PageContentManagement = () => {
 
   const handleEdit = (pageId: string) => {
     setEditingPage(pageId);
-    setFormData(pageData[pageId as keyof PageData]);
+    const pageDataToEdit = pageData[pageId as keyof typeof pageData];
+
+    if (pageId === "home") {
+      // For home page, include hero images and content fields in form data
+      setFormData({
+        ...pageDataToEdit,
+        ...pageDataToEdit?.content, // Include content fields (footerDescription, galleryHours, etc.)
+        heroImageFiles: heroImages.map((img) => ({
+          id: img.id,
+          originalName: img.originalName,
+          filename: img.filename,
+          url: img.url,
+          fileSize: img.fileSize,
+          mimeType: img.mimeType,
+        })),
+      });
+    } else if (pageId === "contactInfo") {
+      // For contact info, combine page data with contact info
+      setFormData({
+        ...pageDataToEdit,
+        ...contactInfo, // Include contact info fields
+      });
+    } else {
+      setFormData(pageDataToEdit);
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingPage) return;
 
     console.log("Admin: Saving page", editingPage, "with data", formData);
 
-    // Update using direct service calls
-    if (editingPage === "home") {
-      console.log("Admin: Updating home settings");
-      updateHomeSettings(formData);
-    } else if (editingPage === "contactInfo") {
-      console.log("Admin: Updating contact info");
-      updateContactInfo(formData);
-    } else {
-      console.log("Admin: Updating page settings");
-      updatePageSettings({
-        [editingPage]: {
-          ...pageData[editingPage as keyof PageData],
-          ...formData,
-        },
+    try {
+      // Update using database API calls
+      if (editingPage === "home") {
+        console.log("Admin: Updating home settings");
+        await apiClient.updateHomeSettings(formData);
+        toast({
+          title: "Success",
+          description: "Home settings updated successfully",
+        });
+      } else if (editingPage === "contactInfo") {
+        console.log("Admin: Updating contact info");
+        await apiClient.updateContactInfo(formData);
+        toast({
+          title: "Success",
+          description: "Contact info updated successfully",
+        });
+      } else {
+        console.log("Admin: Updating page settings");
+        await apiClient.updatePageContent(editingPage, {
+          title: formData.title,
+          description: formData.description,
+          content: formData,
+          isVisible:
+            pageData[editingPage as keyof typeof pageData]?.isVisible || false,
+        });
+        toast({
+          title: "Success",
+          description: "Page content updated successfully",
+        });
+      }
+
+      // Refresh data from database after successful save
+      await refreshPageData();
+    } catch (error) {
+      console.error("Error updating page content:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update page content",
+        variant: "destructive",
       });
     }
-
-    toast({
-      title: "Success",
-      description: "Page content updated successfully",
-    });
 
     setEditingPage(null);
     setFormData({});
@@ -158,43 +196,69 @@ const PageContentManagement = () => {
 
   const handleCancel = () => {
     setEditingPage(null);
+    setEditingContactInfo(false);
     setFormData({});
   };
 
-  const togglePageVisibility = (pageId: string) => {
-    if (pageId === "home" || pageId === "exhibition" || pageId === "contact")
+  const togglePageVisibility = async (pageId: string) => {
+    if (pageId === "home" || pageId === "exhibitions" || pageId === "contact")
       return; // These pages cannot be hidden
 
-    const newVisibility = !pageData[pageId as keyof PageData].isVisible;
+    const newVisibility = !pageData[pageId as keyof typeof pageData]?.isVisible;
 
-    // Update using direct service call
-    updatePageSettings({
-      [pageId]: {
-        ...pageData[pageId as keyof PageData],
+    try {
+      // Update using database API
+      await apiClient.updatePageContent(pageId, {
         isVisible: newVisibility,
-      },
-    });
+      });
 
-    toast({
-      title: "Success",
-      description: `Page ${pageId} ${
-        newVisibility ? "shown" : "hidden"
-      } successfully`,
-    });
+      // Refresh data from database
+      await refreshPageData();
+
+      toast({
+        title: "Success",
+        description: `Page ${pageId} ${
+          newVisibility ? "shown" : "hidden"
+        } successfully`,
+      });
+    } catch (error) {
+      console.error("Error toggling page visibility:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update page visibility",
+        variant: "destructive",
+      });
+    }
   };
 
-  const toggleBlockVisibility = (blockId: string) => {
-    const newBlocks = pageData.about.blocks.map((block) =>
-      block.id === blockId ? { ...block, isVisible: !block.isVisible } : block
-    );
+  const toggleBlockVisibility = async (blockId: string) => {
+    const newBlocks =
+      pageData.about?.content?.content?.blocks?.map((block) =>
+        block.id === blockId ? { ...block, isVisible: !block.isVisible } : block
+      ) || [];
 
-    // Update using direct service call
-    updatePageSettings({
-      about: {
-        ...pageData.about,
-        blocks: newBlocks,
-      },
-    });
+    try {
+      // Update using database API
+      await apiClient.updatePageContent("about", {
+        content: {
+          ...pageData.about?.content,
+          content: {
+            ...pageData.about?.content?.content,
+            blocks: newBlocks,
+          },
+        },
+      });
+
+      // Refresh data from database
+      await refreshPageData();
+    } catch (error) {
+      console.error("Error toggling block visibility:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update block visibility",
+        variant: "destructive",
+      });
+    }
   };
 
   const [blockFormData, setBlockFormData] = useState<Record<string, any>>({});
@@ -213,33 +277,49 @@ const PageContentManagement = () => {
     }));
   };
 
-  const saveBlockContent = (blockId: string) => {
+  const saveBlockContent = async (blockId: string) => {
     const blockData = blockFormData[blockId];
     if (!blockData) return;
 
-    const newBlocks = pageData.about.blocks.map((block) =>
-      block.id === blockId ? { ...block, ...blockData } : block
-    );
+    const newBlocks =
+      pageData.about?.content?.content?.blocks?.map((block) =>
+        block.id === blockId ? { ...block, ...blockData } : block
+      ) || [];
 
-    // Update using direct service call
-    updatePageSettings({
-      about: {
-        ...pageData.about,
-        blocks: newBlocks,
-      },
-    });
+    try {
+      // Update using database API
+      await apiClient.updatePageContent("about", {
+        content: {
+          ...pageData.about?.content,
+          content: {
+            ...pageData.about?.content?.content,
+            blocks: newBlocks,
+          },
+        },
+      });
 
-    // Clear the form data for this block
-    setBlockFormData((prev) => {
-      const newData = { ...prev };
-      delete newData[blockId];
-      return newData;
-    });
+      // Refresh data from database
+      await refreshPageData();
 
-    toast({
-      title: "Success",
-      description: "Block content updated successfully",
-    });
+      // Clear the form data for this block
+      setBlockFormData((prev) => {
+        const newData = { ...prev };
+        delete newData[blockId];
+        return newData;
+      });
+
+      toast({
+        title: "Success",
+        description: "Block content updated successfully",
+      });
+    } catch (error) {
+      console.error("Error saving block content:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update block content",
+        variant: "destructive",
+      });
+    }
   };
 
   // Function to get neutral block names for admin interface
@@ -253,8 +333,20 @@ const PageContentManagement = () => {
   };
 
   const renderTabContent = () => {
-    const currentData = pageData[activeTab as keyof PageData];
+    const currentData = pageData[activeTab as keyof typeof pageData];
     const isEditing = editingPage === activeTab;
+
+    // Show loading state if data is not yet loaded
+    if (pageDataLoading || !currentData) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading page data...</p>
+          </div>
+        </div>
+      );
+    }
 
     if (activeTab === "home") {
       return (
@@ -330,6 +422,29 @@ const PageContentManagement = () => {
                     className="mt-1"
                   />
                 </div>
+                <div>
+                  <Label className="text-sm font-medium">Hero Images</Label>
+                  <div className="mt-2">
+                    <FileUpload
+                      category="hero_image"
+                      onFilesChange={(files) => {
+                        setFormData({
+                          ...formData,
+                          heroImages: files.map((file) => file.url),
+                          heroImageIds: files.map((file) => file.id),
+                          heroImageFiles: files,
+                        });
+                      }}
+                      existingFiles={heroImages || []}
+                      maxFiles={10}
+                      onRefresh={refreshHeroImages}
+                    />
+                    <p className="text-sm text-gray-500 mt-2">
+                      Add multiple images for a slideshow effect. Single image
+                      will show static.
+                    </p>
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <Button onClick={handleSave}>
                     <Save className="w-4 h-4 mr-2" />
@@ -346,14 +461,16 @@ const PageContentManagement = () => {
                   <h4 className="font-semibold text-theme-text-primary mb-2">
                     Hero Title
                   </h4>
-                  <p className="text-theme-text-muted">{currentData.title}</p>
+                  <p className="text-theme-text-muted">
+                    {currentData?.title || "N/A"}
+                  </p>
                 </div>
                 <div>
                   <h4 className="font-semibold text-theme-text-primary mb-2">
                     Hero Description
                   </h4>
                   <p className="text-theme-text-muted">
-                    {currentData.description}
+                    {currentData?.description || "N/A"}
                   </p>
                 </div>
                 <div>
@@ -361,7 +478,7 @@ const PageContentManagement = () => {
                     Footer Description
                   </h4>
                   <p className="text-theme-text-muted whitespace-pre-line">
-                    {currentData.footerDescription}
+                    {currentData?.content?.footerDescription || "N/A"}
                   </p>
                 </div>
                 <div>
@@ -369,8 +486,31 @@ const PageContentManagement = () => {
                     Gallery Hours
                   </h4>
                   <p className="text-theme-text-muted whitespace-pre-line">
-                    {currentData.galleryHours}
+                    {currentData?.content?.galleryHours || "N/A"}
                   </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                    Hero Images ({currentData?.heroImages?.length || 0})
+                  </h4>
+                  {currentData?.heroImages &&
+                  currentData?.heroImages.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {currentData?.heroImages.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={image}
+                            alt={`Hero image ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg border"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-theme-text-muted">
+                      No hero images configured
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -379,21 +519,20 @@ const PageContentManagement = () => {
       );
     }
 
-
     if (activeTab === "about") {
       return (
         <div className="space-y-6">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                About Page
-                <Badge
-                  variant={currentData.isVisible ? "default" : "secondary"}
-                >
-                  {currentData.isVisible ? "Visible" : "Hidden"}
-                </Badge>
-              </CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  About Page
+                  <Badge
+                    variant={currentData?.isVisible ? "default" : "secondary"}
+                  >
+                    {currentData?.isVisible ? "Visible" : "Hidden"}
+                  </Badge>
+                </CardTitle>
                 <div className="flex gap-2">
                   {!isEditing && (
                     <Button onClick={() => handleEdit("about")}>
@@ -451,14 +590,16 @@ const PageContentManagement = () => {
                     <h4 className="font-semibold text-theme-text-primary mb-2">
                       Page Title
                     </h4>
-                    <p className="text-theme-text-muted">{currentData.title}</p>
+                    <p className="text-theme-text-muted">
+                      {currentData?.title || "N/A"}
+                    </p>
                   </div>
                   <div>
                     <h4 className="font-semibold text-theme-text-primary mb-2">
                       Page Description
                     </h4>
                     <p className="text-theme-text-muted">
-                      {currentData.description}
+                      {currentData?.description || "N/A"}
                     </p>
                   </div>
                 </div>
@@ -470,7 +611,7 @@ const PageContentManagement = () => {
             <h3 className="text-lg font-semibold text-theme-text-primary">
               Content Blocks
             </h3>
-            {currentData.blocks.map((block) => (
+            {(currentData?.content?.content?.blocks || []).map((block) => (
               <Card key={block.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -549,24 +690,24 @@ const PageContentManagement = () => {
               </Card>
             ))}
           </div>
-          
+
           {/* Hide Page Button - Bottom of About Page */}
           <div className="mt-6 pt-4 border-t border-theme-border">
             <Button
               variant="outline"
               onClick={() => togglePageVisibility("about")}
               className={`w-full sm:w-auto ${
-                currentData.isVisible
+                currentData?.isVisible
                   ? "bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300"
                   : "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
               }`}
             >
-              {currentData.isVisible ? (
+              {currentData?.isVisible ? (
                 <EyeOff className="w-4 h-4 mr-2" />
               ) : (
                 <Eye className="w-4 h-4 mr-2" />
               )}
-              {currentData.isVisible ? "Hide About Page" : "Show About Page"}
+              {currentData?.isVisible ? "Hide About Page" : "Show About Page"}
             </Button>
           </div>
         </div>
@@ -582,157 +723,52 @@ const PageContentManagement = () => {
               <CardTitle className="flex items-center gap-2">
                 {tabs.find((tab) => tab.id === activeTab)?.label} Page
                 {activeTab === "home" ||
-                activeTab === "exhibition" ||
+                activeTab === "exhibitions" ||
                 activeTab === "contact" ? (
                   <Badge variant="outline">Always Visible</Badge>
                 ) : (
                   <Badge
-                    variant={currentData.isVisible ? "default" : "secondary"}
+                    variant={currentData?.isVisible ? "default" : "secondary"}
                   >
-                    {currentData.isVisible ? "Visible" : "Hidden"}
+                    {currentData?.isVisible ? "Visible" : "Hidden"}
                   </Badge>
                 )}
               </CardTitle>
-            <div className="flex gap-2">
-              {!isEditing && (
-                <Button onClick={() => handleEdit(activeTab)}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Content
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isEditing ? (
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-medium">Page Title</Label>
-                <Input
-                  value={formData.title || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  placeholder="Enter page title"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium">Page Description</Label>
-                <Textarea
-                  value={formData.description || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  placeholder="Enter page description"
-                  rows={4}
-                  className="mt-1"
-                />
-              </div>
               <div className="flex gap-2">
-                <Button onClick={handleSave}>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </Button>
-                <Button variant="outline" onClick={handleCancel}>
-                  Cancel
-                </Button>
+                {!isEditing && (
+                  <Button onClick={() => handleEdit(activeTab)}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Content
+                  </Button>
+                )}
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold text-theme-text-primary mb-2">
-                  Page Title
-                </h4>
-                <p className="text-theme-text-muted">{currentData.title}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-theme-text-primary mb-2">
-                  Page Description
-                </h4>
-                <p className="text-theme-text-muted">
-                  {currentData.description}
-                </p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Contact Information Section - Only for Contact tab */}
-      {activeTab === "contact" && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                Contact Information
-              </CardTitle>
-              {!isEditing && (
-                <Button onClick={() => handleEdit("contactInfo")}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Contact Info
-                </Button>
-              )}
             </div>
           </CardHeader>
           <CardContent>
             {isEditing ? (
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    Email
-                  </Label>
+                  <Label className="text-sm font-medium">Page Title</Label>
                   <Input
-                    value={formData.email || ""}
+                    value={formData.title || ""}
                     onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
+                      setFormData({ ...formData, title: e.target.value })
                     }
-                    placeholder="Enter email address"
+                    placeholder="Enter page title"
                     className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    Phone
-                  </Label>
-                  <Input
-                    value={formData.phone || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    placeholder="Enter phone number"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Instagram className="w-4 h-4" />
-                    Instagram
-                  </Label>
-                  <Input
-                    value={formData.instagram || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, instagram: e.target.value })
-                    }
-                    placeholder="Enter Instagram handle"
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    Address
+                  <Label className="text-sm font-medium">
+                    Page Description
                   </Label>
                   <Textarea
-                    value={formData.address || ""}
+                    value={formData.description || ""}
                     onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
+                      setFormData({ ...formData, description: e.target.value })
                     }
-                    placeholder="Enter full address"
-                    rows={3}
+                    placeholder="Enter page description"
+                    rows={4}
                     className="mt-1"
                   />
                 </div>
@@ -748,82 +784,244 @@ const PageContentManagement = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-theme-primary" />
-                    <div>
-                      <p className="font-medium text-theme-text-primary">
-                        Email
-                      </p>
-                      <p className="text-theme-text-muted">
-                        {pageData.contactInfo.email}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-theme-primary" />
-                    <div>
-                      <p className="font-medium text-theme-text-primary">
-                        Phone
-                      </p>
-                      <p className="text-theme-text-muted">
-                        {pageData.contactInfo.phone}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Instagram className="w-5 h-5 text-theme-primary" />
-                    <div>
-                      <p className="font-medium text-theme-text-primary">
-                        Instagram
-                      </p>
-                      <p className="text-theme-text-muted">
-                        {pageData.contactInfo.instagram}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin className="w-5 h-5 text-theme-primary" />
-                    <div>
-                      <p className="font-medium text-theme-text-primary">
-                        Address
-                      </p>
-                      <p className="text-theme-text-muted">
-                        {pageData.contactInfo.address}
-                      </p>
-                    </div>
-                  </div>
+                <div>
+                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                    Page Title
+                  </h4>
+                  <p className="text-theme-text-muted">
+                    {currentData?.title || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                    Page Description
+                  </h4>
+                  <p className="text-theme-text-muted">
+                    {currentData?.description || "N/A"}
+                  </p>
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
-      )}
 
-      {/* Hide Page Button - Bottom of Other Pages (exhibition, artists, gallery) */}
-      {activeTab !== "home" && activeTab !== "exhibition" && activeTab !== "contact" && (
-        <div className="mt-6 pt-4 border-t border-theme-border">
-          <Button
-            variant="outline"
-            onClick={() => togglePageVisibility(activeTab)}
-            className={`w-full sm:w-auto ${
-              currentData.isVisible
-                ? "bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300"
-                : "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
-            }`}
-          >
-            {currentData.isVisible ? (
-              <EyeOff className="w-4 h-4 mr-2" />
-            ) : (
-              <Eye className="w-4 h-4 mr-2" />
-            )}
-            {currentData.isVisible ? `Hide ${tabs.find((tab) => tab.id === activeTab)?.label} Page` : `Show ${tabs.find((tab) => tab.id === activeTab)?.label} Page`}
-          </Button>
-        </div>
-      )}
-    </div>
+        {/* Contact Information Section - Only for Contact tab */}
+        {activeTab === "contact" && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  Contact Information
+                </CardTitle>
+                {!editingContactInfo && (
+                  <Button
+                    onClick={() => {
+                      setEditingContactInfo(true);
+                      setFormData({
+                        ...contactInfo,
+                      });
+                    }}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Contact Info
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {editingContactInfo ? (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Mail className="w-4 h-4" />
+                      Email
+                    </Label>
+                    <Input
+                      value={formData.email || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      placeholder="Enter email address"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      Phone
+                    </Label>
+                    <Input
+                      value={formData.phone || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      placeholder="Enter phone number"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Instagram className="w-4 h-4" />
+                      Instagram
+                    </Label>
+                    <Input
+                      value={formData.instagram || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, instagram: e.target.value })
+                      }
+                      placeholder="Enter Instagram handle"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Address
+                    </Label>
+                    <Textarea
+                      value={formData.address || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address: e.target.value })
+                      }
+                      placeholder="Enter full address"
+                      rows={3}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={async () => {
+                        try {
+                          await apiClient.updateContactInfo(formData);
+                          await refreshPageData();
+                          setEditingContactInfo(false);
+                          setFormData({});
+                          toast({
+                            title: "Success",
+                            description: "Contact info updated successfully",
+                          });
+                        } catch (error) {
+                          console.error("Error updating contact info:", error);
+                          toast({
+                            title: "Error",
+                            description: "Failed to update contact info",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setEditingContactInfo(false);
+                        setFormData({});
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-5 h-5 text-theme-primary" />
+                      <div>
+                        <p className="font-medium text-theme-text-primary">
+                          Email
+                        </p>
+                        <p className="text-theme-text-muted">
+                          {contactInfo?.email || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-5 h-5 text-theme-primary" />
+                      <div>
+                        <p className="font-medium text-theme-text-primary">
+                          Phone
+                        </p>
+                        <p className="text-theme-text-muted">
+                          {contactInfo?.phone || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Instagram className="w-5 h-5 text-theme-primary" />
+                      <div>
+                        <p className="font-medium text-theme-text-primary">
+                          Instagram
+                        </p>
+                        <p className="text-theme-text-muted">
+                          {contactInfo?.instagram || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <MapPin className="w-5 h-5 text-theme-primary" />
+                      <div>
+                        <p className="font-medium text-theme-text-primary">
+                          Address
+                        </p>
+                        <p className="text-theme-text-muted">
+                          {contactInfo?.address || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Hide Page Button - Bottom of Other Pages (exhibition, artists, gallery) */}
+        {activeTab !== "home" &&
+          activeTab !== "exhibitions" &&
+          activeTab !== "contact" && (
+            <div className="mt-6 pt-4 border-t border-theme-border">
+              <Button
+                variant="outline"
+                onClick={() => togglePageVisibility(activeTab)}
+                className={`w-full sm:w-auto ${
+                  currentData?.isVisible
+                    ? "bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300"
+                    : "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
+                }`}
+              >
+                {currentData?.isVisible ? (
+                  <EyeOff className="w-4 h-4 mr-2" />
+                ) : (
+                  <Eye className="w-4 h-4 mr-2" />
+                )}
+                {currentData?.isVisible
+                  ? `Hide ${
+                      tabs.find((tab) => tab.id === activeTab)?.label
+                    } Page`
+                  : `Show ${
+                      tabs.find((tab) => tab.id === activeTab)?.label
+                    } Page`}
+              </Button>
+            </div>
+          )}
+      </div>
     );
   };
+
+  // Show loading state if data is not yet loaded
+  if (pageDataLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading page content...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -836,11 +1034,9 @@ const PageContentManagement = () => {
             variant="outline"
             size="sm"
             onClick={() => {
-              ensureCorePagesVisible();
               toast({
-                title: "Success",
-                description:
-                  "Exhibition and Contact pages refreshed to be visible",
+                title: "Info",
+                description: "Exhibition and Contact pages are always visible",
               });
             }}
             className="w-full sm:w-auto"
@@ -848,8 +1044,8 @@ const PageContentManagement = () => {
             <Eye className="w-4 h-4 mr-2" />
             Refresh Core Pages
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => window.open("/", "_blank")}
             className="w-full sm:w-auto"

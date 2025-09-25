@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, MapPin, Image } from "lucide-react";
 
 interface ExhibitionCardProps {
   exhibition: {
@@ -9,13 +9,16 @@ interface ExhibitionCardProps {
     slug: string;
     title: string;
     curator: string;
-    dates: string;
+    start_date: string;
+    end_date: string;
     location: string;
     description: string;
     status: string;
     call_for_artists?: boolean;
     cta_link?: string;
-    featuredImage?: string;
+    featured_image?: string;
+    gallery_images?: string[];
+    assigned_artworks?: any[];
   };
   onExhibitionClick: (slug: string) => void;
 }
@@ -35,6 +38,27 @@ const ExhibitionCard = ({
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatDateRange = () => {
+    if (!exhibition.start_date || !exhibition.end_date) return "";
+    const startDate = formatDate(exhibition.start_date);
+    const endDate = formatDate(exhibition.end_date);
+
+    // If same date, show only once
+    if (startDate === endDate) {
+      return startDate;
+    }
+
+    return `${startDate} - ${endDate}`;
+  };
+
   return (
     <Card
       className="border-2 border-transparent overflow-hidden cursor-pointer h-full flex flex-col"
@@ -42,9 +66,9 @@ const ExhibitionCard = ({
     >
       <div className="aspect-[4/3] bg-gradient-to-br from-theme-primary/20 to-theme-primary/5 relative overflow-hidden flex-shrink-0">
         {/* Featured Image Background */}
-        {exhibition.featuredImage ? (
+        {exhibition.featured_image ? (
           <img
-            src={exhibition.featuredImage}
+            src={exhibition.featured_image}
             alt={exhibition.title}
             className="w-full h-full object-cover"
             onError={(e) => {
@@ -84,6 +108,16 @@ const ExhibitionCard = ({
             {exhibition.status}
           </Badge>
         </div>
+
+        {/* Picture Count Badge */}
+        {exhibition.gallery_images && exhibition.gallery_images.length > 1 && (
+          <div className="absolute top-4 right-4">
+            <Badge className="bg-black/70 text-white hover:bg-black/80">
+              <Image className="w-3 h-3 mr-1" />
+              {exhibition.gallery_images.length}
+            </Badge>
+          </div>
+        )}
       </div>
 
       <CardContent className="p-6 flex-grow flex flex-col">
@@ -92,36 +126,42 @@ const ExhibitionCard = ({
             <h3 className="text-xl font-bold text-theme-text-primary mb-2">
               {exhibition.title}
             </h3>
-            <p className="text-sm text-theme-text-muted font-medium">
-              Curated by {exhibition.curator}
-            </p>
+            {exhibition.curator && (
+              <p className="text-sm text-theme-text-muted font-medium">
+                Curated by {exhibition.curator}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center text-sm text-theme-text-muted">
-              <Calendar className="w-4 h-4 mr-2" />
-              {exhibition.dates}
-            </div>
-            <div className="flex items-center text-sm text-theme-text-muted">
-              <MapPin className="w-4 h-4 mr-2" />
-              {exhibition.location}
-            </div>
+            {(exhibition.start_date || exhibition.end_date) && (
+              <div className="flex items-center text-sm text-theme-text-muted">
+                <Calendar className="w-4 h-4 mr-2" />
+                {formatDateRange()}
+              </div>
+            )}
+            {exhibition.location && (
+              <div className="flex items-center text-sm text-theme-text-muted">
+                <MapPin className="w-4 h-4 mr-2" />
+                {exhibition.location}
+              </div>
+            )}
           </div>
 
-          <p className="text-theme-text-muted text-sm line-clamp-3 flex-grow">
-            {exhibition.description}
-          </p>
+          {exhibition.description && (
+            <p className="text-theme-text-muted text-sm line-clamp-3 flex-grow">
+              {exhibition.description}
+            </p>
+          )}
 
-          {exhibition.call_for_artists && (
+          {exhibition.call_for_artists === 1 && exhibition.cta_link && (
             <div className="mt-auto">
               <Button
                 variant="outline"
                 className="w-full"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (exhibition.cta_link) {
-                    window.open(exhibition.cta_link, "_blank");
-                  }
+                  window.open(exhibition.cta_link, "_blank");
                 }}
               >
                 Join as an Artist

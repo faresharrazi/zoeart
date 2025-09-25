@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Image } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Image, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/apiClient";
 
 interface Artist {
   id: string;
@@ -33,92 +34,34 @@ interface Artist {
   assignedArtworks: string[]; // Array of artwork IDs
 }
 
-const mockArtists: Artist[] = [
-  {
-    id: "1",
-    name: "Elena Rodriguez",
-    specialty: "Abstract Expressionism",
-    bio: "Elena Rodriguez is a contemporary abstract artist whose work explores the intersection of emotion and movement. Born in Barcelona, she has exhibited internationally and is known for her dynamic use of color and form.",
-    profileImage: "/artist-elena-rodriguez.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/elenarodriguezart",
-      website: "https://elenarodriguezart.com",
-      email: "elena@elenarodriguezart.com",
-    },
-    assignedArtworks: ["1"],
-  },
-  {
-    id: "2",
-    name: "Marcus Chen",
-    specialty: "Geometric Minimalism",
-    bio: "Marcus Chen creates minimalist works that examine the relationship between structure and space. His precise geometric compositions have been featured in major galleries across Asia and Europe.",
-    profileImage: "/artist-marcus-chen.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/marcuschenart",
-      website: "https://marcuschenart.com",
-      email: "hello@marcuschenart.com",
-    },
-    assignedArtworks: ["2"],
-  },
-  {
-    id: "3",
-    name: "Sarah Williams",
-    specialty: "Contemporary Portraiture",
-    bio: "Sarah Williams is renowned for her deeply psychological portraits that capture the complexity of human emotion. Her work bridges traditional portraiture with contemporary artistic expression.",
-    profileImage: "/artist-sarah-williams.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/sarahwilliamsart",
-      website: "https://sarahwilliamsportrait.com",
-      email: "sarah@sarahwilliamsportrait.com",
-    },
-    assignedArtworks: ["3"],
-  },
-  {
-    id: "4",
-    name: "David Thompson",
-    specialty: "Abstract Landscape",
-    bio: "David Thompson's abstract landscapes celebrate the raw energy of natural forms. His bold brushwork and earth-tone palette create compositions that are both powerful and meditative.",
-    profileImage: "/artist-david-thompson.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/davidthompsonart",
-      website: "https://davidthompsonlandscapes.com",
-    },
-    assignedArtworks: ["4"],
-  },
-  {
-    id: "5",
-    name: "Luna Park",
-    specialty: "Contemporary Landscape",
-    bio: "Luna Park reimagines traditional landscape painting for the contemporary world. Her stylized interpretations blend realism with modern artistic sensibilities.",
-    profileImage: "/artist-luna-park.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/lunaparkart",
-      website: "https://lunaparkart.com",
-      email: "luna@lunaparkart.com",
-    },
-    assignedArtworks: ["5"],
-  },
-  {
-    id: "6",
-    name: "Alex Rivera",
-    specialty: "Sculptural Installation",
-    bio: "Alex Rivera pushes the boundaries of sculptural art through innovative use of materials and space. Their installations challenge viewers' perceptions through light, form, and transparency.",
-    profileImage: "/artist-alex-rivera.jpg",
-    socialMedia: {
-      instagram: "https://instagram.com/alexriverasculpture",
-      website: "https://alexriverasculpture.com",
-      email: "alex@alexriverasculpture.com",
-    },
-    assignedArtworks: ["6"],
-  },
-];
-
 const ArtistManagement = () => {
-  const [artists, setArtists] = useState<Artist[]>(mockArtists);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Artist>>({});
   const { toast } = useToast();
+
+  // Fetch artists from database
+  useEffect(() => {
+    const fetchArtists = async () => {
+      try {
+        const data = await apiClient.getArtists();
+        setArtists(data);
+      } catch (error) {
+        console.error("Error fetching artists:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch artists",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArtists();
+  }, [toast]);
 
   const handleEdit = (artist: Artist) => {
     setFormData(artist);
@@ -139,7 +82,7 @@ const ArtistManagement = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.specialty) {
       toast({
         title: "Error",
@@ -149,44 +92,63 @@ const ArtistManagement = () => {
       return;
     }
 
-    if (editingId) {
-      // Update existing artist
-      setArtists(
-        artists.map((artist) =>
-          artist.id === editingId
-            ? ({ ...artist, ...formData } as Artist)
-            : artist
-        )
-      );
-      toast({
-        title: "Success",
-        description: "Artist updated successfully",
-      });
-    } else {
-      // Add new artist
-      const newArtist: Artist = {
-        ...formData,
-        id: Date.now().toString(),
-        socialMedia: formData.socialMedia || {},
-      } as Artist;
+    try {
+      const artistData = {
+        name: formData.name,
+        specialty: formData.specialty,
+        bio: formData.bio || "",
+        profile_image: formData.profileImage || "",
+        social_media: JSON.stringify(formData.socialMedia || {}),
+      };
 
-      setArtists([...artists, newArtist]);
+      if (editingId) {
+        // Update existing artist
+        await apiClient.updateArtist(parseInt(editingId), artistData);
+        toast({
+          title: "Success",
+          description: "Artist updated successfully",
+        });
+      } else {
+        // Add new artist
+        await apiClient.createArtist(artistData);
+        toast({
+          title: "Success",
+          description: "New artist added successfully",
+        });
+      }
+
+      // Refresh data from database
+      const artistsData = await apiClient.getArtists();
+      setArtists(artistsData);
+
+      setIsEditing(false);
+      setFormData({});
+    } catch (error) {
+      console.error("Error saving artist:", error);
       toast({
-        title: "Success",
-        description: "New artist added successfully",
+        title: "Error",
+        description: "Failed to save artist",
+        variant: "destructive",
       });
     }
-
-    setIsEditing(false);
-    setFormData({});
   };
 
-  const handleDelete = (id: string) => {
-    setArtists(artists.filter((artist) => artist.id !== id));
-    toast({
-      title: "Success",
-      description: "Artist deleted successfully",
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      await apiClient.deleteArtist(parseInt(id));
+      setArtists(artists.filter((artist) => artist.id !== id));
+      toast({
+        title: "Success",
+        description: "Artist deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting artist:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete artist",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleProfileImageUpload = async (file: File) => {
@@ -225,7 +187,7 @@ const ArtistManagement = () => {
         artist.id === artistId
           ? {
               ...artist,
-              assignedArtworks: artist.assignedArtworks.filter(
+              assignedArtworks: (artist.assignedArtworks || []).filter(
                 (id) => id !== artworkId
               ),
             }
@@ -430,6 +392,20 @@ const ArtistManagement = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Artist Management</h2>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-theme-primary" />
+          <span className="ml-2 text-theme-text-muted">Loading artists...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -472,7 +448,8 @@ const ArtistManagement = () => {
                     Assigned Artworks
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {artist.assignedArtworks.length > 0 ? (
+                    {artist.assignedArtworks &&
+                    artist.assignedArtworks.length > 0 ? (
                       artist.assignedArtworks.map((artworkId) => (
                         <Badge
                           key={artworkId}

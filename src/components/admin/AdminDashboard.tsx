@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 // import { usePageHero } from "@/contexts/PageHeroContext";
 import AdminOverview from "./AdminOverview";
@@ -7,15 +7,25 @@ import ArtistManagement from "./ArtistManagement";
 import ExhibitionManagement from "./ExhibitionManagement";
 import NewsletterManagement from "./NewsletterManagement";
 import PageContentManagement from "./PageContentManagement";
+import UserManagement from "./UserManagement";
 // import ThemeControl from "./ThemeControl"; // Removed theme management
 
 interface AdminDashboardProps {
   onLogout: () => void;
+  user: any;
 }
 
-const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
+const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
   const [activeSection, setActiveSection] = useState("overview");
   // const { heroBackgrounds, setHeroBackground } = usePageHero();
+
+  // Check if user is authenticated on component mount
+  useEffect(() => {
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      onLogout();
+    }
+  }, [onLogout]);
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -31,6 +41,8 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
         return <NewsletterManagement />;
       case "pages":
         return <PageContentManagement />;
+      case "users":
+        return <UserManagement />;
       // case "theme":
       //   return <ThemeControl />; // Removed theme management
       default:

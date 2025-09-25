@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   Mail,
+  UserCog,
   // Settings, // Removed theme management
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const menuItems = [
   { id: "exhibitions", label: "Exhibitions", icon: Calendar },
   { id: "newsletter", label: "Newsletter", icon: Mail },
   { id: "pages", label: "Page Content", icon: FileText },
+  { id: "users", label: "User Management", icon: UserCog },
   // { id: "theme", label: "Theme Control", icon: Settings }, // Removed theme management
 ];
 

@@ -2,34 +2,20 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
-// Import actual image assets
-import abstractArt1 from "@/assets/artwork-abstract-1.jpg";
-import abstractArt2 from "@/assets/artwork-abstract-2.jpg";
-import geometricArt1 from "@/assets/artwork-geometric-1.jpg";
-import landscapeArt1 from "@/assets/artwork-landscape-1.jpg";
-import portraitArt1 from "@/assets/artwork-portrait-1.jpg";
-import sculptureArt1 from "@/assets/artwork-sculpture-1.jpg";
-import galleryHero from "@/assets/gallery-hero.jpg";
-import galleryHero2 from "@/assets/gallery-hero2.jpg";
-import galleryHero3 from "@/assets/gallery-hero3.jpg";
-import artistAlex from "@/assets/artist-alex-rivera.jpg";
-import artistDavid from "@/assets/artist-david-thompson.jpg";
-import artistElena from "@/assets/artist-elena-rodriguez.jpg";
-
-// Sample gallery images from assets - expanded to show more than 8
+// Fallback gallery images - placeholder URLs for when no real exhibition images are provided
 const sampleImages = [
-  abstractArt1,
-  abstractArt2,
-  geometricArt1,
-  landscapeArt1,
-  portraitArt1,
-  sculptureArt1,
-  galleryHero,
-  galleryHero2,
-  galleryHero3,
-  artistAlex,
-  artistDavid,
-  artistElena,
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+1",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+2",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+3",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+4",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+5",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+6",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+7",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+8",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+9",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+10",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+11",
+  "https://via.placeholder.com/400x300/393E46/FFFFFF?text=Gallery+Image+12",
 ];
 
 interface ExhibitionGalleryProps {
@@ -351,7 +337,6 @@ const ExhibitionGallery = ({
               </div>
             )}
           </div>
-
         </div>
 
         {/* Modal */}

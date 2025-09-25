@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,12 +22,22 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Search, Download, Trash2, Calendar, Filter } from "lucide-react";
+import {
+  Mail,
+  Search,
+  Download,
+  Trash2,
+  Calendar,
+  Filter,
+  Loader2,
+} from "lucide-react";
+import { apiClient } from "@/lib/apiClient";
 
 interface Subscriber {
   id: number;
   email: string;
-  subscribedAt: string;
+  name: string | null;
+  subscribed_at: string;
   status: "active" | "unsubscribed";
   source: string;
 }
@@ -37,79 +47,63 @@ const NewsletterManagement = () => {
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedYear, setSelectedYear] = useState<number>(2024);
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([
-    {
-      id: 1,
-      email: "john.doe@example.com",
-      subscribedAt: "2024-01-15T10:30:00Z",
-      status: "active",
-      source: "Website",
-    },
-    {
-      id: 2,
-      email: "sarah.wilson@example.com",
-      subscribedAt: "2024-01-20T14:45:00Z",
-      status: "active",
-      source: "Social Media",
-    },
-    {
-      id: 3,
-      email: "mike.chen@example.com",
-      subscribedAt: "2024-02-03T09:15:00Z",
-      status: "active",
-      source: "Website",
-    },
-    {
-      id: 4,
-      email: "emma.rodriguez@example.com",
-      subscribedAt: "2024-02-10T16:20:00Z",
-      status: "unsubscribed",
-      source: "Email Campaign",
-    },
-    {
-      id: 5,
-      email: "alex.thompson@example.com",
-      subscribedAt: "2024-02-15T11:30:00Z",
-      status: "active",
-      source: "Website",
-    },
-    {
-      id: 6,
-      email: "luna.park@example.com",
-      subscribedAt: "2024-02-20T13:45:00Z",
-      status: "active",
-      source: "Social Media",
-    },
-    {
-      id: 7,
-      email: "david.martinez@example.com",
-      subscribedAt: "2024-03-01T08:00:00Z",
-      status: "active",
-      source: "Website",
-    },
-    {
-      id: 8,
-      email: "sophie.brown@example.com",
-      subscribedAt: "2024-03-05T15:30:00Z",
-      status: "active",
-      source: "Referral",
-    },
-    {
-      id: 9,
-      email: "maria.garcia@example.com",
-      subscribedAt: "2024-03-10T12:15:00Z",
-      status: "active",
-      source: "Website",
-    },
-    {
-      id: 10,
-      email: "james.wilson@example.com",
-      subscribedAt: "2024-03-15T17:45:00Z",
-      status: "active",
-      source: "Social Media",
-    },
-  ]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
+
+  const fetchSubscribers = async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
+      // Check if user is authenticated
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        console.error("No admin token found");
+        if (isRefresh) {
+          setRefreshing(false);
+        } else {
+          setLoading(false);
+        }
+        return;
+      }
+
+      console.log(
+        "Fetching newsletter subscribers with token:",
+        token.substring(0, 20) + "..."
+      );
+      const data = await apiClient.getNewsletterSubscribers();
+      console.log("Newsletter data received:", data);
+      setSubscribers(data);
+    } catch (error) {
+      console.error("Error fetching subscribers:", error);
+      // Don't show error toast immediately, just log it
+      setSubscribers([]);
+    } finally {
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscribers();
+  }, []);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchSubscribers(true);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Filtering logic
   const filteredSubscribers = useMemo(() => {
@@ -210,7 +204,7 @@ const NewsletterManagement = () => {
   const availableYears = useMemo(() => {
     const years = new Set(
       subscribers.map((subscriber) =>
-        new Date(subscriber.subscribedAt).getFullYear()
+        new Date(subscriber.subscribed_at).getFullYear()
       )
     );
     return Array.from(years).sort((a, b) => b - a); // Sort descending (newest first)
@@ -219,10 +213,11 @@ const NewsletterManagement = () => {
   // Export functionality
   const handleExport = () => {
     const csvContent = [
-      ["Email", "Subscription Date", "Status", "Source"],
+      ["Name", "Email", "Subscription Date", "Status", "Source"],
       ...filteredSubscribers.map((subscriber) => [
+        subscriber.name || "",
         subscriber.email,
-        new Date(subscriber.subscribedAt).toLocaleDateString(),
+        new Date(subscriber.subscribed_at).toLocaleDateString(),
         subscriber.status,
         subscriber.source,
       ]),
@@ -249,12 +244,22 @@ const NewsletterManagement = () => {
   };
 
   // Delete functionality
-  const handleDelete = (id: number) => {
-    setSubscribers(subscribers.filter((subscriber) => subscriber.id !== id));
-    toast({
-      title: "Subscriber Deleted",
-      description: "The subscriber has been removed from the list",
-    });
+  const handleDelete = async (id: number) => {
+    try {
+      await apiClient.deleteNewsletterSubscriber(id);
+      setSubscribers(subscribers.filter((subscriber) => subscriber.id !== id));
+      toast({
+        title: "Subscriber Deleted",
+        description: "The subscriber has been removed from the database",
+      });
+    } catch (error) {
+      console.error("Error deleting subscriber:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete subscriber. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Format date helper
@@ -268,15 +273,43 @@ const NewsletterManagement = () => {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-theme-primary" />
+          <span className="ml-2 text-theme-text-muted">
+            Loading subscribers...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2 text-theme-text-primary">
-          Newsletter Management
-        </h2>
-        <p className="text-theme-text-muted">
-          Manage your newsletter subscribers and campaigns
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold mb-2 text-theme-text-primary">
+            Newsletter Management
+          </h2>
+          <p className="text-theme-text-muted">
+            Manage your newsletter subscribers and campaigns
+          </p>
+        </div>
+        <Button
+          onClick={() => fetchSubscribers(true)}
+          disabled={refreshing}
+          variant="outline"
+          size="sm"
+        >
+          {refreshing ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Mail className="w-4 h-4 mr-2" />
+          )}
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </Button>
       </div>
 
       {/* Overview Section */}
@@ -425,6 +458,9 @@ const NewsletterManagement = () => {
               <thead>
                 <tr className="border-b border-theme-border">
                   <th className="text-left py-3 px-4 font-medium text-theme-text-primary">
+                    Name
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-theme-text-primary">
                     Email
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-theme-text-primary">
@@ -442,6 +478,11 @@ const NewsletterManagement = () => {
                     className="border-b border-theme-border hover:bg-theme-surface/50 transition-colors"
                   >
                     <td className="py-3 px-4">
+                      <span className="font-medium text-theme-text-primary">
+                        {subscriber.name || "—"}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-theme-primary/10 rounded-full flex items-center justify-center">
                           <Mail className="w-4 h-4 text-theme-primary" />
@@ -452,7 +493,7 @@ const NewsletterManagement = () => {
                       </div>
                     </td>
                     <td className="py-3 px-4 text-theme-text-muted">
-                      {formatDate(subscriber.subscribedAt)}
+                      {formatDate(subscriber.subscribed_at)}
                     </td>
                     <td className="py-3 px-4 text-center">
                       <AlertDialog>
@@ -509,10 +550,15 @@ const NewsletterManagement = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-theme-text-primary truncate">
-                        {subscriber.email}
+                        {subscriber.name || subscriber.email}
                       </p>
+                      {subscriber.name && (
+                        <p className="text-sm text-theme-text-muted truncate">
+                          {subscriber.email}
+                        </p>
+                      )}
                       <p className="text-sm text-theme-text-muted">
-                        {formatDate(subscriber.subscribedAt)}
+                        {formatDate(subscriber.subscribed_at)}
                       </p>
                     </div>
                   </div>
@@ -529,9 +575,7 @@ const NewsletterManagement = () => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Delete Subscriber
-                          </AlertDialogTitle>
+                          <AlertDialogTitle>Delete Subscriber</AlertDialogTitle>
                           <AlertDialogDescription>
                             Are you sure you want to delete{" "}
                             <strong>{subscriber.email}</strong>? This action

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Eye, Image } from "lucide-react";
+import { apiClient } from "@/lib/apiClient";
 
 // Mock data structure - replace with real API calls later
 interface Artwork {
@@ -38,97 +39,42 @@ interface Artwork {
   slug: string;
 }
 
-const mockArtworks: Artwork[] = [
-  {
-    id: "1",
-    title: "Fluid Dynamics",
-    artist: "Elena Rodriguez",
-    year: 2024,
-    medium: "Acrylic on Canvas",
-    size: "48 x 60 inches",
-    description:
-      "An exploration of movement and form through organic shapes that dance across the canvas in harmonious blues and gold.",
-    images: ["/artwork-abstract-1.jpg"],
-    slug: "fluid-dynamics",
-  },
-  {
-    id: "2",
-    title: "Intersection",
-    artist: "Marcus Chen",
-    year: 2023,
-    medium: "Mixed Media",
-    size: "36 x 36 inches",
-    description:
-      "A minimalist composition examining the relationship between structure and space in contemporary urban environments.",
-    images: ["/artwork-geometric-1.jpg"],
-    slug: "intersection",
-  },
-  {
-    id: "3",
-    title: "Silent Contemplation",
-    artist: "Sarah Williams",
-    year: 2024,
-    medium: "Oil on Canvas",
-    size: "24 x 30 inches",
-    description:
-      "A powerful portrait capturing the quiet strength and introspective nature of the human spirit.",
-    images: ["/artwork-portrait-1.jpg"],
-    slug: "silent-contemplation",
-  },
-  {
-    id: "4",
-    title: "Earth Rhythms",
-    artist: "David Thompson",
-    year: 2023,
-    medium: "Acrylic on Canvas",
-    size: "40 x 50 inches",
-    description:
-      "Bold brushstrokes and earth tones create a dynamic composition celebrating the raw energy of nature.",
-    images: ["/artwork-abstract-2.jpg"],
-    slug: "earth-rhythms",
-  },
-  {
-    id: "5",
-    title: "Mountain Dreams",
-    artist: "Luna Park",
-    year: 2024,
-    medium: "Oil on Canvas",
-    size: "32 x 40 inches",
-    description:
-      "A contemporary interpretation of natural landscapes, blending realism with stylized forms and golden highlights.",
-    images: ["/artwork-landscape-1.jpg"],
-    slug: "mountain-dreams",
-  },
-  {
-    id: "6",
-    title: "Modern Forms",
-    artist: "Alex Rivera",
-    year: 2024,
-    medium: "Steel & Glass Installation",
-    size: "60 x 24 x 18 inches",
-    description:
-      "An innovative sculptural piece that challenges perception through the interplay of light, metal, and transparency.",
-    images: ["/artwork-sculpture-1.jpg"],
-    slug: "modern-forms",
-  },
-];
+// Artworks will be fetched from database
 
-// Mock artists data for dropdown
-const mockArtists = [
-  { id: "1", name: "Elena Rodriguez" },
-  { id: "2", name: "Marcus Chen" },
-  { id: "3", name: "Sarah Williams" },
-  { id: "4", name: "David Thompson" },
-  { id: "5", name: "Luna Park" },
-  { id: "6", name: "Alex Rivera" },
-];
+// Artists will be fetched from database
 
 const ArtworkManagement = () => {
-  const [artworks, setArtworks] = useState<Artwork[]>(mockArtworks);
+  const [artworks, setArtworks] = useState<Artwork[]>([]);
+  const [artists, setArtists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Artwork>>({});
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [artworksData, artistsData] = await Promise.all([
+          apiClient.getArtworks(),
+          apiClient.getArtists(),
+        ]);
+        setArtworks(artworksData);
+        setArtists(artistsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load artworks data",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [toast]);
 
   const handleEdit = (artwork: Artwork) => {
     setFormData(artwork);
@@ -151,7 +97,7 @@ const ArtworkManagement = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.title || !formData.artist) {
       toast({
         title: "Error",
@@ -161,44 +107,65 @@ const ArtworkManagement = () => {
       return;
     }
 
-    if (editingId) {
-      // Update existing artwork
-      setArtworks(
-        artworks.map((artwork) =>
-          artwork.id === editingId
-            ? ({ ...artwork, ...formData } as Artwork)
-            : artwork
-        )
-      );
-      toast({
-        title: "Success",
-        description: "Artwork updated successfully",
-      });
-    } else {
-      // Add new artwork
-      const newArtwork: Artwork = {
-        ...formData,
-        id: Date.now().toString(),
-        slug: formData.title?.toLowerCase().replace(/\s+/g, "-") || "",
-      } as Artwork;
+    try {
+      const artworkData = {
+        title: formData.title,
+        artist_id: formData.artist,
+        year: formData.year || "",
+        medium: formData.medium || "",
+        size: formData.size || "",
+        description: formData.description || "",
+        images: JSON.stringify(formData.images || []),
+      };
 
-      setArtworks([...artworks, newArtwork]);
+      if (editingId) {
+        // Update existing artwork
+        await apiClient.updateArtwork(parseInt(editingId), artworkData);
+        toast({
+          title: "Success",
+          description: "Artwork updated successfully",
+        });
+      } else {
+        // Add new artwork
+        await apiClient.createArtwork(artworkData);
+        toast({
+          title: "Success",
+          description: "New artwork added successfully",
+        });
+      }
+
+      // Refresh data from database
+      const artworksData = await apiClient.getArtworks();
+      setArtworks(artworksData);
+
+      setIsEditing(false);
+      setFormData({});
+    } catch (error) {
+      console.error("Error saving artwork:", error);
       toast({
-        title: "Success",
-        description: "New artwork added successfully",
+        title: "Error",
+        description: "Failed to save artwork",
+        variant: "destructive",
       });
     }
-
-    setIsEditing(false);
-    setFormData({});
   };
 
-  const handleDelete = (id: string) => {
-    setArtworks(artworks.filter((artwork) => artwork.id !== id));
-    toast({
-      title: "Success",
-      description: "Artwork deleted successfully",
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      await apiClient.deleteArtwork(parseInt(id));
+      setArtworks(artworks.filter((artwork) => artwork.id !== id));
+      toast({
+        title: "Success",
+        description: "Artwork deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting artwork:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete artwork",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleImageUpload = async (file: File) => {
@@ -262,7 +229,7 @@ const ArtworkManagement = () => {
                     <SelectValue placeholder="Select an artist" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockArtists.map((artist) => (
+                    {artists.map((artist) => (
                       <SelectItem key={artist.id} value={artist.name}>
                         {artist.name}
                       </SelectItem>

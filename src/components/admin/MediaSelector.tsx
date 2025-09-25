@@ -12,87 +12,8 @@ interface MediaFile {
   type: "image" | "document";
 }
 
-// Mock media files - updated to match actual website assets
-const mockMediaFiles: MediaFile[] = [
-  {
-    id: "1",
-    name: "gallery-hero.jpg",
-    url: "/src/assets/gallery-hero.jpg",
-    type: "image",
-  },
-  {
-    id: "2",
-    name: "artwork-abstract-1.jpg",
-    url: "/src/assets/artwork-abstract-1.jpg",
-    type: "image",
-  },
-  {
-    id: "3",
-    name: "artwork-geometric-1.jpg",
-    url: "/src/assets/artwork-geometric-1.jpg",
-    type: "image",
-  },
-  {
-    id: "4",
-    name: "artwork-portrait-1.jpg",
-    url: "/src/assets/artwork-portrait-1.jpg",
-    type: "image",
-  },
-  {
-    id: "5",
-    name: "artwork-abstract-2.jpg",
-    url: "/src/assets/artwork-abstract-2.jpg",
-    type: "image",
-  },
-  {
-    id: "6",
-    name: "artwork-landscape-1.jpg",
-    url: "/src/assets/artwork-landscape-1.jpg",
-    type: "image",
-  },
-  {
-    id: "7",
-    name: "artwork-sculpture-1.jpg",
-    url: "/src/assets/artwork-sculpture-1.jpg",
-    type: "image",
-  },
-  {
-    id: "8",
-    name: "artist-elena-rodriguez.jpg",
-    url: "/src/assets/artist-elena-rodriguez.jpg",
-    type: "image",
-  },
-  {
-    id: "9",
-    name: "artist-marcus-chen.jpg",
-    url: "/src/assets/artist-marcus-chen.jpg",
-    type: "image",
-  },
-  {
-    id: "10",
-    name: "artist-sarah-williams.jpg",
-    url: "/src/assets/artist-sarah-williams.jpg",
-    type: "image",
-  },
-  {
-    id: "11",
-    name: "artist-david-thompson.jpg",
-    url: "/src/assets/artist-david-thompson.jpg",
-    type: "image",
-  },
-  {
-    id: "12",
-    name: "artist-luna-park.jpg",
-    url: "/src/assets/artist-luna-park.jpg",
-    type: "image",
-  },
-  {
-    id: "13",
-    name: "artist-alex-rivera.jpg",
-    url: "/src/assets/artist-alex-rivera.jpg",
-    type: "image",
-  },
-];
+// Empty media files array - will be populated from actual file system
+const mockMediaFiles: MediaFile[] = [];
 
 interface MediaSelectorProps {
   selectedImage?: string;
