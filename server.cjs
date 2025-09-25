@@ -60,8 +60,8 @@ let pool = null;
 function getPool() {
   if (!pool) {
     console.log("Environment variables check:");
-    console.log("DATABASE_URL:", process.env.DATABASE_URL $1 "Set" : "Not set");
-    console.log("POSTGRES_URL:", process.env.POSTGRES_URL $2 "Set" : "Not set");
+    console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
+    console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
     console.log("NODE_ENV:", process.env.NODE_ENV);
 
     // Try DATABASE_URL first, then POSTGRES_URL
@@ -120,7 +120,7 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    console.log("Login attempt:", { username, password: password $3 "provided" : "missing" });
+    console.log("Login attempt:", { username, password: password ? "provided" : "missing" });
 
     if (!username || !password) {
       return res
@@ -188,15 +188,15 @@ app.get("/api/exhibitions", async (req, res) => {
       ...exhibition,
       gallery_images:
         typeof exhibition.gallery_images === "string"
-          $4 JSON.parse(exhibition.gallery_images || "[]")
+          ? JSON.parse(exhibition.gallery_images || "[]")
           : exhibition.gallery_images || [],
       assigned_artists:
         typeof exhibition.assigned_artists === "string"
-          $5 JSON.parse(exhibition.assigned_artists || "[]")
+          ? JSON.parse(exhibition.assigned_artists || "[]")
           : exhibition.assigned_artists || [],
       assigned_artworks:
         typeof exhibition.assigned_artworks === "string"
-          $6 JSON.parse(exhibition.assigned_artworks || "[]")
+          ? JSON.parse(exhibition.assigned_artworks || "[]")
           : exhibition.assigned_artworks || [],
     }));
     
@@ -247,11 +247,11 @@ app.get("/api/artists", async (req, res) => {
       ...artist,
       social_media:
         typeof artist.social_media === "string"
-          $7 JSON.parse(artist.social_media || "{}")
+          ? JSON.parse(artist.social_media || "{}")
           : artist.social_media || {},
       assigned_artworks:
         typeof artist.assigned_artworks === "string"
-          $8 JSON.parse(artist.assigned_artworks || "[]")
+          ? JSON.parse(artist.assigned_artworks || "[]")
           : artist.assigned_artworks || [],
     }));
     
@@ -303,7 +303,7 @@ app.get("/api/artworks", async (req, res) => {
       ...artwork,
       images:
         typeof artwork.images === "string"
-          $10 JSON.parse(artwork.images || "[]")
+          ? JSON.parse(artwork.images || "[]")
           : artwork.images || [],
     }));
     
@@ -357,17 +357,17 @@ app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
       gallery_images:
         exhibition.gallery_images &&
         typeof exhibition.gallery_images === "string"
-          $12 JSON.parse(exhibition.gallery_images)
+          ? JSON.parse(exhibition.gallery_images)
           : exhibition.gallery_images || [],
       assigned_artists:
         exhibition.assigned_artists &&
         typeof exhibition.assigned_artists === "string"
-          $13 JSON.parse(exhibition.assigned_artists)
+          ? JSON.parse(exhibition.assigned_artists)
           : exhibition.assigned_artists || [],
       assigned_artworks:
         exhibition.assigned_artworks &&
         typeof exhibition.assigned_artworks === "string"
-          $14 JSON.parse(exhibition.assigned_artworks)
+          ? JSON.parse(exhibition.assigned_artworks)
           : exhibition.assigned_artworks || [],
     }));
 
@@ -511,7 +511,7 @@ app.get("/api/admin/artists", authenticateToken, async (req, res) => {
       ...artist,
       social_media:
         artist.social_media && typeof artist.social_media === "string"
-          $44 JSON.parse(artist.social_media)
+          ? JSON.parse(artist.social_media)
           : artist.social_media || {},
     }));
 
@@ -613,7 +613,7 @@ app.get("/api/admin/artworks", authenticateToken, async (req, res) => {
       ...artwork,
       images:
         artwork.images && typeof artwork.images === "string"
-          $60 JSON.parse(artwork.images)
+          ? JSON.parse(artwork.images)
           : artwork.images || [],
     }));
 
@@ -986,7 +986,7 @@ app.get("/api/page-content", async (req, res) => {
         try {
           content =
             typeof page.content === "string"
-              $101 JSON.parse(page.content || "{}")
+              ? JSON.parse(page.content || "{}")
               : page.content || {};
         } catch (e) {
           console.error("Error parsing page content:", e);
@@ -1001,7 +1001,7 @@ app.get("/api/page-content", async (req, res) => {
         };
         return acc;
       }, {}),
-      contactInfo: contactInfo.length > 0 $102 contactInfo[0] : {},
+      contactInfo: contactInfo.length > 0 ? contactInfo[0] : {},
     };
 
     res.json(result);
@@ -1048,12 +1048,12 @@ app.put(
 
       if (content !== undefined) {
         updates.push("content = $106");
-        values.push(content $107 JSON.stringify(content) : null);
+        values.push(content ? JSON.stringify(content) : null);
       }
 
       if (isVisible !== undefined) {
         updates.push("is_visible = $108");
-        values.push(isVisible $109 1 : 0);
+        values.push(isVisible ? 1 : 0);
       }
 
       if (updates.length === 0) {
@@ -1125,7 +1125,7 @@ app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
 
     const currentContent =
       typeof currentSettings[0].content === "string"
-        $120 JSON.parse(currentSettings[0].content || "{}")
+        ? JSON.parse(currentSettings[0].content || "{}")
         : currentSettings[0].content || {};
     const updatedContent = {
       ...currentContent,
@@ -1156,8 +1156,8 @@ app.get("/api/health", (req, res) => {
 app.get("/api/test-db", async (req, res) => {
   try {
     console.log("Testing database connection...");
-    console.log("DATABASE_URL:", process.env.DATABASE_URL $124 "Set" : "Not set");
-    console.log("POSTGRES_URL:", process.env.POSTGRES_URL $125 "Set" : "Not set");
+    console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
+    console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
     
     const dbPool = getPool();
     const result = await dbPool.query("SELECT NOW() as current_time, version() as postgres_version");
@@ -1172,8 +1172,8 @@ app.get("/api/test-db", async (req, res) => {
       status: "ERROR", 
       message: "Database connection failed",
       error: error.message,
-      databaseUrl: process.env.DATABASE_URL $126 "Set" : "Not set",
-      postgresUrl: process.env.POSTGRES_URL $127 "Set" : "Not set"
+      databaseUrl: process.env.DATABASE_URL ? "Set" : "Not set",
+      postgresUrl: process.env.POSTGRES_URL ? "Set" : "Not set"
     });
   }
 });
