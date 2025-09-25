@@ -3,6 +3,9 @@ const cors = require("cors");
 const { Pool } = require("pg");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const fs = require("fs");
+const crypto = require("crypto");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,6 +15,38 @@ const JWT_SECRET =
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve uploaded files statically
+app.use("/uploads", express.static("uploads"));
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = `uploads/temp`;
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `${crypto.randomUUID()}-${file.originalname}`;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed!"), false);
+    }
+  },
+});
 
 // Database configuration
 let pool = null;
@@ -675,32 +710,112 @@ app.put("/api/admin/contact-info", authenticateToken, async (req, res) => {
 // Get hero images (public endpoint)
 app.get("/api/hero-images", async (req, res) => {
   try {
-    // For now, return empty array - this can be expanded later
-    res.json([]);
+    const files = await query(
+      "SELECT * FROM uploaded_files WHERE category = 'hero_image' ORDER BY created_at DESC"
+    );
+    res.json(files);
   } catch (error) {
     console.error("Error fetching hero images:", error);
     res.status(500).json({ error: "Failed to fetch hero images" });
   }
 });
 
-// File upload endpoints (minimal implementation)
-app.post("/api/upload", authenticateToken, async (req, res) => {
-  try {
-    // Minimal file upload implementation
-    res
-      .status(501)
-      .json({ error: "File upload not implemented in minimal server" });
-  } catch (error) {
-    console.error("File upload error:", error);
-    res.status(500).json({ error: "File upload failed" });
+// File upload endpoints
+app.post(
+  "/api/upload",
+  authenticateToken,
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      console.log("=== FILE UPLOAD ===");
+      console.log("Request body:", req.body);
+      console.log("Request file:", req.file);
+      console.log("Request headers:", req.headers);
+
+      if (!req.file) {
+        console.log("No file uploaded");
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const { category, uploadedBy } = req.body;
+      const finalCategory = category || "general";
+
+      console.log("File details:", {
+        originalname: req.file.originalname,
+        filename: req.file.filename,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        category: finalCategory,
+      });
+
+      // Create the final destination directory
+      const finalDir = `uploads/${finalCategory}`;
+      if (!fs.existsSync(finalDir)) {
+        fs.mkdirSync(finalDir, { recursive: true });
+      }
+
+      // Move file from temp to final location
+      const finalPath = `${finalDir}/${req.file.filename}`;
+      fs.renameSync(req.file.path, finalPath);
+
+      console.log("File moved to:", finalPath);
+
+      // Save file info to database
+      const result = await query(
+        `INSERT INTO uploaded_files (original_name, filename, file_path, file_size, mime_type, category, uploaded_by) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+        [
+          req.file.originalname,
+          req.file.filename,
+          finalPath,
+          req.file.size,
+          req.file.mimetype,
+          finalCategory,
+          uploadedBy || null,
+        ]
+      );
+
+      console.log("Database insert result:", result);
+
+      const response = {
+        success: true,
+        file: {
+          id: result[0].id,
+          originalName: req.file.originalname,
+          filename: req.file.filename,
+          filePath: finalPath,
+          url: `/uploads/${finalCategory}/${req.file.filename}`,
+          fileSize: req.file.size,
+          mimeType: req.file.mimetype,
+        },
+      };
+
+      console.log("Upload response:", response);
+      res.json(response);
+    } catch (error) {
+      console.error("File upload error:", error);
+      res.status(500).json({ error: "File upload failed" });
+    }
   }
-});
+);
 
 // Get uploaded files (admin only)
 app.get("/api/files", authenticateToken, async (req, res) => {
   try {
-    // For now, return empty array
-    res.json([]);
+    const { category } = req.query;
+
+    let queryStr = "SELECT * FROM uploaded_files";
+    let params = [];
+
+    if (category) {
+      queryStr += " WHERE category = $1";
+      params.push(category);
+    }
+
+    queryStr += " ORDER BY created_at DESC";
+
+    const files = await query(queryStr, params);
+    res.json(files);
   } catch (error) {
     console.error("Error fetching files:", error);
     res.status(500).json({ error: "Failed to fetch files" });
@@ -710,9 +825,29 @@ app.get("/api/files", authenticateToken, async (req, res) => {
 // Delete uploaded file
 app.delete("/api/files/:id", authenticateToken, async (req, res) => {
   try {
-    res
-      .status(501)
-      .json({ error: "File deletion not implemented in minimal server" });
+    const { id } = req.params;
+
+    // Get file info first
+    const files = await query("SELECT * FROM uploaded_files WHERE id = $1", [
+      id,
+    ]);
+    if (files.length === 0) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    const file = files[0];
+
+    // Delete file from filesystem
+    try {
+      fs.unlinkSync(file.file_path);
+    } catch (fsError) {
+      console.warn("Could not delete file from filesystem:", fsError.message);
+    }
+
+    // Delete file record from database
+    await query("DELETE FROM uploaded_files WHERE id = $1", [id]);
+
+    res.json({ success: true, message: "File deleted successfully" });
   } catch (error) {
     console.error("Error deleting file:", error);
     res.status(500).json({ error: "Failed to delete file" });
