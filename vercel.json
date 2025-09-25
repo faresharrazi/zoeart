@@ -10,18 +10,18 @@
       }
     },
     {
-      "src": "server.cjs",
+      "src": "server-minimal.cjs",
       "use": "@vercel/node"
     }
   ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "server.cjs"
+      "destination": "server-minimal.cjs"
     },
     {
       "source": "/admin/(.*)",
-      "destination": "server.cjs"
+      "destination": "server-minimal.cjs"
     },
     {
       "source": "/(.*)",
