@@ -104,7 +104,10 @@ const PageContentManagement = () => {
   // Debug: Log hero images
   useEffect(() => {
     console.log("PageContentManagement - Hero images:", heroImages);
-    console.log("PageContentManagement - Hero images loading:", heroImagesLoading);
+    console.log(
+      "PageContentManagement - Hero images loading:",
+      heroImagesLoading
+    );
   }, [heroImages, heroImagesLoading]);
 
   // Exhibition and Contact pages are always visible (handled in the UI logic)

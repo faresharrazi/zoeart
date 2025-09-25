@@ -704,13 +704,16 @@ app.get("/api/hero-images", async (req, res) => {
       "SELECT * FROM uploaded_files WHERE category = 'hero_image' ORDER BY created_at DESC"
     );
     console.log("Hero images found:", files.length);
-    console.log("Hero images data:", files.map(f => ({
-      id: f.id,
-      originalName: f.original_name,
-      filename: f.filename,
-      mimeType: f.mime_type,
-      hasFileData: !!f.file_data
-    })));
+    console.log(
+      "Hero images data:",
+      files.map((f) => ({
+        id: f.id,
+        originalName: f.original_name,
+        filename: f.filename,
+        mimeType: f.mime_type,
+        hasFileData: !!f.file_data,
+      }))
+    );
     res.json(files);
   } catch (error) {
     console.error("Error fetching hero images:", error);
@@ -723,7 +726,7 @@ app.get("/api/file/:id", async (req, res) => {
   try {
     const { id } = req.params;
     console.log("Serving file with ID:", id);
-    
+
     const files = await query("SELECT * FROM uploaded_files WHERE id = $1", [
       id,
     ]);
@@ -741,8 +744,16 @@ app.get("/api/file/:id", async (req, res) => {
       originalName: file.original_name,
       mimeType: file.mime_type,
       fileSize: file.file_size,
-      hasFileData: !!file.file_data
+      hasFileData: !!file.file_data,
     });
+
+    // Check if file_data exists
+    if (!file.file_data) {
+      console.log("File data is null for file ID:", id);
+      return res.status(404).json({ 
+        error: "File data not available. This file was uploaded before the database migration." 
+      });
+    }
 
     // Set appropriate headers
     res.setHeader("Content-Type", file.mime_type);

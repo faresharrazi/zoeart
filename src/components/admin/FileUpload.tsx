@@ -33,6 +33,7 @@ const FileUpload = ({
 }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [files, setFiles] = useState<UploadedFile[]>(existingFiles);
+  const [imageLoadingStates, setImageLoadingStates] = useState<Record<number, boolean>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -164,7 +165,7 @@ const FileUpload = ({
       </Card>
 
       {/* File List */}
-      {files.length > 0 && (
+      {files.length > 0 ? (
         <div className="space-y-2">
           <h4 className="font-medium text-gray-900">
             Uploaded Files ({files.length}/{maxFiles})
@@ -174,35 +175,58 @@ const FileUpload = ({
               console.log("FileUpload - Rendering file:", file);
               return (
                 <Card key={file.id} className="relative group">
-                <CardContent className="p-4">
+                  <CardContent className="p-4">
                   <div className="aspect-square relative mb-2">
+                    {imageLoadingStates[file.id] !== false && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                        <div className="text-sm text-gray-500">Loading...</div>
+                      </div>
+                    )}
                     <img
                       src={file.url}
                       alt={file.originalName}
                       className="w-full h-full object-cover rounded-lg"
+                      onLoadStart={() => {
+                        setImageLoadingStates(prev => ({ ...prev, [file.id]: true }));
+                      }}
+                      onError={(e) => {
+                        console.error("Image failed to load:", file.url, e);
+                        setImageLoadingStates(prev => ({ ...prev, [file.id]: false }));
+                        e.currentTarget.src = "https://via.placeholder.com/300x300/393E46/FFFFFF?text=Re-upload+Required";
+                      }}
+                      onLoad={() => {
+                        console.log("Image loaded successfully:", file.url);
+                        setImageLoadingStates(prev => ({ ...prev, [file.id]: false }));
+                      }}
                     />
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="absolute top-2 right-2 w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handleRemoveFile(file.id)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {file.originalName}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {formatFileSize(file.fileSize)}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="absolute top-2 right-2 w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRemoveFile(file.id)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {file.originalName}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatFileSize(file.fileSize)}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
+        </div>
+      ) : (
+        <div className="text-center py-8 text-gray-500">
+          <ImageIcon className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+          <p>No images uploaded yet</p>
+          <p className="text-sm">Upload images to see them here</p>
         </div>
       )}
     </div>
