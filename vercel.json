@@ -20,6 +20,10 @@
       "dest": "server.cjs"
     },
     {
+      "src": "/admin",
+      "dest": "server.cjs"
+    },
+    {
       "src": "/admin/(.*)",
       "dest": "server.cjs"
     },
