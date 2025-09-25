@@ -1178,6 +1178,25 @@ app.get("/api/test-db", async (req, res) => {
   }
 });
 
+// Check users table
+app.get("/api/test-users", async (req, res) => {
+  try {
+    const users = await query("SELECT id, username, email, role FROM users");
+    res.json({ 
+      status: "OK", 
+      message: "Users table check",
+      users: users
+    });
+  } catch (error) {
+    console.error("Users check failed:", error);
+    res.status(500).json({ 
+      status: "ERROR", 
+      message: "Users check failed",
+      error: error.message
+    });
+  }
+});
+
 // Serve React app for all other routes
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
