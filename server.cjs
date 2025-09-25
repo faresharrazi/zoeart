@@ -1130,6 +1130,9 @@ app.get("/api/health", (req, res) => {
 // Database connection test
 app.get("/api/test-db", async (req, res) => {
   try {
+    console.log("Testing database connection...");
+    console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
+    
     const result = await pool.query("SELECT NOW() as current_time, version() as postgres_version");
     res.json({ 
       status: "OK", 
@@ -1141,7 +1144,8 @@ app.get("/api/test-db", async (req, res) => {
     res.status(500).json({ 
       status: "ERROR", 
       message: "Database connection failed",
-      error: error.message 
+      error: error.message,
+      databaseUrl: process.env.DATABASE_URL ? "Set" : "Not set"
     });
   }
 });
