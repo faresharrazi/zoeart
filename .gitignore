@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Deployment packages
+*.zip
+deployment-package/
+vercel-deployment/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
