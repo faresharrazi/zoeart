@@ -55,23 +55,30 @@ const upload = multer({
 });
 
 // Database configuration for Supabase (PostgreSQL)
-console.log("Environment variables check:");
-console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
-console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
-console.log("NODE_ENV:", process.env.NODE_ENV);
+let pool = null;
 
-// Try DATABASE_URL first, then POSTGRES_URL
-const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+function getPool() {
+  if (!pool) {
+    console.log("Environment variables check:");
+    console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
+    console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
+    console.log("NODE_ENV:", process.env.NODE_ENV);
 
-if (!connectionString) {
-  console.error("No database connection string found!");
-  throw new Error("Database connection string not found");
+    // Try DATABASE_URL first, then POSTGRES_URL
+    const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+    if (!connectionString) {
+      console.error("No database connection string found!");
+      throw new Error("Database connection string not found");
+    }
+
+    pool = new Pool({
+      connectionString: connectionString,
+      ssl: { rejectUnauthorized: false },
+    });
+  }
+  return pool;
 }
-
-const pool = new Pool({
-  connectionString: connectionString,
-  ssl: { rejectUnauthorized: false },
-});
 
 // Authentication middleware
 const authenticateToken = (req, res, next) => {
@@ -94,7 +101,8 @@ const authenticateToken = (req, res, next) => {
 // Database query helper for PostgreSQL
 async function query(sql, params = []) {
   try {
-    const result = await pool.query(sql, params);
+    const dbPool = getPool();
+    const result = await dbPool.query(sql, params);
     return result.rows;
   } catch (error) {
     console.error("Database query error:", error);
@@ -1145,8 +1153,10 @@ app.get("/api/test-db", async (req, res) => {
   try {
     console.log("Testing database connection...");
     console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
+    console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
     
-    const result = await pool.query("SELECT NOW() as current_time, version() as postgres_version");
+    const dbPool = getPool();
+    const result = await dbPool.query("SELECT NOW() as current_time, version() as postgres_version");
     res.json({ 
       status: "OK", 
       message: "Database connected successfully",
@@ -1158,7 +1168,8 @@ app.get("/api/test-db", async (req, res) => {
       status: "ERROR", 
       message: "Database connection failed",
       error: error.message,
-      databaseUrl: process.env.DATABASE_URL ? "Set" : "Not set"
+      databaseUrl: process.env.DATABASE_URL ? "Set" : "Not set",
+      postgresUrl: process.env.POSTGRES_URL ? "Set" : "Not set"
     });
   }
 });
