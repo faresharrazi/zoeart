@@ -2,6 +2,14 @@
   "version": 2,
   "builds": [
     {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "installCommand": "npm install",
+        "buildCommand": "npm run build"
+      }
+    },
+    {
       "src": "server.cjs",
       "use": "@vercel/node"
     }
@@ -17,7 +25,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/$1"
+      "dest": "/dist/$1"
     }
   ],
   "env": {
