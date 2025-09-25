@@ -370,6 +370,9 @@ app.put("/api/page-content/:pageName", authenticateToken, async (req, res) => {
     const { pageName } = req.params;
     const { title, description, content, isVisible } = req.body;
 
+    console.log("Updating page content for:", pageName);
+    console.log("Update data:", { title, description, content, isVisible });
+
     // Get current page data
     const currentPage = await query(
       "SELECT * FROM page_content WHERE page_name = $1",
@@ -412,6 +415,73 @@ app.put("/api/page-content/:pageName", authenticateToken, async (req, res) => {
     const updateQuery = `UPDATE page_content SET ${updates.join(
       ", "
     )} WHERE page_name = $5`;
+
+    console.log("Update query:", updateQuery);
+    console.log("Values:", values);
+
+    await query(updateQuery, values);
+
+    res.json({ success: true, message: "Page content updated successfully" });
+  } catch (error) {
+    console.error("Error updating page content:", error);
+    res.status(500).json({ error: "Failed to update page content" });
+  }
+});
+
+// Admin page content update endpoint
+app.put("/api/admin/page-content/:pageName", authenticateToken, async (req, res) => {
+  try {
+    const { pageName } = req.params;
+    const { title, description, content, isVisible } = req.body;
+
+    console.log("Admin updating page content for:", pageName);
+    console.log("Update data:", { title, description, content, isVisible });
+
+    // Get current page data
+    const currentPage = await query(
+      "SELECT * FROM page_content WHERE page_name = $1",
+      [pageName]
+    );
+
+    if (currentPage.length === 0) {
+      return res.status(404).json({ error: "Page not found" });
+    }
+
+    const updates = [];
+    const values = [];
+
+    if (title !== undefined) {
+      updates.push("title = $1");
+      values.push(title || null);
+    }
+
+    if (description !== undefined) {
+      updates.push("description = $2");
+      values.push(description || null);
+    }
+
+    if (content !== undefined) {
+      updates.push("content = $3");
+      values.push(content ? JSON.stringify(content) : null);
+    }
+
+    if (isVisible !== undefined) {
+      updates.push("is_visible = $4");
+      values.push(isVisible ? 1 : 0);
+    }
+
+    if (updates.length === 0) {
+      return res.json({ success: true, message: "No changes to update" });
+    }
+
+    values.push(pageName);
+
+    const updateQuery = `UPDATE page_content SET ${updates.join(
+      ", "
+    )} WHERE page_name = $5`;
+
+    console.log("Admin update query:", updateQuery);
+    console.log("Values:", values);
 
     await query(updateQuery, values);
 
@@ -604,6 +674,310 @@ app.get("/api/admin/artworks", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Error fetching artworks:", error);
     res.status(500).json({ error: "Failed to fetch artworks" });
+  }
+});
+
+// Create exhibition
+app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
+  try {
+    const {
+      title,
+      slug,
+      description,
+      start_date,
+      end_date,
+      location,
+      curator,
+      status,
+      featured_image,
+      gallery_images,
+      assigned_artists,
+      assigned_artworks,
+      call_for_artists,
+      cta_link,
+      is_visible = true
+    } = req.body;
+
+    const result = await query(
+      `
+      INSERT INTO exhibitions (title, slug, description, start_date, end_date, location, curator, status, featured_image, gallery_images, assigned_artists, assigned_artworks, call_for_artists, cta_link, is_visible)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      RETURNING id
+    `,
+      [
+        title,
+        slug,
+        description,
+        start_date,
+        end_date,
+        location,
+        curator,
+        status,
+        featured_image,
+        JSON.stringify(gallery_images || []),
+        JSON.stringify(assigned_artists || []),
+        JSON.stringify(assigned_artworks || []),
+        call_for_artists ? 1 : 0,
+        cta_link,
+        is_visible ? 1 : 0
+      ]
+    );
+
+    res.json({ success: true, id: result[0].id });
+  } catch (error) {
+    console.error("Error creating exhibition:", error);
+    res.status(500).json({ error: "Failed to create exhibition" });
+  }
+});
+
+// Update exhibition
+app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      slug,
+      description,
+      start_date,
+      end_date,
+      location,
+      curator,
+      status,
+      featured_image,
+      gallery_images,
+      assigned_artists,
+      assigned_artworks,
+      call_for_artists,
+      cta_link,
+      is_visible
+    } = req.body;
+
+    await query(
+      `
+      UPDATE exhibitions 
+      SET title = $1, slug = $2, description = $3, start_date = $4, end_date = $5, location = $6, curator = $7, status = $8, featured_image = $9, gallery_images = $10, assigned_artists = $11, assigned_artworks = $12, call_for_artists = $13, cta_link = $14, is_visible = $15, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $16
+    `,
+      [
+        title,
+        slug,
+        description,
+        start_date,
+        end_date,
+        location,
+        curator,
+        status,
+        featured_image,
+        JSON.stringify(gallery_images || []),
+        JSON.stringify(assigned_artists || []),
+        JSON.stringify(assigned_artworks || []),
+        call_for_artists ? 1 : 0,
+        cta_link,
+        is_visible ? 1 : 0,
+        id
+      ]
+    );
+
+    res.json({ success: true, message: "Exhibition updated successfully" });
+  } catch (error) {
+    console.error("Error updating exhibition:", error);
+    res.status(500).json({ error: "Failed to update exhibition" });
+  }
+});
+
+// Delete exhibition
+app.delete("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query("DELETE FROM exhibitions WHERE id = $1", [id]);
+    res.json({ success: true, message: "Exhibition deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting exhibition:", error);
+    res.status(500).json({ error: "Failed to delete exhibition" });
+  }
+});
+
+// Create artist
+app.post("/api/admin/artists", authenticateToken, async (req, res) => {
+  try {
+    const {
+      name,
+      slug,
+      specialty,
+      bio,
+      profile_image,
+      social_media,
+      is_visible = true
+    } = req.body;
+
+    const result = await query(
+      `
+      INSERT INTO artists (name, slug, specialty, bio, profile_image, social_media, is_visible)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id
+    `,
+      [
+        name,
+        slug,
+        specialty,
+        bio,
+        profile_image,
+        JSON.stringify(social_media || {}),
+        is_visible ? 1 : 0
+      ]
+    );
+
+    res.json({ success: true, id: result[0].id });
+  } catch (error) {
+    console.error("Error creating artist:", error);
+    res.status(500).json({ error: "Failed to create artist" });
+  }
+});
+
+// Update artist
+app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      slug,
+      specialty,
+      bio,
+      profile_image,
+      social_media,
+      is_visible
+    } = req.body;
+
+    await query(
+      `
+      UPDATE artists 
+      SET name = $1, slug = $2, specialty = $3, bio = $4, profile_image = $5, social_media = $6, is_visible = $7, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $8
+    `,
+      [
+        name,
+        slug,
+        specialty,
+        bio,
+        profile_image,
+        JSON.stringify(social_media || {}),
+        is_visible ? 1 : 0,
+        id
+      ]
+    );
+
+    res.json({ success: true, message: "Artist updated successfully" });
+  } catch (error) {
+    console.error("Error updating artist:", error);
+    res.status(500).json({ error: "Failed to update artist" });
+  }
+});
+
+// Delete artist
+app.delete("/api/admin/artists/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query("DELETE FROM artists WHERE id = $1", [id]);
+    res.json({ success: true, message: "Artist deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting artist:", error);
+    res.status(500).json({ error: "Failed to delete artist" });
+  }
+});
+
+// Create artwork
+app.post("/api/admin/artworks", authenticateToken, async (req, res) => {
+  try {
+    const {
+      title,
+      slug,
+      artist_id,
+      year,
+      medium,
+      size,
+      description,
+      images,
+      is_visible = true
+    } = req.body;
+
+    const result = await query(
+      `
+      INSERT INTO artworks (title, slug, artist_id, year, medium, size, description, images, is_visible)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id
+    `,
+      [
+        title,
+        slug,
+        artist_id,
+        year,
+        medium,
+        size,
+        description,
+        JSON.stringify(images || []),
+        is_visible ? 1 : 0
+      ]
+    );
+
+    res.json({ success: true, id: result[0].id });
+  } catch (error) {
+    console.error("Error creating artwork:", error);
+    res.status(500).json({ error: "Failed to create artwork" });
+  }
+});
+
+// Update artwork
+app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      slug,
+      artist_id,
+      year,
+      medium,
+      size,
+      description,
+      images,
+      is_visible
+    } = req.body;
+
+    await query(
+      `
+      UPDATE artworks 
+      SET title = $1, slug = $2, artist_id = $3, year = $4, medium = $5, size = $6, description = $7, images = $8, is_visible = $9, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $10
+    `,
+      [
+        title,
+        slug,
+        artist_id,
+        year,
+        medium,
+        size,
+        description,
+        JSON.stringify(images || []),
+        is_visible ? 1 : 0,
+        id
+      ]
+    );
+
+    res.json({ success: true, message: "Artwork updated successfully" });
+  } catch (error) {
+    console.error("Error updating artwork:", error);
+    res.status(500).json({ error: "Failed to update artwork" });
+  }
+});
+
+// Delete artwork
+app.delete("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query("DELETE FROM artworks WHERE id = $1", [id]);
+    res.json({ success: true, message: "Artwork deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting artwork:", error);
+    res.status(500).json({ error: "Failed to delete artwork" });
   }
 });
 
