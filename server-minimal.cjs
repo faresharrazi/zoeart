@@ -246,8 +246,12 @@ app.get("/api/artworks", async (req, res) => {
 // Get page content
 app.get("/api/page-content", async (req, res) => {
   try {
+    console.log("Fetching page content...");
     const pages = await query("SELECT * FROM page_content");
     const contactInfo = await query("SELECT * FROM contact_info");
+
+    console.log("Pages found:", pages.length);
+    console.log("Contact info found:", contactInfo.length);
 
     const pageData = pages.reduce((acc, page) => {
       try {
@@ -258,15 +262,26 @@ app.get("/api/page-content", async (req, res) => {
             : page.content || {}
         };
       } catch (e) {
+        console.error("Error parsing page content for", page.page_name, e);
         acc[page.page_name] = { ...page, content: {} };
       }
       return acc;
     }, {});
 
-    res.json({
-      ...pageData,
+    const response = {
+      pages: pageData,
       contactInfo: contactInfo.length > 0 ? contactInfo[0] : {},
+    };
+
+    console.log("Page data keys:", Object.keys(pageData));
+    console.log("Response structure:", {
+      hasPages: !!response.pages,
+      hasHome: !!response.pages.home,
+      hasContactInfo: !!response.contactInfo,
+      keys: Object.keys(response)
     });
+
+    res.json(response);
   } catch (error) {
     console.error("Error fetching page content:", error);
     res.status(500).json({ error: "Failed to fetch page content" });
