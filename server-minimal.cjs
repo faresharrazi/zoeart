@@ -273,8 +273,34 @@ app.get("/api/page-content", async (req, res) => {
   }
 });
 
+// Get hero images
+app.get("/api/hero-images", async (req, res) => {
+  try {
+    // For now, return empty array - this can be expanded later
+    res.json([]);
+  } catch (error) {
+    console.error("Error fetching hero images:", error);
+    res.status(500).json({ error: "Failed to fetch hero images" });
+  }
+});
+
 // Get newsletter subscribers
 app.get("/api/newsletter", authenticateToken, async (req, res) => {
+  try {
+    const subscribers = await query(`
+      SELECT id, email, name, subscribed_at, status 
+      FROM newsletter_subscribers 
+      ORDER BY subscribed_at DESC
+    `);
+    res.json(subscribers);
+  } catch (error) {
+    console.error("Error fetching newsletter subscribers:", error);
+    res.status(500).json({ error: "Failed to fetch newsletter subscribers" });
+  }
+});
+
+// Admin newsletter endpoint (for admin panel)
+app.get("/api/admin/newsletter", authenticateToken, async (req, res) => {
   try {
     const subscribers = await query(`
       SELECT id, email, name, subscribed_at, status 
@@ -467,6 +493,102 @@ app.put("/api/user", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Error updating user:", error);
     res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
+// Delete newsletter subscriber
+app.delete("/api/newsletter/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query("DELETE FROM newsletter_subscribers WHERE id = $1", [id]);
+    res.json({ success: true, message: "Subscriber deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting newsletter subscriber:", error);
+    res.status(500).json({ error: "Failed to delete newsletter subscriber" });
+  }
+});
+
+// Admin endpoints for CRUD operations
+// Get all exhibitions (admin)
+app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
+  try {
+    const exhibitions = await query(`
+      SELECT * FROM exhibitions 
+      ORDER BY start_date DESC
+    `);
+
+    const formattedExhibitions = exhibitions.map((exhibition) => ({
+      ...exhibition,
+      gallery_images:
+        typeof exhibition.gallery_images === "string"
+          ? JSON.parse(exhibition.gallery_images || "[]")
+          : exhibition.gallery_images || [],
+      assigned_artists:
+        typeof exhibition.assigned_artists === "string"
+          ? JSON.parse(exhibition.assigned_artists || "[]")
+          : exhibition.assigned_artists || [],
+      assigned_artworks:
+        typeof exhibition.assigned_artworks === "string"
+          ? JSON.parse(exhibition.assigned_artworks || "[]")
+          : exhibition.assigned_artworks || [],
+    }));
+    
+    res.json(formattedExhibitions);
+  } catch (error) {
+    console.error("Error fetching exhibitions:", error);
+    res.status(500).json({ error: "Failed to fetch exhibitions" });
+  }
+});
+
+// Get all artists (admin)
+app.get("/api/admin/artists", authenticateToken, async (req, res) => {
+  try {
+    const artists = await query(`
+      SELECT * FROM artists 
+      ORDER BY name ASC
+    `);
+
+    const formattedArtists = artists.map((artist) => ({
+      ...artist,
+      social_media:
+        typeof artist.social_media === "string"
+          ? JSON.parse(artist.social_media || "{}")
+          : artist.social_media || {},
+      assigned_artworks:
+        typeof artist.assigned_artworks === "string"
+          ? JSON.parse(artist.assigned_artworks || "[]")
+          : artist.assigned_artworks || [],
+    }));
+
+    res.json(formattedArtists);
+  } catch (error) {
+    console.error("Error fetching artists:", error);
+    res.status(500).json({ error: "Failed to fetch artists" });
+  }
+});
+
+// Get all artworks (admin)
+app.get("/api/admin/artworks", authenticateToken, async (req, res) => {
+  try {
+    const artworks = await query(`
+      SELECT a.*, ar.name as artist_name 
+      FROM artworks a
+      LEFT JOIN artists ar ON a.artist_id = ar.id
+      ORDER BY a.created_at DESC
+    `);
+
+    const formattedArtworks = artworks.map((artwork) => ({
+      ...artwork,
+      images:
+        typeof artwork.images === "string"
+          ? JSON.parse(artwork.images || "[]")
+          : artwork.images || [],
+    }));
+
+    res.json(formattedArtworks);
+  } catch (error) {
+    console.error("Error fetching artworks:", error);
+    res.status(500).json({ error: "Failed to fetch artworks" });
   }
 });
 
