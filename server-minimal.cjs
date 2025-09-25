@@ -19,28 +19,8 @@ app.use(express.json());
 // Serve uploaded files statically
 app.use("/uploads", express.static("uploads"));
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    console.log("Multer destination called for file:", file.originalname);
-    const uploadPath = `uploads/temp`;
-    try {
-      if (!fs.existsSync(uploadPath)) {
-        fs.mkdirSync(uploadPath, { recursive: true });
-        console.log("Created upload directory:", uploadPath);
-      }
-      cb(null, uploadPath);
-    } catch (error) {
-      console.error("Error creating upload directory:", error);
-      cb(error, null);
-    }
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${crypto.randomUUID()}-${file.originalname}`;
-    console.log("Generated filename:", uniqueName);
-    cb(null, uniqueName);
-  },
-});
+// Configure multer for file uploads (memory storage for Vercel)
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
@@ -729,6 +709,36 @@ app.get("/api/hero-images", async (req, res) => {
   }
 });
 
+// Serve uploaded files from database
+app.get("/api/file/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const files = await query(
+      "SELECT * FROM uploaded_files WHERE id = $1",
+      [id]
+    );
+
+    if (files.length === 0) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    const file = files[0];
+    
+    // Set appropriate headers
+    res.setHeader('Content-Type', file.mime_type);
+    res.setHeader('Content-Length', file.file_size);
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    res.setHeader('Content-Disposition', `inline; filename="${file.original_name}"`);
+
+    // Send the binary data directly from database
+    res.send(file.file_data);
+  } catch (error) {
+    console.error("Error serving file:", error);
+    res.status(500).json({ error: "Failed to serve file" });
+  }
+});
+
+
 // File upload endpoints
 app.post(
   "/api/upload",
@@ -738,7 +748,7 @@ app.post(
     try {
       console.log("=== FILE UPLOAD ===");
       console.log("Request body:", req.body);
-      console.log("Request file:", req.file);
+      console.log("Request file:", req.file ? "File present" : "No file");
       console.log("Request headers:", req.headers);
 
       if (!req.file) {
@@ -751,36 +761,33 @@ app.post(
 
       console.log("File details:", {
         originalname: req.file.originalname,
-        filename: req.file.filename,
         size: req.file.size,
         mimetype: req.file.mimetype,
         category: finalCategory,
       });
 
-      // Create the final destination directory
-      const finalDir = `uploads/${finalCategory}`;
-      if (!fs.existsSync(finalDir)) {
-        fs.mkdirSync(finalDir, { recursive: true });
-      }
+      // Generate a unique filename
+      const uniqueFilename = `${crypto.randomUUID()}-${req.file.originalname}`;
+      const filePath = `uploads/${finalCategory}/${uniqueFilename}`;
 
-      // Move file from temp to final location
-      const finalPath = `${finalDir}/${req.file.filename}`;
-      fs.renameSync(req.file.path, finalPath);
+      console.log("Generated filename:", uniqueFilename);
 
-      console.log("File moved to:", finalPath);
+      // Store binary file data directly in PostgreSQL database
+      const fileBuffer = req.file.buffer;
 
-      // Save file info to database
+      // Save file info to database with binary data
       const result = await query(
-        `INSERT INTO uploaded_files (original_name, filename, file_path, file_size, mime_type, category, uploaded_by) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+        `INSERT INTO uploaded_files (original_name, filename, file_path, file_size, mime_type, category, uploaded_by, file_data) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
         [
           req.file.originalname,
-          req.file.filename,
-          finalPath,
+          uniqueFilename,
+          filePath,
           req.file.size,
           req.file.mimetype,
           finalCategory,
           uploadedBy || null,
+          fileBuffer, // Store binary data directly
         ]
       );
 
@@ -791,9 +798,9 @@ app.post(
         file: {
           id: result[0].id,
           originalName: req.file.originalname,
-          filename: req.file.filename,
-          filePath: finalPath,
-          url: `/uploads/${finalCategory}/${req.file.filename}`,
+          filename: uniqueFilename,
+          filePath: filePath,
+          url: `/api/file/${result[0].id}`, // Use API endpoint to serve files
           fileSize: req.file.size,
           mimeType: req.file.mimetype,
         },

@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     file_size INTEGER NOT NULL,
     mime_type VARCHAR(100) NOT NULL,
     category VARCHAR(20) NOT NULL CHECK (category IN ('hero_image', 'artwork', 'artist_profile', 'exhibition', 'gallery')),
+    file_data BYTEA, -- Store binary file data directly in database
     uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
