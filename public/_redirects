@@ -1,0 +1,4 @@
+# Redirect all non-API routes to index.html for React Router
+/api/* 200
+/admin/* 200
+/*    /index.html   200

@@ -20,44 +20,8 @@
       "dest": "server.cjs"
     },
     {
-      "src": "/admin",
-      "dest": "server.cjs"
-    },
-    {
       "src": "/admin/(.*)",
       "dest": "server.cjs"
-    },
-    {
-      "src": "/exhibitions",
-      "dest": "/dist/index.html"
-    },
-    {
-      "src": "/artists",
-      "dest": "/dist/index.html"
-    },
-    {
-      "src": "/collection",
-      "dest": "/dist/index.html"
-    },
-    {
-      "src": "/about",
-      "dest": "/dist/index.html"
-    },
-    {
-      "src": "/contact",
-      "dest": "/dist/index.html"
-    },
-    {
-      "src": "/exhibition/(.*)",
-      "dest": "/dist/index.html"
-    },
-    {
-      "src": "/artist/(.*)",
-      "dest": "/dist/index.html"
-    },
-    {
-      "src": "/artwork/(.*)",
-      "dest": "/dist/index.html"
     },
     {
       "src": "/(.*)",
