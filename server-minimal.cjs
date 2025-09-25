@@ -699,9 +699,18 @@ app.put("/api/admin/contact-info", authenticateToken, async (req, res) => {
 // Get hero images (public endpoint)
 app.get("/api/hero-images", async (req, res) => {
   try {
+    console.log("Fetching hero images...");
     const files = await query(
       "SELECT * FROM uploaded_files WHERE category = 'hero_image' ORDER BY created_at DESC"
     );
+    console.log("Hero images found:", files.length);
+    console.log("Hero images data:", files.map(f => ({
+      id: f.id,
+      originalName: f.original_name,
+      filename: f.filename,
+      mimeType: f.mime_type,
+      hasFileData: !!f.file_data
+    })));
     res.json(files);
   } catch (error) {
     console.error("Error fetching hero images:", error);
@@ -713,22 +722,36 @@ app.get("/api/hero-images", async (req, res) => {
 app.get("/api/file/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const files = await query(
-      "SELECT * FROM uploaded_files WHERE id = $1",
-      [id]
-    );
+    console.log("Serving file with ID:", id);
+    
+    const files = await query("SELECT * FROM uploaded_files WHERE id = $1", [
+      id,
+    ]);
+
+    console.log("Found files:", files.length);
 
     if (files.length === 0) {
+      console.log("File not found for ID:", id);
       return res.status(404).json({ error: "File not found" });
     }
 
     const file = files[0];
-    
+    console.log("File details:", {
+      id: file.id,
+      originalName: file.original_name,
+      mimeType: file.mime_type,
+      fileSize: file.file_size,
+      hasFileData: !!file.file_data
+    });
+
     // Set appropriate headers
-    res.setHeader('Content-Type', file.mime_type);
-    res.setHeader('Content-Length', file.file_size);
-    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-    res.setHeader('Content-Disposition', `inline; filename="${file.original_name}"`);
+    res.setHeader("Content-Type", file.mime_type);
+    res.setHeader("Content-Length", file.file_size);
+    res.setHeader("Cache-Control", "public, max-age=31536000"); // Cache for 1 year
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${file.original_name}"`
+    );
 
     // Send the binary data directly from database
     res.send(file.file_data);
@@ -737,7 +760,6 @@ app.get("/api/file/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to serve file" });
   }
 });
-
 
 // File upload endpoints
 app.post(

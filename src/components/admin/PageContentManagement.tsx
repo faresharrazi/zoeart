@@ -101,6 +101,12 @@ const PageContentManagement = () => {
     refreshHeroImages,
   } = useHeroImages();
 
+  // Debug: Log hero images
+  useEffect(() => {
+    console.log("PageContentManagement - Hero images:", heroImages);
+    console.log("PageContentManagement - Hero images loading:", heroImagesLoading);
+  }, [heroImages, heroImagesLoading]);
+
   // Exhibition and Contact pages are always visible (handled in the UI logic)
 
   // Data is now fetched from database via usePageDataFromDB hook
