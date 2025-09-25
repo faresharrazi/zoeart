@@ -57,10 +57,19 @@ const upload = multer({
 // Database configuration for Supabase (PostgreSQL)
 console.log("Environment variables check:");
 console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
+console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
 console.log("NODE_ENV:", process.env.NODE_ENV);
 
+// Try DATABASE_URL first, then POSTGRES_URL
+const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+if (!connectionString) {
+  console.error("No database connection string found!");
+  throw new Error("Database connection string not found");
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connectionString,
   ssl: { rejectUnauthorized: false },
 });
 
@@ -178,7 +187,7 @@ app.get("/api/exhibitions", async (req, res) => {
           ? JSON.parse(exhibition.assigned_artworks || "[]")
           : exhibition.assigned_artworks || [],
     }));
-
+    
     res.json(formattedExhibitions);
   } catch (error) {
     console.error("Error fetching exhibitions:", error);
@@ -193,11 +202,11 @@ app.get("/api/exhibitions/:id", async (req, res) => {
       `SELECT * FROM exhibitions WHERE id = ? AND is_visible = true`,
       [req.params.id]
     );
-
+    
     if (exhibitions.length === 0) {
       return res.status(404).json({ error: "Exhibition not found" });
     }
-
+    
     const exhibition = exhibitions[0];
     const formattedExhibition = {
       ...exhibition,
@@ -205,7 +214,7 @@ app.get("/api/exhibitions/:id", async (req, res) => {
       assigned_artists: JSON.parse(exhibition.assigned_artists || "[]"),
       assigned_artworks: JSON.parse(exhibition.assigned_artworks || "[]"),
     };
-
+    
     res.json(formattedExhibition);
   } catch (error) {
     console.error("Error fetching exhibition:", error);
@@ -233,7 +242,7 @@ app.get("/api/artists", async (req, res) => {
           ? JSON.parse(artist.assigned_artworks || "[]")
           : artist.assigned_artworks || [],
     }));
-
+    
     res.json(formattedArtists);
   } catch (error) {
     console.error("Error fetching artists:", error);
@@ -248,18 +257,18 @@ app.get("/api/artists/:id", async (req, res) => {
       `SELECT * FROM artists WHERE id = ? AND is_visible = true`,
       [req.params.id]
     );
-
+    
     if (artists.length === 0) {
       return res.status(404).json({ error: "Artist not found" });
     }
-
+    
     const artist = artists[0];
     const formattedArtist = {
       ...artist,
       social_media: JSON.parse(artist.social_media || "{}"),
       assigned_artworks: JSON.parse(artist.assigned_artworks || "[]"),
     };
-
+    
     res.json(formattedArtist);
   } catch (error) {
     console.error("Error fetching artist:", error);
@@ -277,7 +286,7 @@ app.get("/api/artworks", async (req, res) => {
       WHERE a.is_visible = true
       ORDER BY a.created_at DESC
     `);
-
+    
     const formattedArtworks = artworks.map((artwork) => ({
       ...artwork,
       images:
@@ -285,7 +294,7 @@ app.get("/api/artworks", async (req, res) => {
           ? JSON.parse(artwork.images || "[]")
           : artwork.images || [],
     }));
-
+    
     res.json(formattedArtworks);
   } catch (error) {
     console.error("Error fetching artworks:", error);
@@ -305,17 +314,17 @@ app.get("/api/artworks/:id", async (req, res) => {
     `,
       [req.params.id]
     );
-
+    
     if (artworks.length === 0) {
       return res.status(404).json({ error: "Artwork not found" });
     }
-
+    
     const artwork = artworks[0];
     const formattedArtwork = {
       ...artwork,
       images: JSON.parse(artwork.images || "[]"),
     };
-
+    
     res.json(formattedArtwork);
   } catch (error) {
     console.error("Error fetching artwork:", error);
@@ -455,7 +464,7 @@ app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
         id,
       ]
     );
-
+    
     res.json({ id, ...req.body });
   } catch (error) {
     console.error("Error updating exhibition:", error);
@@ -467,10 +476,10 @@ app.delete(
   "/api/admin/exhibitions/:id",
   authenticateToken,
   async (req, res) => {
-    try {
-      const { id } = req.params;
+  try {
+    const { id } = req.params;
       await query("DELETE FROM exhibitions WHERE id = ?", [id]);
-      res.json({ success: true });
+    res.json({ success: true });
     } catch (error) {
       console.error("Error deleting exhibition:", error);
       res.status(500).json({ error: "Failed to delete exhibition" });
@@ -504,12 +513,12 @@ app.get("/api/admin/artists", authenticateToken, async (req, res) => {
 app.post("/api/admin/artists", async (req, res) => {
   try {
     const { name, specialty, bio, profile_image, social_media } = req.body;
-
+    
     const slug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
-
+    
     const result = await query(
       `
       INSERT INTO artists (name, slug, specialty, bio, profile_image, social_media, is_visible)
@@ -537,12 +546,12 @@ app.put("/api/admin/artists/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { name, specialty, bio, profile_image, social_media } = req.body;
-
+    
     const slug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
-
+    
     await query(
       `
       UPDATE artists 
@@ -559,7 +568,7 @@ app.put("/api/admin/artists/:id", async (req, res) => {
         id,
       ]
     );
-
+    
     res.json({ id, ...req.body });
   } catch (error) {
     console.error("Error updating artist:", error);
@@ -643,12 +652,12 @@ app.put("/api/admin/artworks/:id", async (req, res) => {
     const { id } = req.params;
     const { title, artist_id, year, medium, size, description, images } =
       req.body;
-
+    
     const slug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
-
+    
     await query(
       `
       UPDATE artworks 
@@ -667,7 +676,7 @@ app.put("/api/admin/artworks/:id", async (req, res) => {
         id,
       ]
     );
-
+    
     res.json({ id, ...req.body });
   } catch (error) {
     console.error("Error updating artwork:", error);
