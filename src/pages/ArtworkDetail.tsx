@@ -125,7 +125,7 @@ const ArtworkDetail = () => {
         <Navigation />
         <div className="pt-24 pb-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Artwork Not Found</h1>
-          <Button onClick={() => navigate("/")} variant="outline">
+          <Button onClick={() => navigate("/collection")} variant="outline">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Gallery
           </Button>
@@ -144,7 +144,7 @@ const ArtworkDetail = () => {
           {/* Back Button */}
           <div className="mb-8">
             <Button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/collection")}
               variant="outline"
               className="hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
             >

@@ -352,12 +352,6 @@ const ExhibitionGallery = ({
             )}
           </div>
 
-          {/* Album Info */}
-          <div className="text-center mt-6">
-            <p className="text-theme-text-muted text-sm">
-              {images.length} images • Click any image to view full size
-            </p>
-          </div>
         </div>
 
         {/* Modal */}
