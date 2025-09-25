@@ -199,7 +199,7 @@ class ApiClient {
   }
 
   async updateContactInfo(data: any) {
-    return this.request("/admin/contact-info", {
+    return this.request("/contact-info", {
       method: "PUT",
       body: JSON.stringify(data),
     });

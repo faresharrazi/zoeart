@@ -152,7 +152,17 @@ const PageContentManagement = () => {
       // Update using database API calls
       if (editingPage === "home") {
         console.log("Admin: Updating home settings");
-        await apiClient.updateHomeSettings(formData);
+        // Extract content fields for home page
+        const { footerDescription, galleryHours, ...otherFields } = formData;
+        const homeData = {
+          title: formData.title,
+          description: formData.description,
+          content: {
+            footerDescription,
+            galleryHours,
+          },
+        };
+        await apiClient.updateHomeSettings(homeData);
         toast({
           title: "Success",
           description: "Home settings updated successfully",

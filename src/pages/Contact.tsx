@@ -95,7 +95,7 @@ const Contact = () => {
               {pageData.contact?.title || "Contact Us"}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-              {pageData.contact?.description || "Get in touch with us"}
+              {pageData.contact?.description || pageData.contact?.content?.description || "Get in touch with us"}
             </p>
           </div>
         </div>
