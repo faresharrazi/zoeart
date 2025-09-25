@@ -120,6 +120,8 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    console.log("Login attempt:", { username, password: password ? "provided" : "missing" });
+
     if (!username || !password) {
       return res
         .status(400)
@@ -131,6 +133,8 @@ app.post("/api/auth/login", async (req, res) => {
       "SELECT id, username, email, password_hash, role FROM users WHERE username = ?",
       [username]
     );
+
+    console.log("Found users:", users.length);
 
     if (users.length === 0) {
       return res.status(401).json({ error: "Invalid credentials" });
