@@ -147,11 +147,14 @@ const PageContentManagement = () => {
           mimeType: img.mimeType,
         })),
       };
-      
+
       console.log("PCM: Setting form data for home:", formDataToSet);
-      console.log("PCM: Hero image IDs from page data:", pageDataToEdit?.heroImageIds);
+      console.log(
+        "PCM: Hero image IDs from page data:",
+        pageDataToEdit?.heroImageIds
+      );
       console.log("PCM: All hero images:", heroImages);
-      
+
       setFormData(formDataToSet);
     } else if (pageId === "contactInfo") {
       // For contact info, combine page data with contact info
@@ -467,16 +470,18 @@ const PageContentManagement = () => {
                         });
                       }}
                       existingFiles={(() => {
-                        const filteredImages = formData.heroImageIds && formData.heroImageIds.length > 0
-                          ? heroImages.filter((img) =>
-                              formData.heroImageIds.includes(img.id)
-                            )
-                          : [];
+                        const filteredImages =
+                          formData.heroImageIds &&
+                          formData.heroImageIds.length > 0
+                            ? heroImages.filter((img) =>
+                                formData.heroImageIds.includes(img.id)
+                              )
+                            : [];
                         console.log("PCM: FileUpload existingFiles:", {
                           heroImageIds: formData.heroImageIds,
                           allHeroImages: heroImages.length,
                           filteredImages: filteredImages.length,
-                          filteredImagesData: filteredImages
+                          filteredImagesData: filteredImages,
                         });
                         return filteredImages;
                       })()}
