@@ -138,16 +138,18 @@ const ExhibitionDetail = () => {
             )}
 
             {/* Join as an Artist Button */}
-            {(exhibition.call_for_artists === true || exhibition.call_for_artists === 1) && exhibition.cta_link && (
-              <div className="mt-8">
-                <Button
-                  onClick={() => window.open(exhibition.cta_link, "_blank")}
-                  className="bg-white text-black hover:bg-gray-100 px-8 py-3 text-lg "
-                >
-                  Join as an Artist
-                </Button>
-              </div>
-            )}
+            {(exhibition.call_for_artists === true ||
+              exhibition.call_for_artists === 1) &&
+              exhibition.cta_link && (
+                <div className="mt-8">
+                  <Button
+                    onClick={() => window.open(exhibition.cta_link, "_blank")}
+                    className="bg-white text-black hover:bg-gray-100 px-8 py-3 text-lg "
+                  >
+                    Join as an Artist
+                  </Button>
+                </div>
+              )}
           </div>
         </div>
       </section>

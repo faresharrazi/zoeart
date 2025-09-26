@@ -53,6 +53,7 @@ interface Exhibition {
   assignedArtworks: string[]; // artwork IDs
   callForArtists?: boolean; // enable/disable CTA button
   ctaLink?: string; // link for the CTA button
+  isVisible?: boolean; // visibility on frontend
 }
 
 // Data will be fetched from database
@@ -94,6 +95,7 @@ const ExhibitionManagement = () => {
             assignedArtworks: exhibition.assigned_artworks || [],
             callForArtists: exhibition.call_for_artists || false,
             ctaLink: exhibition.cta_link || "",
+            isVisible: exhibition.is_visible !== false, // Convert to boolean
           })
         );
 
@@ -257,6 +259,37 @@ const ExhibitionManagement = () => {
       toast({
         title: "Error",
         description: "Failed to delete exhibition",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleVisibility = async (exhibition: Exhibition) => {
+    try {
+      const newVisibility = !exhibition.isVisible;
+      
+      await apiClient.updateExhibition(parseInt(exhibition.id), {
+        is_visible: newVisibility,
+      });
+
+      toast({
+        title: "Success",
+        description: `Exhibition ${newVisibility ? "shown" : "hidden"} on frontend`,
+      });
+
+      // Update local state
+      setExhibitions(prev => 
+        prev.map(ex => 
+          ex.id === exhibition.id 
+            ? { ...ex, isVisible: newVisibility }
+            : ex
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling visibility:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update exhibition visibility",
         variant: "destructive",
       });
     }
@@ -669,10 +702,17 @@ const ExhibitionManagement = () => {
                   </div>
                 )}
 
+              {/* Visibility Badge */}
+              <div className="absolute top-2 left-2">
+                <Badge className={exhibition.isVisible ? "bg-green-600 text-white" : "bg-red-600 text-white"}>
+                  {exhibition.isVisible ? "Visible" : "Hidden"}
+                </Badge>
+              </div>
+
               {/* CTA Badge */}
               {exhibition.callForArtists && (
-                <div className="absolute top-2 left-2">
-                  <Badge className="bg-green-600 text-white hover:bg-green-700">
+                <div className="absolute top-2 right-2">
+                  <Badge className="bg-blue-600 text-white hover:bg-blue-700">
                     CTA Active
                   </Badge>
                 </div>
@@ -742,6 +782,14 @@ const ExhibitionManagement = () => {
                   onClick={() => handleEdit(exhibition)}
                 >
                   <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant={exhibition.isVisible ? "outline" : "secondary"}
+                  onClick={() => toggleVisibility(exhibition)}
+                  className={exhibition.isVisible ? "text-green-600 hover:text-green-700" : "text-red-600 hover:text-red-700"}
+                >
+                  {exhibition.isVisible ? "Hide" : "Show"}
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>

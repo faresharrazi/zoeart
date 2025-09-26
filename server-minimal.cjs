@@ -1277,7 +1277,7 @@ app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
     console.log("=== UPDATING EXHIBITION ===");
     console.log("Exhibition ID:", req.params.id);
     console.log("Request body:", req.body);
-    
+
     const { id } = req.params;
     const {
       title,
@@ -1312,7 +1312,7 @@ app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
       assigned_artworks,
       call_for_artists,
       cta_link,
-      is_visible
+      is_visible,
     });
 
     await query(

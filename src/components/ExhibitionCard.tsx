@@ -102,9 +102,7 @@ const ExhibitionCard = ({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         <div className="absolute top-4 left-4">
-          <Badge
-            className={`${getStatusColor(exhibition.status)} `}
-          >
+          <Badge className={`${getStatusColor(exhibition.status)} `}>
             {exhibition.status}
           </Badge>
         </div>
@@ -154,20 +152,22 @@ const ExhibitionCard = ({
             </p>
           )}
 
-          {(exhibition.call_for_artists === true || exhibition.call_for_artists === 1) && exhibition.cta_link && (
-            <div className="mt-auto">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open(exhibition.cta_link, "_blank");
-                }}
-              >
-                Join as an Artist
-              </Button>
-            </div>
-          )}
+          {(exhibition.call_for_artists === true ||
+            exhibition.call_for_artists === 1) &&
+            exhibition.cta_link && (
+              <div className="mt-auto">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(exhibition.cta_link, "_blank");
+                  }}
+                >
+                  Join as an Artist
+                </Button>
+              </div>
+            )}
         </div>
       </CardContent>
     </Card>
