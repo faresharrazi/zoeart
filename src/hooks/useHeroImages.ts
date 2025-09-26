@@ -17,10 +17,7 @@ export const useHeroImages = () => {
   const fetchHeroImages = async () => {
     try {
       setLoading(true);
-      console.log("useHeroImages: Fetching hero images...");
       const images = await apiClient.getHeroImages();
-      console.log("useHeroImages: Raw hero images data:", images);
-      console.log("useHeroImages: Number of images found:", images.length);
 
       // Map file_path to url and convert snake_case to camelCase
       const mappedImages = images.map((image: any) => ({
@@ -31,12 +28,6 @@ export const useHeroImages = () => {
         fileSize: image.file_size,
         mimeType: image.mime_type,
       }));
-      console.log("useHeroImages: Mapped hero images:", mappedImages);
-      console.log(
-        "useHeroImages: Setting hero images state with",
-        mappedImages.length,
-        "images"
-      );
       setHeroImages(mappedImages);
     } catch (error) {
       console.error("Error fetching hero images:", error);

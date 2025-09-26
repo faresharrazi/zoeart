@@ -95,20 +95,19 @@ const PageContentManagement = () => {
     loading: pageDataLoading,
     refreshPageData,
   } = usePageDataFromDB();
+
+  useEffect(() => {
+    console.log("PageContentManagement - Page data:", pageData);
+    console.log("PageContentManagement - Artists page:", pageData.artists);
+    console.log("PageContentManagement - About page:", pageData.about);
+  }, [pageData]);
+
   const {
     heroImages,
     loading: heroImagesLoading,
     refreshHeroImages,
   } = useHeroImages();
 
-  // Debug: Log hero images
-  useEffect(() => {
-    console.log("PageContentManagement - Hero images:", heroImages);
-    console.log(
-      "PageContentManagement - Hero images loading:",
-      heroImagesLoading
-    );
-  }, [heroImages, heroImagesLoading]);
 
   // Exhibition and Contact pages are always visible (handled in the UI logic)
 
@@ -127,8 +126,6 @@ const PageContentManagement = () => {
     setEditingPage(pageId);
     const pageDataToEdit = pageData[pageId as keyof typeof pageData];
 
-    console.log("PCM: Editing page:", pageId);
-
     if (pageId === "home") {
       // For home page, include hero images and content fields in form data
       const formDataToSet = {
@@ -137,8 +134,7 @@ const PageContentManagement = () => {
         heroImageIds: pageDataToEdit?.content?.heroImageIds || [],
         heroImages: pageDataToEdit?.content?.heroImages || [],
       };
-
-      console.log("PCM: Setting form data for home");
+      
       setFormData(formDataToSet);
     } else if (pageId === "contactInfo") {
       // For contact info, combine page data with contact info
@@ -224,7 +220,12 @@ const PageContentManagement = () => {
     if (pageId === "home" || pageId === "exhibitions" || pageId === "contact")
       return; // These pages cannot be hidden
 
-    const newVisibility = !pageData[pageId as keyof typeof pageData]?.isVisible;
+    const currentVisibility = pageData[pageId as keyof typeof pageData]?.isVisible;
+    const newVisibility = !currentVisibility;
+
+    console.log("TogglePageVisibility - Page:", pageId);
+    console.log("TogglePageVisibility - Current visibility:", currentVisibility);
+    console.log("TogglePageVisibility - New visibility:", newVisibility);
 
     try {
       // Update using database API
