@@ -121,7 +121,7 @@ const ArtistDetail = () => {
                   <img
                     src={artist.profile_image}
                     alt={artist.name}
-                    className="w-32 h-32 rounded-full mx-auto object-cover shadow-2xl border-4 border-white/20"
+                    className="w-40 h-40 rounded-full mx-auto object-cover shadow-2xl border-4 border-white/30"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                       e.currentTarget.nextElementSibling.style.display = "flex";
@@ -130,8 +130,8 @@ const ArtistDetail = () => {
                   <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
               ) : (
-                <div className="w-32 h-32 rounded-full mx-auto bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center shadow-2xl border-4 border-white/20">
-                  <span className="text-4xl text-white/80">
+                <div className="w-40 h-40 rounded-full mx-auto bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center shadow-2xl border-4 border-white/30">
+                  <span className="text-5xl text-white/80 font-semibold">
                     {artist.name.charAt(0)}
                   </span>
                 </div>
