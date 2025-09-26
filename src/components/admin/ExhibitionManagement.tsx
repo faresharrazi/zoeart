@@ -456,7 +456,7 @@ const ExhibitionManagement = () => {
                 <label className="block text-sm  mb-2">Start Date *</label>
                 <Input
                   type="date"
-                  value={formData.startDate || ""}
+                  value={formData.startDate ? new Date(formData.startDate).toISOString().split('T')[0] : ""}
                   onChange={(e) =>
                     setFormData({ ...formData, startDate: e.target.value })
                   }
@@ -467,7 +467,7 @@ const ExhibitionManagement = () => {
                 <label className="block text-sm  mb-2">End Date *</label>
                 <Input
                   type="date"
-                  value={formData.endDate || ""}
+                  value={formData.endDate ? new Date(formData.endDate).toISOString().split('T')[0] : ""}
                   onChange={(e) =>
                     setFormData({ ...formData, endDate: e.target.value })
                   }
