@@ -89,8 +89,15 @@ const ExhibitionManagement = () => {
             location: exhibition.location || "",
             curator: exhibition.curator || "",
             status: exhibition.status,
-            featuredImage: exhibition.featured_image || "",
-            galleryImages: exhibition.gallery_images || [],
+            featuredImage: exhibition.featured_image ? 
+              (exhibition.featured_image.startsWith('/api/file/') ? 
+                exhibition.featured_image : 
+                `/api/file/${exhibition.featured_image}`) : "",
+            galleryImages: (exhibition.gallery_images || []).map((img: any) => 
+              typeof img === 'string' && img.startsWith('/api/file/') ? 
+                img : 
+                `/api/file/${img}`
+            ),
             assignedArtists: exhibition.assigned_artists || [],
             assignedArtworks: exhibition.assigned_artworks || [],
             callForArtists: exhibition.call_for_artists || false,
@@ -268,7 +275,10 @@ const ExhibitionManagement = () => {
     try {
       const newVisibility = !exhibition.isVisible;
 
-      await apiClient.toggleExhibitionVisibility(parseInt(exhibition.id), newVisibility);
+      await apiClient.toggleExhibitionVisibility(
+        parseInt(exhibition.id),
+        newVisibility
+      );
 
       toast({
         title: "Success",
@@ -736,7 +746,7 @@ const ExhibitionManagement = () => {
 
               {/* CTA Badge */}
               {exhibition.callForArtists && (
-                <div className="absolute top-2 right-2">
+                <div className="absolute bottom-2 right-2">
                   <Badge className="bg-blue-600 text-white hover:bg-blue-700">
                     CTA Active
                   </Badge>

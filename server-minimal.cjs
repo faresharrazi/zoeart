@@ -230,10 +230,22 @@ app.get("/api/exhibitions", async (req, res) => {
 
     const formattedExhibitions = exhibitions.map((exhibition) => ({
       ...exhibition,
+      featured_image: exhibition.featured_image ? 
+        (exhibition.featured_image.startsWith('/api/file/') ? 
+          exhibition.featured_image : 
+          `/api/file/${exhibition.featured_image}`) : null,
       gallery_images:
         typeof exhibition.gallery_images === "string"
-          ? JSON.parse(exhibition.gallery_images || "[]")
-          : exhibition.gallery_images || [],
+          ? JSON.parse(exhibition.gallery_images || "[]").map((img: any) => 
+              typeof img === 'string' && img.startsWith('/api/file/') ? 
+                img : 
+                `/api/file/${img}`
+            )
+          : (exhibition.gallery_images || []).map((img: any) => 
+              typeof img === 'string' && img.startsWith('/api/file/') ? 
+                img : 
+                `/api/file/${img}`
+            ),
       assigned_artists:
         typeof exhibition.assigned_artists === "string"
           ? JSON.parse(exhibition.assigned_artists || "[]")
@@ -1107,10 +1119,22 @@ app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
 
     const formattedExhibitions = exhibitions.map((exhibition) => ({
       ...exhibition,
+      featured_image: exhibition.featured_image ? 
+        (exhibition.featured_image.startsWith('/api/file/') ? 
+          exhibition.featured_image : 
+          `/api/file/${exhibition.featured_image}`) : null,
       gallery_images:
         typeof exhibition.gallery_images === "string"
-          ? JSON.parse(exhibition.gallery_images || "[]")
-          : exhibition.gallery_images || [],
+          ? JSON.parse(exhibition.gallery_images || "[]").map((img: any) => 
+              typeof img === 'string' && img.startsWith('/api/file/') ? 
+                img : 
+                `/api/file/${img}`
+            )
+          : (exhibition.gallery_images || []).map((img: any) => 
+              typeof img === 'string' && img.startsWith('/api/file/') ? 
+                img : 
+                `/api/file/${img}`
+            ),
       assigned_artists:
         typeof exhibition.assigned_artists === "string"
           ? JSON.parse(exhibition.assigned_artists || "[]")
@@ -1272,31 +1296,38 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
 });
 
 // Toggle exhibition visibility
-app.patch("/api/admin/exhibitions/:id/visibility", authenticateToken, async (req, res) => {
-  try {
-    console.log("=== TOGGLING EXHIBITION VISIBILITY ===");
-    console.log("Exhibition ID:", req.params.id);
-    console.log("Request body:", req.body);
-    
-    const { id } = req.params;
-    const { is_visible } = req.body;
+app.patch(
+  "/api/admin/exhibitions/:id/visibility",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      console.log("=== TOGGLING EXHIBITION VISIBILITY ===");
+      console.log("Exhibition ID:", req.params.id);
+      console.log("Request body:", req.body);
 
-    console.log("Setting visibility to:", is_visible);
+      const { id } = req.params;
+      const { is_visible } = req.body;
 
-    await query(
-      `UPDATE exhibitions SET is_visible = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
-      [is_visible !== false, id]
-    );
+      console.log("Setting visibility to:", is_visible);
 
-    console.log("Exhibition visibility updated successfully");
-    res.json({ success: true, message: "Exhibition visibility updated successfully" });
-  } catch (error) {
-    console.error("Error updating exhibition visibility:", error);
-    console.error("Error details:", error.message);
-    console.error("Error stack:", error.stack);
-    res.status(500).json({ error: "Failed to update exhibition visibility" });
+      await query(
+        `UPDATE exhibitions SET is_visible = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+        [is_visible !== false, id]
+      );
+
+      console.log("Exhibition visibility updated successfully");
+      res.json({
+        success: true,
+        message: "Exhibition visibility updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating exhibition visibility:", error);
+      console.error("Error details:", error.message);
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ error: "Failed to update exhibition visibility" });
+    }
   }
-});
+);
 
 // Update exhibition
 app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
