@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Image, Loader2, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Image, Loader2, EyeOff, ExternalLink } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 
 interface Artist {
@@ -554,8 +554,9 @@ const ArtistManagement = () => {
                   onClick={() =>
                     window.open(`/artist/${artist.slug}`, "_blank")
                   }
+                  title="Preview artist page"
                 >
-                  <Eye className="w-4 h-4" />
+                  <ExternalLink className="w-4 h-4" />
                 </Button>
                 <Button
                   size="sm"

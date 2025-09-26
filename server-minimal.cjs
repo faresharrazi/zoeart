@@ -1579,7 +1579,9 @@ app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
     } = req.body;
 
     // Get current artist data first
-    const currentArtist = await query("SELECT * FROM artists WHERE id = $1", [id]);
+    const currentArtist = await query("SELECT * FROM artists WHERE id = $1", [
+      id,
+    ]);
     if (currentArtist.length === 0) {
       return res.status(404).json({ error: "Artist not found" });
     }
@@ -1588,12 +1590,22 @@ app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
 
     // Use provided values or fall back to current values
     const updatedName = name || artist.name;
-    const updatedSlug = slug || artist.slug || updatedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const updatedSpecialty = specialty !== undefined ? specialty : artist.specialty;
+    const updatedSlug =
+      slug ||
+      artist.slug ||
+      updatedName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+    const updatedSpecialty =
+      specialty !== undefined ? specialty : artist.specialty;
     const updatedBio = bio !== undefined ? bio : artist.bio;
-    const updatedProfileImage = profile_image !== undefined ? profile_image : artist.profile_image;
-    const updatedSocialMedia = social_media !== undefined ? social_media : artist.social_media;
-    const updatedIsVisible = is_visible !== undefined ? is_visible : artist.is_visible;
+    const updatedProfileImage =
+      profile_image !== undefined ? profile_image : artist.profile_image;
+    const updatedSocialMedia =
+      social_media !== undefined ? social_media : artist.social_media;
+    const updatedIsVisible =
+      is_visible !== undefined ? is_visible : artist.is_visible;
 
     await query(
       `
@@ -1721,7 +1733,9 @@ app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
     } = req.body;
 
     // Get current artwork data first
-    const currentArtwork = await query("SELECT * FROM artworks WHERE id = $1", [id]);
+    const currentArtwork = await query("SELECT * FROM artworks WHERE id = $1", [
+      id,
+    ]);
     if (currentArtwork.length === 0) {
       return res.status(404).json({ error: "Artwork not found" });
     }
@@ -1730,14 +1744,23 @@ app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
 
     // Use provided values or fall back to current values
     const updatedTitle = title || artwork.title;
-    const updatedSlug = slug || artwork.slug || updatedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const updatedArtistId = artist_id !== undefined ? artist_id : artwork.artist_id;
+    const updatedSlug =
+      slug ||
+      artwork.slug ||
+      updatedTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+    const updatedArtistId =
+      artist_id !== undefined ? artist_id : artwork.artist_id;
     const updatedYear = year !== undefined ? year : artwork.year;
     const updatedMedium = medium !== undefined ? medium : artwork.medium;
     const updatedSize = size !== undefined ? size : artwork.size;
-    const updatedDescription = description !== undefined ? description : artwork.description;
+    const updatedDescription =
+      description !== undefined ? description : artwork.description;
     const updatedImages = images !== undefined ? images : artwork.images;
-    const updatedIsVisible = is_visible !== undefined ? is_visible : artwork.is_visible;
+    const updatedIsVisible =
+      is_visible !== undefined ? is_visible : artwork.is_visible;
 
     await query(
       `

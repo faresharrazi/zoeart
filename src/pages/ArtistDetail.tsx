@@ -104,144 +104,217 @@ const ArtistDetail = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
+      <section className="pt-24 pb-20 bg-gradient-to-br from-gray-900 via-black to-gray-800 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+        </div>
+        
         <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="max-w-4xl mx-auto py-16">
-            <h1 className="text-5xl md:text-7xl text-white mb-6">
+          <div className="max-w-5xl mx-auto py-20">
+            {/* Artist Profile Image */}
+            <div className="mb-8">
+              {artist.profile_image ? (
+                <div className="relative inline-block">
+                  <img
+                    src={artist.profile_image}
+                    alt={artist.name}
+                    className="w-32 h-32 rounded-full mx-auto object-cover shadow-2xl border-4 border-white/20"
+                  />
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/20 to-transparent"></div>
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full mx-auto bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center shadow-2xl border-4 border-white/20">
+                  <span className="text-4xl text-white/80">
+                    {artist.name.charAt(0)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Artist Name */}
+            <h1 className="text-6xl md:text-8xl text-white mb-6 drop-shadow-2xl">
               {artist.name}
             </h1>
+            
+            {/* Specialty */}
             {artist.specialty && (
-              <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed">
-                {artist.specialty}
-              </p>
+              <div className="mb-8">
+                <span className="inline-block px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-lg border border-white/20">
+                  {artist.specialty}
+                </span>
+              </div>
+            )}
+
+            {/* Bio */}
+            {artist.bio && (
+              <div className="max-w-3xl mx-auto mb-12">
+                <p className="text-xl text-white/90 leading-relaxed drop-shadow-lg">
+                  {artist.bio}
+                </p>
+              </div>
+            )}
+
+            {/* Social Media */}
+            {artist.social_media && Object.keys(artist.social_media).length > 0 && (
+              <div className="flex justify-center space-x-4">
+                {artist.social_media.instagram && (
+                  <a
+                    href={
+                      artist.social_media.instagram.startsWith("http")
+                        ? artist.social_media.instagram
+                        : `https://instagram.com/${artist.social_media.instagram.replace(
+                            "@",
+                            ""
+                          )}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-110"
+                  >
+                    <Instagram className="w-6 h-6 text-white" />
+                  </a>
+                )}
+                {artist.social_media.website && (
+                  <a
+                    href={
+                      artist.social_media.website.startsWith("http")
+                        ? artist.social_media.website
+                        : `https://${artist.social_media.website}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-110"
+                  >
+                    <Globe className="w-6 h-6 text-white" />
+                  </a>
+                )}
+                {artist.social_media.email && (
+                  <a
+                    href={`mailto:${artist.social_media.email}`}
+                    className="p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-110"
+                  >
+                    <Mail className="w-6 h-6 text-white" />
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* Artist Profile */}
-      <section className="py-20 bg-theme-background">
-        <div className="container mx-auto px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              {/* Artist Info */}
-              <div className="lg:col-span-1">
-                <Card className="shadow-elegant sticky top-8">
-                  <CardHeader className="text-center">
+      {/* Artworks Section */}
+      {artworks.length > 0 ? (
+        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+          <div className="container mx-auto px-6">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl md:text-5xl text-gray-900 mb-4">
+                  Featured Works
+                </h2>
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                  Explore {artist.name}'s collection of {artworks.length} {artworks.length === 1 ? 'artwork' : 'artworks'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                {artworks.map((artwork) => (
+                  <ArtworkCard
+                    key={artwork.id}
+                    artwork={artwork}
+                    onArtworkClick={handleArtworkClick}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        /* Centered Artist Card when no artworks */
+        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+          <div className="container mx-auto px-6">
+            <div className="max-w-4xl mx-auto flex justify-center">
+              <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm max-w-md w-full">
+                <CardContent className="p-12 text-center">
+                  <div className="mb-8">
                     {artist.profile_image ? (
                       <img
                         src={artist.profile_image}
                         alt={artist.name}
-                        className="w-32 h-32 rounded-full mx-auto mb-4 object-cover shadow-lg"
+                        className="w-24 h-24 rounded-full mx-auto object-cover shadow-lg"
                       />
                     ) : (
-                      <div className="w-32 h-32 rounded-full mx-auto mb-4 bg-theme-card flex items-center justify-center">
-                        <span className="text-2xl  text-theme-text-muted">
+                      <div className="w-24 h-24 rounded-full mx-auto bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                        <span className="text-2xl text-gray-600">
                           {artist.name.charAt(0)}
                         </span>
                       </div>
                     )}
-                    <CardTitle className="text-2xl text-theme-text-primary">
-                      {artist.name}
-                    </CardTitle>
-                    <Badge variant="secondary" className="w-fit mx-auto">
+                  </div>
+                  
+                  <h3 className="text-2xl text-gray-900 mb-2">{artist.name}</h3>
+                  {artist.specialty && (
+                    <Badge variant="secondary" className="mb-6">
                       {artist.specialty}
                     </Badge>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {artist.bio && (
-                      <div>
-                        <h4 className=" text-theme-text-primary mb-2">About</h4>
-                        <p className="text-theme-text-muted text-sm leading-relaxed">
-                          {artist.bio}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Social Media */}
-                    {artist.social_media &&
-                      Object.keys(artist.social_media).length > 0 && (
-                        <div>
-                          <h4 className=" text-theme-text-primary mb-3">
-                            Connect
-                          </h4>
-                          <div className="flex space-x-3">
-                            {artist.social_media.instagram && (
-                              <a
-                                href={
-                                  artist.social_media.instagram.startsWith(
-                                    "http"
-                                  )
-                                    ? artist.social_media.instagram
-                                    : `https://instagram.com/${artist.social_media.instagram.replace(
-                                        "@",
-                                        ""
-                                      )}`
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 rounded-full bg-theme-card hover:bg-theme-primary hover:text-white transition-colors"
-                              >
-                                <Instagram className="w-4 h-4" />
-                              </a>
-                            )}
-                            {artist.social_media.website && (
-                              <a
-                                href={
-                                  artist.social_media.website.startsWith("http")
-                                    ? artist.social_media.website
-                                    : `https://${artist.social_media.website}`
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 rounded-full bg-theme-card hover:bg-theme-primary hover:text-white transition-colors"
-                              >
-                                <Globe className="w-4 h-4" />
-                              </a>
-                            )}
-                            {artist.social_media.email && (
-                              <a
-                                href={`mailto:${artist.social_media.email}`}
-                                className="p-2 rounded-full bg-theme-card hover:bg-theme-primary hover:text-white transition-colors"
-                              >
-                                <Mail className="w-4 h-4" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Artist's Works */}
-              {artworks.length > 0 && (
-                <div className="lg:col-span-2">
-                  <div className="mb-8">
-                    <h2 className="text-3xl  text-theme-text-primary mb-4">
-                      Featured Works
-                    </h2>
-                    <p className="text-theme-text-muted">
-                      Explore the artist's collection of {artworks.length}{" "}
-                      artworks
+                  )}
+                  
+                  {artist.bio && (
+                    <p className="text-gray-600 leading-relaxed mb-6">
+                      {artist.bio}
                     </p>
-                  </div>
+                  )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {artworks.map((artwork) => (
-                      <ArtworkCard
-                        key={artwork.id}
-                        artwork={artwork}
-                        onArtworkClick={handleArtworkClick}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+                  {/* Social Media */}
+                  {artist.social_media && Object.keys(artist.social_media).length > 0 && (
+                    <div className="flex justify-center space-x-3">
+                      {artist.social_media.instagram && (
+                        <a
+                          href={
+                            artist.social_media.instagram.startsWith("http")
+                              ? artist.social_media.instagram
+                              : `https://instagram.com/${artist.social_media.instagram.replace(
+                                  "@",
+                                  ""
+                                )}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                        >
+                          <Instagram className="w-5 h-5 text-gray-600" />
+                        </a>
+                      )}
+                      {artist.social_media.website && (
+                        <a
+                          href={
+                            artist.social_media.website.startsWith("http")
+                              ? artist.social_media.website
+                              : `https://${artist.social_media.website}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-3 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                        >
+                          <Globe className="w-5 h-5 text-gray-600" />
+                        </a>
+                      )}
+                      {artist.social_media.email && (
+                        <a
+                          href={`mailto:${artist.social_media.email}`}
+                          className="p-3 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                        >
+                          <Mail className="w-5 h-5 text-gray-600" />
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <Footer />
     </div>
