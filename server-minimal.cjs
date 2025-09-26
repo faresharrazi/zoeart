@@ -795,7 +795,12 @@ app.put("/api/admin/user/:id", authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { username, email, password, currentPassword } = req.body;
 
-    console.log("Updating user:", { id, username, email, hasPassword: !!password });
+    console.log("Updating user:", {
+      id,
+      username,
+      email,
+      hasPassword: !!password,
+    });
 
     // Verify current password if changing password
     if (password) {
@@ -848,7 +853,9 @@ app.put("/api/admin/user/:id", authenticateToken, async (req, res) => {
     values.push(id);
 
     await query(
-      `UPDATE users SET ${updates.join(", ")}, updated_at = NOW() WHERE id = $${paramIndex}`,
+      `UPDATE users SET ${updates.join(
+        ", "
+      )}, updated_at = NOW() WHERE id = $${paramIndex}`,
       values
     );
 

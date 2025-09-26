@@ -127,11 +127,17 @@ const PageContentManagement = () => {
     setEditingPage(pageId);
     const pageDataToEdit = pageData[pageId as keyof typeof pageData];
 
+    console.log("PCM: Editing page:", pageId);
+    console.log("PCM: Page data to edit:", pageDataToEdit);
+
     if (pageId === "home") {
       // For home page, include hero images and content fields in form data
-      setFormData({
+      const formDataToSet = {
         ...pageDataToEdit,
         ...pageDataToEdit?.content, // Include content fields (footerDescription, galleryHours, etc.)
+        // Keep existing heroImageIds from page data
+        heroImageIds: pageDataToEdit?.heroImageIds || [],
+        heroImages: pageDataToEdit?.heroImages || [],
         heroImageFiles: heroImages.map((img) => ({
           id: img.id,
           originalName: img.originalName,
@@ -140,7 +146,13 @@ const PageContentManagement = () => {
           fileSize: img.fileSize,
           mimeType: img.mimeType,
         })),
-      });
+      };
+      
+      console.log("PCM: Setting form data for home:", formDataToSet);
+      console.log("PCM: Hero image IDs from page data:", pageDataToEdit?.heroImageIds);
+      console.log("PCM: All hero images:", heroImages);
+      
+      setFormData(formDataToSet);
     } else if (pageId === "contactInfo") {
       // For contact info, combine page data with contact info
       setFormData({
@@ -454,7 +466,20 @@ const PageContentManagement = () => {
                           heroImageFiles: files,
                         });
                       }}
-                      existingFiles={heroImages || []}
+                      existingFiles={(() => {
+                        const filteredImages = formData.heroImageIds && formData.heroImageIds.length > 0
+                          ? heroImages.filter((img) =>
+                              formData.heroImageIds.includes(img.id)
+                            )
+                          : [];
+                        console.log("PCM: FileUpload existingFiles:", {
+                          heroImageIds: formData.heroImageIds,
+                          allHeroImages: heroImages.length,
+                          filteredImages: filteredImages.length,
+                          filteredImagesData: filteredImages
+                        });
+                        return filteredImages;
+                      })()}
                       maxFiles={10}
                       onRefresh={refreshHeroImages}
                     />
