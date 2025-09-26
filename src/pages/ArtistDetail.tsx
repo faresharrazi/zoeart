@@ -73,7 +73,7 @@ const ArtistDetail = () => {
           <div className="absolute inset-0 bg-black/40" />
           <div className="container mx-auto px-6 text-center relative z-10">
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
-              <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
                 Artist Not Found
               </h1>
               <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
@@ -107,7 +107,7 @@ const ArtistDetail = () => {
       <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto py-16">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
               {artist.name}
             </h1>
             {artist.specialty && (

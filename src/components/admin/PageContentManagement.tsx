@@ -235,7 +235,10 @@ const PageContentManagement = () => {
 
     try {
       // Update using database API
-      console.log("Calling updatePageContent API with:", { pageId, isVisible: newVisibility });
+      console.log("Calling updatePageContent API with:", {
+        pageId,
+        isVisible: newVisibility,
+      });
       const result = await apiClient.updatePageContent(pageId, {
         isVisible: newVisibility,
       });
