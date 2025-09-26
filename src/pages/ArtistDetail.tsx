@@ -114,9 +114,9 @@ const ArtistDetail = () => {
           <div className="max-w-5xl mx-auto py-20">
             {/* Artist Profile Image */}
             <div className="mb-8">
-              {artist.profile_image && 
-               artist.profile_image !== "null" && 
-               artist.profile_image !== "undefined" ? (
+              {artist.profile_image &&
+              artist.profile_image !== "null" &&
+              artist.profile_image !== "undefined" ? (
                 <div className="relative inline-block">
                   <img
                     src={artist.profile_image}

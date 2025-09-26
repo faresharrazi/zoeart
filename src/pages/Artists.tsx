@@ -102,7 +102,8 @@ const Artists = () => {
                   <div className="relative h-48 bg-gradient-to-br from-slate-100 via-gray-50 to-slate-200 overflow-hidden">
                     {(artist.profile_image || artist.profileImage) &&
                     (artist.profile_image || artist.profileImage) !== "null" &&
-                    (artist.profile_image || artist.profileImage) !== "undefined" ? (
+                    (artist.profile_image || artist.profileImage) !==
+                      "undefined" ? (
                       <img
                         src={artist.profile_image || artist.profileImage}
                         alt={artist.name}
@@ -119,8 +120,10 @@ const Artists = () => {
                     <div
                       className={`w-full h-full flex items-center justify-center ${
                         (artist.profile_image || artist.profileImage) &&
-                        (artist.profile_image || artist.profileImage) !== "null" &&
-                        (artist.profile_image || artist.profileImage) !== "undefined"
+                        (artist.profile_image || artist.profileImage) !==
+                          "null" &&
+                        (artist.profile_image || artist.profileImage) !==
+                          "undefined"
                           ? "hidden"
                           : "flex"
                       }`}

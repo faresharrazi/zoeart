@@ -13,6 +13,9 @@ import {
   Users,
   Image as ImageIcon,
   Loader2,
+  Clock,
+  ExternalLink,
+  Share2,
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 
@@ -118,94 +121,220 @@ const ExhibitionDetail = () => {
     <div className="min-h-screen">
       <Navigation />
 
-      {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="max-w-4xl mx-auto py-16">
-            <Badge
-              className={`mb-6 ${getStatusColor(exhibition.status)}`}
-              variant="secondary"
-            >
-              {exhibition.status}
-            </Badge>
-            <h1 className="text-5xl md:text-7xl text-white mb-6">
+      {/* Hero Section with Featured Image */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Featured Image Background */}
+        {exhibition.featured_image && 
+         exhibition.featured_image !== "null" && 
+         exhibition.featured_image !== "undefined" ? (
+          <div className="absolute inset-0">
+            <img
+              src={exhibition.featured_image}
+              alt={exhibition.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/60"></div>
+          </div>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800">
+            <div className="absolute inset-0 bg-black/40"></div>
+          </div>
+        )}
+
+        {/* Content Overlay */}
+        <div className="relative z-10 container mx-auto px-6 text-center">
+          <div className="max-w-4xl mx-auto">
+            {/* Status Badge */}
+            <div className="mb-6">
+              <Badge 
+                variant={exhibition.status === 'upcoming' ? 'default' : 'secondary'}
+                className="px-6 py-2 text-lg font-semibold"
+              >
+                {exhibition.status === 'upcoming' ? 'Upcoming Exhibition' : 'Past Exhibition'}
+              </Badge>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-6xl md:text-8xl text-white mb-6 drop-shadow-2xl font-bold">
               {exhibition.title}
             </h1>
+
+            {/* Description */}
             {exhibition.description && (
-              <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-lg mb-8">
                 {exhibition.description}
               </p>
             )}
 
-            {/* Join as an Artist Button */}
+            {/* Event Details */}
+            <div className="flex flex-wrap justify-center gap-6 mb-8">
+              {exhibition.start_date && (
+                <div className="flex items-center gap-2 text-white/90">
+                  <Calendar className="w-5 h-5" />
+                  <span className="text-lg">
+                    {new Date(exhibition.start_date).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                    {exhibition.end_date && exhibition.end_date !== exhibition.start_date && (
+                      <> - {new Date(exhibition.end_date).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}</>
+                    )}
+                  </span>
+                </div>
+              )}
+              
+              {exhibition.location && (
+                <div className="flex items-center gap-2 text-white/90">
+                  <MapPin className="w-5 h-5" />
+                  <span className="text-lg">{exhibition.location}</span>
+                </div>
+              )}
+            </div>
+
+            {/* CTA Button */}
             {(exhibition.call_for_artists === true ||
               exhibition.call_for_artists === 1) &&
               exhibition.cta_link && (
-                <div className="mt-8">
+                <div className="mb-8">
                   <Button
-                    onClick={() => window.open(exhibition.cta_link, "_blank")}
-                    className="bg-white text-black hover:bg-gray-100 px-8 py-3 text-lg "
+                    size="lg"
+                    className="bg-white text-black hover:bg-white/90 px-8 py-4 text-lg font-semibold"
+                    onClick={() => window.open(exhibition.cta_link, '_blank')}
                   >
+                    <ExternalLink className="w-5 h-5 mr-2" />
                     Join as an Artist
                   </Button>
                 </div>
               )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white/30 text-white hover:bg-white/10 px-6 py-3"
+                onClick={() => navigate("/exhibitions")}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Exhibitions
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white/30 text-white hover:bg-white/10 px-6 py-3"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: exhibition.title,
+                      text: exhibition.description,
+                      url: window.location.href
+                    });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    // You could add a toast notification here
+                  }
+                }}
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Exhibition Details */}
-      <section className="py-20 bg-theme-background">
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
               {/* Main Content */}
               <div className="lg:col-span-2">
-                <Card className="shadow-elegant">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-theme-text-primary">
-                      About This Exhibition
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-theme-text-muted leading-relaxed">
-                      {exhibition.description}
-                    </p>
-                  </CardContent>
-                </Card>
-
                 {/* Gallery */}
                 {exhibition.gallery_images &&
                   exhibition.gallery_images.length > 0 && (
-                    <div className="mt-8">
+                    <div className="mb-12">
+                      <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+                        Exhibition Gallery
+                      </h2>
                       <ExhibitionGallery images={exhibition.gallery_images} />
                     </div>
                   )}
+
+                {/* Additional Info */}
+                {(exhibition.assigned_artists?.length > 0 || exhibition.assigned_artworks?.length > 0) && (
+                  <Card className="shadow-elegant">
+                    <CardHeader>
+                      <CardTitle className="text-2xl text-gray-900">
+                        Exhibition Details
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {exhibition.assigned_artists?.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                            Featured Artists
+                          </h3>
+                          <div className="flex flex-wrap gap-2">
+                            {exhibition.assigned_artists.map((artist: any, index: number) => (
+                              <Badge key={index} variant="outline" className="px-3 py-1">
+                                {typeof artist === 'string' ? artist : artist.name || artist}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {exhibition.assigned_artworks?.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                            Featured Artworks
+                          </h3>
+                          <p className="text-gray-600">
+                            This exhibition showcases {exhibition.assigned_artworks.length} carefully selected artworks.
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* Sidebar */}
               <div className="space-y-6">
-                {/* Exhibition Info */}
+                {/* Event Info Card */}
                 <Card className="shadow-elegant">
                   <CardHeader>
-                    <CardTitle className="text-xl text-theme-text-primary">
-                      Exhibition Details
+                    <CardTitle className="text-xl text-gray-900">
+                      Event Information
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {(exhibition.start_date || exhibition.end_date) && (
+                    {exhibition.start_date && (
                       <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-theme-primary" />
+                        <Calendar className="w-5 h-5 text-blue-600" />
                         <div>
-                          <p className="text-sm text-theme-text-muted">Dates</p>
-                          <p className=" text-theme-text-primary">
-                            {exhibition.start_date && exhibition.end_date
-                              ? `${formatDate(
-                                  exhibition.start_date
-                                )} - ${formatDate(exhibition.end_date)}`
-                              : exhibition.start_date
-                              ? formatDate(exhibition.start_date)
-                              : formatDate(exhibition.end_date)}
+                          <p className="text-sm text-gray-500">Date</p>
+                          <p className="font-semibold text-gray-900">
+                            {new Date(exhibition.start_date).toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                            {exhibition.end_date && exhibition.end_date !== exhibition.start_date && (
+                              <> - {new Date(exhibition.end_date).toLocaleDateString('en-US', {
+                                month: 'long',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}</>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -213,48 +342,60 @@ const ExhibitionDetail = () => {
 
                     {exhibition.location && (
                       <div className="flex items-center space-x-3">
-                        <MapPin className="w-5 h-5 text-theme-primary" />
+                        <MapPin className="w-5 h-5 text-green-600" />
                         <div>
-                          <p className="text-sm text-theme-text-muted">
-                            Location
-                          </p>
-                          <p className=" text-theme-text-primary">
-                            {exhibition.location}
-                          </p>
+                          <p className="text-sm text-gray-500">Location</p>
+                          <p className="font-semibold text-gray-900">{exhibition.location}</p>
                         </div>
                       </div>
                     )}
 
                     {exhibition.curator && (
                       <div className="flex items-center space-x-3">
-                        <Users className="w-5 h-5 text-theme-primary" />
+                        <Users className="w-5 h-5 text-purple-600" />
                         <div>
-                          <p className="text-sm text-theme-text-muted">
-                            Curator
-                          </p>
-                          <p className=" text-theme-text-primary">
-                            {exhibition.curator}
-                          </p>
+                          <p className="text-sm text-gray-500">Curator</p>
+                          <p className="font-semibold text-gray-900">{exhibition.curator}</p>
                         </div>
                       </div>
                     )}
 
-                    {exhibition.assigned_artworks &&
-                      exhibition.assigned_artworks.length > 0 && (
-                        <div className="flex items-center space-x-3">
-                          <ImageIcon className="w-5 h-5 text-theme-primary" />
-                          <div>
-                            <p className="text-sm text-theme-text-muted">
-                              Artworks
-                            </p>
-                            <p className=" text-theme-text-primary">
-                              {exhibition.assigned_artworks.length} pieces
-                            </p>
-                          </div>
+                    {exhibition.assigned_artworks?.length > 0 && (
+                      <div className="flex items-center space-x-3">
+                        <ImageIcon className="w-5 h-5 text-orange-600" />
+                        <div>
+                          <p className="text-sm text-gray-500">Artworks</p>
+                          <p className="font-semibold text-gray-900">
+                            {exhibition.assigned_artworks.length} pieces
+                          </p>
                         </div>
-                      )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
+
+                {/* CTA Card */}
+                {(exhibition.call_for_artists === true ||
+                  exhibition.call_for_artists === 1) &&
+                  exhibition.cta_link && (
+                    <Card className="shadow-elegant bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                      <CardContent className="p-6 text-center">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                          Join This Exhibition
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          Artists are invited to participate in this exhibition.
+                        </p>
+                        <Button
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          onClick={() => window.open(exhibition.cta_link, '_blank')}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Apply Now
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
               </div>
             </div>
           </div>
