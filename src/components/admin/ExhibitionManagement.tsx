@@ -285,12 +285,24 @@ const ExhibitionManagement = () => {
 
   const toggleVisibility = async (exhibition: Exhibition) => {
     try {
+      console.log("=== TOGGLE VISIBILITY CLICKED ===");
+      console.log("Exhibition:", exhibition);
+      console.log("Current visibility:", exhibition.isVisible);
+      
       const newVisibility = !exhibition.isVisible;
+      console.log("New visibility:", newVisibility);
 
-      await apiClient.toggleExhibitionVisibility(
+      console.log("Calling API with:", {
+        id: parseInt(exhibition.id),
+        isVisible: newVisibility
+      });
+
+      const result = await apiClient.toggleExhibitionVisibility(
         parseInt(exhibition.id),
         newVisibility
       );
+
+      console.log("API call result:", result);
 
       toast({
         title: "Success",
@@ -305,8 +317,11 @@ const ExhibitionManagement = () => {
           ex.id === exhibition.id ? { ...ex, isVisible: newVisibility } : ex
         )
       );
+      
+      console.log("Local state updated");
     } catch (error) {
       console.error("Error toggling visibility:", error);
+      console.error("Error details:", error);
       toast({
         title: "Error",
         description: "Failed to update exhibition visibility",
