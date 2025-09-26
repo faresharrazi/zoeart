@@ -8,7 +8,7 @@ const Footer = () => {
   // Show loading state while data is being fetched
   if (loading) {
     return (
-      <footer className="bg-white text-gray-900 py-16 border-t border-gray-200">
+      <footer className="bg-gradient-to-b from-white to-gray-50 text-gray-900 py-20 border-t border-gray-200 shadow-lg">
         <div className="container mx-auto px-6">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
@@ -20,7 +20,7 @@ const Footer = () => {
   }
 
   return (
-    <footer className="bg-white text-gray-900 py-16 border-t border-gray-200">
+    <footer className="bg-gradient-to-b from-white to-gray-50 text-gray-900 py-20 border-t border-gray-200 shadow-lg">
       <div className="container mx-auto px-6">
         {/* Check if there's contact info to determine layout */}
         {contactInfo?.email ||
@@ -65,25 +65,35 @@ const Footer = () => {
               </div>
 
               <div className="text-center md:text-left">
-                <h4 className="text-xl  mb-6 text-gray-900">
-                  Contact
+                <h4 className="text-xl mb-6 text-gray-900 font-medium">
+                  Contact Information
                 </h4>
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {contactInfo?.email && (
-                    <div className="flex items-center justify-center md:justify-start space-x-3">
-                      <Mail className="w-5 h-5 text-gray-600 flex-shrink-0" />
-                      <p className="text-gray-600">{contactInfo.email}</p>
+                    <div className="flex items-center justify-center md:justify-start space-x-3 group">
+                      <Mail className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 flex-shrink-0" />
+                      <a 
+                        href={`mailto:${contactInfo.email}`}
+                        className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                      >
+                        {contactInfo.email}
+                      </a>
                     </div>
                   )}
                   {contactInfo?.phone && (
-                    <div className="flex items-center justify-center md:justify-start space-x-3">
-                      <Phone className="w-5 h-5 text-gray-600 flex-shrink-0" />
-                      <p className="text-gray-600">{contactInfo.phone}</p>
+                    <div className="flex items-center justify-center md:justify-start space-x-3 group">
+                      <Phone className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 flex-shrink-0" />
+                      <a 
+                        href={`tel:${contactInfo.phone}`}
+                        className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                      >
+                        {contactInfo.phone}
+                      </a>
                     </div>
                   )}
                   {contactInfo?.instagram && (
-                    <div className="flex items-center justify-center md:justify-start space-x-3">
-                      <Instagram className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                    <div className="flex items-center justify-center md:justify-start space-x-3 group">
+                      <Instagram className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 flex-shrink-0" />
                       <a
                         href={`https://instagram.com/${contactInfo.instagram.replace(
                           "@",
@@ -91,15 +101,15 @@ const Footer = () => {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-900 transition-colors duration-200 "
+                        className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
                       >
                         {contactInfo.instagram}
                       </a>
                     </div>
                   )}
                   {contactInfo?.address && (
-                    <div className="flex items-start justify-center md:justify-start space-x-3">
-                      <MapPin className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start justify-center md:justify-start space-x-3 group">
+                      <MapPin className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-gray-600 text-sm whitespace-pre-line">
                           {contactInfo.address}
@@ -111,39 +121,35 @@ const Footer = () => {
               </div>
 
               <div className="text-center">
-                <h4 className="text-xl  mb-6 text-gray-900">
-                  Collaborators
+                <h4 className="text-xl mb-6 text-gray-900">
+                  Our Partners
                 </h4>
-                {/* Desktop/Tablet: Horizontal alignment with bigger logos */}
-                <div className="hidden md:flex flex-wrap items-center justify-center gap-8">
-                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                    <div key={num} className="flex items-center justify-center">
+                {/* Desktop/Tablet: Elegant horizontal alignment */}
+                <div className="hidden md:flex items-center justify-center gap-12">
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <div key={num} className="group">
                       <img
-                        src={`/collaborators/${num}.${
-                          num === 5 || num === 6 ? "jpeg" : "png"
-                        }`}
-                        alt={`Collaborator ${num}`}
-                        className="max-h-20 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-200"
+                        src={`/collaborators/${num}.png`}
+                        alt={`Partner ${num}`}
+                        className="h-16 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
                       />
                     </div>
                   ))}
                 </div>
 
-                {/* Mobile: 3-column grid with centered last logo */}
-                <div className="md:hidden grid grid-cols-3 gap-6">
-                  {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                {/* Mobile: Clean 2-3 layout */}
+                <div className="md:hidden grid grid-cols-3 gap-8">
+                  {[1, 2, 3, 4, 5].map((num) => (
                     <div
                       key={num}
                       className={`flex items-center justify-center ${
-                        num === 7 ? "col-start-2" : ""
+                        num === 5 ? "col-start-2" : ""
                       }`}
                     >
                       <img
-                        src={`/collaborators/${num}.${
-                          num === 5 || num === 6 ? "jpeg" : "png"
-                        }`}
-                        alt={`Collaborator ${num}`}
-                        className="max-h-20 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-200"
+                        src={`/collaborators/${num}.png`}
+                        alt={`Partner ${num}`}
+                        className="h-14 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
                       />
                     </div>
                   ))}
@@ -185,41 +191,37 @@ const Footer = () => {
               </div>
             )}
 
-            {/* Collaborators - Centered and bigger */}
+            {/* Partners - Centered and elegant */}
             <div className="w-full">
-              <h4 className="text-2xl  mb-8 text-gray-900">
-                Collaborators
+              <h4 className="text-2xl mb-10 text-gray-900">
+                Our Partners
               </h4>
-              {/* Desktop/Tablet: Horizontal alignment with more spacing */}
-              <div className="hidden md:flex flex-wrap items-center justify-center gap-12">
-                {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                  <div key={num} className="flex items-center justify-center">
+              {/* Desktop/Tablet: Elegant horizontal alignment with premium spacing */}
+              <div className="hidden md:flex items-center justify-center gap-16">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <div key={num} className="group">
                     <img
-                      src={`/collaborators/${num}.${
-                        num === 5 || num === 6 ? "jpeg" : "png"
-                      }`}
-                      alt={`Collaborator ${num}`}
-                      className="max-h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-200"
+                      src={`/collaborators/${num}.png`}
+                      alt={`Partner ${num}`}
+                      className="h-20 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
                     />
                   </div>
                 ))}
               </div>
 
-              {/* Mobile: 3-column grid with centered last logo */}
-              <div className="md:hidden grid grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+              {/* Mobile: Clean 2-3 layout with better spacing */}
+              <div className="md:hidden grid grid-cols-3 gap-10">
+                {[1, 2, 3, 4, 5].map((num) => (
                   <div
                     key={num}
                     className={`flex items-center justify-center ${
-                      num === 7 ? "col-start-2" : ""
+                      num === 5 ? "col-start-2" : ""
                     }`}
                   >
                     <img
-                      src={`/collaborators/${num}.${
-                        num === 5 || num === 6 ? "jpeg" : "png"
-                      }`}
-                      alt={`Collaborator ${num}`}
-                      className="max-h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-200"
+                      src={`/collaborators/${num}.png`}
+                      alt={`Partner ${num}`}
+                      className="h-16 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
                     />
                   </div>
                 ))}
@@ -228,10 +230,16 @@ const Footer = () => {
           </div>
         )}
 
-        <div className="border-t border-gray-200 mt-12 pt-8 text-center">
-          <p className="text-gray-600">
-            © 2025 Aether Art Space. All rights reserved.
-          </p>
+        <div className="border-t border-gray-200 mt-16 pt-8 text-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+            <p className="text-gray-500 text-sm">
+              © 2025 Aether Art Space. All rights reserved.
+            </p>
+            <p className="text-gray-400 text-xs">
+              Crafted with passion for contemporary art
+            </p>
+          </div>
         </div>
       </div>
     </footer>

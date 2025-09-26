@@ -15,7 +15,7 @@ const Artists = () => {
 
   // Check if page is visible
   const isPageVisible = pageData.artists?.isVisible;
-  
+
   // If page is not visible, redirect to home
   useEffect(() => {
     if (pageData && isPageVisible === false) {

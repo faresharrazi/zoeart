@@ -26,7 +26,7 @@ const Collection = () => {
 
   // Check if page is visible
   const isPageVisible = pageData.gallery?.isVisible;
-  
+
   // If page is not visible, redirect to home
   useEffect(() => {
     if (pageData && isPageVisible === false) {

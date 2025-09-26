@@ -9,7 +9,7 @@ const About = () => {
 
   // Check if page is visible
   const isPageVisible = pageData.about?.isVisible;
-  
+
   // If page is not visible, redirect to home
   useEffect(() => {
     if (pageData && isPageVisible === false) {
