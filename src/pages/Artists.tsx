@@ -137,10 +137,14 @@ const Artists = () => {
                             className="w-8 h-8 p-0 hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
                             onClick={(e) => {
                               e.stopPropagation();
-                              window.open(
-                                artist.social_media.instagram,
-                                "_blank"
-                              );
+                              const instagramUrl =
+                                artist.social_media.instagram.startsWith("http")
+                                  ? artist.social_media.instagram
+                                  : `https://instagram.com/${artist.social_media.instagram.replace(
+                                      "@",
+                                      ""
+                                    )}`;
+                              window.open(instagramUrl, "_blank");
                             }}
                           >
                             <Instagram className="w-3 h-3" />
@@ -153,10 +157,11 @@ const Artists = () => {
                             className="w-8 h-8 p-0 hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
                             onClick={(e) => {
                               e.stopPropagation();
-                              window.open(
-                                artist.social_media.website,
-                                "_blank"
-                              );
+                              const websiteUrl =
+                                artist.social_media.website.startsWith("http")
+                                  ? artist.social_media.website
+                                  : `https://${artist.social_media.website}`;
+                              window.open(websiteUrl, "_blank");
                             }}
                           >
                             <Globe className="w-3 h-3" />

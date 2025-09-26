@@ -292,6 +292,15 @@ app.get("/api/artists", async (req, res) => {
 
     const formattedArtists = artists.map((artist) => ({
       ...artist,
+      profile_image: artist.profile_image
+        ? artist.profile_image.startsWith("/api/file/")
+          ? artist.profile_image
+          : artist.profile_image.startsWith("blob:")
+          ? `/api/file/${artist.profile_image.split("/").pop()}`
+          : artist.profile_image && artist.profile_image !== "undefined"
+          ? `/api/file/${artist.profile_image}`
+          : null
+        : null,
       social_media:
         typeof artist.social_media === "string"
           ? JSON.parse(artist.social_media || "{}")
@@ -1234,6 +1243,15 @@ app.get("/api/admin/artists", authenticateToken, async (req, res) => {
 
     const formattedArtists = artists.map((artist) => ({
       ...artist,
+      profile_image: artist.profile_image
+        ? artist.profile_image.startsWith("/api/file/")
+          ? artist.profile_image
+          : artist.profile_image.startsWith("blob:")
+          ? `/api/file/${artist.profile_image.split("/").pop()}`
+          : artist.profile_image && artist.profile_image !== "undefined"
+          ? `/api/file/${artist.profile_image}`
+          : null
+        : null,
       social_media:
         typeof artist.social_media === "string"
           ? JSON.parse(artist.social_media || "{}")

@@ -502,120 +502,156 @@ const ArtistManagement = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {artists.map((artist) => (
-          <Card key={artist.id}>
-            <CardContent className="p-6">
-              <div className="flex items-start space-x-4 mb-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarImage src={artist.profileImage} alt={artist.name} />
-                  <AvatarFallback>
-                    {artist.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h3 className="text-xl ">{artist.name}</h3>
-                  <p className="text-theme-text-muted ">{artist.specialty}</p>
+          <Card key={artist.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-lg">
+            {/* Artist Header with Image */}
+            <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+              {artist.profileImage ? (
+                <img
+                  src={artist.profileImage}
+                  alt={artist.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
+                    <span className="text-3xl text-gray-600">
+                      {artist.name.charAt(0)}
+                    </span>
+                  </div>
                 </div>
+              )}
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              
+              {/* Status Badge */}
+              <div className="absolute top-4 right-4">
+                <Badge 
+                  variant={artist.isVisible ? "default" : "secondary"}
+                  className="backdrop-blur-sm bg-white/90 text-gray-900"
+                >
+                  {artist.isVisible ? "Visible" : "Hidden"}
+                </Badge>
               </div>
+            </div>
 
-              <div className="space-y-3 mb-4">
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {artist.bio}
-                </p>
-
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant={artist.isVisible ? "default" : "secondary"}>
-                    {artist.isVisible ? "Visible" : "Hidden"}
-                  </Badge>
+            {/* Artist Info */}
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {/* Name and Specialty */}
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">{artist.name}</h3>
+                  {artist.specialty && (
+                    <p className="text-sm text-gray-600">{artist.specialty}</p>
+                  )}
                 </div>
 
+                {/* Bio */}
+                {artist.bio && (
+                  <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
+                    {artist.bio}
+                  </p>
+                )}
+
+                {/* Assigned Artworks */}
                 <div>
-                  <h4 className=" text-sm mb-2">Assigned Artworks</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {artist.assignedArtworks &&
-                    artist.assignedArtworks.length > 0 ? (
-                      artist.assignedArtworks.map((artworkId) => (
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Artworks</span>
+                    <Badge variant="outline" className="text-xs">
+                      {artist.assignedArtworks?.length || 0}
+                    </Badge>
+                  </div>
+                  {artist.assignedArtworks && artist.assignedArtworks.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {artist.assignedArtworks.slice(0, 3).map((artworkId) => (
                         <Badge
                           key={artworkId}
                           variant="secondary"
-                          className="text-xs"
+                          className="text-xs px-2 py-1"
                         >
-                          Artwork {artworkId}
+                          #{artworkId}
                         </Badge>
-                      ))
-                    ) : (
-                      <span className="text-sm text-muted-foreground">
-                        No artworks assigned
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex space-x-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() =>
-                    window.open(`/artist/${artist.slug}`, "_blank")
-                  }
-                  title="Preview artist page"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => toggleVisibility(artist.id, artist.isVisible)}
-                  title={artist.isVisible ? "Hide artist" : "Show artist"}
-                >
-                  {artist.isVisible ? (
-                    <EyeOff className="w-4 h-4" />
+                      ))}
+                      {artist.assignedArtworks.length > 3 && (
+                        <Badge variant="secondary" className="text-xs px-2 py-1">
+                          +{artist.assignedArtworks.length - 3}
+                        </Badge>
+                      )}
+                    </div>
                   ) : (
-                    <Eye className="w-4 h-4" />
+                    <p className="text-xs text-gray-400">No artworks assigned</p>
                   )}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEdit(artist)}
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex space-x-2">
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-destructive hover:text-destructive"
+                      onClick={() =>
+                        window.open(`/artist/${artist.slug}`, "_blank")
+                      }
+                      title="Preview artist page"
+                      className="h-8 px-3"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <ExternalLink className="w-4 h-4" />
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Artist</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete{" "}
-                        <strong>{artist.name}</strong>? This action cannot be
-                        undone and will remove all associated data.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleDelete(artist.id)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => toggleVisibility(artist.id, artist.isVisible)}
+                      title={artist.isVisible ? "Hide artist" : "Show artist"}
+                      className="h-8 px-3"
+                    >
+                      {artist.isVisible ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEdit(artist)}
+                      className="h-8 px-3"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
-                        Delete Artist
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Artist</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete{" "}
+                          <strong>{artist.name}</strong>? This action cannot be
+                          undone and will remove all associated data.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(artist.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete Artist
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
             </CardContent>
           </Card>
