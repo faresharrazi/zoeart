@@ -214,8 +214,13 @@ const ArtworkManagement = () => {
   };
 
   const handleImageUpload = async (file: File) => {
-    // Mock upload function - in a real app, this would upload to your storage
-    return URL.createObjectURL(file);
+    try {
+      const response = await apiClient.uploadFile(file, "artwork");
+      return `/api/file/${response.file.id}`;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
   };
 
   const handleAddImage = async (file: File) => {

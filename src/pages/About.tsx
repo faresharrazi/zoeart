@@ -49,13 +49,13 @@ const About = () => {
       <div className="bg-gallery-light-grey py-20">
         <div className="container mx-auto px-6">
           {/* Dynamic Content Blocks */}
-          {(pageData.about?.content?.content?.blocks || []).map(
+          {(pageData.about?.content?.blocks || []).map(
             (block) =>
               block.isVisible && (
                 <section key={block.id} className="mb-16">
                   <Card className="shadow-elegant">
                     <CardContent className="p-12 text-center">
-                      <h2 className="text-3xl  mb-6 text-foreground">
+                      <h2 className="text-3xl font-semibold mb-6 text-foreground">
                         {block.title}
                       </h2>
                       <div

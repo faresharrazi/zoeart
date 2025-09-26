@@ -201,8 +201,13 @@ const ArtistManagement = () => {
   };
 
   const handleProfileImageUpload = async (file: File) => {
-    // Mock upload function - in a real app, this would upload to your storage
-    return URL.createObjectURL(file);
+    try {
+      const response = await apiClient.uploadFile(file, "artist_profile");
+      return `/api/file/${response.file.id}`;
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      throw error;
+    }
   };
 
   const handleAddProfileImage = async (file: File) => {
