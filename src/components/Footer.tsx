@@ -120,8 +120,8 @@ const Footer = () => {
 
               <div className="text-center">
                 <h4 className="text-xl mb-6 text-gray-900">Our Partners</h4>
-                {/* Desktop/Tablet: Elegant horizontal alignment */}
-                <div className="hidden md:flex items-center justify-center gap-12">
+                {/* Desktop: Elegant horizontal alignment */}
+                <div className="hidden lg:flex items-center justify-center gap-12">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <div key={num} className="group">
                       <img
@@ -133,13 +133,45 @@ const Footer = () => {
                   ))}
                 </div>
 
+                {/* Medium screens: 2-row layout for better visibility */}
+                <div className="hidden md:flex lg:hidden flex-col items-center gap-8">
+                  {/* Top row: 3 logos */}
+                  <div className="flex items-center justify-center gap-12">
+                    {[1, 2, 3].map((num) => (
+                      <div key={num} className="group">
+                        <img
+                          src={`/collaborators/${num}.png`}
+                          alt={`Partner ${num}`}
+                          className="h-20 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {/* Bottom row: 2 centered logos */}
+                  <div className="flex items-center justify-center gap-16">
+                    {[4, 5].map((num) => (
+                      <div key={num} className="group">
+                        <img
+                          src={`/collaborators/${num}.png`}
+                          alt={`Partner ${num}`}
+                          className="h-20 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Mobile: Clean 2-3 layout with centered bottom row */}
                 <div className="md:hidden grid grid-cols-3 gap-8">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <div
                       key={num}
                       className={`flex items-center justify-center ${
-                        num === 4 ? "col-start-1" : num === 5 ? "col-start-3" : ""
+                        num === 4
+                          ? "col-start-1"
+                          : num === 5
+                          ? "col-start-3"
+                          : ""
                       }`}
                     >
                       <img
@@ -188,8 +220,8 @@ const Footer = () => {
             {/* Partners - Centered and elegant */}
             <div className="w-full">
               <h4 className="text-2xl mb-10 text-gray-900">Our Partners</h4>
-              {/* Desktop/Tablet: Elegant horizontal alignment with premium spacing */}
-              <div className="hidden md:flex items-center justify-center gap-16">
+              {/* Desktop: Elegant horizontal alignment with premium spacing */}
+              <div className="hidden lg:flex items-center justify-center gap-16">
                 {[1, 2, 3, 4, 5].map((num) => (
                   <div key={num} className="group">
                     <img
@@ -199,6 +231,34 @@ const Footer = () => {
                     />
                   </div>
                 ))}
+              </div>
+
+              {/* Medium screens: 2-row layout for better visibility */}
+              <div className="hidden md:flex lg:hidden flex-col items-center gap-10">
+                {/* Top row: 3 logos */}
+                <div className="flex items-center justify-center gap-16">
+                  {[1, 2, 3].map((num) => (
+                    <div key={num} className="group">
+                      <img
+                        src={`/collaborators/${num}.png`}
+                        alt={`Partner ${num}`}
+                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
+                      />
+                    </div>
+                  ))}
+                </div>
+                {/* Bottom row: 2 centered logos */}
+                <div className="flex items-center justify-center gap-20">
+                  {[4, 5].map((num) => (
+                    <div key={num} className="group">
+                      <img
+                        src={`/collaborators/${num}.png`}
+                        alt={`Partner ${num}`}
+                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Mobile: Clean 2-3 layout with centered bottom row */}
