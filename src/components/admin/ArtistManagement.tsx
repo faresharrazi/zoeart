@@ -23,6 +23,7 @@ import { apiClient } from "@/lib/apiClient";
 interface Artist {
   id: string;
   name: string;
+  slug: string;
   specialty: string;
   bio: string;
   profileImage: string;
@@ -32,6 +33,7 @@ interface Artist {
     email?: string;
   };
   assignedArtworks: string[]; // Array of artwork IDs
+  isVisible: boolean;
 }
 
 const ArtistManagement = () => {
@@ -47,7 +49,23 @@ const ArtistManagement = () => {
     const fetchArtists = async () => {
       try {
         const data = await apiClient.getArtists();
-        setArtists(data);
+        console.log("Raw artists data:", data);
+        
+        // Transform the data to match our interface
+        const transformedArtists = data.map((artist: any) => ({
+          id: artist.id.toString(),
+          name: artist.name,
+          slug: artist.slug,
+          specialty: artist.specialty || "",
+          bio: artist.bio || "",
+          profileImage: artist.profile_image || "",
+          socialMedia: artist.social_media || {},
+          assignedArtworks: artist.assigned_artworks || [],
+          isVisible: artist.is_visible !== false,
+        }));
+        
+        console.log("Transformed artists:", transformedArtists);
+        setArtists(transformedArtists);
       } catch (error) {
         console.error("Error fetching artists:", error);
         toast({
@@ -72,21 +90,23 @@ const ArtistManagement = () => {
   const handleAdd = () => {
     setFormData({
       name: "",
+      slug: "",
       specialty: "",
       bio: "",
       profileImage: "",
       socialMedia: {},
       assignedArtworks: [],
+      isVisible: true,
     });
     setEditingId(null);
     setIsEditing(true);
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.specialty) {
+    if (!formData.name) {
       toast({
         title: "Error",
-        description: "Name and Specialty are required fields",
+        description: "Name is required",
         variant: "destructive",
       });
       return;
@@ -95,11 +115,15 @@ const ArtistManagement = () => {
     try {
       const artistData = {
         name: formData.name,
-        specialty: formData.specialty,
+        slug: formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        specialty: formData.specialty || "",
         bio: formData.bio || "",
         profile_image: formData.profileImage || "",
-        social_media: JSON.stringify(formData.socialMedia || {}),
+        social_media: formData.socialMedia || {},
+        is_visible: formData.isVisible !== false,
       };
+
+      console.log("Sending artist data:", artistData);
 
       if (editingId) {
         // Update existing artist
@@ -119,7 +143,18 @@ const ArtistManagement = () => {
 
       // Refresh data from database
       const artistsData = await apiClient.getArtists();
-      setArtists(artistsData);
+      const transformedArtists = artistsData.map((artist: any) => ({
+        id: artist.id.toString(),
+        name: artist.name,
+        slug: artist.slug,
+        specialty: artist.specialty || "",
+        bio: artist.bio || "",
+        profileImage: artist.profile_image || "",
+        socialMedia: artist.social_media || {},
+        assignedArtworks: artist.assigned_artworks || [],
+        isVisible: artist.is_visible !== false,
+      }));
+      setArtists(transformedArtists);
 
       setIsEditing(false);
       setFormData({});
@@ -227,7 +262,7 @@ const ArtistManagement = () => {
               </div>
               <div>
                 <label className="block text-sm  mb-2">
-                  Specialty *
+                  Specialty
                 </label>
                 <Input
                   value={formData.specialty || ""}
@@ -236,6 +271,21 @@ const ArtistManagement = () => {
                   }
                   placeholder="e.g., Abstract Expressionism"
                 />
+              </div>
+              <div>
+                <label className="block text-sm  mb-2">
+                  Slug (URL-friendly name)
+                </label>
+                <Input
+                  value={formData.slug || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, slug: e.target.value })
+                  }
+                  placeholder="auto-generated from name"
+                />
+                <p className="text-xs text-theme-text-muted mt-1">
+                  Leave empty to auto-generate from name
+                </p>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm  mb-2">

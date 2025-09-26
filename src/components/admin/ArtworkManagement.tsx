@@ -30,13 +30,15 @@ import { apiClient } from "@/lib/apiClient";
 interface Artwork {
   id: string;
   title: string;
-  artist: string;
+  slug: string;
+  artist_id: number;
+  artist_name: string;
   year: number;
   medium: string;
   size: string;
   description: string;
   images: string[];
-  slug: string;
+  isVisible: boolean;
 }
 
 // Artworks will be fetched from database
@@ -59,7 +61,27 @@ const ArtworkManagement = () => {
           apiClient.getArtworks(),
           apiClient.getArtists(),
         ]);
-        setArtworks(artworksData);
+        
+        console.log("Raw artworks data:", artworksData);
+        console.log("Raw artists data:", artistsData);
+        
+        // Transform artworks data to match our interface
+        const transformedArtworks = artworksData.map((artwork: any) => ({
+          id: artwork.id.toString(),
+          title: artwork.title,
+          slug: artwork.slug,
+          artist_id: artwork.artist_id,
+          artist_name: artwork.artist_name || "Unknown Artist",
+          year: artwork.year || new Date().getFullYear(),
+          medium: artwork.medium || "",
+          size: artwork.size || "",
+          description: artwork.description || "",
+          images: artwork.images || [],
+          isVisible: artwork.is_visible !== false,
+        }));
+        
+        console.log("Transformed artworks:", transformedArtworks);
+        setArtworks(transformedArtworks);
         setArtists(artistsData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -85,23 +107,24 @@ const ArtworkManagement = () => {
   const handleAdd = () => {
     setFormData({
       title: "",
-      artist: "",
+      slug: "",
+      artist_id: 0,
       year: new Date().getFullYear(),
       medium: "",
       size: "",
       description: "",
       images: [],
-      slug: "",
+      isVisible: true,
     });
     setEditingId(null);
     setIsEditing(true);
   };
 
   const handleSave = async () => {
-    if (!formData.title || !formData.artist) {
+    if (!formData.title) {
       toast({
         title: "Error",
-        description: "Title and Artist are required fields",
+        description: "Title is required",
         variant: "destructive",
       });
       return;
@@ -110,13 +133,17 @@ const ArtworkManagement = () => {
     try {
       const artworkData = {
         title: formData.title,
-        artist_id: formData.artist,
-        year: formData.year || "",
+        slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        artist_id: formData.artist_id || null,
+        year: formData.year || null,
         medium: formData.medium || "",
         size: formData.size || "",
         description: formData.description || "",
-        images: JSON.stringify(formData.images || []),
+        images: formData.images || [],
+        is_visible: formData.isVisible !== false,
       };
+
+      console.log("Sending artwork data:", artworkData);
 
       if (editingId) {
         // Update existing artwork
@@ -136,7 +163,20 @@ const ArtworkManagement = () => {
 
       // Refresh data from database
       const artworksData = await apiClient.getArtworks();
-      setArtworks(artworksData);
+      const transformedArtworks = artworksData.map((artwork: any) => ({
+        id: artwork.id.toString(),
+        title: artwork.title,
+        slug: artwork.slug,
+        artist_id: artwork.artist_id,
+        artist_name: artwork.artist_name || "Unknown Artist",
+        year: artwork.year || new Date().getFullYear(),
+        medium: artwork.medium || "",
+        size: artwork.size || "",
+        description: artwork.description || "",
+        images: artwork.images || [],
+        isVisible: artwork.is_visible !== false,
+      }));
+      setArtworks(transformedArtworks);
 
       setIsEditing(false);
       setFormData({});
@@ -217,12 +257,12 @@ const ArtworkManagement = () => {
               </div>
               <div>
                 <label className="block text-sm  mb-2">
-                  Artist *
+                  Artist
                 </label>
                 <Select
-                  value={formData.artist || ""}
+                  value={formData.artist_id?.toString() || ""}
                   onValueChange={(value) =>
-                    setFormData({ ...formData, artist: value })
+                    setFormData({ ...formData, artist_id: parseInt(value) })
                   }
                 >
                   <SelectTrigger>
@@ -230,12 +270,27 @@ const ArtworkManagement = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {artists.map((artist) => (
-                      <SelectItem key={artist.id} value={artist.name}>
+                      <SelectItem key={artist.id} value={artist.id.toString()}>
                         {artist.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <label className="block text-sm  mb-2">
+                  Slug (URL-friendly name)
+                </label>
+                <Input
+                  value={formData.slug || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, slug: e.target.value })
+                  }
+                  placeholder="auto-generated from title"
+                />
+                <p className="text-xs text-theme-text-muted mt-1">
+                  Leave empty to auto-generate from title
+                </p>
               </div>
               <div>
                 <label className="block text-sm  mb-2">Year</label>
@@ -374,7 +429,7 @@ const ArtworkManagement = () => {
             <CardContent className="p-4">
               <div className="mb-2">
                 <h3 className=" text-lg">{artwork.title}</h3>
-                <p className="text-theme-text-muted mb-1">{artwork.artist}</p>
+                <p className="text-theme-text-muted mb-1">{artwork.artist_name}</p>
                 <p className="text-sm text-theme-text-muted mb-1">
                   {artwork.year} • {artwork.medium}
                 </p>
@@ -414,7 +469,7 @@ const ArtworkManagement = () => {
                       <AlertDialogDescription>
                         Are you sure you want to delete{" "}
                         <strong>{artwork.title}</strong> by{" "}
-                        <strong>{artwork.artist}</strong>? This action cannot be
+                        <strong>{artwork.artist_name}</strong>? This action cannot be
                         undone and will remove all associated data.
                       </AlertDialogDescription>
                     </AlertDialogHeader>

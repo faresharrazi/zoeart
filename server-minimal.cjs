@@ -1514,9 +1514,17 @@ app.post("/api/admin/artists", authenticateToken, async (req, res) => {
       is_visible = true,
     } = req.body;
 
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    // Generate slug if not provided
+    const artistSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
     console.log("Artist data:", {
       name,
-      slug,
+      slug: artistSlug,
       specialty,
       bio,
       profile_image,
@@ -1532,12 +1540,12 @@ app.post("/api/admin/artists", authenticateToken, async (req, res) => {
     `,
       [
         name,
-        slug,
-        specialty,
-        bio,
-        profile_image,
+        artistSlug,
+        specialty || null,
+        bio || null,
+        profile_image || null,
         JSON.stringify(social_media || {}),
-        is_visible ? 1 : 0,
+        is_visible !== false, // Convert to boolean
       ]
     );
 
@@ -1545,6 +1553,8 @@ app.post("/api/admin/artists", authenticateToken, async (req, res) => {
     res.json({ success: true, id: result[0].id });
   } catch (error) {
     console.error("Error creating artist:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
     res.status(500).json({ error: "Failed to create artist" });
   }
 });
@@ -1563,6 +1573,14 @@ app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
       is_visible,
     } = req.body;
 
+    // Validate required fields
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
+    }
+
+    // Generate slug if not provided
+    const artistSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
     await query(
       `
       UPDATE artists 
@@ -1571,12 +1589,12 @@ app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
     `,
       [
         name,
-        slug,
-        specialty,
-        bio,
-        profile_image,
+        artistSlug,
+        specialty || null,
+        bio || null,
+        profile_image || null,
         JSON.stringify(social_media || {}),
-        is_visible ? 1 : 0,
+        is_visible !== false, // Convert to boolean
         id,
       ]
     );
@@ -1603,6 +1621,9 @@ app.delete("/api/admin/artists/:id", authenticateToken, async (req, res) => {
 // Create artwork
 app.post("/api/admin/artworks", authenticateToken, async (req, res) => {
   try {
+    console.log("=== CREATE ARTWORK ===");
+    console.log("Request body:", req.body);
+
     const {
       title,
       slug,
@@ -1615,6 +1636,26 @@ app.post("/api/admin/artworks", authenticateToken, async (req, res) => {
       is_visible = true,
     } = req.body;
 
+    // Validate required fields
+    if (!title) {
+      return res.status(400).json({ error: "Title is required" });
+    }
+
+    // Generate slug if not provided
+    const artworkSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    console.log("Artwork data:", {
+      title,
+      slug: artworkSlug,
+      artist_id,
+      year,
+      medium,
+      size,
+      description,
+      images,
+      is_visible,
+    });
+
     const result = await query(
       `
       INSERT INTO artworks (title, slug, artist_id, year, medium, size, description, images, is_visible)
@@ -1623,20 +1664,23 @@ app.post("/api/admin/artworks", authenticateToken, async (req, res) => {
     `,
       [
         title,
-        slug,
-        artist_id,
-        year,
-        medium,
-        size,
-        description,
+        artworkSlug,
+        artist_id || null,
+        year || null,
+        medium || null,
+        size || null,
+        description || null,
         JSON.stringify(images || []),
-        is_visible ? 1 : 0,
+        is_visible !== false, // Convert to boolean
       ]
     );
 
+    console.log("Artwork created with ID:", result[0].id);
     res.json({ success: true, id: result[0].id });
   } catch (error) {
     console.error("Error creating artwork:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
     res.status(500).json({ error: "Failed to create artwork" });
   }
 });
@@ -1657,6 +1701,14 @@ app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
       is_visible,
     } = req.body;
 
+    // Validate required fields
+    if (!title) {
+      return res.status(400).json({ error: "Title is required" });
+    }
+
+    // Generate slug if not provided
+    const artworkSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
     await query(
       `
       UPDATE artworks 
@@ -1665,14 +1717,14 @@ app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
     `,
       [
         title,
-        slug,
-        artist_id,
-        year,
-        medium,
-        size,
-        description,
+        artworkSlug,
+        artist_id || null,
+        year || null,
+        medium || null,
+        size || null,
+        description || null,
         JSON.stringify(images || []),
-        is_visible ? 1 : 0,
+        is_visible !== false, // Convert to boolean
         id,
       ]
     );

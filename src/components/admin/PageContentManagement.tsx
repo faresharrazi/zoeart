@@ -415,9 +415,7 @@ const PageContentManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-sm ">
-                    Hero Description
-                  </Label>
+                  <Label className="text-sm ">Hero Description</Label>
                   <Textarea
                     value={formData.description || ""}
                     onChange={(e) =>
@@ -429,9 +427,7 @@ const PageContentManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-sm ">
-                    Footer Description
-                  </Label>
+                  <Label className="text-sm ">Footer Description</Label>
                   <Textarea
                     value={formData.footerDescription || ""}
                     onChange={(e) =>
@@ -493,9 +489,7 @@ const PageContentManagement = () => {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <h4 className=" text-theme-text-primary mb-2">
-                    Hero Title
-                  </h4>
+                  <h4 className=" text-theme-text-primary mb-2">Hero Title</h4>
                   <p className="text-theme-text-muted">
                     {currentData?.title || "N/A"}
                   </p>
@@ -593,9 +587,7 @@ const PageContentManagement = () => {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm ">
-                      Page Description
-                    </Label>
+                    <Label className="text-sm ">Page Description</Label>
                     <Textarea
                       value={formData.description || ""}
                       onChange={(e) =>
@@ -643,9 +635,7 @@ const PageContentManagement = () => {
           </Card>
 
           <div className="space-y-4">
-            <h3 className="text-lg  text-theme-text-primary">
-              Content Blocks
-            </h3>
+            <h3 className="text-lg  text-theme-text-primary">Content Blocks</h3>
             {(currentData?.content?.content?.blocks || []).map((block) => (
               <Card key={block.id}>
                 <CardHeader>
@@ -691,9 +681,7 @@ const PageContentManagement = () => {
                       />
                     </div>
                     <div>
-                      <Label className="text-sm ">
-                        Block Content
-                      </Label>
+                      <Label className="text-sm ">Block Content</Label>
                       <Textarea
                         value={
                           blockFormData[block.id]?.content ?? block.content
@@ -794,9 +782,7 @@ const PageContentManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-sm ">
-                    Page Description
-                  </Label>
+                  <Label className="text-sm ">Page Description</Label>
                   <Textarea
                     value={formData.description || ""}
                     onChange={(e) =>
@@ -820,9 +806,7 @@ const PageContentManagement = () => {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <h4 className=" text-theme-text-primary mb-2">
-                    Page Title
-                  </h4>
+                  <h4 className=" text-theme-text-primary mb-2">Page Title</h4>
                   <p className="text-theme-text-muted">
                     {currentData?.title || "N/A"}
                   </p>
@@ -965,9 +949,7 @@ const PageContentManagement = () => {
                     <div className="flex items-center gap-3">
                       <Mail className="w-5 h-5 text-theme-primary" />
                       <div>
-                        <p className=" text-theme-text-primary">
-                          Email
-                        </p>
+                        <p className=" text-theme-text-primary">Email</p>
                         <p className="text-theme-text-muted">
                           {contactInfo?.email || "N/A"}
                         </p>
@@ -976,9 +958,7 @@ const PageContentManagement = () => {
                     <div className="flex items-center gap-3">
                       <Phone className="w-5 h-5 text-theme-primary" />
                       <div>
-                        <p className=" text-theme-text-primary">
-                          Phone
-                        </p>
+                        <p className=" text-theme-text-primary">Phone</p>
                         <p className="text-theme-text-muted">
                           {contactInfo?.phone || "N/A"}
                         </p>
@@ -987,9 +967,7 @@ const PageContentManagement = () => {
                     <div className="flex items-center gap-3">
                       <Instagram className="w-5 h-5 text-theme-primary" />
                       <div>
-                        <p className=" text-theme-text-primary">
-                          Instagram
-                        </p>
+                        <p className=" text-theme-text-primary">Instagram</p>
                         <p className="text-theme-text-muted">
                           {contactInfo?.instagram || "N/A"}
                         </p>
@@ -998,9 +976,7 @@ const PageContentManagement = () => {
                     <div className="flex items-center gap-3">
                       <MapPin className="w-5 h-5 text-theme-primary" />
                       <div>
-                        <p className=" text-theme-text-primary">
-                          Address
-                        </p>
+                        <p className=" text-theme-text-primary">Address</p>
                         <p className="text-theme-text-muted">
                           {contactInfo?.address || "N/A"}
                         </p>

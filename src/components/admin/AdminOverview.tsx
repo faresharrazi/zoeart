@@ -144,8 +144,8 @@ const AdminOverview = ({ onNavigate }: AdminOverviewProps) => {
         {statsData.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
-            <Card 
-              key={index} 
+            <Card
+              key={index}
               className="shadow-elegant cursor-pointer hover:shadow-lg transition-shadow duration-200 hover:scale-105"
               onClick={() => onNavigate(stat.navigateTo)}
             >
@@ -158,9 +158,7 @@ const AdminOverview = ({ onNavigate }: AdminOverviewProps) => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl  ${stat.color}`}>
-                  {stat.value}
-                </div>
+                <div className={`text-2xl  ${stat.color}`}>{stat.value}</div>
                 <p className="text-xs text-theme-text-muted mt-1">
                   {stat.change}
                 </p>
