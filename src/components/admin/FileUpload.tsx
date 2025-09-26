@@ -137,12 +137,13 @@ const FileUpload = ({
       {files.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="text-blue-800 text-sm">
-            <strong>Note:</strong> If you see "Image Not Available" below, these images were uploaded before our recent update. 
-            Please delete them and re-upload to see the thumbnails properly.
+            <strong>Note:</strong> If you see "Image Not Available" below, these
+            images were uploaded before our recent update. Please delete them
+            and re-upload to see the thumbnails properly.
           </div>
         </div>
       )}
-      
+
       {/* Upload Area */}
       <Card className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors">
         <CardContent className="p-6">
@@ -188,8 +189,12 @@ const FileUpload = ({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  if (confirm("Are you sure you want to remove all files? This action cannot be undone.")) {
-                    files.forEach(file => handleRemoveFile(file.id));
+                  if (
+                    confirm(
+                      "Are you sure you want to remove all files? This action cannot be undone."
+                    )
+                  ) {
+                    files.forEach((file) => handleRemoveFile(file.id));
                   }
                 }}
                 className="text-red-600 hover:text-red-700"
@@ -212,47 +217,47 @@ const FileUpload = ({
                           </div>
                         </div>
                       )}
-                    <img
-                      src={file.url}
-                      alt={file.originalName}
-                      className="w-full h-full object-cover rounded-lg"
-                      onLoadStart={() => {
-                        setImageLoadingStates((prev) => ({
-                          ...prev,
-                          [file.id]: true,
-                        }));
-                      }}
-                      onError={(e) => {
-                        console.error("Image failed to load:", file.url, e);
-                        setImageLoadingStates((prev) => ({
-                          ...prev,
-                          [file.id]: false,
-                        }));
-                        // Show a more informative placeholder
-                        e.currentTarget.src =
-                          "https://via.placeholder.com/300x300/FF6B6B/FFFFFF?text=Image+Not+Available";
-                      }}
-                      onLoad={() => {
-                        console.log("Image loaded successfully:", file.url);
-                        setImageLoadingStates((prev) => ({
-                          ...prev,
-                          [file.id]: false,
-                        }));
-                      }}
-                    />
-                    {/* Show overlay when image fails to load */}
-                    {imageLoadingStates[file.id] === false && (
-                      <div className="absolute inset-0 bg-red-50 border-2 border-red-200 rounded-lg flex items-center justify-center">
-                        <div className="text-center p-2">
-                          <div className="text-red-600 text-xs font-medium mb-1">
-                            Image Not Available
-                          </div>
-                          <div className="text-red-500 text-xs">
-                            Re-upload required
+                      <img
+                        src={file.url}
+                        alt={file.originalName}
+                        className="w-full h-full object-cover rounded-lg"
+                        onLoadStart={() => {
+                          setImageLoadingStates((prev) => ({
+                            ...prev,
+                            [file.id]: true,
+                          }));
+                        }}
+                        onError={(e) => {
+                          console.error("Image failed to load:", file.url, e);
+                          setImageLoadingStates((prev) => ({
+                            ...prev,
+                            [file.id]: false,
+                          }));
+                          // Show a more informative placeholder
+                          e.currentTarget.src =
+                            "https://via.placeholder.com/300x300/FF6B6B/FFFFFF?text=Image+Not+Available";
+                        }}
+                        onLoad={() => {
+                          console.log("Image loaded successfully:", file.url);
+                          setImageLoadingStates((prev) => ({
+                            ...prev,
+                            [file.id]: false,
+                          }));
+                        }}
+                      />
+                      {/* Show overlay when image fails to load */}
+                      {imageLoadingStates[file.id] === false && (
+                        <div className="absolute inset-0 bg-red-50 border-2 border-red-200 rounded-lg flex items-center justify-center">
+                          <div className="text-center p-2">
+                            <div className="text-red-600 text-xs font-medium mb-1">
+                              Image Not Available
+                            </div>
+                            <div className="text-red-500 text-xs">
+                              Re-upload required
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                       <Button
                         size="sm"
                         variant="destructive"

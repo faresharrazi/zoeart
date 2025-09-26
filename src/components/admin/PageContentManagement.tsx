@@ -470,20 +470,18 @@ const PageContentManagement = () => {
                         });
                       }}
                       existingFiles={(() => {
-                        const filteredImages =
-                          formData.heroImageIds &&
-                          formData.heroImageIds.length > 0
-                            ? heroImages.filter((img) =>
-                                formData.heroImageIds.includes(img.id)
-                              )
-                            : [];
-                        console.log("PCM: FileUpload existingFiles:", {
+                        console.log("PCM: FileUpload existingFiles - DEBUG:", {
+                          formDataKeys: Object.keys(formData),
                           heroImageIds: formData.heroImageIds,
-                          allHeroImages: heroImages.length,
-                          filteredImages: filteredImages.length,
-                          filteredImagesData: filteredImages,
+                          heroImages: formData.heroImages,
+                          allHeroImagesFromHook: heroImages.length,
+                          allHeroImagesData: heroImages,
+                          editingPage: editingPage,
                         });
-                        return filteredImages;
+                        
+                        // For now, show all hero images to debug the issue
+                        // TODO: Filter based on heroImageIds once we confirm data flow
+                        return heroImages || [];
                       })()}
                       maxFiles={10}
                       onRefresh={refreshHeroImages}
