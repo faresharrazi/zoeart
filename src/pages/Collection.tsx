@@ -253,13 +253,8 @@ const Collection = () => {
                   {filteredArtworks.map((artwork) => (
                     <ArtworkCard
                       key={artwork.id}
-                      title={artwork.title}
-                      artist={artwork.artist_name}
-                      year={artwork.year}
-                      medium={artwork.medium}
-                      image={artwork.image}
-                      description={artwork.description}
-                      slug={artwork.slug}
+                      artwork={artwork}
+                      onArtworkClick={handleArtworkClick}
                     />
                   ))}
                 </div>

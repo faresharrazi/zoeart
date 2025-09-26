@@ -54,7 +54,7 @@ const ArtworkDetail = () => {
 
   const handlePrevImage = () => {
     if (artwork.images && artwork.images.length > 1) {
-      setSelectedImageIndex(prev => 
+      setSelectedImageIndex((prev) =>
         prev === 0 ? artwork.images.length - 1 : prev - 1
       );
     }
@@ -62,7 +62,7 @@ const ArtworkDetail = () => {
 
   const handleNextImage = () => {
     if (artwork.images && artwork.images.length > 1) {
-      setSelectedImageIndex(prev => 
+      setSelectedImageIndex((prev) =>
         prev === artwork.images.length - 1 ? 0 : prev + 1
       );
     }
@@ -100,7 +100,8 @@ const ArtworkDetail = () => {
                 Artwork Not Found
               </h1>
               <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-                The artwork you're looking for doesn't exist or has been removed.
+                The artwork you're looking for doesn't exist or has been
+                removed.
               </p>
               <Button
                 onClick={() => navigate("/collection")}
@@ -119,7 +120,9 @@ const ArtworkDetail = () => {
   }
 
   const hasImages = artwork.images && artwork.images.length > 0;
-  const hasValidImages = hasImages && artwork.images.some((img: string) => img && !img.startsWith('blob:'));
+  const hasValidImages =
+    hasImages &&
+    artwork.images.some((img: string) => img && !img.startsWith("blob:"));
 
   return (
     <div className="min-h-screen">
@@ -167,7 +170,7 @@ const ArtworkDetail = () => {
                         Click to Zoom
                       </Button>
                     </div>
-                    
+
                     {/* Navigation arrows for multiple images */}
                     {artwork.images.length > 1 && (
                       <>
@@ -195,7 +198,7 @@ const ArtworkDetail = () => {
                     <div className="text-center">
                       <div className="w-24 h-24 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center mx-auto mb-4">
                         <span className="text-4xl text-slate-600 font-semibold">
-                          {artwork.title?.charAt(0) || 'A'}
+                          {artwork.title?.charAt(0) || "A"}
                         </span>
                       </div>
                       <p className="text-slate-500">No image available</p>
@@ -212,9 +215,9 @@ const ArtworkDetail = () => {
                         src={image}
                         alt={`${artwork.title} detail ${index + 1}`}
                         className={`w-full h-24 object-cover rounded-lg cursor-pointer transition-all duration-300 ${
-                          index === selectedImageIndex 
-                            ? 'ring-2 ring-blue-500 shadow-lg' 
-                            : 'hover:shadow-md'
+                          index === selectedImageIndex
+                            ? "ring-2 ring-blue-500 shadow-lg"
+                            : "hover:shadow-md"
                         }`}
                         onClick={() => setSelectedImageIndex(index)}
                       />
@@ -243,28 +246,36 @@ const ArtworkDetail = () => {
                         {artwork.year && (
                           <div className="flex items-center gap-3">
                             <Calendar className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">{artwork.year}</span>
+                            <span className="text-gray-700">
+                              {artwork.year}
+                            </span>
                           </div>
                         )}
-                        
+
                         {artwork.medium && (
                           <div className="flex items-center gap-3">
                             <Palette className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">{artwork.medium}</span>
+                            <span className="text-gray-700">
+                              {artwork.medium}
+                            </span>
                           </div>
                         )}
-                        
+
                         {artwork.size && (
                           <div className="flex items-center gap-3">
                             <Ruler className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">{artwork.size}</span>
+                            <span className="text-gray-700">
+                              {artwork.size}
+                            </span>
                           </div>
                         )}
-                        
+
                         {artwork.artist_name && (
                           <div className="flex items-center gap-3">
                             <User className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">{artwork.artist_name}</span>
+                            <span className="text-gray-700">
+                              {artwork.artist_name}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -295,7 +306,13 @@ const ArtworkDetail = () => {
                     Back to Collection
                   </Button>
                   <Button
-                    onClick={() => navigate(`/artist/${artwork.artist_name?.toLowerCase().replace(/\s+/g, '-')}`)}
+                    onClick={() =>
+                      navigate(
+                        `/artist/${artwork.artist_name
+                          ?.toLowerCase()
+                          .replace(/\s+/g, "-")}`
+                      )
+                    }
                     className="flex-1"
                   >
                     View Artist Profile
