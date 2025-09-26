@@ -54,9 +54,7 @@ const Footer = () => {
                 )}
                 {homeSettings?.galleryHours && (
                   <div className="mt-6">
-                    <p className="text-gray-900  text-lg mb-2">
-                      Gallery Hours
-                    </p>
+                    <p className="text-gray-900  text-lg mb-2">Gallery Hours</p>
                     <p className="text-gray-600 text-sm whitespace-pre-line">
                       {homeSettings.galleryHours}
                     </p>
@@ -72,7 +70,7 @@ const Footer = () => {
                   {contactInfo?.email && (
                     <div className="flex items-center justify-center md:justify-start space-x-3 group">
                       <Mail className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 flex-shrink-0" />
-                      <a 
+                      <a
                         href={`mailto:${contactInfo.email}`}
                         className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
                       >
@@ -83,7 +81,7 @@ const Footer = () => {
                   {contactInfo?.phone && (
                     <div className="flex items-center justify-center md:justify-start space-x-3 group">
                       <Phone className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 flex-shrink-0" />
-                      <a 
+                      <a
                         href={`tel:${contactInfo.phone}`}
                         className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
                       >
@@ -121,9 +119,7 @@ const Footer = () => {
               </div>
 
               <div className="text-center">
-                <h4 className="text-xl mb-6 text-gray-900">
-                  Our Partners
-                </h4>
+                <h4 className="text-xl mb-6 text-gray-900">Our Partners</h4>
                 {/* Desktop/Tablet: Elegant horizontal alignment */}
                 <div className="hidden md:flex items-center justify-center gap-12">
                   {[1, 2, 3, 4, 5].map((num) => (
@@ -137,13 +133,13 @@ const Footer = () => {
                   ))}
                 </div>
 
-                {/* Mobile: Clean 2-3 layout */}
+                {/* Mobile: Clean 2-3 layout with centered bottom row */}
                 <div className="md:hidden grid grid-cols-3 gap-8">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <div
                       key={num}
                       className={`flex items-center justify-center ${
-                        num === 5 ? "col-start-2" : ""
+                        num === 4 ? "col-start-1" : num === 5 ? "col-start-3" : ""
                       }`}
                     >
                       <img
@@ -180,9 +176,7 @@ const Footer = () => {
                 )}
                 {homeSettings?.galleryHours && (
                   <div>
-                    <p className="text-gray-900  text-xl mb-3">
-                      Gallery Hours
-                    </p>
+                    <p className="text-gray-900  text-xl mb-3">Gallery Hours</p>
                     <p className="text-gray-600 whitespace-pre-line">
                       {homeSettings.galleryHours}
                     </p>
@@ -193,9 +187,7 @@ const Footer = () => {
 
             {/* Partners - Centered and elegant */}
             <div className="w-full">
-              <h4 className="text-2xl mb-10 text-gray-900">
-                Our Partners
-              </h4>
+              <h4 className="text-2xl mb-10 text-gray-900">Our Partners</h4>
               {/* Desktop/Tablet: Elegant horizontal alignment with premium spacing */}
               <div className="hidden md:flex items-center justify-center gap-16">
                 {[1, 2, 3, 4, 5].map((num) => (
@@ -209,13 +201,13 @@ const Footer = () => {
                 ))}
               </div>
 
-              {/* Mobile: Clean 2-3 layout with better spacing */}
+              {/* Mobile: Clean 2-3 layout with centered bottom row */}
               <div className="md:hidden grid grid-cols-3 gap-10">
                 {[1, 2, 3, 4, 5].map((num) => (
                   <div
                     key={num}
                     className={`flex items-center justify-center ${
-                      num === 5 ? "col-start-2" : ""
+                      num === 4 ? "col-start-1" : num === 5 ? "col-start-3" : ""
                     }`}
                   >
                     <img
