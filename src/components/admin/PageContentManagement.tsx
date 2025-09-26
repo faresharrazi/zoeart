@@ -404,7 +404,7 @@ const PageContentManagement = () => {
             {isEditing ? (
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">Hero Title</Label>
+                  <Label className="text-sm ">Hero Title</Label>
                   <Input
                     value={formData.title || ""}
                     onChange={(e) =>
@@ -415,7 +415,7 @@ const PageContentManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">
+                  <Label className="text-sm ">
                     Hero Description
                   </Label>
                   <Textarea
@@ -429,7 +429,7 @@ const PageContentManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">
+                  <Label className="text-sm ">
                     Footer Description
                   </Label>
                   <Textarea
@@ -446,7 +446,7 @@ const PageContentManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Gallery Hours</Label>
+                  <Label className="text-sm ">Gallery Hours</Label>
                   <Textarea
                     value={formData.galleryHours || ""}
                     onChange={(e) =>
@@ -458,7 +458,7 @@ const PageContentManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Hero Images</Label>
+                  <Label className="text-sm ">Hero Images</Label>
                   <div className="mt-2">
                     <FileUpload
                       category="hero_image"
@@ -493,7 +493,7 @@ const PageContentManagement = () => {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                  <h4 className=" text-theme-text-primary mb-2">
                     Hero Title
                   </h4>
                   <p className="text-theme-text-muted">
@@ -501,7 +501,7 @@ const PageContentManagement = () => {
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                  <h4 className=" text-theme-text-primary mb-2">
                     Hero Description
                   </h4>
                   <p className="text-theme-text-muted">
@@ -509,7 +509,7 @@ const PageContentManagement = () => {
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                  <h4 className=" text-theme-text-primary mb-2">
                     Footer Description
                   </h4>
                   <p className="text-theme-text-muted whitespace-pre-line">
@@ -517,7 +517,7 @@ const PageContentManagement = () => {
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                  <h4 className=" text-theme-text-primary mb-2">
                     Gallery Hours
                   </h4>
                   <p className="text-theme-text-muted whitespace-pre-line">
@@ -525,7 +525,7 @@ const PageContentManagement = () => {
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                  <h4 className=" text-theme-text-primary mb-2">
                     Hero Images ({currentData?.heroImages?.length || 0})
                   </h4>
                   {currentData?.heroImages &&
@@ -582,7 +582,7 @@ const PageContentManagement = () => {
               {isEditing ? (
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium">Page Title</Label>
+                    <Label className="text-sm ">Page Title</Label>
                     <Input
                       value={formData.title || ""}
                       onChange={(e) =>
@@ -593,7 +593,7 @@ const PageContentManagement = () => {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium">
+                    <Label className="text-sm ">
                       Page Description
                     </Label>
                     <Textarea
@@ -622,7 +622,7 @@ const PageContentManagement = () => {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-semibold text-theme-text-primary mb-2">
+                    <h4 className=" text-theme-text-primary mb-2">
                       Page Title
                     </h4>
                     <p className="text-theme-text-muted">
@@ -630,7 +630,7 @@ const PageContentManagement = () => {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-theme-text-primary mb-2">
+                    <h4 className=" text-theme-text-primary mb-2">
                       Page Description
                     </h4>
                     <p className="text-theme-text-muted">
@@ -643,7 +643,7 @@ const PageContentManagement = () => {
           </Card>
 
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-theme-text-primary">
+            <h3 className="text-lg  text-theme-text-primary">
               Content Blocks
             </h3>
             {(currentData?.content?.content?.blocks || []).map((block) => (
@@ -680,7 +680,7 @@ const PageContentManagement = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-sm font-medium">Block Title</Label>
+                      <Label className="text-sm ">Block Title</Label>
                       <Input
                         value={blockFormData[block.id]?.title ?? block.title}
                         onChange={(e) =>
@@ -691,7 +691,7 @@ const PageContentManagement = () => {
                       />
                     </div>
                     <div>
-                      <Label className="text-sm font-medium">
+                      <Label className="text-sm ">
                         Block Content
                       </Label>
                       <Textarea
@@ -783,7 +783,7 @@ const PageContentManagement = () => {
             {isEditing ? (
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">Page Title</Label>
+                  <Label className="text-sm ">Page Title</Label>
                   <Input
                     value={formData.title || ""}
                     onChange={(e) =>
@@ -794,7 +794,7 @@ const PageContentManagement = () => {
                   />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">
+                  <Label className="text-sm ">
                     Page Description
                   </Label>
                   <Textarea
@@ -820,7 +820,7 @@ const PageContentManagement = () => {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                  <h4 className=" text-theme-text-primary mb-2">
                     Page Title
                   </h4>
                   <p className="text-theme-text-muted">
@@ -828,7 +828,7 @@ const PageContentManagement = () => {
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-theme-text-primary mb-2">
+                  <h4 className=" text-theme-text-primary mb-2">
                     Page Description
                   </h4>
                   <p className="text-theme-text-muted">
@@ -867,7 +867,7 @@ const PageContentManagement = () => {
               {editingContactInfo ? (
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium flex items-center gap-2">
+                    <Label className="text-sm  flex items-center gap-2">
                       <Mail className="w-4 h-4" />
                       Email
                     </Label>
@@ -881,7 +881,7 @@ const PageContentManagement = () => {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium flex items-center gap-2">
+                    <Label className="text-sm  flex items-center gap-2">
                       <Phone className="w-4 h-4" />
                       Phone
                     </Label>
@@ -895,7 +895,7 @@ const PageContentManagement = () => {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium flex items-center gap-2">
+                    <Label className="text-sm  flex items-center gap-2">
                       <Instagram className="w-4 h-4" />
                       Instagram
                     </Label>
@@ -909,7 +909,7 @@ const PageContentManagement = () => {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium flex items-center gap-2">
+                    <Label className="text-sm  flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
                       Address
                     </Label>
@@ -965,7 +965,7 @@ const PageContentManagement = () => {
                     <div className="flex items-center gap-3">
                       <Mail className="w-5 h-5 text-theme-primary" />
                       <div>
-                        <p className="font-medium text-theme-text-primary">
+                        <p className=" text-theme-text-primary">
                           Email
                         </p>
                         <p className="text-theme-text-muted">
@@ -976,7 +976,7 @@ const PageContentManagement = () => {
                     <div className="flex items-center gap-3">
                       <Phone className="w-5 h-5 text-theme-primary" />
                       <div>
-                        <p className="font-medium text-theme-text-primary">
+                        <p className=" text-theme-text-primary">
                           Phone
                         </p>
                         <p className="text-theme-text-muted">
@@ -987,7 +987,7 @@ const PageContentManagement = () => {
                     <div className="flex items-center gap-3">
                       <Instagram className="w-5 h-5 text-theme-primary" />
                       <div>
-                        <p className="font-medium text-theme-text-primary">
+                        <p className=" text-theme-text-primary">
                           Instagram
                         </p>
                         <p className="text-theme-text-muted">
@@ -998,7 +998,7 @@ const PageContentManagement = () => {
                     <div className="flex items-center gap-3">
                       <MapPin className="w-5 h-5 text-theme-primary" />
                       <div>
-                        <p className="font-medium text-theme-text-primary">
+                        <p className=" text-theme-text-primary">
                           Address
                         </p>
                         <p className="text-theme-text-muted">
@@ -1061,7 +1061,7 @@ const PageContentManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-theme-text-primary">
+        <h2 className="text-xl sm:text-2xl  text-theme-text-primary">
           Page Content Management
         </h2>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -1098,7 +1098,7 @@ const PageContentManagement = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex-shrink-0 ${
+              className={`py-4 px-1 border-b-2  text-sm whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab.id
                   ? "border-theme-primary text-theme-primary"
                   : "border-transparent text-theme-text-muted hover:text-theme-text-primary hover:border-theme-border"

@@ -104,7 +104,7 @@ const ArtworkZoom = ({
 
       {/* Zoom Level Indicator */}
       <div className="absolute bottom-4 left-4 z-10 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2">
-        <span className="text-white text-sm font-medium">
+        <span className="text-white text-sm ">
           {Math.round(zoom * 100)}%
         </span>
       </div>
@@ -133,7 +133,7 @@ const ArtworkZoom = ({
 
       {/* Image Info */}
       <div className="absolute bottom-4 right-4 z-10 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-4 py-2">
-        <h3 className="text-white font-semibold text-sm">{title}</h3>
+        <h3 className="text-white  text-sm">{title}</h3>
         <p className="text-white/80 text-xs">{artist}</p>
       </div>
 

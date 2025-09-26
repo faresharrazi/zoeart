@@ -39,7 +39,7 @@ const Artists = () => {
         <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
           <div className="container mx-auto px-6 text-center relative z-10">
             <div className="max-w-4xl mx-auto my-24">
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+              <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
                 {pageData.artists?.title || "Artists"}
               </h1>
               <div className="flex items-center justify-center py-12">
@@ -62,7 +62,7 @@ const Artists = () => {
       <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto my-24">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+            <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
               {pageData.artists?.title || "Artists"}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
@@ -91,7 +91,7 @@ const Artists = () => {
                           alt={artist.name}
                           className="object-cover"
                         />
-                        <AvatarFallback className="bg-theme-primary/10 text-theme-primary font-semibold text-lg">
+                        <AvatarFallback className="bg-theme-primary/10 text-theme-primary  text-lg">
                           {artist.name
                             ?.split(" ")
                             .map((n) => n[0])
@@ -99,10 +99,10 @@ const Artists = () => {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-foreground mb-2">
+                        <h3 className="text-2xl  text-foreground mb-2">
                           {artist.name || "Unknown Artist"}
                         </h3>
-                        <p className="text-theme-primary font-semibold text-lg">
+                        <p className="text-theme-primary  text-lg">
                           {artist.specialty || "Artist"}
                         </p>
                       </div>

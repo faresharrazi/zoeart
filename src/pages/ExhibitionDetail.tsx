@@ -72,7 +72,7 @@ const ExhibitionDetail = () => {
           <div className="absolute inset-0 bg-black/40" />
           <div className="container mx-auto px-6 text-center relative z-10">
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+              <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
                 Exhibition Not Found
               </h1>
               <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
@@ -128,7 +128,7 @@ const ExhibitionDetail = () => {
             >
               {exhibition.status}
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+            <h1 className="text-5xl md:text-7xl text-white mb-6">
               {exhibition.title}
             </h1>
             {exhibition.description && (
@@ -142,7 +142,7 @@ const ExhibitionDetail = () => {
               <div className="mt-8">
                 <Button
                   onClick={() => window.open(exhibition.cta_link, "_blank")}
-                  className="bg-white text-black hover:bg-gray-100 px-8 py-3 text-lg font-semibold"
+                  className="bg-white text-black hover:bg-gray-100 px-8 py-3 text-lg "
                 >
                   Join as an Artist
                 </Button>
@@ -196,7 +196,7 @@ const ExhibitionDetail = () => {
                         <Calendar className="w-5 h-5 text-theme-primary" />
                         <div>
                           <p className="text-sm text-theme-text-muted">Dates</p>
-                          <p className="font-medium text-theme-text-primary">
+                          <p className=" text-theme-text-primary">
                             {exhibition.start_date && exhibition.end_date
                               ? `${formatDate(
                                   exhibition.start_date
@@ -216,7 +216,7 @@ const ExhibitionDetail = () => {
                           <p className="text-sm text-theme-text-muted">
                             Location
                           </p>
-                          <p className="font-medium text-theme-text-primary">
+                          <p className=" text-theme-text-primary">
                             {exhibition.location}
                           </p>
                         </div>
@@ -230,7 +230,7 @@ const ExhibitionDetail = () => {
                           <p className="text-sm text-theme-text-muted">
                             Curator
                           </p>
-                          <p className="font-medium text-theme-text-primary">
+                          <p className=" text-theme-text-primary">
                             {exhibition.curator}
                           </p>
                         </div>
@@ -245,7 +245,7 @@ const ExhibitionDetail = () => {
                             <p className="text-sm text-theme-text-muted">
                               Artworks
                             </p>
-                            <p className="font-medium text-theme-text-primary">
+                            <p className=" text-theme-text-primary">
                               {exhibition.assigned_artworks.length} pieces
                             </p>
                           </div>

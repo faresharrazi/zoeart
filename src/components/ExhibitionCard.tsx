@@ -103,7 +103,7 @@ const ExhibitionCard = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         <div className="absolute top-4 left-4">
           <Badge
-            className={`${getStatusColor(exhibition.status)} font-semibold`}
+            className={`${getStatusColor(exhibition.status)} `}
           >
             {exhibition.status}
           </Badge>
@@ -123,11 +123,11 @@ const ExhibitionCard = ({
       <CardContent className="p-6 flex-grow flex flex-col">
         <div className="space-y-4 flex-grow">
           <div>
-            <h3 className="text-xl font-bold text-theme-text-primary mb-2">
+            <h3 className="text-xl  text-theme-text-primary mb-2">
               {exhibition.title}
             </h3>
             {exhibition.curator && (
-              <p className="text-sm text-theme-text-muted font-medium">
+              <p className="text-sm text-theme-text-muted ">
                 Curated by {exhibition.curator}
               </p>
             )}

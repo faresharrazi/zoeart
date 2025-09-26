@@ -43,7 +43,7 @@ const AdminSidebar = ({
     <>
       {/* Mobile Header */}
       <div className="lg:hidden bg-theme-surface border-b border-theme-border p-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-theme-text-primary">
+        <h1 className="text-xl  text-theme-text-primary">
           Admin Panel
         </h1>
         <div className="flex items-center space-x-2">
@@ -82,7 +82,7 @@ const AdminSidebar = ({
           >
             <div className="p-4 border-b border-theme-border">
               <div className="flex items-center justify-between">
-                <h1 className="text-xl font-bold text-theme-text-primary">
+                <h1 className="text-xl  text-theme-text-primary">
                   Admin Panel
                 </h1>
                 <Button
@@ -123,7 +123,7 @@ const AdminSidebar = ({
       <div className="hidden lg:flex lg:flex-col lg:w-64 lg:flex-shrink-0 bg-theme-surface border-r border-theme-border">
         <div className="p-4 border-b border-theme-border">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-theme-text-primary">
+            <h1 className="text-xl  text-theme-text-primary">
               Admin Panel
             </h1>
             <Button

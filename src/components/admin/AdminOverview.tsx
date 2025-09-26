@@ -110,7 +110,7 @@ const AdminOverview = () => {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold mb-2 text-theme-text-primary">
+          <h2 className="text-2xl  mb-2 text-theme-text-primary">
             Dashboard Overview
           </h2>
           <p className="text-theme-text-muted">Loading dashboard data...</p>
@@ -125,7 +125,7 @@ const AdminOverview = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2 text-theme-text-primary">
+        <h2 className="text-2xl  mb-2 text-theme-text-primary">
           Dashboard Overview
         </h2>
         <p className="text-theme-text-muted">
@@ -141,14 +141,14 @@ const AdminOverview = () => {
             <Card key={index} className="shadow-elegant">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-theme-text-muted">
+                  <CardTitle className="text-sm  text-theme-text-muted">
                     {stat.title}
                   </CardTitle>
                   <IconComponent className="w-4 h-4 text-theme-text-muted" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${stat.color}`}>
+                <div className={`text-2xl  ${stat.color}`}>
                   {stat.value}
                 </div>
                 <p className="text-xs text-theme-text-muted mt-1">
@@ -224,7 +224,7 @@ const AdminOverview = () => {
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between p-3 bg-theme-surface rounded-lg">
             <div>
-              <h4 className="font-semibold text-theme-text-primary">
+              <h4 className=" text-theme-text-primary">
                 Artworks
               </h4>
               <p className="text-sm text-theme-text-muted">
@@ -236,7 +236,7 @@ const AdminOverview = () => {
 
           <div className="flex items-center justify-between p-3 bg-theme-surface rounded-lg">
             <div>
-              <h4 className="font-semibold text-theme-text-primary">Artists</h4>
+              <h4 className=" text-theme-text-primary">Artists</h4>
               <p className="text-sm text-theme-text-muted">
                 Manage artist profiles and information
               </p>
@@ -246,7 +246,7 @@ const AdminOverview = () => {
 
           <div className="flex items-center justify-between p-3 bg-theme-surface rounded-lg">
             <div>
-              <h4 className="font-semibold text-theme-text-primary">
+              <h4 className=" text-theme-text-primary">
                 Exhibitions
               </h4>
               <p className="text-sm text-theme-text-muted">
@@ -260,7 +260,7 @@ const AdminOverview = () => {
 
           <div className="flex items-center justify-between p-3 bg-theme-surface rounded-lg">
             <div>
-              <h4 className="font-semibold text-theme-text-primary">
+              <h4 className=" text-theme-text-primary">
                 Newsletter
               </h4>
               <p className="text-sm text-theme-text-muted">

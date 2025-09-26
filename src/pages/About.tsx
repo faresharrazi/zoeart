@@ -14,7 +14,7 @@ const About = () => {
       <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto my-24">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+            <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
               {pageData.about?.title || "About Us"}
             </h1>
             <div
@@ -39,7 +39,7 @@ const About = () => {
                 <section key={block.id} className="mb-16">
                   <Card className="shadow-elegant">
                     <CardContent className="p-12 text-center">
-                      <h2 className="text-3xl font-bold mb-6 text-foreground">
+                      <h2 className="text-3xl  mb-6 text-foreground">
                         {block.title}
                       </h2>
                       <div

@@ -81,7 +81,7 @@ const PageHeroConfig = ({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-theme-text-primary mb-2">
+        <h3 className="text-lg  text-theme-text-primary mb-2">
           Page Hero Background Images
         </h3>
         <p className="text-theme-text-muted text-sm">
@@ -103,7 +103,7 @@ const PageHeroConfig = ({
             <div className="space-y-4">
               {/* Current Background */}
               <div className="space-y-2">
-                <div className="text-sm font-medium text-theme-text-primary">Current Background</div>
+                <div className="text-sm  text-theme-text-primary">Current Background</div>
                 <div className="relative w-full max-w-md">
                   <img
                     src={currentImage}
@@ -121,7 +121,7 @@ const PageHeroConfig = ({
 
               {/* Upload New Image */}
               <div className="space-y-2">
-                <div className="text-sm font-medium text-theme-text-primary">Upload New Image</div>
+                <div className="text-sm  text-theme-text-primary">Upload New Image</div>
                 <div className="flex items-center space-x-4">
                   <input
                     type="file"
@@ -146,7 +146,7 @@ const PageHeroConfig = ({
 
               {/* Available Images */}
               <div className="space-y-2">
-                <div className="text-sm font-medium text-theme-text-primary">Select from Available Images</div>
+                <div className="text-sm  text-theme-text-primary">Select from Available Images</div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {availableImages.map((image, index) => (
                     <div key={index} className="space-y-1">
@@ -197,7 +197,7 @@ const PageHeroConfig = ({
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-theme-text-primary">
+                <h3 className="text-lg  text-theme-text-primary">
                   Preview Hero Background - {pageNames[previewPage as keyof typeof pageNames]}
                 </h3>
                 <Button
@@ -226,7 +226,7 @@ const PageHeroConfig = ({
                   {/* Content */}
                   <div className="relative z-10 h-full flex items-center justify-center">
                     <div className="text-center text-white">
-                      <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
+                      <h1 className="text-4xl md:text-6xl  mb-4 drop-shadow-lg">
                         {pageNames[previewPage as keyof typeof pageNames]}
                       </h1>
                       <p className="text-lg md:text-xl drop-shadow-md max-w-2xl mx-auto">

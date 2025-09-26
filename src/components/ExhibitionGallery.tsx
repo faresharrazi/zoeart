@@ -63,7 +63,7 @@ const ExhibitionGallery = ({
     <section className="py-16 bg-theme-background">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-theme-text-primary mb-4">
+          <h2 className="text-3xl  text-theme-text-primary mb-4">
             {title}
           </h2>
           <p className="text-theme-text-muted">
@@ -153,7 +153,7 @@ const ExhibitionGallery = ({
                         />
                       </svg>
                     </div>
-                    <p className="text-theme-primary font-semibold text-xs group-hover:text-white transition-colors duration-300">
+                    <p className="text-theme-primary  text-xs group-hover:text-white transition-colors duration-300">
                       +{images.length - 3}
                     </p>
                   </div>
@@ -241,7 +241,7 @@ const ExhibitionGallery = ({
                         />
                       </svg>
                     </div>
-                    <p className="text-theme-primary font-semibold text-sm group-hover:text-white transition-colors duration-300">
+                    <p className="text-theme-primary  text-sm group-hover:text-white transition-colors duration-300">
                       +{images.length - 5}
                     </p>
                   </div>
@@ -329,7 +329,7 @@ const ExhibitionGallery = ({
                         />
                       </svg>
                     </div>
-                    <p className="text-theme-primary font-semibold text-sm group-hover:text-white transition-colors duration-300">
+                    <p className="text-theme-primary  text-sm group-hover:text-white transition-colors duration-300">
                       +{images.length - 7}
                     </p>
                   </div>

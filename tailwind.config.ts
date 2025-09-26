@@ -19,8 +19,9 @@ export default {
     },
     extend: {
       fontFamily: {
+        sans: ["DM Serif Display", "serif"], // Make DM Serif Display the default
         serif: ["DM Serif Display", "serif"],
-        sans: ["DM Serif Display", "sans-serif"],
+        display: ["DM Serif Display", "serif"], // Add display variant
       },
       colors: {
         border: "hsl(var(--border))",

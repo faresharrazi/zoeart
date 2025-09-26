@@ -192,7 +192,7 @@ const ArtworkManagement = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl ">
             {editingId ? "Edit Artwork" : "Add New Artwork"}
           </h2>
           <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -204,7 +204,7 @@ const ArtworkManagement = () => {
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   Title *
                 </label>
                 <Input
@@ -216,7 +216,7 @@ const ArtworkManagement = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   Artist *
                 </label>
                 <Select
@@ -238,7 +238,7 @@ const ArtworkManagement = () => {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Year</label>
+                <label className="block text-sm  mb-2">Year</label>
                 <Input
                   type="number"
                   value={formData.year || ""}
@@ -249,7 +249,7 @@ const ArtworkManagement = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Medium</label>
+                <label className="block text-sm  mb-2">Medium</label>
                 <Input
                   value={formData.medium || ""}
                   onChange={(e) =>
@@ -259,7 +259,7 @@ const ArtworkManagement = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Size</label>
+                <label className="block text-sm  mb-2">Size</label>
                 <Input
                   value={formData.size || ""}
                   onChange={(e) =>
@@ -271,7 +271,7 @@ const ArtworkManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm  mb-2">
                 Description
               </label>
               <Textarea
@@ -285,7 +285,7 @@ const ArtworkManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm  mb-2">
                 Artwork Images
               </label>
               <div className="space-y-4">
@@ -354,7 +354,7 @@ const ArtworkManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Artwork Management</h2>
+        <h2 className="text-2xl ">Artwork Management</h2>
         <Button onClick={handleAdd} className="">
           <Plus className="w-4 h-4 mr-2" />
           Add Artwork
@@ -373,7 +373,7 @@ const ArtworkManagement = () => {
             </div>
             <CardContent className="p-4">
               <div className="mb-2">
-                <h3 className="font-semibold text-lg">{artwork.title}</h3>
+                <h3 className=" text-lg">{artwork.title}</h3>
                 <p className="text-theme-text-muted mb-1">{artwork.artist}</p>
                 <p className="text-sm text-theme-text-muted mb-1">
                   {artwork.year} • {artwork.medium}

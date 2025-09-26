@@ -54,7 +54,7 @@ const Footer = () => {
                 )}
                 {homeSettings?.galleryHours && (
                   <div className="mt-6">
-                    <p className="text-gray-900 font-bold text-lg mb-2">
+                    <p className="text-gray-900  text-lg mb-2">
                       Gallery Hours
                     </p>
                     <p className="text-gray-600 text-sm whitespace-pre-line">
@@ -65,7 +65,7 @@ const Footer = () => {
               </div>
 
               <div className="text-center md:text-left">
-                <h4 className="text-xl font-bold mb-6 text-gray-900">
+                <h4 className="text-xl  mb-6 text-gray-900">
                   Contact
                 </h4>
                 <div className="space-y-6">
@@ -91,7 +91,7 @@ const Footer = () => {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
+                        className="text-gray-600 hover:text-gray-900 transition-colors duration-200 "
                       >
                         {contactInfo.instagram}
                       </a>
@@ -111,7 +111,7 @@ const Footer = () => {
               </div>
 
               <div className="text-center">
-                <h4 className="text-xl font-bold mb-6 text-gray-900">
+                <h4 className="text-xl  mb-6 text-gray-900">
                   Collaborators
                 </h4>
                 {/* Desktop/Tablet: Horizontal alignment with bigger logos */}
@@ -174,7 +174,7 @@ const Footer = () => {
                 )}
                 {homeSettings?.galleryHours && (
                   <div>
-                    <p className="text-gray-900 font-bold text-xl mb-3">
+                    <p className="text-gray-900  text-xl mb-3">
                       Gallery Hours
                     </p>
                     <p className="text-gray-600 whitespace-pre-line">
@@ -187,7 +187,7 @@ const Footer = () => {
 
             {/* Collaborators - Centered and bigger */}
             <div className="w-full">
-              <h4 className="text-2xl font-bold mb-8 text-gray-900">
+              <h4 className="text-2xl  mb-8 text-gray-900">
                 Collaborators
               </h4>
               {/* Desktop/Tablet: Horizontal alignment with more spacing */}

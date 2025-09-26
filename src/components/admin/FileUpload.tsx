@@ -138,7 +138,7 @@ const FileUpload = ({
           <div className="text-center">
             <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <div className="space-y-2">
-              <p className="text-lg font-medium text-gray-900">Upload Images</p>
+              <p className="text-lg  text-gray-900">Upload Images</p>
               <p className="text-sm text-gray-500">
                 Drag and drop images here, or click to select files
               </p>
@@ -169,7 +169,7 @@ const FileUpload = ({
       {files.length > 0 ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h4 className="font-medium text-gray-900">
+            <h4 className=" text-gray-900">
               Uploaded Files ({files.length}/{maxFiles})
             </h4>
             {files.length > 0 && (
@@ -231,7 +231,7 @@ const FileUpload = ({
                     {imageLoadingStates[file.id] === "error" && (
                       <div className="absolute inset-0 bg-red-50 border-2 border-red-200 rounded-lg flex items-center justify-center">
                         <div className="text-center p-2">
-                          <div className="text-red-600 text-xs font-medium mb-1">
+                          <div className="text-red-600 text-xs  mb-1">
                             Image Not Available
                           </div>
                           <div className="text-red-500 text-xs">
@@ -250,7 +250,7 @@ const FileUpload = ({
                     </Button>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm  text-gray-900 truncate">
                       {file.originalName}
                     </p>
                     <p className="text-xs text-gray-500">

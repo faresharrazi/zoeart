@@ -43,7 +43,7 @@ const Navigation = () => {
                   alt="Aether Art Space"
                   className="h-10 w-auto md:h-12 md:w-auto object-contain"
                 />
-                <span className="text-xl md:text-2xl font-bold tracking-tight text-gray-900">
+                <span className="text-xl md:text-2xl  tracking-tight text-gray-900">
                   Aether Art Space
                 </span>
               </a>
@@ -75,7 +75,7 @@ const Navigation = () => {
                   alt="Aether Art Space"
                   className="h-10 w-auto md:h-12 md:w-auto object-contain"
                 />
-                <span className="text-xl md:text-2xl font-bold tracking-tight text-gray-900">
+                <span className="text-xl md:text-2xl  tracking-tight text-gray-900">
                   Aether Art Space
                 </span>
               </a>
@@ -108,7 +108,7 @@ const Navigation = () => {
                 alt="Aether Art Space"
                 className="h-10 w-auto md:h-12 md:w-auto object-contain"
               />
-              <span className="text-xl md:text-2xl font-bold tracking-tight text-theme-text-primary">
+              <span className="text-xl md:text-2xl  tracking-tight text-theme-text-primary">
                 Aether Art Space
               </span>
             </a>

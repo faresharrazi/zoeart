@@ -33,11 +33,11 @@ const ArtworkCard = ({
         </div>
 
         <div className="p-6 space-y-3">
-          <h3 className="text-xl font-bold text-foreground group-hover:text-theme-primary transition-smooth">
+          <h3 className="text-xl  text-foreground group-hover:text-theme-primary transition-smooth">
             {title}
           </h3>
           <div className="space-y-1">
-            <p className="text-theme-text-primary font-medium">{artist}</p>
+            <p className="text-theme-text-primary ">{artist}</p>
             <p className="text-muted-foreground text-sm">
               {year} • {medium}
             </p>

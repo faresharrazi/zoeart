@@ -70,7 +70,7 @@ const ArtworkDetail = () => {
           <div className="absolute inset-0 bg-black/40" />
           <div className="container mx-auto px-6 text-center relative z-10">
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+              <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
                 Artwork Not Found
               </h1>
               <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
@@ -101,7 +101,7 @@ const ArtworkDetail = () => {
       <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto py-16">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+            <h1 className="text-5xl md:text-7xl text-white mb-6">
               {artwork.title}
             </h1>
             {artwork.artist_name && (
@@ -166,7 +166,7 @@ const ArtworkDetail = () => {
                       <Calendar className="w-5 h-5 text-theme-primary" />
                       <div>
                         <p className="text-sm text-theme-text-muted">Year</p>
-                        <p className="font-medium text-theme-text-primary">
+                        <p className=" text-theme-text-primary">
                           {artwork.year}
                         </p>
                       </div>
@@ -176,7 +176,7 @@ const ArtworkDetail = () => {
                       <Palette className="w-5 h-5 text-theme-primary" />
                       <div>
                         <p className="text-sm text-theme-text-muted">Medium</p>
-                        <p className="font-medium text-theme-text-primary">
+                        <p className=" text-theme-text-primary">
                           {artwork.medium}
                         </p>
                       </div>
@@ -186,7 +186,7 @@ const ArtworkDetail = () => {
                       <Ruler className="w-5 h-5 text-theme-primary" />
                       <div>
                         <p className="text-sm text-theme-text-muted">Size</p>
-                        <p className="font-medium text-theme-text-primary">
+                        <p className=" text-theme-text-primary">
                           {artwork.size}
                         </p>
                       </div>
@@ -196,7 +196,7 @@ const ArtworkDetail = () => {
                       <User className="w-5 h-5 text-theme-primary" />
                       <div>
                         <p className="text-sm text-theme-text-muted">Artist</p>
-                        <p className="font-medium text-theme-text-primary">
+                        <p className=" text-theme-text-primary">
                           {artwork.artist_name}
                         </p>
                       </div>

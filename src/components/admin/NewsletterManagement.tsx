@@ -290,7 +290,7 @@ const NewsletterManagement = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold mb-2 text-theme-text-primary">
+          <h2 className="text-2xl  mb-2 text-theme-text-primary">
             Newsletter Management
           </h2>
           <p className="text-theme-text-muted">
@@ -318,13 +318,13 @@ const NewsletterManagement = () => {
         <div className="lg:col-span-1">
           <Card className="shadow-elegant">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-theme-text-muted flex items-center gap-2">
+              <CardTitle className="text-sm  text-theme-text-muted flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 Total Subscribers
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-theme-primary">
+              <div className="text-3xl  text-theme-primary">
                 {subscribers.length}
               </div>
               <p className="text-sm text-theme-text-muted mt-1">
@@ -364,7 +364,7 @@ const NewsletterManagement = () => {
               <div className="space-y-4">
                 {monthlyData.map((data, index) => (
                   <div key={data.month} className="flex items-center gap-4">
-                    <div className="w-12 text-sm font-medium text-theme-text-muted">
+                    <div className="w-12 text-sm  text-theme-text-muted">
                       {data.month}
                     </div>
                     <div className="flex-1 bg-theme-surface rounded-full h-4 overflow-hidden">
@@ -380,7 +380,7 @@ const NewsletterManagement = () => {
                         }}
                       />
                     </div>
-                    <div className="w-8 text-sm font-medium text-theme-text-primary">
+                    <div className="w-8 text-sm  text-theme-text-primary">
                       {data.count}
                     </div>
                   </div>
@@ -457,16 +457,16 @@ const NewsletterManagement = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-theme-border">
-                  <th className="text-left py-3 px-4 font-medium text-theme-text-primary">
+                  <th className="text-left py-3 px-4  text-theme-text-primary">
                     Name
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-theme-text-primary">
+                  <th className="text-left py-3 px-4  text-theme-text-primary">
                     Email
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-theme-text-primary">
+                  <th className="text-left py-3 px-4  text-theme-text-primary">
                     Date
                   </th>
-                  <th className="text-center py-3 px-4 font-medium text-theme-text-primary">
+                  <th className="text-center py-3 px-4  text-theme-text-primary">
                     Actions
                   </th>
                 </tr>
@@ -478,7 +478,7 @@ const NewsletterManagement = () => {
                     className="border-b border-theme-border hover:bg-theme-surface/50 transition-colors"
                   >
                     <td className="py-3 px-4">
-                      <span className="font-medium text-theme-text-primary">
+                      <span className=" text-theme-text-primary">
                         {subscriber.name || "—"}
                       </span>
                     </td>
@@ -487,7 +487,7 @@ const NewsletterManagement = () => {
                         <div className="w-8 h-8 bg-theme-primary/10 rounded-full flex items-center justify-center">
                           <Mail className="w-4 h-4 text-theme-primary" />
                         </div>
-                        <span className="font-medium text-theme-text-primary">
+                        <span className=" text-theme-text-primary">
                           {subscriber.email}
                         </span>
                       </div>
@@ -549,7 +549,7 @@ const NewsletterManagement = () => {
                       <Mail className="w-4 h-4 text-theme-primary" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-theme-text-primary truncate">
+                      <p className=" text-theme-text-primary truncate">
                         {subscriber.name || subscriber.email}
                       </p>
                       {subscriber.name && (

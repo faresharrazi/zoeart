@@ -63,7 +63,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     <div className="min-h-screen flex items-center justify-center bg-theme-background">
       <Card className="w-full max-w-md shadow-elegant">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-theme-text-primary">
+          <CardTitle className="text-2xl  text-theme-text-primary">
             Admin Login
           </CardTitle>
           <p className="text-theme-text-muted">
@@ -75,7 +75,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
             <div>
               <label
                 htmlFor="username"
-                className="block text-sm font-medium text-theme-text-primary mb-2"
+                className="block text-sm  text-theme-text-primary mb-2"
               >
                 Username
               </label>
@@ -92,7 +92,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-theme-text-primary mb-2"
+                className="block text-sm  text-theme-text-primary mb-2"
               >
                 Password
               </label>

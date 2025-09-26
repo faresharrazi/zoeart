@@ -46,7 +46,7 @@ const ColorPaletteConfig = () => {
     <div className="max-w-4xl mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-2xl ">
             Color Palette Configuration
           </CardTitle>
           <p className="text-muted-foreground">
@@ -58,7 +58,7 @@ const ColorPaletteConfig = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* White */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium">
+              <label className="block text-sm ">
                 White/Off-white
               </label>
               <div className="flex items-center space-x-3">
@@ -77,7 +77,7 @@ const ColorPaletteConfig = () => {
 
             {/* Light Blue */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Light Blue</label>
+              <label className="block text-sm ">Light Blue</label>
               <div className="flex items-center space-x-3">
                 <div
                   className="w-12 h-12 rounded-lg border-2 border-gray-300"
@@ -96,7 +96,7 @@ const ColorPaletteConfig = () => {
 
             {/* Medium Blue */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Medium Blue</label>
+              <label className="block text-sm ">Medium Blue</label>
               <div className="flex items-center space-x-3">
                 <div
                   className="w-12 h-12 rounded-lg border-2 border-gray-300"
@@ -115,7 +115,7 @@ const ColorPaletteConfig = () => {
 
             {/* Dark Navy */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Dark Navy</label>
+              <label className="block text-sm ">Dark Navy</label>
               <div className="flex items-center space-x-3">
                 <div
                   className="w-12 h-12 rounded-lg border-2 border-gray-300"

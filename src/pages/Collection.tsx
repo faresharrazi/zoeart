@@ -85,7 +85,7 @@ const Collection = () => {
         <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
           <div className="container mx-auto px-6 text-center relative z-10">
             <div className="max-w-4xl mx-auto my-24">
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+              <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
                 {pageData.gallery?.title || "Gallery"}
               </h1>
               <div className="flex items-center justify-center py-12">
@@ -110,7 +110,7 @@ const Collection = () => {
       <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto my-24">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+            <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
               {pageData.gallery?.title || "Gallery"}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
@@ -168,7 +168,7 @@ const Collection = () => {
                 {showFilters && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 bg-theme-card rounded-xl border border-theme-border">
                     <div>
-                      <label className="block text-sm font-medium text-theme-text-primary mb-2">
+                      <label className="block text-sm  text-theme-text-primary mb-2">
                         Category
                       </label>
                       <Select
@@ -190,7 +190,7 @@ const Collection = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-theme-text-primary mb-2">
+                      <label className="block text-sm  text-theme-text-primary mb-2">
                         Artist
                       </label>
                       <Select

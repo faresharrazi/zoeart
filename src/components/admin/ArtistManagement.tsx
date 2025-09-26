@@ -204,7 +204,7 @@ const ArtistManagement = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl ">
             {editingId ? "Edit Artist" : "Add New Artist"}
           </h2>
           <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -216,7 +216,7 @@ const ArtistManagement = () => {
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Name *</label>
+                <label className="block text-sm  mb-2">Name *</label>
                 <Input
                   value={formData.name || ""}
                   onChange={(e) =>
@@ -226,7 +226,7 @@ const ArtistManagement = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   Specialty *
                 </label>
                 <Input
@@ -238,7 +238,7 @@ const ArtistManagement = () => {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   Profile Image
                 </label>
                 <div className="space-y-4">
@@ -310,7 +310,7 @@ const ArtistManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm  mb-2">
                 Biography
               </label>
               <Textarea
@@ -324,10 +324,10 @@ const ArtistManagement = () => {
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Social Media Links</h3>
+              <h3 className="text-lg ">Social Media Links</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm  mb-2">
                     Instagram
                   </label>
                   <Input
@@ -345,7 +345,7 @@ const ArtistManagement = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm  mb-2">
                     Website
                   </label>
                   <Input
@@ -363,7 +363,7 @@ const ArtistManagement = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm  mb-2">
                     Email
                   </label>
                   <Input
@@ -396,7 +396,7 @@ const ArtistManagement = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Artist Management</h2>
+          <h2 className="text-2xl ">Artist Management</h2>
         </div>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-theme-primary" />
@@ -409,7 +409,7 @@ const ArtistManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Artist Management</h2>
+        <h2 className="text-2xl ">Artist Management</h2>
         <Button onClick={handleAdd} className="">
           <Plus className="w-4 h-4 mr-2" />
           Add Artist
@@ -431,8 +431,8 @@ const ArtistManagement = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold">{artist.name}</h3>
-                  <p className="text-theme-text-muted font-medium">
+                  <h3 className="text-xl ">{artist.name}</h3>
+                  <p className="text-theme-text-muted ">
                     {artist.specialty}
                   </p>
                 </div>
@@ -444,7 +444,7 @@ const ArtistManagement = () => {
                 </p>
 
                 <div>
-                  <h4 className="font-semibold text-sm mb-2">
+                  <h4 className=" text-sm mb-2">
                     Assigned Artworks
                   </h4>
                   <div className="flex flex-wrap gap-2">

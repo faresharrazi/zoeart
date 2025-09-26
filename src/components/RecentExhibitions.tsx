@@ -61,7 +61,7 @@ const RecentExhibitions = () => {
     <section id="recent-exhibitions" className="py-20 bg-theme-background">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-theme-text-primary">
+          <h2 className="text-4xl md:text-5xl  mb-6 text-theme-text-primary">
             Upcoming{" "}
             <span className="text-theme-text-primary">Exhibitions</span>
           </h2>
@@ -85,7 +85,7 @@ const RecentExhibitions = () => {
         <div className="text-center mt-16">
           <a
             href="/exhibitions"
-            className="inline-block bg-theme-primary text-theme-primary-text hover:bg-theme-primary-hover transition-smooth px-8 py-3 text-lg font-semibold"
+            className="inline-block bg-theme-primary text-theme-primary-text hover:bg-theme-primary-hover transition-smooth px-8 py-3 text-lg "
           >
             View All Exhibitions
           </a>

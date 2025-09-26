@@ -332,7 +332,7 @@ const ExhibitionManagement = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">
+          <h2 className="text-2xl ">
             {editingId ? "Edit Exhibition" : "Add New Exhibition"}
           </h2>
           <Button variant="outline" onClick={() => setIsEditing(false)}>
@@ -344,7 +344,7 @@ const ExhibitionManagement = () => {
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   Title *
                 </label>
                 <Input
@@ -357,7 +357,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   Start Date *
                 </label>
                 <Input
@@ -370,7 +370,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   End Date *
                 </label>
                 <Input
@@ -383,7 +383,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   Status *
                 </label>
                 <Select
@@ -403,7 +403,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   Location
                 </label>
                 <Input
@@ -416,7 +416,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm  mb-2">
                   Curator
                 </label>
                 <Input
@@ -430,7 +430,7 @@ const ExhibitionManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm  mb-2">
                 Description
               </label>
               <Textarea
@@ -458,14 +458,14 @@ const ExhibitionManagement = () => {
                   }
                   className="rounded"
                 />
-                <label htmlFor="callForArtists" className="text-sm font-medium">
+                <label htmlFor="callForArtists" className="text-sm ">
                   Open Call for Artists
                 </label>
               </div>
 
               {formData.callForArtists && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm  mb-2">
                     CTA Link (Google Form, etc.)
                   </label>
                   <Input
@@ -485,7 +485,7 @@ const ExhibitionManagement = () => {
 
             {/* Gallery Images Section */}
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm  mb-2">
                 Gallery Images
               </label>
               <div className="space-y-4">
@@ -550,7 +550,7 @@ const ExhibitionManagement = () => {
 
             {/* Artist Assignment Section */}
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm  mb-2">
                 Assign Artists
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -577,7 +577,7 @@ const ExhibitionManagement = () => {
 
             {/* Artwork Assignment Section */}
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm  mb-2">
                 Assign Artworks
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -615,7 +615,7 @@ const ExhibitionManagement = () => {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Exhibition Management</h2>
+          <h2 className="text-2xl ">Exhibition Management</h2>
         </div>
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -628,7 +628,7 @@ const ExhibitionManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Exhibition Management</h2>
+        <h2 className="text-2xl ">Exhibition Management</h2>
         <Button onClick={handleAdd} className="">
           <Plus className="w-4 h-4 mr-2" />
           Add Exhibition
@@ -677,7 +677,7 @@ const ExhibitionManagement = () => {
 
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-3">
-                <h3 className="text-xl font-semibold">{exhibition.title}</h3>
+                <h3 className="text-xl ">{exhibition.title}</h3>
                 <Badge className={getStatusColor(exhibition.status)}>
                   {exhibition.status}
                 </Badge>
@@ -780,7 +780,7 @@ const ExhibitionManagement = () => {
         <div className="text-center py-12">
           <div className="text-gray-500 mb-4">
             <Calendar className="w-12 h-12 mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">No exhibitions yet</h3>
+            <h3 className="text-lg  mb-2">No exhibitions yet</h3>
             <p className="text-sm">
               Get started by adding your first exhibition.
             </p>

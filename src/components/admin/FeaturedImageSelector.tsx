@@ -39,7 +39,7 @@ const FeaturedImageSelector = ({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-theme-text-primary mb-2">
+        <h3 className="text-lg  text-theme-text-primary mb-2">
           Featured Image
         </h3>
         <p className="text-theme-text-muted text-sm">
@@ -52,7 +52,7 @@ const FeaturedImageSelector = ({
       {/* Current Featured Image */}
       {featuredImage && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-theme-text-primary">
+          <h4 className="text-sm  text-theme-text-primary">
             Current Featured Image:
           </h4>
           <div className="relative w-full max-w-md">
@@ -73,7 +73,7 @@ const FeaturedImageSelector = ({
 
       {/* Upload New Image */}
       <div className="space-y-2">
-        <h4 className="text-sm font-medium text-theme-text-primary">
+        <h4 className="text-sm  text-theme-text-primary">
           Upload New Image:
         </h4>
         <div className="flex items-center space-x-4">
@@ -101,7 +101,7 @@ const FeaturedImageSelector = ({
       {/* Gallery Images */}
       {images.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-theme-text-primary">
+          <h4 className="text-sm  text-theme-text-primary">
             Select from Gallery ({images.length} images):
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

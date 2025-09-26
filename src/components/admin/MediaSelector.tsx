@@ -96,7 +96,7 @@ const MediaSelector = ({
       <Card className="w-full max-w-4xl max-h-[80vh] overflow-hidden">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Select Image</h3>
+            <h3 className="text-lg ">Select Image</h3>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>

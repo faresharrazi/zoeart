@@ -91,7 +91,7 @@ const Contact = () => {
       <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto my-24">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
+            <h1 className="text-4xl md:text-6xl  mb-6 text-white drop-shadow-lg">
               {pageData.contact?.title || "Contact Us"}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
@@ -117,7 +117,7 @@ const Contact = () => {
               <div>
                 <Card className="border-2 border-palette-medium-blue/20">
                   <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-foreground">
+                    <CardTitle className="text-2xl  text-foreground">
                       Newsletter Subscription
                     </CardTitle>
                     <p className="text-muted-foreground">
@@ -133,7 +133,7 @@ const Contact = () => {
                       <div>
                         <label
                           htmlFor="name"
-                          className="block text-sm font-medium text-foreground mb-2"
+                          className="block text-sm  text-foreground mb-2"
                         >
                           Full Name
                         </label>
@@ -151,7 +151,7 @@ const Contact = () => {
                       <div>
                         <label
                           htmlFor="email"
-                          className="block text-sm font-medium text-foreground mb-2"
+                          className="block text-sm  text-foreground mb-2"
                         >
                           Email Address *
                         </label>
@@ -170,7 +170,7 @@ const Contact = () => {
                       <Button
                         type="submit"
                         variant="default"
-                        className="w-full font-semibold py-3"
+                        className="w-full  py-3"
                       >
                         Subscribe to Newsletter
                       </Button>
@@ -186,7 +186,7 @@ const Contact = () => {
                 contactInfo?.address) && (
                 <div className="space-y-8">
                   <div>
-                    <h2 className="text-3xl font-bold text-foreground mb-6">
+                    <h2 className="text-3xl  text-foreground mb-6">
                       Contact Information
                     </h2>
                   </div>
@@ -245,7 +245,7 @@ const Contact = () => {
               <div className="w-full max-w-md">
                 <Card className="border-2 border-palette-medium-blue/20">
                   <CardHeader>
-                    <CardTitle className="text-2xl font-bold text-foreground">
+                    <CardTitle className="text-2xl  text-foreground">
                       Newsletter Subscription
                     </CardTitle>
                     <p className="text-muted-foreground">
@@ -261,7 +261,7 @@ const Contact = () => {
                       <div>
                         <label
                           htmlFor="name"
-                          className="block text-sm font-medium text-foreground mb-2"
+                          className="block text-sm  text-foreground mb-2"
                         >
                           Full Name
                         </label>
@@ -279,7 +279,7 @@ const Contact = () => {
                       <div>
                         <label
                           htmlFor="email"
-                          className="block text-sm font-medium text-foreground mb-2"
+                          className="block text-sm  text-foreground mb-2"
                         >
                           Email Address *
                         </label>
@@ -298,7 +298,7 @@ const Contact = () => {
                       <Button
                         type="submit"
                         variant="default"
-                        className="w-full font-semibold py-3"
+                        className="w-full  py-3"
                       >
                         Subscribe to Newsletter
                       </Button>

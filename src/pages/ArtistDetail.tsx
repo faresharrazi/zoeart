@@ -73,7 +73,7 @@ const ArtistDetail = () => {
           <div className="absolute inset-0 bg-black/40" />
           <div className="container mx-auto px-6 text-center relative z-10">
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+              <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
                 Artist Not Found
               </h1>
               <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
@@ -107,7 +107,7 @@ const ArtistDetail = () => {
       <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto py-16">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+            <h1 className="text-5xl md:text-7xl text-white mb-6">
               {artist.name}
             </h1>
             {artist.specialty && (
@@ -136,7 +136,7 @@ const ArtistDetail = () => {
                       />
                     ) : (
                       <div className="w-32 h-32 rounded-full mx-auto mb-4 bg-theme-card flex items-center justify-center">
-                        <span className="text-2xl font-bold text-theme-text-muted">
+                        <span className="text-2xl  text-theme-text-muted">
                           {artist.name.charAt(0)}
                         </span>
                       </div>
@@ -151,7 +151,7 @@ const ArtistDetail = () => {
                   <CardContent className="space-y-4">
                     {artist.bio && (
                       <div>
-                        <h4 className="font-semibold text-theme-text-primary mb-2">
+                        <h4 className=" text-theme-text-primary mb-2">
                           About
                         </h4>
                         <p className="text-theme-text-muted text-sm leading-relaxed">
@@ -164,7 +164,7 @@ const ArtistDetail = () => {
                     {artist.social_media &&
                       Object.keys(artist.social_media).length > 0 && (
                         <div>
-                          <h4 className="font-semibold text-theme-text-primary mb-3">
+                          <h4 className=" text-theme-text-primary mb-3">
                             Connect
                           </h4>
                           <div className="flex space-x-3">
@@ -206,7 +206,7 @@ const ArtistDetail = () => {
               {/* Artist's Works */}
               <div className="lg:col-span-2">
                 <div className="mb-8">
-                  <h2 className="text-3xl font-bold text-theme-text-primary mb-4">
+                  <h2 className="text-3xl  text-theme-text-primary mb-4">
                     Featured Works
                   </h2>
                   <p className="text-theme-text-muted">

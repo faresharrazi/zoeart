@@ -62,7 +62,7 @@ const NavigationConfig = ({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-theme-text-primary mb-2">
+        <h3 className="text-lg  text-theme-text-primary mb-2">
           Navigation Background Image
         </h3>
         <p className="text-theme-text-muted text-sm">
@@ -198,7 +198,7 @@ const NavigationConfig = ({
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-theme-text-primary">
+                <h3 className="text-lg  text-theme-text-primary">
                   Preview Navigation Background
                 </h3>
                 <Button
@@ -223,7 +223,7 @@ const NavigationConfig = ({
 
                   <div className="container mx-auto px-6 py-4 relative z-10">
                     <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold tracking-tight">
+                      <div className="text-2xl  tracking-tight">
                         <span className="hover:text-theme-primary transition-smooth">
                           Aether Art Space
                         </span>

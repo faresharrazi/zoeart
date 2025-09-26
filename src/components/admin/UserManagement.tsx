@@ -141,7 +141,7 @@ const UserManagement = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2 text-theme-text-primary">
+        <h2 className="text-2xl  mb-2 text-theme-text-primary">
           User Management
         </h2>
         <p className="text-theme-text-muted">
@@ -169,7 +169,7 @@ const UserManagement = () => {
                       <User className="w-5 h-5 text-theme-primary" />
                     </div>
                     <div>
-                      <p className="font-medium text-theme-text-primary">
+                      <p className=" text-theme-text-primary">
                         {user.username}
                       </p>
                       <p className="text-sm text-theme-text-muted">

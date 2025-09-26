@@ -36,7 +36,7 @@ const Gallery = ({ limit, showTitle = true }: GalleryProps) => {
       <section className="py-20 bg-theme-background">
         <div className="container mx-auto px-6">
           {showTitle && (
-            <h2 className="text-3xl font-bold mb-8 text-theme-text-primary text-center">
+            <h2 className="text-3xl  mb-8 text-theme-text-primary text-center">
               Featured Collection
             </h2>
           )}
@@ -56,7 +56,7 @@ const Gallery = ({ limit, showTitle = true }: GalleryProps) => {
       <section className="py-20 bg-theme-background">
         <div className="container mx-auto px-6">
           {showTitle && (
-            <h2 className="text-3xl font-bold mb-8 text-theme-text-primary text-center">
+            <h2 className="text-3xl  mb-8 text-theme-text-primary text-center">
               Featured Collection
             </h2>
           )}
@@ -74,7 +74,7 @@ const Gallery = ({ limit, showTitle = true }: GalleryProps) => {
     <section className="py-20 bg-theme-background">
       <div className="container mx-auto px-6">
         {showTitle && (
-          <h2 className="text-3xl font-bold mb-8 text-theme-text-primary text-center">
+          <h2 className="text-3xl  mb-8 text-theme-text-primary text-center">
             Featured Collection
           </h2>
         )}

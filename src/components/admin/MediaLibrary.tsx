@@ -58,7 +58,7 @@ const MediaLibrary = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Media Library</h2>
+        <h2 className="text-2xl ">Media Library</h2>
         <Button onClick={handleUpload} className="">
           <Upload className="w-4 h-4 mr-2" />
           Upload Files
@@ -108,7 +108,7 @@ const MediaLibrary = () => {
             </div>
 
             <CardContent className="p-3">
-              <h3 className="font-medium text-sm truncate mb-1">{file.name}</h3>
+              <h3 className=" text-sm truncate mb-1">{file.name}</h3>
               <p className="text-xs text-muted-foreground mb-1">{file.size}</p>
               <p className="text-xs text-muted-foreground mb-3">
                 {new Date(file.uploadDate).toLocaleDateString()}
@@ -150,7 +150,7 @@ const MediaLibrary = () => {
           <CardContent className="p-8 text-center">
             <div className="text-muted-foreground">
               <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <h3 className="font-semibold mb-2">No files found</h3>
+              <h3 className=" mb-2">No files found</h3>
               <p className="text-sm">
                 {searchTerm || selectedType !== "all"
                   ? "Try adjusting your search or filters"
