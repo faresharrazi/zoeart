@@ -100,12 +100,11 @@ const Artists = () => {
                 >
                   {/* Artist Header with Image */}
                   <div className="relative h-48 bg-gradient-to-br from-slate-100 via-gray-50 to-slate-200 overflow-hidden">
-                    {(artist.profile_image || artist.profileImage) &&
-                    (artist.profile_image || artist.profileImage) !== "null" &&
-                    (artist.profile_image || artist.profileImage) !==
-                      "undefined" ? (
+                    {artist.profile_image &&
+                    artist.profile_image !== "null" &&
+                    artist.profile_image !== "undefined" ? (
                       <img
-                        src={artist.profile_image || artist.profileImage}
+                        src={artist.profile_image}
                         alt={artist.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
@@ -119,11 +118,9 @@ const Artists = () => {
                     {/* Fallback Avatar */}
                     <div
                       className={`w-full h-full flex items-center justify-center ${
-                        (artist.profile_image || artist.profileImage) &&
-                        (artist.profile_image || artist.profileImage) !==
-                          "null" &&
-                        (artist.profile_image || artist.profileImage) !==
-                          "undefined"
+                        artist.profile_image &&
+                        artist.profile_image !== "null" &&
+                        artist.profile_image !== "undefined"
                           ? "hidden"
                           : "flex"
                       }`}

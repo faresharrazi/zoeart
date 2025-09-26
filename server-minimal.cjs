@@ -300,25 +300,39 @@ app.get("/api/artists", async (req, res) => {
       ORDER BY name ASC
     `);
 
-    const formattedArtists = artists.map((artist) => ({
-      ...artist,
-      profile_image: artist.profile_image
-        ? artist.profile_image.startsWith("/api/file/")
-          ? artist.profile_image
-          : artist.profile_image.startsWith("blob:")
-          ? `/api/file/${artist.profile_image.split("/").pop()}`
-          : artist.profile_image && artist.profile_image !== "undefined"
-          ? `/api/file/${artist.profile_image}`
-          : null
-        : null,
-      social_media:
-        typeof artist.social_media === "string"
-          ? JSON.parse(artist.social_media || "{}")
-          : artist.social_media || {},
-      assigned_artworks:
-        typeof artist.assigned_artworks === "string"
-          ? JSON.parse(artist.assigned_artworks || "[]")
-          : artist.assigned_artworks || [],
+    const formattedArtists = await Promise.all(artists.map(async (artist) => {
+      let profileImageUrl = null;
+      
+      if (artist.profile_image) {
+        if (artist.profile_image.startsWith("/api/file/")) {
+          profileImageUrl = artist.profile_image;
+        } else if (artist.profile_image.startsWith("blob:")) {
+          profileImageUrl = `/api/file/${artist.profile_image.split("/").pop()}`;
+        } else if (artist.profile_image !== "undefined") {
+          // Try to find the file by ID and get its filename
+          try {
+            const fileResult = await query("SELECT filename FROM uploaded_files WHERE id = $1", [artist.profile_image]);
+            if (fileResult.length > 0) {
+              profileImageUrl = `/api/file/${fileResult[0].filename}`;
+            }
+          } catch (error) {
+            console.error("Error looking up file:", error);
+          }
+        }
+      }
+
+      return {
+        ...artist,
+        profile_image: profileImageUrl,
+        social_media:
+          typeof artist.social_media === "string"
+            ? JSON.parse(artist.social_media || "{}")
+            : artist.social_media || {},
+        assigned_artworks:
+          typeof artist.assigned_artworks === "string"
+            ? JSON.parse(artist.assigned_artworks || "[]")
+            : artist.assigned_artworks || [],
+      };
     }));
 
     res.json(formattedArtists);
@@ -1087,7 +1101,7 @@ app.post(
           originalName: req.file.originalname,
           filename: uniqueFilename,
           filePath: filePath,
-          url: `/api/file/${result[0].id}`, // Use API endpoint to serve files
+          url: `/api/file/${uniqueFilename}`, // Use UUID filename to serve files
           fileSize: req.file.size,
           mimeType: req.file.mimetype,
         },
@@ -1303,25 +1317,39 @@ app.get("/api/admin/artists", authenticateToken, async (req, res) => {
       ORDER BY name ASC
     `);
 
-    const formattedArtists = artists.map((artist) => ({
-      ...artist,
-      profile_image: artist.profile_image
-        ? artist.profile_image.startsWith("/api/file/")
-          ? artist.profile_image
-          : artist.profile_image.startsWith("blob:")
-          ? `/api/file/${artist.profile_image.split("/").pop()}`
-          : artist.profile_image && artist.profile_image !== "undefined"
-          ? `/api/file/${artist.profile_image}`
-          : null
-        : null,
-      social_media:
-        typeof artist.social_media === "string"
-          ? JSON.parse(artist.social_media || "{}")
-          : artist.social_media || {},
-      assigned_artworks:
-        typeof artist.assigned_artworks === "string"
-          ? JSON.parse(artist.assigned_artworks || "[]")
-          : artist.assigned_artworks || [],
+    const formattedArtists = await Promise.all(artists.map(async (artist) => {
+      let profileImageUrl = null;
+      
+      if (artist.profile_image) {
+        if (artist.profile_image.startsWith("/api/file/")) {
+          profileImageUrl = artist.profile_image;
+        } else if (artist.profile_image.startsWith("blob:")) {
+          profileImageUrl = `/api/file/${artist.profile_image.split("/").pop()}`;
+        } else if (artist.profile_image !== "undefined") {
+          // Try to find the file by ID and get its filename
+          try {
+            const fileResult = await query("SELECT filename FROM uploaded_files WHERE id = $1", [artist.profile_image]);
+            if (fileResult.length > 0) {
+              profileImageUrl = `/api/file/${fileResult[0].filename}`;
+            }
+          } catch (error) {
+            console.error("Error looking up file:", error);
+          }
+        }
+      }
+
+      return {
+        ...artist,
+        profile_image: profileImageUrl,
+        social_media:
+          typeof artist.social_media === "string"
+            ? JSON.parse(artist.social_media || "{}")
+            : artist.social_media || {},
+        assigned_artworks:
+          typeof artist.assigned_artworks === "string"
+            ? JSON.parse(artist.assigned_artworks || "[]")
+            : artist.assigned_artworks || [],
+      };
     }));
 
     res.json(formattedArtists);
