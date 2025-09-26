@@ -783,14 +783,18 @@ app.get("/api/file/:id", async (req, res) => {
     // 1. A database ID (integer) - for backward compatibility
     // 2. A UUID filename - for new files
     // 3. A UUID extracted from a blob URL
-    
+
     let files;
-    
+
     // First, try to query by filename (UUID) if it looks like a UUID
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (uuidRegex.test(id)) {
       console.log("Querying by filename (UUID):", id);
-      files = await query("SELECT * FROM uploaded_files WHERE filename LIKE $1", [`%${id}%`]);
+      files = await query(
+        "SELECT * FROM uploaded_files WHERE filename LIKE $1",
+        [`%${id}%`]
+      );
     } else {
       // Try to query by database ID (integer)
       console.log("Querying by database ID:", id);
@@ -799,7 +803,9 @@ app.get("/api/file/:id", async (req, res) => {
         console.log("Invalid ID format:", id);
         return res.status(400).json({ error: "Invalid file ID format" });
       }
-      files = await query("SELECT * FROM uploaded_files WHERE id = $1", [numericId]);
+      files = await query("SELECT * FROM uploaded_files WHERE id = $1", [
+        numericId,
+      ]);
     }
 
     console.log("Found files:", files.length);
@@ -808,7 +814,8 @@ app.get("/api/file/:id", async (req, res) => {
       console.log("File not found for ID:", id);
       return res.status(404).json({
         error: "File not found",
-        message: "This file may have been uploaded using the old system and needs to be re-uploaded"
+        message:
+          "This file may have been uploaded using the old system and needs to be re-uploaded",
       });
     }
 
@@ -827,7 +834,8 @@ app.get("/api/file/:id", async (req, res) => {
       console.log("File data is null for file ID:", id);
       return res.status(404).json({
         error: "File data not available",
-        message: "This file was uploaded before the database migration and needs to be re-uploaded"
+        message:
+          "This file was uploaded before the database migration and needs to be re-uploaded",
       });
     }
 
@@ -848,7 +856,7 @@ app.get("/api/file/:id", async (req, res) => {
     console.error("Error stack:", error.stack);
     res.status(500).json({
       error: "Failed to serve file",
-      message: "An internal server error occurred while serving the file"
+      message: "An internal server error occurred while serving the file",
     });
   }
 });

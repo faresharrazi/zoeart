@@ -94,15 +94,21 @@ const ExhibitionManagement = () => {
                 ? exhibition.featured_image
                 : exhibition.featured_image.startsWith("blob:")
                 ? `/api/file/${exhibition.featured_image.split("/").pop()}`
-                : `/api/file/${exhibition.featured_image}`
+                : exhibition.featured_image && exhibition.featured_image !== "undefined"
+                ? `/api/file/${exhibition.featured_image}`
+                : ""
               : "",
-            galleryImages: (exhibition.gallery_images || []).map((img) =>
-              typeof img === "string" && img.startsWith("/api/file/")
-                ? img
-                : typeof img === "string" && img.startsWith("blob:")
-                ? `/api/file/${img.split("/").pop()}`
-                : `/api/file/${img}`
-            ),
+            galleryImages: (exhibition.gallery_images || [])
+              .map((img) =>
+                typeof img === "string" && img.startsWith("/api/file/")
+                  ? img
+                  : typeof img === "string" && img.startsWith("blob:")
+                  ? `/api/file/${img.split("/").pop()}`
+                  : typeof img === "string" && img && img !== "undefined"
+                  ? `/api/file/${img}`
+                  : null
+              )
+              .filter((img) => img !== null),
             assignedArtists: exhibition.assigned_artists || [],
             assignedArtworks: exhibition.assigned_artworks || [],
             callForArtists: exhibition.call_for_artists || false,
