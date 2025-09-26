@@ -10,7 +10,7 @@ import {
   ArrowLeft,
   Calendar,
   MapPin,
-  Users,
+  UserCheck,
   Image as ImageIcon,
   Loader2,
   Clock,
@@ -124,9 +124,9 @@ const ExhibitionDetail = () => {
       {/* Hero Section with Featured Image */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Featured Image Background */}
-        {exhibition.featured_image && 
-         exhibition.featured_image !== "null" && 
-         exhibition.featured_image !== "undefined" ? (
+        {exhibition.featured_image &&
+        exhibition.featured_image !== "null" &&
+        exhibition.featured_image !== "undefined" ? (
           <div className="absolute inset-0">
             <img
               src={exhibition.featured_image}
@@ -146,11 +146,15 @@ const ExhibitionDetail = () => {
           <div className="max-w-4xl mx-auto">
             {/* Status Badge */}
             <div className="mb-6">
-              <Badge 
-                variant={exhibition.status === 'upcoming' ? 'default' : 'secondary'}
+              <Badge
+                variant={
+                  exhibition.status === "upcoming" ? "default" : "secondary"
+                }
                 className="px-6 py-2 text-lg font-semibold"
               >
-                {exhibition.status === 'upcoming' ? 'Upcoming Exhibition' : 'Past Exhibition'}
+                {exhibition.status === "upcoming"
+                  ? "Upcoming Exhibition"
+                  : "Past Exhibition"}
               </Badge>
             </div>
 
@@ -172,22 +176,33 @@ const ExhibitionDetail = () => {
                 <div className="flex items-center gap-2 text-white/90">
                   <Calendar className="w-5 h-5" />
                   <span className="text-lg">
-                    {new Date(exhibition.start_date).toLocaleDateString('en-US', {
-                      month: 'long',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
-                    {exhibition.end_date && exhibition.end_date !== exhibition.start_date && (
-                      <> - {new Date(exhibition.end_date).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}</>
+                    {new Date(exhibition.start_date).toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      }
                     )}
+                    {exhibition.end_date &&
+                      exhibition.end_date !== exhibition.start_date && (
+                        <>
+                          {" "}
+                          -{" "}
+                          {new Date(exhibition.end_date).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            }
+                          )}
+                        </>
+                      )}
                   </span>
                 </div>
               )}
-              
+
               {exhibition.location && (
                 <div className="flex items-center gap-2 text-white/90">
                   <MapPin className="w-5 h-5" />
@@ -204,7 +219,7 @@ const ExhibitionDetail = () => {
                   <Button
                     size="lg"
                     className="bg-white text-black hover:bg-white/90 px-8 py-4 text-lg font-semibold"
-                    onClick={() => window.open(exhibition.cta_link, '_blank')}
+                    onClick={() => window.open(exhibition.cta_link, "_blank")}
                   >
                     <ExternalLink className="w-5 h-5 mr-2" />
                     Join as an Artist
@@ -223,7 +238,7 @@ const ExhibitionDetail = () => {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Exhibitions
               </Button>
-              
+
               <Button
                 variant="outline"
                 size="lg"
@@ -233,7 +248,7 @@ const ExhibitionDetail = () => {
                     navigator.share({
                       title: exhibition.title,
                       text: exhibition.description,
-                      url: window.location.href
+                      url: window.location.href,
                     });
                   } else {
                     navigator.clipboard.writeText(window.location.href);
@@ -260,15 +275,13 @@ const ExhibitionDetail = () => {
                 {exhibition.gallery_images &&
                   exhibition.gallery_images.length > 0 && (
                     <div className="mb-12">
-                      <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                        Exhibition Gallery
-                      </h2>
                       <ExhibitionGallery images={exhibition.gallery_images} />
                     </div>
                   )}
 
                 {/* Additional Info */}
-                {(exhibition.assigned_artists?.length > 0 || exhibition.assigned_artworks?.length > 0) && (
+                {(exhibition.assigned_artists?.length > 0 ||
+                  exhibition.assigned_artworks?.length > 0) && (
                   <Card className="shadow-elegant">
                     <CardHeader>
                       <CardTitle className="text-2xl text-gray-900">
@@ -282,11 +295,19 @@ const ExhibitionDetail = () => {
                             Featured Artists
                           </h3>
                           <div className="flex flex-wrap gap-2">
-                            {exhibition.assigned_artists.map((artist: any, index: number) => (
-                              <Badge key={index} variant="outline" className="px-3 py-1">
-                                {typeof artist === 'string' ? artist : artist.name || artist}
-                              </Badge>
-                            ))}
+                            {exhibition.assigned_artists.map(
+                              (artist: any, index: number) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="px-3 py-1"
+                                >
+                                  {typeof artist === "string"
+                                    ? artist
+                                    : artist.name || artist}
+                                </Badge>
+                              )
+                            )}
                           </div>
                         </div>
                       )}
@@ -297,7 +318,9 @@ const ExhibitionDetail = () => {
                             Featured Artworks
                           </h3>
                           <p className="text-gray-600">
-                            This exhibition showcases {exhibition.assigned_artworks.length} carefully selected artworks.
+                            This exhibition showcases{" "}
+                            {exhibition.assigned_artworks.length} carefully
+                            selected artworks.
                           </p>
                         </div>
                       )}
@@ -318,23 +341,33 @@ const ExhibitionDetail = () => {
                   <CardContent className="space-y-4">
                     {exhibition.start_date && (
                       <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-blue-600" />
+                        <Calendar className="w-5 h-5 text-theme-primary" />
                         <div>
                           <p className="text-sm text-gray-500">Date</p>
                           <p className="font-semibold text-gray-900">
-                            {new Date(exhibition.start_date).toLocaleDateString('en-US', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                            {exhibition.end_date && exhibition.end_date !== exhibition.start_date && (
-                              <> - {new Date(exhibition.end_date).toLocaleDateString('en-US', {
-                                month: 'long',
-                                day: 'numeric',
-                                year: 'numeric'
-                              })}</>
+                            {new Date(exhibition.start_date).toLocaleDateString(
+                              "en-US",
+                              {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
                             )}
+                            {exhibition.end_date &&
+                              exhibition.end_date !== exhibition.start_date && (
+                                <>
+                                  {" "}
+                                  -{" "}
+                                  {new Date(
+                                    exhibition.end_date
+                                  ).toLocaleDateString("en-US", {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })}
+                                </>
+                              )}
                           </p>
                         </div>
                       </div>
@@ -342,27 +375,31 @@ const ExhibitionDetail = () => {
 
                     {exhibition.location && (
                       <div className="flex items-center space-x-3">
-                        <MapPin className="w-5 h-5 text-green-600" />
+                        <MapPin className="w-5 h-5 text-theme-primary" />
                         <div>
                           <p className="text-sm text-gray-500">Location</p>
-                          <p className="font-semibold text-gray-900">{exhibition.location}</p>
+                          <p className="font-semibold text-gray-900">
+                            {exhibition.location}
+                          </p>
                         </div>
                       </div>
                     )}
 
                     {exhibition.curator && (
                       <div className="flex items-center space-x-3">
-                        <Users className="w-5 h-5 text-purple-600" />
+                        <UserCheck className="w-5 h-5 text-theme-primary" />
                         <div>
                           <p className="text-sm text-gray-500">Curator</p>
-                          <p className="font-semibold text-gray-900">{exhibition.curator}</p>
+                          <p className="font-semibold text-gray-900">
+                            {exhibition.curator}
+                          </p>
                         </div>
                       </div>
                     )}
 
                     {exhibition.assigned_artworks?.length > 0 && (
                       <div className="flex items-center space-x-3">
-                        <ImageIcon className="w-5 h-5 text-orange-600" />
+                        <ImageIcon className="w-5 h-5 text-theme-primary" />
                         <div>
                           <p className="text-sm text-gray-500">Artworks</p>
                           <p className="font-semibold text-gray-900">
@@ -378,7 +415,7 @@ const ExhibitionDetail = () => {
                 {(exhibition.call_for_artists === true ||
                   exhibition.call_for_artists === 1) &&
                   exhibition.cta_link && (
-                    <Card className="shadow-elegant bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                    <Card className="shadow-elegant bg-gradient-to-br from-theme-primary/5 to-theme-primary/10 border-theme-primary/20">
                       <CardContent className="p-6 text-center">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">
                           Join This Exhibition
@@ -387,8 +424,10 @@ const ExhibitionDetail = () => {
                           Artists are invited to participate in this exhibition.
                         </p>
                         <Button
-                          className="w-full bg-blue-600 hover:bg-blue-700"
-                          onClick={() => window.open(exhibition.cta_link, '_blank')}
+                          className="w-full bg-theme-primary hover:bg-theme-primary/90 text-white"
+                          onClick={() =>
+                            window.open(exhibition.cta_link, "_blank")
+                          }
                         >
                           <ExternalLink className="w-4 h-4 mr-2" />
                           Apply Now
