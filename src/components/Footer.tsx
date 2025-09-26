@@ -119,7 +119,7 @@ const Footer = () => {
               </div>
 
               <div className="text-center">
-                <h4 className="text-xl mb-6 text-gray-900">Our Partners</h4>
+                <h4 className="text-xl mb-6 text-gray-900">Collaboration</h4>
                 {/* Desktop: Elegant horizontal alignment */}
                 <div className="hidden lg:flex items-center justify-center gap-12">
                   {[1, 2, 3, 4, 5].map((num) => (
@@ -127,7 +127,7 @@ const Footer = () => {
                       <img
                         src={`/collaborators/${num}.png`}
                         alt={`Partner ${num}`}
-                        className="h-16 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
+                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
                       />
                     </div>
                   ))}
@@ -142,7 +142,7 @@ const Footer = () => {
                         <img
                           src={`/collaborators/${num}.png`}
                           alt={`Partner ${num}`}
-                          className="h-20 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
+                          className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
                         />
                       </div>
                     ))}
@@ -154,33 +154,39 @@ const Footer = () => {
                         <img
                           src={`/collaborators/${num}.png`}
                           alt={`Partner ${num}`}
-                          className="h-20 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
+                          className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
                         />
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Mobile: Clean 2-3 layout with centered bottom row */}
-                <div className="md:hidden grid grid-cols-3 gap-8">
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <div
-                      key={num}
-                      className={`flex items-center justify-center ${
-                        num === 4
-                          ? "col-start-1"
-                          : num === 5
-                          ? "col-start-3"
-                          : ""
-                      }`}
-                    >
-                      <img
-                        src={`/collaborators/${num}.png`}
-                        alt={`Partner ${num}`}
-                        className="h-14 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
-                      />
-                    </div>
-                  ))}
+                {/* Mobile: 2-row layout with bigger logos */}
+                <div className="md:hidden flex flex-col items-center gap-6">
+                  {/* Top row: 3 logos */}
+                  <div className="flex items-center justify-center gap-6">
+                    {[1, 2, 3].map((num) => (
+                      <div key={num} className="group">
+                        <img
+                          src={`/collaborators/${num}.png`}
+                          alt={`Collaborator ${num}`}
+                          className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {/* Bottom row: 2 centered logos */}
+                  <div className="flex items-center justify-center gap-8">
+                    {[4, 5].map((num) => (
+                      <div key={num} className="group">
+                        <img
+                          src={`/collaborators/${num}.png`}
+                          alt={`Collaborator ${num}`}
+                          className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -219,7 +225,7 @@ const Footer = () => {
 
             {/* Partners - Centered and elegant */}
             <div className="w-full">
-              <h4 className="text-2xl mb-10 text-gray-900">Our Partners</h4>
+              <h4 className="text-2xl mb-10 text-gray-900">Collaboration</h4>
               {/* Desktop: Elegant horizontal alignment with premium spacing */}
               <div className="hidden lg:flex items-center justify-center gap-16">
                 {[1, 2, 3, 4, 5].map((num) => (
@@ -227,7 +233,7 @@ const Footer = () => {
                     <img
                       src={`/collaborators/${num}.png`}
                       alt={`Partner ${num}`}
-                      className="h-20 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
+                      className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
                     />
                   </div>
                 ))}
@@ -261,22 +267,32 @@ const Footer = () => {
                 </div>
               </div>
 
-              {/* Mobile: Clean 2-3 layout with centered bottom row */}
-              <div className="md:hidden grid grid-cols-3 gap-10">
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <div
-                    key={num}
-                    className={`flex items-center justify-center ${
-                      num === 4 ? "col-start-1" : num === 5 ? "col-start-3" : ""
-                    }`}
-                  >
-                    <img
-                      src={`/collaborators/${num}.png`}
-                      alt={`Partner ${num}`}
-                      className="h-16 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
-                    />
-                  </div>
-                ))}
+              {/* Mobile: 2-row layout with bigger logos */}
+              <div className="md:hidden flex flex-col items-center gap-6">
+                {/* Top row: 3 logos */}
+                <div className="flex items-center justify-center gap-6">
+                  {[1, 2, 3].map((num) => (
+                    <div key={num} className="group">
+                      <img
+                        src={`/collaborators/${num}.png`}
+                        alt={`Collaborator ${num}`}
+                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
+                      />
+                    </div>
+                  ))}
+                </div>
+                {/* Bottom row: 2 centered logos */}
+                <div className="flex items-center justify-center gap-8">
+                  {[4, 5].map((num) => (
+                    <div key={num} className="group">
+                      <img
+                        src={`/collaborators/${num}.png`}
+                        alt={`Collaborator ${num}`}
+                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
