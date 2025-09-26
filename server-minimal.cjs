@@ -605,7 +605,13 @@ app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
     const { title, description, content, heroImages, heroImageIds } = req.body;
 
     console.log("=== ADMIN HOME SETTINGS UPDATE ===");
-    console.log("Update data:", { title, description, content, heroImages, heroImageIds });
+    console.log("Update data:", {
+      title,
+      description,
+      content,
+      heroImages,
+      heroImageIds,
+    });
     console.log("Request headers:", req.headers);
 
     // Get current home page data
