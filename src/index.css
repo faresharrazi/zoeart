@@ -199,19 +199,33 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-sans; /* Apply DM Serif Display globally */
   }
-  
+
   /* Ensure all headings use DM Serif Display */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: "DM Serif Display", serif;
   }
-  
+
   /* Ensure all text elements use DM Serif Display */
-  p, span, div, a, button, input, textarea, select {
+  p,
+  span,
+  div,
+  a,
+  button,
+  input,
+  textarea,
+  select {
     font-family: "DM Serif Display", serif;
   }
-  
+
   /* Override any conflicting font classes */
-  .font-sans, .font-serif, .font-display {
+  .font-sans,
+  .font-serif,
+  .font-display {
     font-family: "DM Serif Display", serif !important;
   }
 }

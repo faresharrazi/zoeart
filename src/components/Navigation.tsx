@@ -22,11 +22,9 @@ const Navigation = () => {
 
   // Helper function to check if a page is visible
   const isPageVisible = (pageName: string): boolean => {
-    // Always show navigation items for now to debug
-    return true;
-    // if (loading || !pageData) return true; // Show all pages while loading
-    // const page = pageData[pageName];
-    // return page ? Boolean(page.isVisible) : true;
+    if (loading || !pageData) return true; // Show all pages while loading
+    const page = pageData[pageName];
+    return page ? Boolean(page.isVisible) : true;
   };
 
   // If there's an error loading page data, show a simple navigation
