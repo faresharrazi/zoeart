@@ -235,7 +235,9 @@ app.get("/api/exhibitions", async (req, res) => {
           ? exhibition.featured_image
           : exhibition.featured_image.startsWith("blob:")
           ? `/api/file/${exhibition.featured_image.split("/").pop()}`
-          : `/api/file/${exhibition.featured_image}`
+          : exhibition.featured_image && exhibition.featured_image !== "undefined"
+          ? `/api/file/${exhibition.featured_image}`
+          : null
         : null,
       gallery_images:
         typeof exhibition.gallery_images === "string"
@@ -244,15 +246,19 @@ app.get("/api/exhibitions", async (req, res) => {
                 ? img
                 : typeof img === "string" && img.startsWith("blob:")
                 ? `/api/file/${img.split("/").pop()}`
-                : `/api/file/${img}`
-            )
+                : typeof img === "string" && img && img !== "undefined"
+                ? `/api/file/${img}`
+                : null
+            ).filter(img => img !== null)
           : (exhibition.gallery_images || []).map((img) =>
               typeof img === "string" && img.startsWith("/api/file/")
                 ? img
                 : typeof img === "string" && img.startsWith("blob:")
                 ? `/api/file/${img.split("/").pop()}`
-                : `/api/file/${img}`
-            ),
+                : typeof img === "string" && img && img !== "undefined"
+                ? `/api/file/${img}`
+                : null
+            ).filter(img => img !== null),
       assigned_artists:
         typeof exhibition.assigned_artists === "string"
           ? JSON.parse(exhibition.assigned_artists || "[]")
@@ -769,7 +775,8 @@ app.get("/api/file/:id", async (req, res) => {
     console.log("Serving file with ID:", id);
 
     // Validate UUID format
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(id)) {
       console.log("Invalid UUID format:", id);
       return res.status(400).json({ error: "Invalid file ID format" });
@@ -783,9 +790,10 @@ app.get("/api/file/:id", async (req, res) => {
 
     if (files.length === 0) {
       console.log("File not found for ID:", id);
-      return res.status(404).json({ 
+      return res.status(404).json({
         error: "File not found",
-        message: "This file may have been uploaded using the old system and needs to be re-uploaded"
+        message:
+          "This file may have been uploaded using the old system and needs to be re-uploaded",
       });
     }
 
@@ -803,7 +811,8 @@ app.get("/api/file/:id", async (req, res) => {
       console.log("File data is null for file ID:", id);
       return res.status(404).json({
         error: "File data not available",
-        message: "This file was uploaded before the database migration and needs to be re-uploaded"
+        message:
+          "This file was uploaded before the database migration and needs to be re-uploaded",
       });
     }
 
@@ -822,9 +831,9 @@ app.get("/api/file/:id", async (req, res) => {
     console.error("Error serving file:", error);
     console.error("Error details:", error.message);
     console.error("Error stack:", error.stack);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Failed to serve file",
-      message: "An internal server error occurred while serving the file"
+      message: "An internal server error occurred while serving the file",
     });
   }
 });
@@ -1146,7 +1155,9 @@ app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
           ? exhibition.featured_image
           : exhibition.featured_image.startsWith("blob:")
           ? `/api/file/${exhibition.featured_image.split("/").pop()}`
-          : `/api/file/${exhibition.featured_image}`
+          : exhibition.featured_image && exhibition.featured_image !== "undefined"
+          ? `/api/file/${exhibition.featured_image}`
+          : null
         : null,
       gallery_images:
         typeof exhibition.gallery_images === "string"
@@ -1155,15 +1166,19 @@ app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
                 ? img
                 : typeof img === "string" && img.startsWith("blob:")
                 ? `/api/file/${img.split("/").pop()}`
-                : `/api/file/${img}`
-            )
+                : typeof img === "string" && img && img !== "undefined"
+                ? `/api/file/${img}`
+                : null
+            ).filter(img => img !== null)
           : (exhibition.gallery_images || []).map((img) =>
               typeof img === "string" && img.startsWith("/api/file/")
                 ? img
                 : typeof img === "string" && img.startsWith("blob:")
                 ? `/api/file/${img.split("/").pop()}`
-                : `/api/file/${img}`
-            ),
+                : typeof img === "string" && img && img !== "undefined"
+                ? `/api/file/${img}`
+                : null
+            ).filter(img => img !== null),
       assigned_artists:
         typeof exhibition.assigned_artists === "string"
           ? JSON.parse(exhibition.assigned_artists || "[]")
