@@ -233,6 +233,8 @@ app.get("/api/exhibitions", async (req, res) => {
       featured_image: exhibition.featured_image
         ? exhibition.featured_image.startsWith("/api/file/")
           ? exhibition.featured_image
+          : exhibition.featured_image.startsWith("blob:")
+          ? `/api/file/${exhibition.featured_image.split('/').pop()}`
           : `/api/file/${exhibition.featured_image}`
         : null,
       gallery_images:
@@ -240,11 +242,15 @@ app.get("/api/exhibitions", async (req, res) => {
           ? JSON.parse(exhibition.gallery_images || "[]").map((img) =>
               typeof img === "string" && img.startsWith("/api/file/")
                 ? img
+                : typeof img === "string" && img.startsWith("blob:")
+                ? `/api/file/${img.split('/').pop()}`
                 : `/api/file/${img}`
             )
           : (exhibition.gallery_images || []).map((img) =>
               typeof img === "string" && img.startsWith("/api/file/")
                 ? img
+                : typeof img === "string" && img.startsWith("blob:")
+                ? `/api/file/${img.split('/').pop()}`
                 : `/api/file/${img}`
             ),
       assigned_artists:
@@ -1123,6 +1129,8 @@ app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
       featured_image: exhibition.featured_image
         ? exhibition.featured_image.startsWith("/api/file/")
           ? exhibition.featured_image
+          : exhibition.featured_image.startsWith("blob:")
+          ? `/api/file/${exhibition.featured_image.split('/').pop()}`
           : `/api/file/${exhibition.featured_image}`
         : null,
       gallery_images:
@@ -1130,11 +1138,15 @@ app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
           ? JSON.parse(exhibition.gallery_images || "[]").map((img) =>
               typeof img === "string" && img.startsWith("/api/file/")
                 ? img
+                : typeof img === "string" && img.startsWith("blob:")
+                ? `/api/file/${img.split('/').pop()}`
                 : `/api/file/${img}`
             )
           : (exhibition.gallery_images || []).map((img) =>
               typeof img === "string" && img.startsWith("/api/file/")
                 ? img
+                : typeof img === "string" && img.startsWith("blob:")
+                ? `/api/file/${img.split('/').pop()}`
                 : `/api/file/${img}`
             ),
       assigned_artists:
