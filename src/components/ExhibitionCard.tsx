@@ -154,7 +154,7 @@ const ExhibitionCard = ({
             </p>
           )}
 
-          {exhibition.call_for_artists === 1 && exhibition.cta_link && (
+          {(exhibition.call_for_artists === true || exhibition.call_for_artists === 1) && exhibition.cta_link && (
             <div className="mt-auto">
               <Button
                 variant="outline"

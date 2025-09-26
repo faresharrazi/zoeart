@@ -1274,6 +1274,10 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
 // Update exhibition
 app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
   try {
+    console.log("=== UPDATING EXHIBITION ===");
+    console.log("Exhibition ID:", req.params.id);
+    console.log("Request body:", req.body);
+    
     const { id } = req.params;
     const {
       title,
@@ -1292,6 +1296,24 @@ app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
       cta_link,
       is_visible,
     } = req.body;
+
+    console.log("Extracted fields:", {
+      title,
+      slug,
+      description,
+      start_date,
+      end_date,
+      location,
+      curator,
+      status,
+      featured_image,
+      gallery_images,
+      assigned_artists,
+      assigned_artworks,
+      call_for_artists,
+      cta_link,
+      is_visible
+    });
 
     await query(
       `
@@ -1312,16 +1334,19 @@ app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
         JSON.stringify(gallery_images || []),
         JSON.stringify(assigned_artists || []),
         JSON.stringify(assigned_artworks || []),
-        call_for_artists ? 1 : 0,
+        call_for_artists || false,
         cta_link,
-        is_visible ? 1 : 0,
+        is_visible !== false,
         id,
       ]
     );
 
+    console.log("Exhibition updated successfully");
     res.json({ success: true, message: "Exhibition updated successfully" });
   } catch (error) {
     console.error("Error updating exhibition:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
     res.status(500).json({ error: "Failed to update exhibition" });
   }
 });

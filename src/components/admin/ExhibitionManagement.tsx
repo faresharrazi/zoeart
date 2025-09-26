@@ -157,7 +157,13 @@ const ExhibitionManagement = () => {
 
     try {
       // Generate slug from title if not provided
-      const slug = formData.slug || formData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '';
+      const slug =
+        formData.slug ||
+        formData.title
+          ?.toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "") ||
+        "";
 
       const exhibitionData = {
         title: formData.title,
@@ -348,9 +354,7 @@ const ExhibitionManagement = () => {
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm  mb-2">
-                  Title *
-                </label>
+                <label className="block text-sm  mb-2">Title *</label>
                 <Input
                   value={formData.title || ""}
                   onChange={(e) =>
@@ -361,9 +365,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm  mb-2">
-                  Slug *
-                </label>
+                <label className="block text-sm  mb-2">Slug *</label>
                 <Input
                   value={formData.slug || ""}
                   onChange={(e) =>
@@ -377,9 +379,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm  mb-2">
-                  Start Date *
-                </label>
+                <label className="block text-sm  mb-2">Start Date *</label>
                 <Input
                   type="date"
                   value={formData.startDate || ""}
@@ -390,9 +390,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm  mb-2">
-                  End Date *
-                </label>
+                <label className="block text-sm  mb-2">End Date *</label>
                 <Input
                   type="date"
                   value={formData.endDate || ""}
@@ -403,9 +401,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm  mb-2">
-                  Status *
-                </label>
+                <label className="block text-sm  mb-2">Status *</label>
                 <Select
                   value={formData.status || ""}
                   onValueChange={(value: "upcoming" | "past") =>
@@ -423,9 +419,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm  mb-2">
-                  Location
-                </label>
+                <label className="block text-sm  mb-2">Location</label>
                 <Input
                   value={formData.location || ""}
                   onChange={(e) =>
@@ -436,9 +430,7 @@ const ExhibitionManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm  mb-2">
-                  Curator
-                </label>
+                <label className="block text-sm  mb-2">Curator</label>
                 <Input
                   value={formData.curator || ""}
                   onChange={(e) =>
@@ -450,9 +442,7 @@ const ExhibitionManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm  mb-2">
-                Description
-              </label>
+              <label className="block text-sm  mb-2">Description</label>
               <Textarea
                 value={formData.description || ""}
                 onChange={(e) =>
@@ -505,9 +495,7 @@ const ExhibitionManagement = () => {
 
             {/* Gallery Images Section */}
             <div>
-              <label className="block text-sm  mb-2">
-                Gallery Images
-              </label>
+              <label className="block text-sm  mb-2">Gallery Images</label>
               <div className="space-y-4">
                 {/* Upload new images */}
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
@@ -570,9 +558,7 @@ const ExhibitionManagement = () => {
 
             {/* Artist Assignment Section */}
             <div>
-              <label className="block text-sm  mb-2">
-                Assign Artists
-              </label>
+              <label className="block text-sm  mb-2">Assign Artists</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {artists.map((artist) => (
                   <label
@@ -597,9 +583,7 @@ const ExhibitionManagement = () => {
 
             {/* Artwork Assignment Section */}
             <div>
-              <label className="block text-sm  mb-2">
-                Assign Artworks
-              </label>
+              <label className="block text-sm  mb-2">Assign Artworks</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {artworks.map((artwork) => (
                   <label
