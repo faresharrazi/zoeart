@@ -114,12 +114,18 @@ const ArtistDetail = () => {
           <div className="max-w-5xl mx-auto py-20">
             {/* Artist Profile Image */}
             <div className="mb-8">
-              {artist.profile_image ? (
+              {artist.profile_image && 
+               artist.profile_image !== "null" && 
+               artist.profile_image !== "undefined" ? (
                 <div className="relative inline-block">
                   <img
                     src={artist.profile_image}
                     alt={artist.name}
                     className="w-32 h-32 rounded-full mx-auto object-cover shadow-2xl border-4 border-white/20"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.nextElementSibling.style.display = "flex";
+                    }}
                   />
                   <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>

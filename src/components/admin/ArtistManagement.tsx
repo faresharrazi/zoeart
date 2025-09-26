@@ -516,7 +516,8 @@ const ArtistManagement = () => {
             {/* Artist Header with Image */}
             <div className="relative h-56 bg-gradient-to-br from-slate-100 via-gray-50 to-slate-200 overflow-hidden">
               {artist.profileImage &&
-              !artist.profileImage.startsWith("blob:") ? (
+              artist.profileImage !== "null" &&
+              artist.profileImage !== "undefined" ? (
                 <img
                   src={artist.profileImage}
                   alt={artist.name}
@@ -532,7 +533,8 @@ const ArtistManagement = () => {
               <div
                 className={`w-full h-full flex items-center justify-center ${
                   artist.profileImage &&
-                  !artist.profileImage.startsWith("blob:")
+                  artist.profileImage !== "null" &&
+                  artist.profileImage !== "undefined"
                     ? "hidden"
                     : "flex"
                 }`}

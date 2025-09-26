@@ -20,7 +20,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // Additional middleware for handling large payloads
 app.use((req, res, next) => {
   // Set higher limits for specific routes
-  if (req.path === '/api/upload') {
+  if (req.path === "/api/upload") {
     req.setTimeout(30000); // 30 second timeout
   }
   next();
@@ -1002,13 +1002,13 @@ app.post(
   (req, res, next) => {
     // Set specific limits for this route
     req.setTimeout(30000); // 30 second timeout
-    
+
     upload.single("file")(req, res, (err) => {
       if (err) {
         console.error("Multer error:", err);
         console.error("Error code:", err.code);
         console.error("Error message:", err.message);
-        
+
         if (err.code === "LIMIT_FILE_SIZE") {
           return res.status(413).json({
             error: "File too large",
