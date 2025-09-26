@@ -95,46 +95,75 @@ const Artists = () => {
               {artists.map((artist, index) => (
                 <Card
                   key={index}
-                  className="shadow-elegant hover:shadow-artwork transition-all duration-300 cursor-pointer group"
+                  className="group cursor-pointer hover:shadow-2xl transition-all duration-500 hover:scale-105 overflow-hidden border-0 shadow-lg bg-white"
                   onClick={() => handleArtistClick(artist.slug)}
                 >
-                  <CardContent className="p-8">
-                    <div className="flex items-start space-x-6 mb-6">
-                      <Avatar className="w-20 h-20 ring-2 ring-theme-primary/20">
-                        <AvatarImage
-                          src={artist.profile_image || artist.profileImage}
-                          alt={artist.name}
-                          className="object-cover"
-                        />
-                        <AvatarFallback className="bg-theme-primary/10 text-theme-primary  text-lg">
-                          {artist.name
-                            ?.split(" ")
-                            .map((n) => n[0])
-                            .join("") || "A"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h3 className="text-2xl  text-foreground mb-2">
-                          {artist.name || "Unknown Artist"}
-                        </h3>
-                        <p className="text-theme-primary  text-lg">
-                          {artist.specialty || "Artist"}
-                        </p>
+                  {/* Artist Header with Image */}
+                  <div className="relative h-48 bg-gradient-to-br from-slate-100 via-gray-50 to-slate-200 overflow-hidden">
+                    {(artist.profile_image || artist.profileImage) &&
+                    !(artist.profile_image || artist.profileImage).startsWith(
+                      "blob:"
+                    ) ? (
+                      <img
+                        src={artist.profile_image || artist.profileImage}
+                        alt={artist.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.nextElementSibling.style.display =
+                            "flex";
+                        }}
+                      />
+                    ) : null}
+
+                    {/* Fallback Avatar */}
+                    <div
+                      className={`w-full h-full flex items-center justify-center ${
+                        (artist.profile_image || artist.profileImage) &&
+                        !(
+                          artist.profile_image || artist.profileImage
+                        ).startsWith("blob:")
+                          ? "hidden"
+                          : "flex"
+                      }`}
+                    >
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center shadow-lg">
+                        <span className="text-3xl text-slate-600 font-semibold">
+                          {artist.name?.charAt(0) || "A"}
+                        </span>
                       </div>
                     </div>
 
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                  </div>
+
+                  <CardContent className="p-6">
                     <div className="space-y-4">
-                      <p className="text-muted-foreground leading-relaxed">
-                        {artist.bio || "No bio available"}
-                      </p>
+                      {/* Name and Specialty */}
+                      <div className="text-center">
+                        <h3 className="text-xl font-bold text-slate-900 mb-1">
+                          {artist.name || "Unknown Artist"}
+                        </h3>
+                        <p className="text-slate-600 font-medium text-sm">
+                          {artist.specialty || "Artist"}
+                        </p>
+                      </div>
+
+                      {/* Bio */}
+                      <div className="text-center">
+                        <p className="text-slate-600 leading-relaxed text-sm line-clamp-3">
+                          {artist.bio || "No bio available"}
+                        </p>
+                      </div>
 
                       {/* Social Media Icons */}
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex justify-center gap-3">
                         {artist.social_media?.instagram && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-8 h-8 p-0 hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
+                            className="w-10 h-10 p-0 rounded-full hover:bg-pink-50 hover:border-pink-200 hover:text-pink-600"
                             onClick={(e) => {
                               e.stopPropagation();
                               const instagramUrl =
@@ -147,14 +176,14 @@ const Artists = () => {
                               window.open(instagramUrl, "_blank");
                             }}
                           >
-                            <Instagram className="w-3 h-3" />
+                            <Instagram className="w-4 h-4" />
                           </Button>
                         )}
                         {artist.social_media?.website && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-8 h-8 p-0 hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
+                            className="w-10 h-10 p-0 rounded-full hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600"
                             onClick={(e) => {
                               e.stopPropagation();
                               const websiteUrl =
@@ -164,14 +193,14 @@ const Artists = () => {
                               window.open(websiteUrl, "_blank");
                             }}
                           >
-                            <Globe className="w-3 h-3" />
+                            <Globe className="w-4 h-4" />
                           </Button>
                         )}
                         {artist.social_media?.email && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-8 h-8 p-0 hover:bg-theme-primary hover:text-theme-primary-text hover:border-theme-primary"
+                            className="w-10 h-10 p-0 rounded-full hover:bg-green-50 hover:border-green-200 hover:text-green-600"
                             onClick={(e) => {
                               e.stopPropagation();
                               window.open(
@@ -180,7 +209,7 @@ const Artists = () => {
                               );
                             }}
                           >
-                            <Mail className="w-3 h-3" />
+                            <Mail className="w-4 h-4" />
                           </Button>
                         )}
                       </div>

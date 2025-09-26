@@ -1,50 +1,78 @@
 interface ArtworkCardProps {
-  title: string;
-  artist: string;
-  year: number;
-  medium: string;
-  image: string;
-  description?: string;
-  slug: string;
+  artwork: {
+    id: string | number;
+    title: string;
+    artist_name?: string;
+    year?: number;
+    medium?: string;
+    size?: string;
+    images?: string[];
+    description?: string;
+    slug: string;
+  };
+  onArtworkClick?: (slug: string) => void;
 }
 
-const ArtworkCard = ({
-  title,
-  artist,
-  year,
-  medium,
-  image,
-  description,
-  slug,
-}: ArtworkCardProps) => {
+const ArtworkCard = ({ artwork, onArtworkClick }: ArtworkCardProps) => {
   const handleClick = () => {
-    window.location.href = `/artwork/${slug}`;
+    if (onArtworkClick) {
+      onArtworkClick(artwork.slug);
+    } else {
+      window.location.href = `/artwork/${artwork.slug}`;
+    }
   };
+
+  // Get the first image or show fallback
+  const imageUrl = artwork.images && artwork.images.length > 0 ? artwork.images[0] : null;
+  const hasValidImage = imageUrl && !imageUrl.startsWith('blob:');
 
   return (
     <div className="group cursor-pointer" onClick={handleClick}>
       <div className="relative overflow-hidden bg-gradient-card shadow-elegant hover:shadow-artwork transition-all duration-500 ease-out">
         <div className="aspect-square overflow-hidden">
-          <img
-            src={image}
-            alt={`${title} by ${artist}`}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
+          {hasValidImage ? (
+            <img
+              src={imageUrl}
+              alt={`${artwork.title} by ${artwork.artist_name || 'Unknown Artist'}`}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          
+          {/* Fallback for missing/broken images */}
+          <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 ${hasValidImage ? 'hidden' : 'flex'}`}>
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center mx-auto mb-3">
+                <span className="text-2xl text-slate-600 font-semibold">
+                  {artwork.title?.charAt(0) || 'A'}
+                </span>
+              </div>
+              <p className="text-sm text-slate-500">No image available</p>
+            </div>
+          </div>
         </div>
 
         <div className="p-6 space-y-3">
-          <h3 className="text-xl  text-foreground group-hover:text-theme-primary transition-smooth">
-            {title}
+          <h3 className="text-xl font-semibold text-foreground group-hover:text-theme-primary transition-smooth">
+            {artwork.title || 'Untitled'}
           </h3>
           <div className="space-y-1">
-            <p className="text-theme-text-primary ">{artist}</p>
-            <p className="text-muted-foreground text-sm">
-              {year} • {medium}
+            <p className="text-theme-text-primary font-medium">
+              {artwork.artist_name || 'Unknown Artist'}
             </p>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              {artwork.year && <span>{artwork.year}</span>}
+              {artwork.year && artwork.medium && <span>•</span>}
+              {artwork.medium && <span>{artwork.medium}</span>}
+              {artwork.size && <span>• {artwork.size}</span>}
+            </div>
           </div>
-          {description && (
+          {artwork.description && (
             <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
-              {description}
+              {artwork.description}
             </p>
           )}
         </div>

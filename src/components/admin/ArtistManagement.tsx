@@ -502,34 +502,51 @@ const ArtistManagement = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
         {artists.map((artist) => (
-          <Card key={artist.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-lg">
+          <Card
+            key={artist.id}
+            className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg bg-white"
+          >
             {/* Artist Header with Image */}
-            <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-              {artist.profileImage ? (
+            <div className="relative h-56 bg-gradient-to-br from-slate-100 via-gray-50 to-slate-200 overflow-hidden">
+              {artist.profileImage &&
+              !artist.profileImage.startsWith("blob:") ? (
                 <img
                   src={artist.profileImage}
                   alt={artist.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling.style.display = "flex";
+                  }}
                 />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
-                    <span className="text-3xl text-gray-600">
-                      {artist.name.charAt(0)}
-                    </span>
-                  </div>
+              ) : null}
+
+              {/* Fallback Avatar */}
+              <div
+                className={`w-full h-full flex items-center justify-center ${
+                  artist.profileImage &&
+                  !artist.profileImage.startsWith("blob:")
+                    ? "hidden"
+                    : "flex"
+                }`}
+              >
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center shadow-lg">
+                  <span className="text-4xl text-slate-600 font-semibold">
+                    {artist.name.charAt(0)}
+                  </span>
                 </div>
-              )}
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              
+              </div>
+
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+
               {/* Status Badge */}
               <div className="absolute top-4 right-4">
-                <Badge 
+                <Badge
                   variant={artist.isVisible ? "default" : "secondary"}
-                  className="backdrop-blur-sm bg-white/90 text-gray-900"
+                  className="backdrop-blur-md bg-white/95 text-slate-900 border-0 shadow-sm"
                 >
                   {artist.isVisible ? "Visible" : "Hidden"}
                 </Badge>
@@ -537,55 +554,43 @@ const ArtistManagement = () => {
             </div>
 
             {/* Artist Info */}
-            <CardContent className="p-6">
-              <div className="space-y-4">
+            <CardContent className="p-8">
+              <div className="space-y-6">
                 {/* Name and Specialty */}
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">{artist.name}</h3>
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                    {artist.name}
+                  </h3>
                   {artist.specialty && (
-                    <p className="text-sm text-gray-600">{artist.specialty}</p>
+                    <p className="text-slate-600 font-medium">
+                      {artist.specialty}
+                    </p>
                   )}
                 </div>
 
                 {/* Bio */}
                 {artist.bio && (
-                  <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-                    {artist.bio}
-                  </p>
+                  <div className="text-center">
+                    <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">
+                      {artist.bio}
+                    </p>
+                  </div>
                 )}
 
-                {/* Assigned Artworks */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Artworks</span>
-                    <Badge variant="outline" className="text-xs">
+                {/* Artworks Count */}
+                <div className="text-center">
+                  <div className="inline-flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-full">
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      Artworks
+                    </span>
+                    <Badge variant="outline" className="text-sm font-semibold">
                       {artist.assignedArtworks?.length || 0}
                     </Badge>
                   </div>
-                  {artist.assignedArtworks && artist.assignedArtworks.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {artist.assignedArtworks.slice(0, 3).map((artworkId) => (
-                        <Badge
-                          key={artworkId}
-                          variant="secondary"
-                          className="text-xs px-2 py-1"
-                        >
-                          #{artworkId}
-                        </Badge>
-                      ))}
-                      {artist.assignedArtworks.length > 3 && (
-                        <Badge variant="secondary" className="text-xs px-2 py-1">
-                          +{artist.assignedArtworks.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-gray-400">No artworks assigned</p>
-                  )}
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-6 border-t border-slate-100">
                   <div className="flex space-x-2">
                     <Button
                       size="sm"
@@ -594,16 +599,18 @@ const ArtistManagement = () => {
                         window.open(`/artist/${artist.slug}`, "_blank")
                       }
                       title="Preview artist page"
-                      className="h-8 px-3"
+                      className="h-9 px-3 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => toggleVisibility(artist.id, artist.isVisible)}
+                      onClick={() =>
+                        toggleVisibility(artist.id, artist.isVisible)
+                      }
                       title={artist.isVisible ? "Hide artist" : "Show artist"}
-                      className="h-8 px-3"
+                      className="h-9 px-3 hover:bg-green-50 hover:border-green-200 hover:text-green-700"
                     >
                       {artist.isVisible ? (
                         <EyeOff className="w-4 h-4" />
@@ -615,18 +622,18 @@ const ArtistManagement = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => handleEdit(artist)}
-                      className="h-8 px-3"
+                      className="h-9 px-3 hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
                   </div>
-                  
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="h-9 px-3 text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-200"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
