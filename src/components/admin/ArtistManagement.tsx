@@ -17,7 +17,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Image, Loader2, EyeOff, ExternalLink } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Image,
+  Loader2,
+  EyeOff,
+  ExternalLink,
+} from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 
 interface Artist {
