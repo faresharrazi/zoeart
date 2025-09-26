@@ -230,21 +230,22 @@ app.get("/api/exhibitions", async (req, res) => {
 
     const formattedExhibitions = exhibitions.map((exhibition) => ({
       ...exhibition,
-      featured_image: exhibition.featured_image ? 
-        (exhibition.featured_image.startsWith('/api/file/') ? 
-          exhibition.featured_image : 
-          `/api/file/${exhibition.featured_image}`) : null,
+      featured_image: exhibition.featured_image
+        ? exhibition.featured_image.startsWith("/api/file/")
+          ? exhibition.featured_image
+          : `/api/file/${exhibition.featured_image}`
+        : null,
       gallery_images:
         typeof exhibition.gallery_images === "string"
-          ? JSON.parse(exhibition.gallery_images || "[]").map((img: any) => 
-              typeof img === 'string' && img.startsWith('/api/file/') ? 
-                img : 
-                `/api/file/${img}`
+          ? JSON.parse(exhibition.gallery_images || "[]").map((img) =>
+              typeof img === "string" && img.startsWith("/api/file/")
+                ? img
+                : `/api/file/${img}`
             )
-          : (exhibition.gallery_images || []).map((img: any) => 
-              typeof img === 'string' && img.startsWith('/api/file/') ? 
-                img : 
-                `/api/file/${img}`
+          : (exhibition.gallery_images || []).map((img) =>
+              typeof img === "string" && img.startsWith("/api/file/")
+                ? img
+                : `/api/file/${img}`
             ),
       assigned_artists:
         typeof exhibition.assigned_artists === "string"
@@ -1119,21 +1120,22 @@ app.get("/api/admin/exhibitions", authenticateToken, async (req, res) => {
 
     const formattedExhibitions = exhibitions.map((exhibition) => ({
       ...exhibition,
-      featured_image: exhibition.featured_image ? 
-        (exhibition.featured_image.startsWith('/api/file/') ? 
-          exhibition.featured_image : 
-          `/api/file/${exhibition.featured_image}`) : null,
+      featured_image: exhibition.featured_image
+        ? exhibition.featured_image.startsWith("/api/file/")
+          ? exhibition.featured_image
+          : `/api/file/${exhibition.featured_image}`
+        : null,
       gallery_images:
         typeof exhibition.gallery_images === "string"
-          ? JSON.parse(exhibition.gallery_images || "[]").map((img: any) => 
-              typeof img === 'string' && img.startsWith('/api/file/') ? 
-                img : 
-                `/api/file/${img}`
+          ? JSON.parse(exhibition.gallery_images || "[]").map((img) =>
+              typeof img === "string" && img.startsWith("/api/file/")
+                ? img
+                : `/api/file/${img}`
             )
-          : (exhibition.gallery_images || []).map((img: any) => 
-              typeof img === 'string' && img.startsWith('/api/file/') ? 
-                img : 
-                `/api/file/${img}`
+          : (exhibition.gallery_images || []).map((img) =>
+              typeof img === "string" && img.startsWith("/api/file/")
+                ? img
+                : `/api/file/${img}`
             ),
       assigned_artists:
         typeof exhibition.assigned_artists === "string"

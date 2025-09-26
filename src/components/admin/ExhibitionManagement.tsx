@@ -89,14 +89,15 @@ const ExhibitionManagement = () => {
             location: exhibition.location || "",
             curator: exhibition.curator || "",
             status: exhibition.status,
-            featuredImage: exhibition.featured_image ? 
-              (exhibition.featured_image.startsWith('/api/file/') ? 
-                exhibition.featured_image : 
-                `/api/file/${exhibition.featured_image}`) : "",
-            galleryImages: (exhibition.gallery_images || []).map((img: any) => 
-              typeof img === 'string' && img.startsWith('/api/file/') ? 
-                img : 
-                `/api/file/${img}`
+            featuredImage: exhibition.featured_image
+              ? exhibition.featured_image.startsWith("/api/file/")
+                ? exhibition.featured_image
+                : `/api/file/${exhibition.featured_image}`
+              : "",
+            galleryImages: (exhibition.gallery_images || []).map((img: any) =>
+              typeof img === "string" && img.startsWith("/api/file/")
+                ? img
+                : `/api/file/${img}`
             ),
             assignedArtists: exhibition.assigned_artists || [],
             assignedArtworks: exhibition.assigned_artworks || [],
