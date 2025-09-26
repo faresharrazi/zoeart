@@ -267,22 +267,20 @@ const ExhibitionManagement = () => {
   const toggleVisibility = async (exhibition: Exhibition) => {
     try {
       const newVisibility = !exhibition.isVisible;
-      
-      await apiClient.updateExhibition(parseInt(exhibition.id), {
-        is_visible: newVisibility,
-      });
+
+      await apiClient.toggleExhibitionVisibility(parseInt(exhibition.id), newVisibility);
 
       toast({
         title: "Success",
-        description: `Exhibition ${newVisibility ? "shown" : "hidden"} on frontend`,
+        description: `Exhibition ${
+          newVisibility ? "shown" : "hidden"
+        } on frontend`,
       });
 
       // Update local state
-      setExhibitions(prev => 
-        prev.map(ex => 
-          ex.id === exhibition.id 
-            ? { ...ex, isVisible: newVisibility }
-            : ex
+      setExhibitions((prev) =>
+        prev.map((ex) =>
+          ex.id === exhibition.id ? { ...ex, isVisible: newVisibility } : ex
         )
       );
     } catch (error) {
@@ -316,16 +314,29 @@ const ExhibitionManagement = () => {
 
   // Helper functions for image management
   const handleImageUpload = async (file: File) => {
-    // Mock upload function - in real app, this would upload to your storage
-    return URL.createObjectURL(file);
+    try {
+      const response = await apiClient.uploadFile(file, "exhibition");
+      return `/api/file/${response.id}`;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
   };
 
   const handleGalleryImageUpload = async (file: File) => {
-    const imageUrl = await handleImageUpload(file);
-    setFormData({
-      ...formData,
-      galleryImages: [...(formData.galleryImages || []), imageUrl],
-    });
+    try {
+      const imageUrl = await handleImageUpload(file);
+      setFormData({
+        ...formData,
+        galleryImages: [...(formData.galleryImages || []), imageUrl],
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload image",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleBulkGalleryImageUpload = async (
@@ -334,18 +345,26 @@ const ExhibitionManagement = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const uploadPromises = Array.from(files).map((file) =>
-      handleImageUpload(file)
-    );
-    const imageUrls = await Promise.all(uploadPromises);
+    try {
+      const uploadPromises = Array.from(files).map((file) =>
+        handleImageUpload(file)
+      );
+      const imageUrls = await Promise.all(uploadPromises);
 
-    setFormData({
-      ...formData,
-      galleryImages: [...(formData.galleryImages || []), ...imageUrls],
-    });
+      setFormData({
+        ...formData,
+        galleryImages: [...(formData.galleryImages || []), ...imageUrls],
+      });
 
-    // Reset the input
-    e.target.value = "";
+      // Reset the input
+      e.target.value = "";
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload some images",
+        variant: "destructive",
+      });
+    }
   };
 
   const removeGalleryImage = (index: number) => {
@@ -704,7 +723,13 @@ const ExhibitionManagement = () => {
 
               {/* Visibility Badge */}
               <div className="absolute top-2 left-2">
-                <Badge className={exhibition.isVisible ? "bg-green-600 text-white" : "bg-red-600 text-white"}>
+                <Badge
+                  className={
+                    exhibition.isVisible
+                      ? "bg-green-600 text-white"
+                      : "bg-red-600 text-white"
+                  }
+                >
                   {exhibition.isVisible ? "Visible" : "Hidden"}
                 </Badge>
               </div>
@@ -787,7 +812,11 @@ const ExhibitionManagement = () => {
                   size="sm"
                   variant={exhibition.isVisible ? "outline" : "secondary"}
                   onClick={() => toggleVisibility(exhibition)}
-                  className={exhibition.isVisible ? "text-green-600 hover:text-green-700" : "text-red-600 hover:text-red-700"}
+                  className={
+                    exhibition.isVisible
+                      ? "text-green-600 hover:text-green-700"
+                      : "text-red-600 hover:text-red-700"
+                  }
                 >
                   {exhibition.isVisible ? "Hide" : "Show"}
                 </Button>

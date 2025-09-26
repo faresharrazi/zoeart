@@ -84,6 +84,13 @@ class ApiClient {
     });
   }
 
+  async toggleExhibitionVisibility(id: number, isVisible: boolean) {
+    return this.request(`/admin/exhibitions/${id}/visibility`, {
+      method: "PATCH",
+      body: JSON.stringify({ is_visible: isVisible }),
+    });
+  }
+
   // Admin operations for artists
   async createArtist(data: any) {
     return this.request("/admin/artists", {

@@ -1271,6 +1271,33 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
   }
 });
 
+// Toggle exhibition visibility
+app.patch("/api/admin/exhibitions/:id/visibility", authenticateToken, async (req, res) => {
+  try {
+    console.log("=== TOGGLING EXHIBITION VISIBILITY ===");
+    console.log("Exhibition ID:", req.params.id);
+    console.log("Request body:", req.body);
+    
+    const { id } = req.params;
+    const { is_visible } = req.body;
+
+    console.log("Setting visibility to:", is_visible);
+
+    await query(
+      `UPDATE exhibitions SET is_visible = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+      [is_visible !== false, id]
+    );
+
+    console.log("Exhibition visibility updated successfully");
+    res.json({ success: true, message: "Exhibition visibility updated successfully" });
+  } catch (error) {
+    console.error("Error updating exhibition visibility:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
+    res.status(500).json({ error: "Failed to update exhibition visibility" });
+  }
+});
+
 // Update exhibition
 app.put("/api/admin/exhibitions/:id", authenticateToken, async (req, res) => {
   try {
