@@ -85,18 +85,10 @@ class ApiClient {
   }
 
   async toggleExhibitionVisibility(id: number, isVisible: boolean) {
-    console.log("=== API CLIENT TOGGLE VISIBILITY ===");
-    console.log("ID:", id);
-    console.log("isVisible:", isVisible);
-    console.log("URL:", `/admin/exhibitions/${id}/visibility`);
-    
-    const result = await this.request(`/admin/exhibitions/${id}/visibility`, {
+    return this.request(`/admin/exhibitions/${id}/visibility`, {
       method: "PATCH",
       body: JSON.stringify({ is_visible: isVisible }),
     });
-    
-    console.log("API Client result:", result);
-    return result;
   }
 
   // Admin operations for artists
