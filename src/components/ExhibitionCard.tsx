@@ -66,7 +66,7 @@ const ExhibitionCard = ({
     >
       <div className="aspect-[4/3] bg-gradient-to-br from-theme-primary/20 to-theme-primary/5 relative overflow-hidden flex-shrink-0">
         {/* Featured Image Background */}
-        {exhibition.featured_image ? (
+        {exhibition.featured_image && exhibition.featured_image !== "null" && exhibition.featured_image !== "undefined" ? (
           <img
             src={exhibition.featured_image}
             alt={exhibition.title}

@@ -94,7 +94,8 @@ const ExhibitionManagement = () => {
                 ? exhibition.featured_image
                 : exhibition.featured_image.startsWith("blob:")
                 ? `/api/file/${exhibition.featured_image.split("/").pop()}`
-                : exhibition.featured_image && exhibition.featured_image !== "undefined"
+                : exhibition.featured_image &&
+                  exhibition.featured_image !== "undefined"
                 ? `/api/file/${exhibition.featured_image}`
                 : ""
               : "",
@@ -337,7 +338,7 @@ const ExhibitionManagement = () => {
   const handleImageUpload = async (file: File) => {
     try {
       const response = await apiClient.uploadFile(file, "exhibition");
-      return `/api/file/${response.id}`;
+      return `/api/file/${response.file.id}`;
     } catch (error) {
       console.error("Error uploading image:", error);
       throw error;
