@@ -14,7 +14,8 @@ const JWT_SECRET =
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve uploaded files statically
 app.use("/uploads", express.static("uploads"));
@@ -989,13 +990,32 @@ app.put("/api/admin/user/:id", authenticateToken, async (req, res) => {
 app.post(
   "/api/upload",
   authenticateToken,
-  upload.single("file"),
+  (req, res, next) => {
+    upload.single("file")(req, res, (err) => {
+      if (err) {
+        console.error("Multer error:", err);
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(413).json({ 
+            error: "File too large", 
+            message: "File size exceeds the maximum limit of 50MB" 
+          });
+        }
+        return res.status(400).json({ 
+          error: "Upload error", 
+          message: err.message 
+        });
+      }
+      next();
+    });
+  },
   async (req, res) => {
     try {
       console.log("=== FILE UPLOAD ===");
       console.log("Request body:", req.body);
       console.log("Request file:", req.file ? "File present" : "No file");
       console.log("Request headers:", req.headers);
+      console.log("Content-Type:", req.headers['content-type']);
+      console.log("Content-Length:", req.headers['content-length']);
 
       if (!req.file) {
         console.log("No file uploaded");
