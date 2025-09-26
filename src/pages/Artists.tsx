@@ -13,6 +13,21 @@ const Artists = () => {
   const [loading, setLoading] = useState(true);
   const { pageData } = usePageDataFromDB();
 
+  // Check if page is visible
+  const isPageVisible = pageData.artists?.isVisible;
+  
+  // If page is not visible, redirect to home
+  useEffect(() => {
+    if (pageData && isPageVisible === false) {
+      window.location.href = "/";
+    }
+  }, [pageData, isPageVisible]);
+
+  // Don't render anything if page is not visible
+  if (pageData && isPageVisible === false) {
+    return null;
+  }
+
   useEffect(() => {
     const fetchArtists = async () => {
       try {

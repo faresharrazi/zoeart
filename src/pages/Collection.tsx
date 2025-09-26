@@ -24,6 +24,21 @@ const Collection = () => {
   const [showFilters, setShowFilters] = useState(false);
   const { pageData } = usePageDataFromDB();
 
+  // Check if page is visible
+  const isPageVisible = pageData.gallery?.isVisible;
+  
+  // If page is not visible, redirect to home
+  useEffect(() => {
+    if (pageData && isPageVisible === false) {
+      window.location.href = "/";
+    }
+  }, [pageData, isPageVisible]);
+
+  // Don't render anything if page is not visible
+  if (pageData && isPageVisible === false) {
+    return null;
+  }
+
   useEffect(() => {
     const fetchArtworks = async () => {
       try {

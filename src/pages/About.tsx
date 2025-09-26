@@ -2,9 +2,25 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
+import { useEffect } from "react";
 
 const About = () => {
   const { pageData } = usePageDataFromDB();
+
+  // Check if page is visible
+  const isPageVisible = pageData.about?.isVisible;
+  
+  // If page is not visible, redirect to home
+  useEffect(() => {
+    if (pageData && isPageVisible === false) {
+      window.location.href = "/";
+    }
+  }, [pageData, isPageVisible]);
+
+  // Don't render anything if page is not visible
+  if (pageData && isPageVisible === false) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen">

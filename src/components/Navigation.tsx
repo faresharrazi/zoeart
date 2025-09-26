@@ -47,11 +47,27 @@ const Navigation = () => {
               </a>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="/exhibitions" className="text-gray-600 hover:text-gray-900">Exhibitions</a>
-              <a href="/artists" className="text-gray-600 hover:text-gray-900">Artists</a>
-              <a href="/collection" className="text-gray-600 hover:text-gray-900">Gallery</a>
-              <a href="/about" className="text-gray-600 hover:text-gray-900">About</a>
-              <a href="/contact" className="text-gray-600 hover:text-gray-900">Contact</a>
+              <a
+                href="/exhibitions"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Exhibitions
+              </a>
+              <a href="/artists" className="text-gray-600 hover:text-gray-900">
+                Artists
+              </a>
+              <a
+                href="/collection"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Gallery
+              </a>
+              <a href="/about" className="text-gray-600 hover:text-gray-900">
+                About
+              </a>
+              <a href="/contact" className="text-gray-600 hover:text-gray-900">
+                Contact
+              </a>
             </div>
           </div>
         </div>
@@ -61,7 +77,10 @@ const Navigation = () => {
 
   // If loading or no page data, show a simple navigation
   if (loading || !pageData) {
-    console.log("Navigation loading state or no page data:", { loading, pageData });
+    console.log("Navigation loading state or no page data:", {
+      loading,
+      pageData,
+    });
     return (
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 relative shadow-sm">
         <div className="container mx-auto px-6 py-5">
@@ -79,11 +98,27 @@ const Navigation = () => {
               </a>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="/exhibitions" className="text-gray-600 hover:text-gray-900">Exhibitions</a>
-              <a href="/artists" className="text-gray-600 hover:text-gray-900">Artists</a>
-              <a href="/collection" className="text-gray-600 hover:text-gray-900">Gallery</a>
-              <a href="/about" className="text-gray-600 hover:text-gray-900">About</a>
-              <a href="/contact" className="text-gray-600 hover:text-gray-900">Contact</a>
+              <a
+                href="/exhibitions"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Exhibitions
+              </a>
+              <a href="/artists" className="text-gray-600 hover:text-gray-900">
+                Artists
+              </a>
+              <a
+                href="/collection"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Gallery
+              </a>
+              <a href="/about" className="text-gray-600 hover:text-gray-900">
+                About
+              </a>
+              <a href="/contact" className="text-gray-600 hover:text-gray-900">
+                Contact
+              </a>
             </div>
           </div>
         </div>
