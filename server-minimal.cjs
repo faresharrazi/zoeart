@@ -1520,7 +1520,12 @@ app.post("/api/admin/artists", authenticateToken, async (req, res) => {
     }
 
     // Generate slug if not provided
-    const artistSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const artistSlug =
+      slug ||
+      name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
     console.log("Artist data:", {
       name,
@@ -1579,7 +1584,12 @@ app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
     }
 
     // Generate slug if not provided
-    const artistSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const artistSlug =
+      slug ||
+      name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
     await query(
       `
@@ -1642,7 +1652,12 @@ app.post("/api/admin/artworks", authenticateToken, async (req, res) => {
     }
 
     // Generate slug if not provided
-    const artworkSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const artworkSlug =
+      slug ||
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
     console.log("Artwork data:", {
       title,
@@ -1707,7 +1722,12 @@ app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
     }
 
     // Generate slug if not provided
-    const artworkSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const artworkSlug =
+      slug ||
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
     await query(
       `

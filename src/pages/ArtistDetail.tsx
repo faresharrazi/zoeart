@@ -170,7 +170,7 @@ const ArtistDetail = () => {
                           <div className="flex space-x-3">
                             {artist.social_media.instagram && (
                               <a
-                                href={artist.social_media.instagram}
+                                href={artist.social_media.instagram.startsWith('http') ? artist.social_media.instagram : `https://instagram.com/${artist.social_media.instagram.replace('@', '')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 rounded-full bg-theme-card hover:bg-theme-primary hover:text-white transition-colors"
@@ -180,7 +180,7 @@ const ArtistDetail = () => {
                             )}
                             {artist.social_media.website && (
                               <a
-                                href={artist.social_media.website}
+                                href={artist.social_media.website.startsWith('http') ? artist.social_media.website : `https://${artist.social_media.website}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 rounded-full bg-theme-card hover:bg-theme-primary hover:text-white transition-colors"
@@ -204,25 +204,19 @@ const ArtistDetail = () => {
               </div>
 
               {/* Artist's Works */}
-              <div className="lg:col-span-2">
-                <div className="mb-8">
-                  <h2 className="text-3xl  text-theme-text-primary mb-4">
-                    Featured Works
-                  </h2>
-                  <p className="text-theme-text-muted">
-                    Explore the artist's collection of {artworks.length}{" "}
-                    artworks
-                  </p>
-                </div>
-
-                {artworks.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-theme-text-muted text-lg">
-                      No artworks available for this artist.
+              {artworks.length > 0 && (
+                <div className="lg:col-span-2">
+                  <div className="mb-8">
+                    <h2 className="text-3xl  text-theme-text-primary mb-4">
+                      Featured Works
+                    </h2>
+                    <p className="text-theme-text-muted">
+                      Explore the artist's collection of {artworks.length}{" "}
+                      artworks
                     </p>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {artworks.map((artwork) => (
                       <ArtworkCard
                         key={artwork.id}
@@ -231,8 +225,8 @@ const ArtistDetail = () => {
                       />
                     ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

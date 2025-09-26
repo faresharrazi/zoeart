@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Image, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Image, Loader2, EyeOff } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 
 interface Artist {
@@ -50,7 +50,7 @@ const ArtistManagement = () => {
       try {
         const data = await apiClient.getArtists();
         console.log("Raw artists data:", data);
-        
+
         // Transform the data to match our interface
         const transformedArtists = data.map((artist: any) => ({
           id: artist.id.toString(),
@@ -63,7 +63,7 @@ const ArtistManagement = () => {
           assignedArtworks: artist.assigned_artworks || [],
           isVisible: artist.is_visible !== false,
         }));
-        
+
         console.log("Transformed artists:", transformedArtists);
         setArtists(transformedArtists);
       } catch (error) {
@@ -115,7 +115,12 @@ const ArtistManagement = () => {
     try {
       const artistData = {
         name: formData.name,
-        slug: formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        slug:
+          formData.slug ||
+          formData.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, ""),
         specialty: formData.specialty || "",
         bio: formData.bio || "",
         profile_image: formData.profileImage || "",
@@ -235,6 +240,33 @@ const ArtistManagement = () => {
     });
   };
 
+  const toggleVisibility = async (artistId: string, currentVisibility: boolean) => {
+    try {
+      const newVisibility = !currentVisibility;
+      await apiClient.updateArtist(parseInt(artistId), {
+        is_visible: newVisibility,
+      });
+      
+      setArtists(artists.map(artist => 
+        artist.id === artistId 
+          ? { ...artist, isVisible: newVisibility }
+          : artist
+      ));
+      
+      toast({
+        title: "Success",
+        description: `Artist ${newVisibility ? 'shown' : 'hidden'} successfully`,
+      });
+    } catch (error) {
+      console.error("Error toggling artist visibility:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update artist visibility",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isEditing) {
     return (
       <div className="space-y-6">
@@ -261,9 +293,7 @@ const ArtistManagement = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm  mb-2">
-                  Specialty
-                </label>
+                <label className="block text-sm  mb-2">Specialty</label>
                 <Input
                   value={formData.specialty || ""}
                   onChange={(e) =>
@@ -288,9 +318,7 @@ const ArtistManagement = () => {
                 </p>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm  mb-2">
-                  Profile Image
-                </label>
+                <label className="block text-sm  mb-2">Profile Image</label>
                 <div className="space-y-4">
                   {formData.profileImage ? (
                     <div className="flex items-center space-x-4">
@@ -360,9 +388,7 @@ const ArtistManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm  mb-2">
-                Biography
-              </label>
+              <label className="block text-sm  mb-2">Biography</label>
               <Textarea
                 value={formData.bio || ""}
                 onChange={(e) =>
@@ -377,9 +403,7 @@ const ArtistManagement = () => {
               <h3 className="text-lg ">Social Media Links</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm  mb-2">
-                    Instagram
-                  </label>
+                  <label className="block text-sm  mb-2">Instagram</label>
                   <Input
                     value={formData.socialMedia?.instagram || ""}
                     onChange={(e) =>
@@ -395,9 +419,7 @@ const ArtistManagement = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm  mb-2">
-                    Website
-                  </label>
+                  <label className="block text-sm  mb-2">Website</label>
                   <Input
                     value={formData.socialMedia?.website || ""}
                     onChange={(e) =>
@@ -413,9 +435,7 @@ const ArtistManagement = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm  mb-2">
-                    Email
-                  </label>
+                  <label className="block text-sm  mb-2">Email</label>
                   <Input
                     value={formData.socialMedia?.email || ""}
                     onChange={(e) =>
@@ -482,9 +502,7 @@ const ArtistManagement = () => {
                 </Avatar>
                 <div className="flex-1">
                   <h3 className="text-xl ">{artist.name}</h3>
-                  <p className="text-theme-text-muted ">
-                    {artist.specialty}
-                  </p>
+                  <p className="text-theme-text-muted ">{artist.specialty}</p>
                 </div>
               </div>
 
@@ -493,10 +511,14 @@ const ArtistManagement = () => {
                   {artist.bio}
                 </p>
 
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant={artist.isVisible ? "default" : "secondary"}>
+                    {artist.isVisible ? "Visible" : "Hidden"}
+                  </Badge>
+                </div>
+
                 <div>
-                  <h4 className=" text-sm mb-2">
-                    Assigned Artworks
-                  </h4>
+                  <h4 className=" text-sm mb-2">Assigned Artworks</h4>
                   <div className="flex flex-wrap gap-2">
                     {artist.assignedArtworks &&
                     artist.assignedArtworks.length > 0 ? (
@@ -522,9 +544,17 @@ const ArtistManagement = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => window.open("/artists", "_blank")}
+                  onClick={() => window.open(`/artist/${artist.slug}`, "_blank")}
                 >
                   <Eye className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => toggleVisibility(artist.id, artist.isVisible)}
+                  title={artist.isVisible ? "Hide artist" : "Show artist"}
+                >
+                  {artist.isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </Button>
                 <Button
                   size="sm"

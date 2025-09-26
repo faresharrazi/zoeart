@@ -61,10 +61,10 @@ const ArtworkManagement = () => {
           apiClient.getArtworks(),
           apiClient.getArtists(),
         ]);
-        
+
         console.log("Raw artworks data:", artworksData);
         console.log("Raw artists data:", artistsData);
-        
+
         // Transform artworks data to match our interface
         const transformedArtworks = artworksData.map((artwork: any) => ({
           id: artwork.id.toString(),
@@ -79,7 +79,7 @@ const ArtworkManagement = () => {
           images: artwork.images || [],
           isVisible: artwork.is_visible !== false,
         }));
-        
+
         console.log("Transformed artworks:", transformedArtworks);
         setArtworks(transformedArtworks);
         setArtists(artistsData);
@@ -133,7 +133,12 @@ const ArtworkManagement = () => {
     try {
       const artworkData = {
         title: formData.title,
-        slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        slug:
+          formData.slug ||
+          formData.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, ""),
         artist_id: formData.artist_id || null,
         year: formData.year || null,
         medium: formData.medium || "",
@@ -244,9 +249,7 @@ const ArtworkManagement = () => {
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm  mb-2">
-                  Title *
-                </label>
+                <label className="block text-sm  mb-2">Title *</label>
                 <Input
                   value={formData.title || ""}
                   onChange={(e) =>
@@ -256,9 +259,7 @@ const ArtworkManagement = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm  mb-2">
-                  Artist
-                </label>
+                <label className="block text-sm  mb-2">Artist</label>
                 <Select
                   value={formData.artist_id?.toString() || ""}
                   onValueChange={(value) =>
@@ -326,9 +327,7 @@ const ArtworkManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm  mb-2">
-                Description
-              </label>
+              <label className="block text-sm  mb-2">Description</label>
               <Textarea
                 value={formData.description || ""}
                 onChange={(e) =>
@@ -340,9 +339,7 @@ const ArtworkManagement = () => {
             </div>
 
             <div>
-              <label className="block text-sm  mb-2">
-                Artwork Images
-              </label>
+              <label className="block text-sm  mb-2">Artwork Images</label>
               <div className="space-y-4">
                 {/* Display existing images */}
                 {formData.images && formData.images.length > 0 && (
@@ -429,7 +426,9 @@ const ArtworkManagement = () => {
             <CardContent className="p-4">
               <div className="mb-2">
                 <h3 className=" text-lg">{artwork.title}</h3>
-                <p className="text-theme-text-muted mb-1">{artwork.artist_name}</p>
+                <p className="text-theme-text-muted mb-1">
+                  {artwork.artist_name}
+                </p>
                 <p className="text-sm text-theme-text-muted mb-1">
                   {artwork.year} • {artwork.medium}
                 </p>
@@ -469,8 +468,8 @@ const ArtworkManagement = () => {
                       <AlertDialogDescription>
                         Are you sure you want to delete{" "}
                         <strong>{artwork.title}</strong> by{" "}
-                        <strong>{artwork.artist_name}</strong>? This action cannot be
-                        undone and will remove all associated data.
+                        <strong>{artwork.artist_name}</strong>? This action
+                        cannot be undone and will remove all associated data.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
