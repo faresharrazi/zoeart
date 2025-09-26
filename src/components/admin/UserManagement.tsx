@@ -32,10 +32,12 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        console.log("UserManagement: Fetching users...");
         const data = await apiClient.getUsers();
+        console.log("UserManagement: Received users data:", data);
         setUsers(data);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("UserManagement: Error fetching users:", error);
         toast({
           title: "Error",
           description: "Failed to load users",
@@ -85,6 +87,7 @@ const UserManagement = () => {
         updateData.currentPassword = formData.currentPassword;
       }
 
+      console.log("UserManagement: Updating user with data:", updateData);
       await apiClient.updateUser(editingUser.id, updateData);
 
       // Update local state

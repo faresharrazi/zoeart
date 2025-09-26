@@ -33,7 +33,9 @@ const FileUpload = ({
 }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [files, setFiles] = useState<UploadedFile[]>(existingFiles);
-  const [imageLoadingStates, setImageLoadingStates] = useState<Record<number, boolean>>({});
+  const [imageLoadingStates, setImageLoadingStates] = useState<
+    Record<number, boolean>
+  >({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -176,29 +178,41 @@ const FileUpload = ({
               return (
                 <Card key={file.id} className="relative group">
                   <CardContent className="p-4">
-                  <div className="aspect-square relative mb-2">
-                    {imageLoadingStates[file.id] !== false && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
-                        <div className="text-sm text-gray-500">Loading...</div>
-                      </div>
-                    )}
-                    <img
-                      src={file.url}
-                      alt={file.originalName}
-                      className="w-full h-full object-cover rounded-lg"
-                      onLoadStart={() => {
-                        setImageLoadingStates(prev => ({ ...prev, [file.id]: true }));
-                      }}
-                      onError={(e) => {
-                        console.error("Image failed to load:", file.url, e);
-                        setImageLoadingStates(prev => ({ ...prev, [file.id]: false }));
-                        e.currentTarget.src = "https://via.placeholder.com/300x300/393E46/FFFFFF?text=Re-upload+Required";
-                      }}
-                      onLoad={() => {
-                        console.log("Image loaded successfully:", file.url);
-                        setImageLoadingStates(prev => ({ ...prev, [file.id]: false }));
-                      }}
-                    />
+                    <div className="aspect-square relative mb-2">
+                      {imageLoadingStates[file.id] !== false && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                          <div className="text-sm text-gray-500">
+                            Loading...
+                          </div>
+                        </div>
+                      )}
+                      <img
+                        src={file.url}
+                        alt={file.originalName}
+                        className="w-full h-full object-cover rounded-lg"
+                        onLoadStart={() => {
+                          setImageLoadingStates((prev) => ({
+                            ...prev,
+                            [file.id]: true,
+                          }));
+                        }}
+                        onError={(e) => {
+                          console.error("Image failed to load:", file.url, e);
+                          setImageLoadingStates((prev) => ({
+                            ...prev,
+                            [file.id]: false,
+                          }));
+                          e.currentTarget.src =
+                            "https://via.placeholder.com/300x300/393E46/FFFFFF?text=Re-upload+Required";
+                        }}
+                        onLoad={() => {
+                          console.log("Image loaded successfully:", file.url);
+                          setImageLoadingStates((prev) => ({
+                            ...prev,
+                            [file.id]: false,
+                          }));
+                        }}
+                      />
                       <Button
                         size="sm"
                         variant="destructive"

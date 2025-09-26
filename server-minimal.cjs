@@ -750,8 +750,9 @@ app.get("/api/file/:id", async (req, res) => {
     // Check if file_data exists
     if (!file.file_data) {
       console.log("File data is null for file ID:", id);
-      return res.status(404).json({ 
-        error: "File data not available. This file was uploaded before the database migration." 
+      return res.status(404).json({
+        error:
+          "File data not available. This file was uploaded before the database migration.",
       });
     }
 
@@ -769,6 +770,93 @@ app.get("/api/file/:id", async (req, res) => {
   } catch (error) {
     console.error("Error serving file:", error);
     res.status(500).json({ error: "Failed to serve file" });
+  }
+});
+
+// Admin user management endpoints
+app.get("/api/admin/user", authenticateToken, async (req, res) => {
+  try {
+    console.log("Fetching users...");
+    const users = await query(`
+      SELECT id, username, email, role, created_at, updated_at
+      FROM users 
+      ORDER BY created_at DESC
+    `);
+    console.log("Found users:", users.length);
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+app.put("/api/admin/user/:id", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, email, password, currentPassword } = req.body;
+
+    console.log("Updating user:", { id, username, email, hasPassword: !!password });
+
+    // Verify current password if changing password
+    if (password) {
+      const users = await query(
+        "SELECT password_hash FROM users WHERE id = $1",
+        [id]
+      );
+
+      if (users.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const isValidPassword = await bcrypt.compare(
+        currentPassword,
+        users[0].password_hash
+      );
+      if (!isValidPassword) {
+        return res.status(400).json({ error: "Current password is incorrect" });
+      }
+    }
+
+    // Build update query dynamically
+    const updates = [];
+    const values = [];
+    let paramIndex = 1;
+
+    if (username) {
+      updates.push(`username = $${paramIndex}`);
+      values.push(username);
+      paramIndex++;
+    }
+
+    if (email) {
+      updates.push(`email = $${paramIndex}`);
+      values.push(email);
+      paramIndex++;
+    }
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updates.push(`password_hash = $${paramIndex}`);
+      values.push(hashedPassword);
+      paramIndex++;
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: "No fields to update" });
+    }
+
+    values.push(id);
+
+    await query(
+      `UPDATE users SET ${updates.join(", ")}, updated_at = NOW() WHERE id = $${paramIndex}`,
+      values
+    );
+
+    console.log("User updated successfully");
+    res.json({ success: true, message: "User updated successfully" });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Failed to update user" });
   }
 });
 
