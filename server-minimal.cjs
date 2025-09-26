@@ -14,8 +14,17 @@ const JWT_SECRET =
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+// Additional middleware for handling large payloads
+app.use((req, res, next) => {
+  // Set higher limits for specific routes
+  if (req.path === '/api/upload') {
+    req.setTimeout(30000); // 30 second timeout
+  }
+  next();
+});
 
 // Serve uploaded files statically
 app.use("/uploads", express.static("uploads"));
@@ -991,18 +1000,30 @@ app.post(
   "/api/upload",
   authenticateToken,
   (req, res, next) => {
+    // Set specific limits for this route
+    req.setTimeout(30000); // 30 second timeout
+    
     upload.single("file")(req, res, (err) => {
       if (err) {
         console.error("Multer error:", err);
-        if (err.code === 'LIMIT_FILE_SIZE') {
-          return res.status(413).json({ 
-            error: "File too large", 
-            message: "File size exceeds the maximum limit of 50MB" 
+        console.error("Error code:", err.code);
+        console.error("Error message:", err.message);
+        
+        if (err.code === "LIMIT_FILE_SIZE") {
+          return res.status(413).json({
+            error: "File too large",
+            message: "File size exceeds the maximum limit of 50MB",
           });
         }
-        return res.status(400).json({ 
-          error: "Upload error", 
-          message: err.message 
+        if (err.code === "LIMIT_UNEXPECTED_FILE") {
+          return res.status(400).json({
+            error: "Unexpected file field",
+            message: "Please ensure the file field is named 'file'",
+          });
+        }
+        return res.status(400).json({
+          error: "Upload error",
+          message: err.message,
         });
       }
       next();
@@ -1014,8 +1035,8 @@ app.post(
       console.log("Request body:", req.body);
       console.log("Request file:", req.file ? "File present" : "No file");
       console.log("Request headers:", req.headers);
-      console.log("Content-Type:", req.headers['content-type']);
-      console.log("Content-Length:", req.headers['content-length']);
+      console.log("Content-Type:", req.headers["content-type"]);
+      console.log("Content-Length:", req.headers["content-length"]);
 
       if (!req.file) {
         console.log("No file uploaded");

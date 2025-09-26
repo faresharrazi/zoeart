@@ -11,7 +11,10 @@
     },
     {
       "src": "server-minimal.cjs",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 30
+      }
     }
   ],
   "rewrites": [
