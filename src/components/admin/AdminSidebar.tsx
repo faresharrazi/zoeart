@@ -23,13 +23,12 @@ interface AdminSidebarProps {
 
 const menuItems = [
   { id: "overview", label: "Overview", icon: Home },
-  { id: "artworks", label: "Artworks", icon: Palette },
-  { id: "artists", label: "Artists", icon: Users },
   { id: "exhibitions", label: "Exhibitions", icon: Calendar },
+  { id: "artists", label: "Artists", icon: Users },
+  { id: "artworks", label: "Artworks", icon: Palette },
   { id: "newsletter", label: "Newsletter", icon: Mail },
   { id: "pages", label: "Page Content", icon: FileText },
   { id: "users", label: "User Management", icon: UserCog },
-  // { id: "theme", label: "Theme Control", icon: Settings }, // Removed theme management
 ];
 
 const AdminSidebar = ({

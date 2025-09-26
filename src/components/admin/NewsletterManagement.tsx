@@ -27,8 +27,7 @@ import {
   Search,
   Download,
   Trash2,
-  Calendar,
-  Filter,
+  RefreshCw,
   Loader2,
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
@@ -297,119 +296,57 @@ const NewsletterManagement = () => {
             Manage your newsletter subscribers and campaigns
           </p>
         </div>
-        <Button
-          onClick={() => fetchSubscribers(true)}
-          disabled={refreshing}
-          variant="outline"
-          size="sm"
-        >
-          {refreshing ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <Mail className="w-4 h-4 mr-2" />
-          )}
-          {refreshing ? "Refreshing..." : "Refresh"}
-        </Button>
-      </div>
-
-      {/* Overview Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Total Subscribers Card */}
-        <div className="lg:col-span-1">
-          <Card className="shadow-elegant">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm  text-theme-text-muted flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                Total Subscribers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl  text-theme-primary">
-                {subscribers.length}
-              </div>
-              <p className="text-sm text-theme-text-muted mt-1">
-                All time subscribers
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Monthly Chart */}
-        <div className="lg:col-span-3">
-          <Card className="shadow-elegant">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-theme-text-primary flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  Monthly Subscriptions
-                </CardTitle>
-                <Select
-                  value={selectedYear.toString()}
-                  onValueChange={(value) => setSelectedYear(parseInt(value))}
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableYears.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {monthlyData.map((data, index) => (
-                  <div key={data.month} className="flex items-center gap-4">
-                    <div className="w-12 text-sm  text-theme-text-muted">
-                      {data.month}
-                    </div>
-                    <div className="flex-1 bg-theme-surface rounded-full h-4 overflow-hidden">
-                      <div
-                        className="bg-theme-primary h-full transition-all duration-500"
-                        style={{
-                          width: `${Math.max(
-                            (data.count /
-                              Math.max(...monthlyData.map((d) => d.count))) *
-                              100,
-                            5
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="w-8 text-sm  text-theme-text-primary">
-                      {data.count}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => fetchSubscribers(true)}
+            disabled={refreshing}
+            variant="outline"
+            size="sm"
+            className="p-2"
+          >
+            {refreshing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            className="p-2"
+          >
+            <Download className="w-4 h-4" />
+          </Button>
         </div>
       </div>
+
+      {/* Total Subscribers Card */}
+      <Card className="shadow-elegant">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm  text-theme-text-muted flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            Total Subscribers
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl  text-theme-primary">
+            {subscribers.length}
+          </div>
+          <p className="text-sm text-theme-text-muted mt-1">
+            All time subscribers
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Subscriber List */}
       <Card className="shadow-elegant">
         <CardHeader>
           <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-theme-text-primary">
-                Subscriber List ({filteredSubscribers.length} of{" "}
-                {subscribers.length})
-              </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                className="flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Export CSV
-              </Button>
-            </div>
+            <CardTitle className="text-theme-text-primary">
+              Subscriber List ({filteredSubscribers.length} of{" "}
+              {subscribers.length})
+            </CardTitle>
 
             {/* Filters */}
             <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4">

@@ -195,16 +195,14 @@ const UserManagement = () => {
         </Card>
 
         {/* Edit Form */}
-        <Card className="shadow-elegant">
-          <CardHeader>
-            <CardTitle className="text-theme-text-primary">
-              {editingUser
-                ? `Edit ${editingUser.username}`
-                : "Select a user to edit"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {editingUser ? (
+        {editingUser && (
+          <Card className="shadow-elegant">
+            <CardHeader>
+              <CardTitle className="text-theme-text-primary">
+                Edit {editingUser.username}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="username" className="text-theme-text-primary">
@@ -301,16 +299,9 @@ const UserManagement = () => {
                   </Button>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <User className="w-12 h-12 text-theme-text-muted mx-auto mb-4" />
-                <p className="text-theme-text-muted">
-                  Select a user from the list to edit their credentials
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

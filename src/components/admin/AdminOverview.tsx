@@ -11,7 +11,11 @@ import {
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/apiClient";
 
-const AdminOverview = () => {
+interface AdminOverviewProps {
+  onNavigate: (section: string) => void;
+}
+
+const AdminOverview = ({ onNavigate }: AdminOverviewProps) => {
   const [stats, setStats] = useState({
     upcomingExhibitions: 0,
     pastExhibitions: 0,
@@ -63,46 +67,48 @@ const AdminOverview = () => {
 
   const statsData = [
     {
-      title: "Upcoming Exhibitions",
-      value: stats.upcomingExhibitions.toString(),
+      title: "Exhibitions",
+      value: (stats.upcomingExhibitions + stats.pastExhibitions).toString(),
       change:
-        stats.upcomingExhibitions > 0
-          ? "Active exhibitions"
-          : "No upcoming exhibitions",
+        stats.upcomingExhibitions + stats.pastExhibitions > 0
+          ? `${stats.upcomingExhibitions} upcoming, ${stats.pastExhibitions} past`
+          : "No exhibitions yet",
       color: "text-theme-primary",
       icon: Calendar,
+      navigateTo: "exhibitions",
     },
     {
-      title: "Past Exhibitions",
-      value: stats.pastExhibitions.toString(),
-      change:
-        stats.pastExhibitions > 0
-          ? "Completed exhibitions"
-          : "No past exhibitions",
-      color: "text-theme-text-muted",
-      icon: Calendar,
-    },
-    {
-      title: "Active Artists",
+      title: "Artists",
       value: stats.artists.toString(),
       change: stats.artists > 0 ? "Featured artists" : "No artists yet",
       color: "text-theme-primary",
       icon: Users,
+      navigateTo: "artists",
     },
     {
-      title: "Artwork Collection",
+      title: "Artworks",
       value: stats.artworks.toString(),
       change: stats.artworks > 0 ? "Gallery pieces" : "No artworks yet",
       color: "text-theme-primary",
       icon: Palette,
+      navigateTo: "artworks",
     },
     {
-      title: "Newsletter Subscribers",
+      title: "Newsletter",
       value: stats.subscribers.toString(),
       change:
         stats.subscribers > 0 ? "Active subscribers" : "No subscribers yet",
       color: "text-theme-primary",
       icon: Mail,
+      navigateTo: "newsletter",
+    },
+    {
+      title: "Page Content",
+      value: "5",
+      change: "Manage pages",
+      color: "text-theme-primary",
+      icon: TrendingUp,
+      navigateTo: "pages",
     },
   ];
 
@@ -138,7 +144,11 @@ const AdminOverview = () => {
         {statsData.map((stat, index) => {
           const IconComponent = stat.icon;
           return (
-            <Card key={index} className="shadow-elegant">
+            <Card 
+              key={index} 
+              className="shadow-elegant cursor-pointer hover:shadow-lg transition-shadow duration-200 hover:scale-105"
+              onClick={() => onNavigate(stat.navigateTo)}
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm  text-theme-text-muted">
@@ -159,118 +169,6 @@ const AdminOverview = () => {
           );
         })}
       </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-elegant">
-          <CardHeader>
-            <CardTitle className="text-theme-text-primary flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Recent Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="text-sm text-theme-text-muted">
-                Database connected and ready for content management.
-              </div>
-              <div className="text-sm text-theme-text-muted">
-                Start by adding artists, artworks, and exhibitions through the
-                management tabs.
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-elegant">
-          <CardHeader>
-            <CardTitle className="text-theme-text-primary flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              System Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-theme-text-primary">
-                  Database Connected
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-theme-text-primary">
-                  API Server Running
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-theme-text-primary">
-                  Frontend Connected
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Content Overview */}
-      <Card className="shadow-elegant">
-        <CardHeader>
-          <CardTitle className="text-theme-text-primary">
-            Content Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-theme-surface rounded-lg">
-            <div>
-              <h4 className=" text-theme-text-primary">
-                Artworks
-              </h4>
-              <p className="text-sm text-theme-text-muted">
-                Add, edit, and manage gallery pieces
-              </p>
-            </div>
-            <Badge variant="secondary">{stats.artworks} items</Badge>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-theme-surface rounded-lg">
-            <div>
-              <h4 className=" text-theme-text-primary">Artists</h4>
-              <p className="text-sm text-theme-text-muted">
-                Manage artist profiles and information
-              </p>
-            </div>
-            <Badge variant="secondary">{stats.artists} profiles</Badge>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-theme-surface rounded-lg">
-            <div>
-              <h4 className=" text-theme-text-primary">
-                Exhibitions
-              </h4>
-              <p className="text-sm text-theme-text-muted">
-                Plan and manage gallery exhibitions
-              </p>
-            </div>
-            <Badge variant="secondary">
-              {stats.upcomingExhibitions + stats.pastExhibitions} events
-            </Badge>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-theme-surface rounded-lg">
-            <div>
-              <h4 className=" text-theme-text-primary">
-                Newsletter
-              </h4>
-              <p className="text-sm text-theme-text-muted">
-                Manage subscriber list and campaigns
-              </p>
-            </div>
-            <Badge variant="secondary">{stats.subscribers} subscribers</Badge>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

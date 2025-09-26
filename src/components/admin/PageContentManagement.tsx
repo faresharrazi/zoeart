@@ -1068,20 +1068,6 @@ const PageContentManagement = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              toast({
-                title: "Info",
-                description: "Exhibition and Contact pages are always visible",
-              });
-            }}
-            className="w-full sm:w-auto"
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            Refresh Core Pages
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             onClick={() => window.open("/", "_blank")}
             className="w-full sm:w-auto"
           >

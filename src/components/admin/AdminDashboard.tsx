@@ -30,7 +30,7 @@ const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
   const renderActiveSection = () => {
     switch (activeSection) {
       case "overview":
-        return <AdminOverview />;
+        return <AdminOverview onNavigate={setActiveSection} />;
       case "artworks":
         return <ArtworkManagement />;
       case "artists":
