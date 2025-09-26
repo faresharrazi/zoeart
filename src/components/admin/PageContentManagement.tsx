@@ -216,8 +216,11 @@ const PageContentManagement = () => {
   };
 
   const togglePageVisibility = async (pageId: string) => {
-    if (pageId === "home" || pageId === "exhibitions" || pageId === "contact")
-      return; // These pages cannot be hidden
+    // These pages cannot be hidden and should always be visible
+    if (pageId === "home" || pageId === "exhibitions" || pageId === "contact") {
+      console.log("Cannot toggle visibility for always-visible page:", pageId);
+      return;
+    }
 
     const currentVisibility =
       pageData[pageId as keyof typeof pageData]?.isVisible;
@@ -232,12 +235,16 @@ const PageContentManagement = () => {
 
     try {
       // Update using database API
-      await apiClient.updatePageContent(pageId, {
+      console.log("Calling updatePageContent API with:", { pageId, isVisible: newVisibility });
+      const result = await apiClient.updatePageContent(pageId, {
         isVisible: newVisibility,
       });
+      console.log("API call result:", result);
 
       // Refresh data from database
+      console.log("Refreshing page data...");
       await refreshPageData();
+      console.log("Page data refreshed");
 
       toast({
         title: "Success",
@@ -247,6 +254,7 @@ const PageContentManagement = () => {
       });
     } catch (error) {
       console.error("Error toggling page visibility:", error);
+      console.error("Error details:", error);
       toast({
         title: "Error",
         description: "Failed to update page visibility",

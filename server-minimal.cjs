@@ -314,7 +314,14 @@ app.get("/api/page-content", async (req, res) => {
 
     console.log("Pages found:", pages.length);
     console.log("Contact info found:", contactInfo.length);
-    console.log("Raw pages data:", pages.map(p => ({ page_name: p.page_name, is_visible: p.is_visible, type: typeof p.is_visible })));
+    console.log(
+      "Raw pages data:",
+      pages.map((p) => ({
+        page_name: p.page_name,
+        is_visible: p.is_visible,
+        type: typeof p.is_visible,
+      }))
+    );
 
     const pageData = pages.reduce((acc, page) => {
       try {
@@ -328,10 +335,10 @@ app.get("/api/page-content", async (req, res) => {
         };
       } catch (e) {
         console.error("Error parsing page content for", page.page_name, e);
-        acc[page.page_name] = { 
-          ...page, 
+        acc[page.page_name] = {
+          ...page,
           isVisible: Boolean(page.is_visible), // Convert integer to boolean
-          content: {} 
+          content: {},
         };
       }
       return acc;
@@ -504,6 +511,7 @@ app.put(
       console.log("Page name:", pageName);
       console.log("Update data:", { title, description, content, isVisible });
       console.log("Request headers:", req.headers);
+      console.log("isVisible type:", typeof isVisible, "value:", isVisible);
 
       // Get current page data
       const currentPage = await query(
@@ -561,7 +569,7 @@ app.put(
       console.log("Values:", values);
 
       const result = await query(updateQuery, values);
-      console.log("Update result:", result);
+      console.log("Database update result:", result);
 
       // Verify the update by fetching the updated data
       const updatedPage = await query(
