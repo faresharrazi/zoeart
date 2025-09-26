@@ -135,9 +135,9 @@ const PageContentManagement = () => {
       const formDataToSet = {
         ...pageDataToEdit,
         ...pageDataToEdit?.content, // Include content fields (footerDescription, galleryHours, etc.)
-        // Keep existing heroImageIds from page data
-        heroImageIds: pageDataToEdit?.heroImageIds || [],
-        heroImages: pageDataToEdit?.heroImages || [],
+        // Keep existing heroImageIds from page data content
+        heroImageIds: pageDataToEdit?.content?.heroImageIds || [],
+        heroImages: pageDataToEdit?.content?.heroImages || [],
         heroImageFiles: heroImages.map((img) => ({
           id: img.id,
           originalName: img.originalName,
@@ -150,8 +150,8 @@ const PageContentManagement = () => {
 
       console.log("PCM: Setting form data for home:", formDataToSet);
       console.log(
-        "PCM: Hero image IDs from page data:",
-        pageDataToEdit?.heroImageIds
+        "PCM: Hero image IDs from page data content:",
+        pageDataToEdit?.content?.heroImageIds
       );
       console.log("PCM: All hero images:", heroImages);
 
@@ -181,6 +181,8 @@ const PageContentManagement = () => {
         const homeData = {
           title: formData.title,
           description: formData.description,
+          heroImages: formData.heroImages || [],
+          heroImageIds: formData.heroImageIds || [],
           content: {
             footerDescription,
             galleryHours,
@@ -479,9 +481,13 @@ const PageContentManagement = () => {
                           editingPage: editingPage,
                         });
                         
-                        // For now, show all hero images to debug the issue
-                        // TODO: Filter based on heroImageIds once we confirm data flow
-                        return heroImages || [];
+                        // Filter images based on heroImageIds from form data
+                        const filteredImages = formData.heroImageIds && formData.heroImageIds.length > 0
+                          ? heroImages.filter((img) => formData.heroImageIds.includes(img.id))
+                          : [];
+                        
+                        console.log("PCM: Filtered images:", filteredImages);
+                        return filteredImages;
                       })()}
                       maxFiles={10}
                       onRefresh={refreshHeroImages}

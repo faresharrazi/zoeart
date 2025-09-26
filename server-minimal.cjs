@@ -602,10 +602,10 @@ app.put("/api/contact-info", authenticateToken, async (req, res) => {
 // Update home settings
 app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
   try {
-    const { title, description, content } = req.body;
+    const { title, description, content, heroImages, heroImageIds } = req.body;
 
     console.log("=== ADMIN HOME SETTINGS UPDATE ===");
-    console.log("Update data:", { title, description, content });
+    console.log("Update data:", { title, description, content, heroImages, heroImageIds });
     console.log("Request headers:", req.headers);
 
     // Get current home page data
@@ -628,6 +628,8 @@ app.put("/api/admin/home-settings", authenticateToken, async (req, res) => {
     const updatedContent = {
       ...currentContent,
       ...content,
+      heroImages: heroImages || [],
+      heroImageIds: heroImageIds || [],
     };
 
     console.log("Current content:", currentContent);

@@ -32,7 +32,11 @@ export const useHeroImages = () => {
         mimeType: image.mime_type,
       }));
       console.log("useHeroImages: Mapped hero images:", mappedImages);
-      console.log("useHeroImages: Setting hero images state with", mappedImages.length, "images");
+      console.log(
+        "useHeroImages: Setting hero images state with",
+        mappedImages.length,
+        "images"
+      );
       setHeroImages(mappedImages);
     } catch (error) {
       console.error("Error fetching hero images:", error);
