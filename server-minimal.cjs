@@ -1185,7 +1185,7 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
   try {
     console.log("=== CREATING EXHIBITION ===");
     console.log("Request body:", req.body);
-    
+
     const {
       title,
       slug,
@@ -1219,7 +1219,7 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
       assigned_artworks,
       call_for_artists,
       cta_link,
-      is_visible
+      is_visible,
     });
 
     // Validate required fields
@@ -1229,7 +1229,12 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
     }
 
     // Generate slug if not provided
-    const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const finalSlug =
+      slug ||
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
     const result = await query(
       `

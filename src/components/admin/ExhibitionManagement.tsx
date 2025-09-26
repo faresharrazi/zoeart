@@ -156,8 +156,12 @@ const ExhibitionManagement = () => {
     }
 
     try {
+      // Generate slug from title if not provided
+      const slug = formData.slug || formData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || '';
+
       const exhibitionData = {
         title: formData.title,
+        slug: slug,
         description: formData.description || "",
         start_date: formData.startDate
           ? new Date(formData.startDate).toISOString().split("T")[0]
@@ -354,6 +358,22 @@ const ExhibitionManagement = () => {
                   }
                   placeholder="Enter exhibition title"
                 />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm  mb-2">
+                  Slug *
+                </label>
+                <Input
+                  value={formData.slug || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, slug: e.target.value })
+                  }
+                  placeholder="exhibition-url-slug"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  URL-friendly version of the title (auto-generated if empty)
+                </p>
               </div>
 
               <div>
