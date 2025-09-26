@@ -23,15 +23,21 @@ const ArtworkCard = ({ artwork, onArtworkClick }: ArtworkCardProps) => {
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center mx-auto mb-3">
-                  <span className="text-2xl text-slate-600 font-semibold">?</span>
+                  <span className="text-2xl text-slate-600 font-semibold">
+                    ?
+                  </span>
                 </div>
                 <p className="text-sm text-slate-500">Artwork unavailable</p>
               </div>
             </div>
           </div>
           <div className="p-6 space-y-3">
-            <h3 className="text-xl font-semibold text-foreground">Unknown Artwork</h3>
-            <p className="text-theme-text-primary font-medium">Unknown Artist</p>
+            <h3 className="text-xl font-semibold text-foreground">
+              Unknown Artwork
+            </h3>
+            <p className="text-theme-text-primary font-medium">
+              Unknown Artist
+            </p>
           </div>
         </div>
       </div>

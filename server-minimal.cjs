@@ -331,10 +331,31 @@ app.get("/api/artworks", async (req, res) => {
 
     const formattedArtworks = artworks.map((artwork) => ({
       ...artwork,
-      images:
-        typeof artwork.images === "string"
+      images: artwork.images
+        ? typeof artwork.images === "string"
           ? JSON.parse(artwork.images || "[]")
-          : artwork.images || [],
+              .map((img) =>
+                typeof img === "string" && img.startsWith("/api/file/")
+                  ? img
+                  : typeof img === "string" && img.startsWith("blob:")
+                  ? `/api/file/${img.split("/").pop()}`
+                  : typeof img === "string" && img && img !== "undefined"
+                  ? `/api/file/${img}`
+                  : null
+              )
+              .filter((img) => img !== null)
+          : (artwork.images || [])
+              .map((img) =>
+                typeof img === "string" && img.startsWith("/api/file/")
+                  ? img
+                  : typeof img === "string" && img.startsWith("blob:")
+                  ? `/api/file/${img.split("/").pop()}`
+                  : typeof img === "string" && img && img !== "undefined"
+                  ? `/api/file/${img}`
+                  : null
+              )
+              .filter((img) => img !== null)
+        : [],
     }));
 
     res.json(formattedArtworks);
@@ -1281,10 +1302,31 @@ app.get("/api/admin/artworks", authenticateToken, async (req, res) => {
 
     const formattedArtworks = artworks.map((artwork) => ({
       ...artwork,
-      images:
-        typeof artwork.images === "string"
+      images: artwork.images
+        ? typeof artwork.images === "string"
           ? JSON.parse(artwork.images || "[]")
-          : artwork.images || [],
+              .map((img) =>
+                typeof img === "string" && img.startsWith("/api/file/")
+                  ? img
+                  : typeof img === "string" && img.startsWith("blob:")
+                  ? `/api/file/${img.split("/").pop()}`
+                  : typeof img === "string" && img && img !== "undefined"
+                  ? `/api/file/${img}`
+                  : null
+              )
+              .filter((img) => img !== null)
+          : (artwork.images || [])
+              .map((img) =>
+                typeof img === "string" && img.startsWith("/api/file/")
+                  ? img
+                  : typeof img === "string" && img.startsWith("blob:")
+                  ? `/api/file/${img.split("/").pop()}`
+                  : typeof img === "string" && img && img !== "undefined"
+                  ? `/api/file/${img}`
+                  : null
+              )
+              .filter((img) => img !== null)
+        : [],
     }));
 
     res.json(formattedArtworks);
