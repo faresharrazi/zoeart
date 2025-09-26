@@ -93,14 +93,14 @@ const ExhibitionManagement = () => {
               ? exhibition.featured_image.startsWith("/api/file/")
                 ? exhibition.featured_image
                 : exhibition.featured_image.startsWith("blob:")
-                ? `/api/file/${exhibition.featured_image.split('/').pop()}`
+                ? `/api/file/${exhibition.featured_image.split("/").pop()}`
                 : `/api/file/${exhibition.featured_image}`
               : "",
             galleryImages: (exhibition.gallery_images || []).map((img) =>
               typeof img === "string" && img.startsWith("/api/file/")
                 ? img
                 : typeof img === "string" && img.startsWith("blob:")
-                ? `/api/file/${img.split('/').pop()}`
+                ? `/api/file/${img.split("/").pop()}`
                 : `/api/file/${img}`
             ),
             assignedArtists: exhibition.assigned_artists || [],
