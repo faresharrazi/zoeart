@@ -54,7 +54,7 @@ const Artists = () => {
         <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
           <div className="container mx-auto px-6 text-center relative z-10">
             <div className="max-w-4xl mx-auto my-24">
-              <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
+              <h1 className="text-4xl md:text-6xl text-white mb-6 drop-shadow-lg">
                 {pageData.artists?.title || "Artists"}
               </h1>
               <div className="flex items-center justify-center py-12">
@@ -77,7 +77,7 @@ const Artists = () => {
       <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto my-24">
-            <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
+            <h1 className="text-4xl md:text-6xl text-white mb-6 drop-shadow-lg">
               {pageData.artists?.title || "Artists"}
             </h1>
             <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">

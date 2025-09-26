@@ -48,7 +48,7 @@ const Hero = () => {
         {/* Text overlay background - only show if there are real images */}
         {hasRealImages ? (
           <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
-            <h1 className="text-5xl md:text-7xl mb-6 tracking-tight text-white drop-shadow-lg">
+            <h1 className="text-4xl md:text-6xl mb-6 text-white drop-shadow-lg">
               {homeSettings.title}
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
@@ -75,7 +75,7 @@ const Hero = () => {
           </div>
         ) : (
           <div className="my-24">
-            <h1 className="text-5xl md:text-7xl mb-6 tracking-tight text-white drop-shadow-lg">
+            <h1 className="text-4xl md:text-6xl mb-6 text-white drop-shadow-lg">
               {homeSettings.title}
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
