@@ -144,19 +144,19 @@ const ExhibitionDetail = () => {
         {/* Content Overlay */}
         <div className="relative z-10 container mx-auto px-6 text-center">
           <div className="max-w-4xl mx-auto">
-              {/* Status Badge */}
-              <div className="mb-6 md:mb-8">
-                <Badge
-                  variant={
-                    exhibition.status === "upcoming" ? "default" : "secondary"
-                  }
-                  className="px-6 py-2 text-lg font-semibold"
-                >
-                  {exhibition.status === "upcoming"
-                    ? "Upcoming Exhibition"
-                    : "Past Exhibition"}
-                </Badge>
-              </div>
+            {/* Status Badge */}
+            <div className="mt-8 md:mt-12 mb-6 md:mb-8">
+              <Badge
+                variant={
+                  exhibition.status === "upcoming" ? "default" : "secondary"
+                }
+                className="px-6 py-2 text-lg font-semibold"
+              >
+                {exhibition.status === "upcoming"
+                  ? "Upcoming Exhibition"
+                  : "Past Exhibition"}
+              </Badge>
+            </div>
 
             {/* Title */}
             <h1 className="text-6xl md:text-8xl text-white mb-6 drop-shadow-2xl font-bold">
@@ -211,24 +211,24 @@ const ExhibitionDetail = () => {
               )}
             </div>
 
-              {/* CTA Button */}
-              {(exhibition.call_for_artists === true ||
-                exhibition.call_for_artists === 1) &&
-                exhibition.cta_link && (
-                  <div className="mb-8 md:mb-12">
-                    <Button
-                      size="lg"
-                      className="bg-white text-black hover:bg-white/90 px-8 py-4 text-lg font-semibold"
-                      onClick={() => window.open(exhibition.cta_link, "_blank")}
-                    >
-                      <ExternalLink className="w-5 h-5 mr-2" />
-                      Join as an Artist
-                    </Button>
-                  </div>
-                )}
+            {/* CTA Button */}
+            {(exhibition.call_for_artists === true ||
+              exhibition.call_for_artists === 1) &&
+              exhibition.cta_link && (
+                <div className="mb-8 md:mb-12">
+                  <Button
+                    size="lg"
+                    className="bg-white text-black hover:bg-white/90 px-8 py-4 text-lg font-semibold"
+                    onClick={() => window.open(exhibition.cta_link, "_blank")}
+                  >
+                    <ExternalLink className="w-5 h-5 mr-2" />
+                    Join as an Artist
+                  </Button>
+                </div>
+              )}
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mt-8 md:mt-12">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mt-8 md:mt-12 mb-8 md:mb-12">
               <Button
                 variant="outline"
                 size="lg"
