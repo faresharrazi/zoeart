@@ -1183,6 +1183,9 @@ app.get("/api/admin/artworks", authenticateToken, async (req, res) => {
 // Create exhibition
 app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
   try {
+    console.log("=== CREATING EXHIBITION ===");
+    console.log("Request body:", req.body);
+    
     const {
       title,
       slug,
@@ -1201,6 +1204,33 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
       is_visible = true,
     } = req.body;
 
+    console.log("Extracted fields:", {
+      title,
+      slug,
+      description,
+      start_date,
+      end_date,
+      location,
+      curator,
+      status,
+      featured_image,
+      gallery_images,
+      assigned_artists,
+      assigned_artworks,
+      call_for_artists,
+      cta_link,
+      is_visible
+    });
+
+    // Validate required fields
+    if (!title || !slug) {
+      console.error("Missing required fields:", { title, slug });
+      return res.status(400).json({ error: "Title and slug are required" });
+    }
+
+    // Generate slug if not provided
+    const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
     const result = await query(
       `
       INSERT INTO exhibitions (title, slug, description, start_date, end_date, location, curator, status, featured_image, gallery_images, assigned_artists, assigned_artworks, call_for_artists, cta_link, is_visible)
@@ -1209,7 +1239,7 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
     `,
       [
         title,
-        slug,
+        finalSlug,
         description,
         start_date,
         end_date,
@@ -1220,15 +1250,18 @@ app.post("/api/admin/exhibitions", authenticateToken, async (req, res) => {
         JSON.stringify(gallery_images || []),
         JSON.stringify(assigned_artists || []),
         JSON.stringify(assigned_artworks || []),
-        call_for_artists ? 1 : 0,
+        call_for_artists || false,
         cta_link,
-        is_visible ? 1 : 0,
+        is_visible !== false,
       ]
     );
 
+    console.log("Exhibition created successfully:", result);
     res.json({ success: true, id: result[0].id });
   } catch (error) {
     console.error("Error creating exhibition:", error);
+    console.error("Error details:", error.message);
+    console.error("Error stack:", error.stack);
     res.status(500).json({ error: "Failed to create exhibition" });
   }
 });
