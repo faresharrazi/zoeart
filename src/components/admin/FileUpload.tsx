@@ -34,7 +34,7 @@ const FileUpload = ({
   const [uploading, setUploading] = useState(false);
   const [files, setFiles] = useState<UploadedFile[]>(existingFiles);
   const [imageLoadingStates, setImageLoadingStates] = useState<
-    Record<number, boolean>
+    Record<number, 'loading' | 'loaded' | 'error'>
   >({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -204,76 +204,74 @@ const FileUpload = ({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {files.map((file) => (
-                <Card key={file.id} className="relative group">
-                  <CardContent className="p-4">
-                    <div className="aspect-square relative mb-2">
-                      {imageLoadingStates[file.id] !== false && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
-                          <div className="text-sm text-gray-500">
-                            Loading...
+              <Card key={file.id} className="relative group">
+                <CardContent className="p-4">
+                  <div className="aspect-square relative mb-2">
+                    {imageLoadingStates[file.id] === 'loading' && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                        <div className="text-sm text-gray-500">Loading...</div>
+                      </div>
+                    )}
+                    <img
+                      src={file.url}
+                      alt={file.originalName}
+                      className="w-full h-full object-cover rounded-lg"
+                      onLoadStart={() => {
+                        setImageLoadingStates((prev) => ({
+                          ...prev,
+                          [file.id]: 'loading',
+                        }));
+                      }}
+                      onError={(e) => {
+                        console.error("Image failed to load:", file.url, e);
+                        setImageLoadingStates((prev) => ({
+                          ...prev,
+                          [file.id]: 'error',
+                        }));
+                        // Show a more informative placeholder
+                        e.currentTarget.src =
+                          "https://via.placeholder.com/300x300/FF6B6B/FFFFFF?text=Image+Not+Available";
+                      }}
+                      onLoad={() => {
+                        console.log("Image loaded successfully:", file.url);
+                        setImageLoadingStates((prev) => ({
+                          ...prev,
+                          [file.id]: 'loaded',
+                        }));
+                      }}
+                    />
+                    {/* Show overlay when image fails to load */}
+                    {imageLoadingStates[file.id] === 'error' && (
+                      <div className="absolute inset-0 bg-red-50 border-2 border-red-200 rounded-lg flex items-center justify-center">
+                        <div className="text-center p-2">
+                          <div className="text-red-600 text-xs font-medium mb-1">
+                            Image Not Available
+                          </div>
+                          <div className="text-red-500 text-xs">
+                            Re-upload required
                           </div>
                         </div>
-                      )}
-                      <img
-                        src={file.url}
-                        alt={file.originalName}
-                        className="w-full h-full object-cover rounded-lg"
-                        onLoadStart={() => {
-                          setImageLoadingStates((prev) => ({
-                            ...prev,
-                            [file.id]: true,
-                          }));
-                        }}
-                        onError={(e) => {
-                          console.error("Image failed to load:", file.url, e);
-                          setImageLoadingStates((prev) => ({
-                            ...prev,
-                            [file.id]: false,
-                          }));
-                          // Show a more informative placeholder
-                          e.currentTarget.src =
-                            "https://via.placeholder.com/300x300/FF6B6B/FFFFFF?text=Image+Not+Available";
-                        }}
-                        onLoad={() => {
-                          console.log("Image loaded successfully:", file.url);
-                          setImageLoadingStates((prev) => ({
-                            ...prev,
-                            [file.id]: false,
-                          }));
-                        }}
-                      />
-                      {/* Show overlay when image fails to load */}
-                      {imageLoadingStates[file.id] === false && (
-                        <div className="absolute inset-0 bg-red-50 border-2 border-red-200 rounded-lg flex items-center justify-center">
-                          <div className="text-center p-2">
-                            <div className="text-red-600 text-xs font-medium mb-1">
-                              Image Not Available
-                            </div>
-                            <div className="text-red-500 text-xs">
-                              Re-upload required
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="absolute top-2 right-2 w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleRemoveFile(file.id)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {file.originalName}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatFileSize(file.fileSize)}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                      </div>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="absolute top-2 right-2 w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleRemoveFile(file.id)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {file.originalName}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {formatFileSize(file.fileSize)}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

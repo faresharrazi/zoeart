@@ -137,7 +137,7 @@ const PageContentManagement = () => {
         heroImageIds: pageDataToEdit?.content?.heroImageIds || [],
         heroImages: pageDataToEdit?.content?.heroImages || [],
       };
-      
+
       console.log("PCM: Setting form data for home");
       setFormData(formDataToSet);
     } else if (pageId === "contactInfo") {
