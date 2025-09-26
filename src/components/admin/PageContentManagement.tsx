@@ -108,7 +108,6 @@ const PageContentManagement = () => {
     refreshHeroImages,
   } = useHeroImages();
 
-
   // Exhibition and Contact pages are always visible (handled in the UI logic)
 
   // Data is now fetched from database via usePageDataFromDB hook
@@ -134,7 +133,7 @@ const PageContentManagement = () => {
         heroImageIds: pageDataToEdit?.content?.heroImageIds || [],
         heroImages: pageDataToEdit?.content?.heroImages || [],
       };
-      
+
       setFormData(formDataToSet);
     } else if (pageId === "contactInfo") {
       // For contact info, combine page data with contact info
@@ -220,11 +219,15 @@ const PageContentManagement = () => {
     if (pageId === "home" || pageId === "exhibitions" || pageId === "contact")
       return; // These pages cannot be hidden
 
-    const currentVisibility = pageData[pageId as keyof typeof pageData]?.isVisible;
+    const currentVisibility =
+      pageData[pageId as keyof typeof pageData]?.isVisible;
     const newVisibility = !currentVisibility;
 
     console.log("TogglePageVisibility - Page:", pageId);
-    console.log("TogglePageVisibility - Current visibility:", currentVisibility);
+    console.log(
+      "TogglePageVisibility - Current visibility:",
+      currentVisibility
+    );
     console.log("TogglePageVisibility - New visibility:", newVisibility);
 
     try {

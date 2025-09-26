@@ -314,11 +314,13 @@ app.get("/api/page-content", async (req, res) => {
 
     console.log("Pages found:", pages.length);
     console.log("Contact info found:", contactInfo.length);
+    console.log("Raw pages data:", pages.map(p => ({ page_name: p.page_name, is_visible: p.is_visible, type: typeof p.is_visible })));
 
     const pageData = pages.reduce((acc, page) => {
       try {
         acc[page.page_name] = {
           ...page,
+          isVisible: Boolean(page.is_visible), // Convert integer to boolean
           content:
             typeof page.content === "string"
               ? JSON.parse(page.content || "{}")
@@ -326,7 +328,11 @@ app.get("/api/page-content", async (req, res) => {
         };
       } catch (e) {
         console.error("Error parsing page content for", page.page_name, e);
-        acc[page.page_name] = { ...page, content: {} };
+        acc[page.page_name] = { 
+          ...page, 
+          isVisible: Boolean(page.is_visible), // Convert integer to boolean
+          content: {} 
+        };
       }
       return acc;
     }, {});
