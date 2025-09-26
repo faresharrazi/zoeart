@@ -1578,18 +1578,22 @@ app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
       is_visible,
     } = req.body;
 
-    // Validate required fields
-    if (!name) {
-      return res.status(400).json({ error: "Name is required" });
+    // Get current artist data first
+    const currentArtist = await query("SELECT * FROM artists WHERE id = $1", [id]);
+    if (currentArtist.length === 0) {
+      return res.status(404).json({ error: "Artist not found" });
     }
 
-    // Generate slug if not provided
-    const artistSlug =
-      slug ||
-      name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+    const artist = currentArtist[0];
+
+    // Use provided values or fall back to current values
+    const updatedName = name || artist.name;
+    const updatedSlug = slug || artist.slug || updatedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const updatedSpecialty = specialty !== undefined ? specialty : artist.specialty;
+    const updatedBio = bio !== undefined ? bio : artist.bio;
+    const updatedProfileImage = profile_image !== undefined ? profile_image : artist.profile_image;
+    const updatedSocialMedia = social_media !== undefined ? social_media : artist.social_media;
+    const updatedIsVisible = is_visible !== undefined ? is_visible : artist.is_visible;
 
     await query(
       `
@@ -1598,13 +1602,13 @@ app.put("/api/admin/artists/:id", authenticateToken, async (req, res) => {
       WHERE id = $8
     `,
       [
-        name,
-        artistSlug,
-        specialty || null,
-        bio || null,
-        profile_image || null,
-        JSON.stringify(social_media || {}),
-        is_visible !== false, // Convert to boolean
+        updatedName,
+        updatedSlug,
+        updatedSpecialty || null,
+        updatedBio || null,
+        updatedProfileImage || null,
+        JSON.stringify(updatedSocialMedia || {}),
+        updatedIsVisible !== false, // Convert to boolean
         id,
       ]
     );
@@ -1716,18 +1720,24 @@ app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
       is_visible,
     } = req.body;
 
-    // Validate required fields
-    if (!title) {
-      return res.status(400).json({ error: "Title is required" });
+    // Get current artwork data first
+    const currentArtwork = await query("SELECT * FROM artworks WHERE id = $1", [id]);
+    if (currentArtwork.length === 0) {
+      return res.status(404).json({ error: "Artwork not found" });
     }
 
-    // Generate slug if not provided
-    const artworkSlug =
-      slug ||
-      title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+    const artwork = currentArtwork[0];
+
+    // Use provided values or fall back to current values
+    const updatedTitle = title || artwork.title;
+    const updatedSlug = slug || artwork.slug || updatedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const updatedArtistId = artist_id !== undefined ? artist_id : artwork.artist_id;
+    const updatedYear = year !== undefined ? year : artwork.year;
+    const updatedMedium = medium !== undefined ? medium : artwork.medium;
+    const updatedSize = size !== undefined ? size : artwork.size;
+    const updatedDescription = description !== undefined ? description : artwork.description;
+    const updatedImages = images !== undefined ? images : artwork.images;
+    const updatedIsVisible = is_visible !== undefined ? is_visible : artwork.is_visible;
 
     await query(
       `
@@ -1736,15 +1746,15 @@ app.put("/api/admin/artworks/:id", authenticateToken, async (req, res) => {
       WHERE id = $10
     `,
       [
-        title,
-        artworkSlug,
-        artist_id || null,
-        year || null,
-        medium || null,
-        size || null,
-        description || null,
-        JSON.stringify(images || []),
-        is_visible !== false, // Convert to boolean
+        updatedTitle,
+        updatedSlug,
+        updatedArtistId || null,
+        updatedYear || null,
+        updatedMedium || null,
+        updatedSize || null,
+        updatedDescription || null,
+        JSON.stringify(updatedImages || []),
+        updatedIsVisible !== false, // Convert to boolean
         id,
       ]
     );

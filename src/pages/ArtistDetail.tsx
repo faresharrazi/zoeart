@@ -151,9 +151,7 @@ const ArtistDetail = () => {
                   <CardContent className="space-y-4">
                     {artist.bio && (
                       <div>
-                        <h4 className=" text-theme-text-primary mb-2">
-                          About
-                        </h4>
+                        <h4 className=" text-theme-text-primary mb-2">About</h4>
                         <p className="text-theme-text-muted text-sm leading-relaxed">
                           {artist.bio}
                         </p>
@@ -170,7 +168,16 @@ const ArtistDetail = () => {
                           <div className="flex space-x-3">
                             {artist.social_media.instagram && (
                               <a
-                                href={artist.social_media.instagram.startsWith('http') ? artist.social_media.instagram : `https://instagram.com/${artist.social_media.instagram.replace('@', '')}`}
+                                href={
+                                  artist.social_media.instagram.startsWith(
+                                    "http"
+                                  )
+                                    ? artist.social_media.instagram
+                                    : `https://instagram.com/${artist.social_media.instagram.replace(
+                                        "@",
+                                        ""
+                                      )}`
+                                }
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 rounded-full bg-theme-card hover:bg-theme-primary hover:text-white transition-colors"
@@ -180,7 +187,11 @@ const ArtistDetail = () => {
                             )}
                             {artist.social_media.website && (
                               <a
-                                href={artist.social_media.website.startsWith('http') ? artist.social_media.website : `https://${artist.social_media.website}`}
+                                href={
+                                  artist.social_media.website.startsWith("http")
+                                    ? artist.social_media.website
+                                    : `https://${artist.social_media.website}`
+                                }
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-2 rounded-full bg-theme-card hover:bg-theme-primary hover:text-white transition-colors"

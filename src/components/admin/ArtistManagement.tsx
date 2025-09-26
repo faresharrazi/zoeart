@@ -240,22 +240,29 @@ const ArtistManagement = () => {
     });
   };
 
-  const toggleVisibility = async (artistId: string, currentVisibility: boolean) => {
+  const toggleVisibility = async (
+    artistId: string,
+    currentVisibility: boolean
+  ) => {
     try {
       const newVisibility = !currentVisibility;
       await apiClient.updateArtist(parseInt(artistId), {
         is_visible: newVisibility,
       });
-      
-      setArtists(artists.map(artist => 
-        artist.id === artistId 
-          ? { ...artist, isVisible: newVisibility }
-          : artist
-      ));
-      
+
+      setArtists(
+        artists.map((artist) =>
+          artist.id === artistId
+            ? { ...artist, isVisible: newVisibility }
+            : artist
+        )
+      );
+
       toast({
         title: "Success",
-        description: `Artist ${newVisibility ? 'shown' : 'hidden'} successfully`,
+        description: `Artist ${
+          newVisibility ? "shown" : "hidden"
+        } successfully`,
       });
     } catch (error) {
       console.error("Error toggling artist visibility:", error);
@@ -544,7 +551,9 @@ const ArtistManagement = () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => window.open(`/artist/${artist.slug}`, "_blank")}
+                  onClick={() =>
+                    window.open(`/artist/${artist.slug}`, "_blank")
+                  }
                 >
                   <Eye className="w-4 h-4" />
                 </Button>
@@ -554,7 +563,11 @@ const ArtistManagement = () => {
                   onClick={() => toggleVisibility(artist.id, artist.isVisible)}
                   title={artist.isVisible ? "Hide artist" : "Show artist"}
                 >
-                  {artist.isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {artist.isVisible ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </Button>
                 <Button
                   size="sm"
