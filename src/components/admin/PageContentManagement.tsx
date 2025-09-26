@@ -128,36 +128,17 @@ const PageContentManagement = () => {
     const pageDataToEdit = pageData[pageId as keyof typeof pageData];
 
     console.log("PCM: Editing page:", pageId);
-    console.log("PCM: Page data to edit:", pageDataToEdit);
-    console.log("PCM: Page data content:", pageDataToEdit?.content);
-    console.log("PCM: Content type:", typeof pageDataToEdit?.content);
-    console.log("PCM: Content keys:", pageDataToEdit?.content ? Object.keys(pageDataToEdit.content) : 'no content');
 
     if (pageId === "home") {
       // For home page, include hero images and content fields in form data
       const formDataToSet = {
         ...pageDataToEdit,
         ...pageDataToEdit?.content, // Include content fields (footerDescription, galleryHours, etc.)
-        // Keep existing heroImageIds from page data content
         heroImageIds: pageDataToEdit?.content?.heroImageIds || [],
         heroImages: pageDataToEdit?.content?.heroImages || [],
-        heroImageFiles: heroImages.map((img) => ({
-          id: img.id,
-          originalName: img.originalName,
-          filename: img.filename,
-          url: img.url,
-          fileSize: img.fileSize,
-          mimeType: img.mimeType,
-        })),
       };
-
-      console.log("PCM: Setting form data for home:", formDataToSet);
-      console.log(
-        "PCM: Hero image IDs from page data content:",
-        pageDataToEdit?.content?.heroImageIds
-      );
-      console.log("PCM: All hero images:", heroImages);
-
+      
+      console.log("PCM: Setting form data for home");
       setFormData(formDataToSet);
     } else if (pageId === "contactInfo") {
       // For contact info, combine page data with contact info
@@ -474,29 +455,7 @@ const PageContentManagement = () => {
                           heroImageFiles: files,
                         });
                       }}
-                      existingFiles={(() => {
-                        console.log("PCM: FileUpload existingFiles - DEBUG:", {
-                          formDataKeys: Object.keys(formData),
-                          heroImageIds: formData.heroImageIds,
-                          heroImages: formData.heroImages,
-                          allHeroImagesFromHook: heroImages.length,
-                          allHeroImagesData: heroImages,
-                          editingPage: editingPage,
-                        });
-
-                        // Filter images based on heroImageIds from form data
-                        // TEMPORARY: Show all hero images if no heroImageIds are stored yet
-                        const filteredImages =
-                          formData.heroImageIds &&
-                          formData.heroImageIds.length > 0
-                            ? heroImages.filter((img) =>
-                                formData.heroImageIds.includes(img.id)
-                              )
-                            : heroImages; // Show all images if no IDs stored yet
-
-                        console.log("PCM: Filtered images:", filteredImages);
-                        return filteredImages;
-                      })()}
+                      existingFiles={heroImages || []}
                       maxFiles={10}
                       onRefresh={refreshHeroImages}
                     />

@@ -41,7 +41,6 @@ const FileUpload = ({
 
   // Sync internal state with existingFiles prop
   useEffect(() => {
-    console.log("FileUpload - Received existingFiles:", existingFiles);
     setFiles(existingFiles);
   }, [existingFiles]);
 
@@ -204,9 +203,7 @@ const FileUpload = ({
             )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files.map((file) => {
-              console.log("FileUpload - Rendering file:", file);
-              return (
+            {files.map((file) => (
                 <Card key={file.id} className="relative group">
                   <CardContent className="p-4">
                     <div className="aspect-square relative mb-2">
@@ -277,8 +274,7 @@ const FileUpload = ({
                     </div>
                   </CardContent>
                 </Card>
-              );
-            })}
+            ))}
           </div>
         </div>
       ) : (
