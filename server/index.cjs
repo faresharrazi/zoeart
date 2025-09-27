@@ -84,10 +84,6 @@ app.use(notFoundHandler);
 
 // Serve React app for all other routes (SPA) - must be last
 app.use((req, res) => {
-  // Skip API routes
-  if (req.path.startsWith("/api/")) {
-    return res.status(404).json({ error: "API endpoint not found" });
-  }
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 

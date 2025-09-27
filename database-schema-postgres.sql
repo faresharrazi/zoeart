@@ -112,9 +112,9 @@ CREATE TABLE IF NOT EXISTS contact_info (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert default admin user (password: admin123)
+-- Insert default admin user (password: admin)
 INSERT INTO users (username, email, password_hash, role) VALUES 
-('admin', 'admin@aetherartspace.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin')
+('admin', 'admin@aetherartspace.com', '$2b$10$cRiBpAKdF3FFdYgW8gwGteiELv91PVX3TKIIh2NnDkYNDGv.s/WBy', 'admin')
 ON CONFLICT (username) DO NOTHING;
 
 -- Insert default contact information

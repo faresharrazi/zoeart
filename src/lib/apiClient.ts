@@ -8,7 +8,8 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retries: number = 3
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
     const cacheKey = `${options.method || "GET"}:${url}`;
@@ -35,39 +36,65 @@ class ApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const response = await fetch(url, {
+          ...options,
+          headers,
+        });
 
-    if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ error: "Unknown error" }));
+        if (!response.ok) {
+          const error = await response
+            .json()
+            .catch(() => ({ error: "Unknown error" }));
 
-      // Handle token expiration
-      if (response.status === 401 && error.code === "TOKEN_EXPIRED") {
-        // Clear expired token
-        localStorage.removeItem("adminToken");
-        // Redirect to login
-        window.location.href = "/admin";
-        throw new Error("Session expired. Please login again.");
+          // Handle token expiration
+          if (response.status === 401 && error.code === "TOKEN_EXPIRED") {
+            // Clear expired token
+            localStorage.removeItem("adminToken");
+            // Redirect to login
+            window.location.href = "/admin";
+            throw new Error("Session expired. Please login again.");
+          }
+
+          // Retry on 500 errors (server errors)
+          if (response.status >= 500 && attempt < retries) {
+            console.log(
+              `Server error (${response.status}), retrying... (attempt ${attempt}/${retries})`
+            );
+            await new Promise((resolve) => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+            continue;
+          }
+
+          throw new Error(error.error || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Cache GET requests
+        if (!options.method || options.method === "GET") {
+          this.cache.set(cacheKey, {
+            data: data as unknown,
+            timestamp: Date.now(),
+          });
+        }
+
+        return data;
+      } catch (error) {
+        // If this is the last attempt or not a network error, throw
+        if (attempt === retries || !(error instanceof TypeError)) {
+          throw error;
+        }
+
+        // Network error, retry
+        console.log(
+          `Network error, retrying... (attempt ${attempt}/${retries})`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
-
-      throw new Error(error.error || `HTTP ${response.status}`);
     }
 
-    const data = await response.json();
-
-    // Cache GET requests
-    if (!options.method || options.method === "GET") {
-      this.cache.set(cacheKey, {
-        data: data as unknown,
-        timestamp: Date.now(),
-      });
-    }
-
-    return data;
+    throw new Error("Max retries exceeded");
   }
 
   // Public operations

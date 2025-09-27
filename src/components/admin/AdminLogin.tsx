@@ -42,9 +42,22 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
       }
     } catch (error: any) {
       console.error("Login error:", error);
+
+      let errorMessage = "Unable to connect to server";
+
+      if (error.message) {
+        if (error.message.includes("500")) {
+          errorMessage = "Server error. Please try again in a moment.";
+        } else if (error.message.includes("Internal server error")) {
+          errorMessage = "Server is temporarily unavailable. Please try again.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
       toast({
         title: "Login Failed",
-        description: error.message || "Unable to connect to server",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
