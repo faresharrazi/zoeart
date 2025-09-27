@@ -20,12 +20,16 @@ router.post(
     }
 
     console.log("Login attempt:", { username, password: "provided" });
+    console.log("Request headers:", req.headers);
+    console.log("Request host:", req.get('host'));
+    console.log("Request origin:", req.get('origin'));
 
     // Check environment variables
     console.log("Environment variables check:");
     console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
     console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
     console.log("NODE_ENV:", process.env.NODE_ENV);
+    console.log("JWT_SECRET:", process.env.JWT_SECRET ? "Set" : "Not set");
 
     try {
       // Get user from database
@@ -79,7 +83,16 @@ router.post(
       });
     } catch (error) {
       console.error("Login error:", error);
-      res.status(500).json({ error: "Login failed" });
+      console.error("Error details:", {
+        message: error.message,
+        code: error.code,
+        stack: error.stack,
+        name: error.name
+      });
+      res.status(500).json({ 
+        error: "Login failed",
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   })
 );
