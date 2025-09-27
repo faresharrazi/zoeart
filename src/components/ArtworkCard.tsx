@@ -54,7 +54,9 @@ const ArtworkCard = ({ artwork, onArtworkClick }: ArtworkCardProps) => {
 
   // Get the first image or show fallback
   const imageUrl =
-    artwork.images && artwork.images.length > 0 ? artwork.images[0] : null;
+    artwork.images && Array.isArray(artwork.images) && artwork.images.length > 0
+      ? artwork.images[0]
+      : null;
   const hasValidImage =
     imageUrl &&
     imageUrl !== "null" &&

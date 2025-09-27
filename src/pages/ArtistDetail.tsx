@@ -6,7 +6,8 @@ import ArtworkCard from "@/components/ArtworkCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Instagram, Mail, Globe, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { getSocialMediaIcon, getSocialMediaUrl } from "@/lib/socialMediaIcons";
 import { apiClient } from "@/lib/apiClient";
 
 const ArtistDetail = () => {
@@ -165,44 +166,33 @@ const ArtistDetail = () => {
             {artist.social_media &&
               Object.keys(artist.social_media).length > 0 && (
                 <div className="flex justify-center space-x-4">
-                  {artist.social_media.instagram && (
-                    <a
-                      href={
-                        artist.social_media.instagram.startsWith("http")
-                          ? artist.social_media.instagram
-                          : `https://instagram.com/${artist.social_media.instagram.replace(
-                              "@",
-                              ""
-                            )}`
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-110"
-                    >
-                      <Instagram className="w-6 h-6 text-white" />
-                    </a>
-                  )}
-                  {artist.social_media.website && (
-                    <a
-                      href={
-                        artist.social_media.website.startsWith("http")
-                          ? artist.social_media.website
-                          : `https://${artist.social_media.website}`
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-110"
-                    >
-                      <Globe className="w-6 h-6 text-white" />
-                    </a>
-                  )}
-                  {artist.social_media.email && (
-                    <a
-                      href={`mailto:${artist.social_media.email}`}
-                      className="p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-110"
-                    >
-                      <Mail className="w-6 h-6 text-white" />
-                    </a>
+                  {Object.entries(artist.social_media).map(
+                    ([platform, handle]) => {
+                      if (!handle || handle.trim() === "") return null;
+
+                      return (
+                        <a
+                          key={platform}
+                          href={getSocialMediaUrl(platform, handle)}
+                          target={
+                            platform.toLowerCase() === "email"
+                              ? "_self"
+                              : "_blank"
+                          }
+                          rel={
+                            platform.toLowerCase() === "email"
+                              ? ""
+                              : "noopener noreferrer"
+                          }
+                          className="p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-110"
+                          title={`Visit ${platform} profile`}
+                        >
+                          <div className="text-white">
+                            {getSocialMediaIcon(platform, "lg")}
+                          </div>
+                        </a>
+                      );
+                    }
                   )}
                 </div>
               )}

@@ -23,6 +23,7 @@ const ArtworkDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [artwork, setArtwork] = useState<any>(null);
+  const [artist, setArtist] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
@@ -30,11 +31,24 @@ const ArtworkDetail = () => {
   useEffect(() => {
     const fetchArtwork = async () => {
       try {
-        const artworks = await apiClient.getArtworks();
+        const [artworks, artists] = await Promise.all([
+          apiClient.getArtworks(),
+          apiClient.getArtists(),
+        ]);
+
         const foundArtwork = (artworks as any[]).find(
           (art: any) => art.slug === slug
         );
         setArtwork(foundArtwork);
+
+        // Find the artist for this artwork
+        if (foundArtwork?.artist_id) {
+          const foundArtist = (artists as any[]).find(
+            (artist: any) =>
+              artist.id.toString() === foundArtwork.artist_id.toString()
+          );
+          setArtist(foundArtist);
+        }
       } catch (error) {
         console.error("Error fetching artwork:", error);
       } finally {
@@ -72,17 +86,18 @@ const ArtworkDetail = () => {
     return (
       <div className="min-h-screen">
         <Navigation />
-        <div className="pt-24 pb-16 bg-gradient-hero relative">
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="container mx-auto px-6 text-center relative z-10">
-            <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+          <div className="absolute inset-0 bg-black"></div>
+
+          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+            <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-white" />
                 <span className="ml-2 text-white/95">Loading artwork...</span>
               </div>
             </div>
           </div>
-        </div>
+        </section>
         <Footer />
       </div>
     );
@@ -92,14 +107,15 @@ const ArtworkDetail = () => {
     return (
       <div className="min-h-screen">
         <Navigation />
-        <div className="pt-24 pb-16 bg-gradient-hero relative">
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="container mx-auto px-6 text-center relative z-10">
-            <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
-              <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+          <div className="absolute inset-0 bg-black"></div>
+
+          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+            <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
+              <h1 className="text-4xl md:text-6xl mb-6 text-white drop-shadow-lg">
                 Artwork Not Found
               </h1>
-              <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+              <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
                 The artwork you're looking for doesn't exist or has been
                 removed.
               </p>
@@ -113,7 +129,7 @@ const ArtworkDetail = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </section>
         <Footer />
       </div>
     );
@@ -129,14 +145,16 @@ const ArtworkDetail = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-gradient-hero relative">
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+        <div className="absolute inset-0 bg-black"></div>
+
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+          {/* Consistent text overlay background for all cases */}
+          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
+            <h1 className="text-4xl md:text-6xl mb-6 text-white drop-shadow-lg">
               {artwork.title || "Untitled"}
             </h1>
-            <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+            <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
               by {artwork.artist_name || "Unknown Artist"}
             </p>
           </div>
@@ -294,6 +312,48 @@ const ArtworkDetail = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Artist Section */}
+                {artist && (
+                  <Card className="mb-8">
+                    <CardContent className="p-6">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                        Artist
+                      </h3>
+                      <div className="flex justify-center">
+                        <div
+                          className={`text-center w-32 ${
+                            artist.is_visible !== false
+                              ? "cursor-pointer hover:opacity-80 transition-opacity"
+                              : ""
+                          }`}
+                          onClick={() => {
+                            if (artist.is_visible !== false && artist.slug) {
+                              navigate(`/artist/${artist.slug}`);
+                            }
+                          }}
+                        >
+                          {artist.profile_image ? (
+                            <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden">
+                              <img
+                                src={artist.profile_image}
+                                alt={artist.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-gray-200 flex items-center justify-center">
+                              <User className="w-8 h-8 text-gray-600" />
+                            </div>
+                          )}
+                          <p className="text-gray-900 font-semibold text-lg">
+                            {artist.name}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex gap-4">

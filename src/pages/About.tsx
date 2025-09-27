@@ -2,10 +2,12 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
+import { useAboutBlocks } from "@/hooks/useAboutBlocks";
 import { useEffect } from "react";
 
 const About = () => {
   const { pageData } = usePageDataFromDB();
+  const { visibleBlocks, loading: blocksLoading } = useAboutBlocks();
 
   // Check if page is visible
   const isPageVisible = pageData.about?.isVisible;
@@ -49,25 +51,28 @@ const About = () => {
       <div className="bg-gallery-light-grey py-20">
         <div className="container mx-auto px-6">
           {/* Dynamic Content Blocks */}
-          {(pageData.about?.content?.blocks || []).map(
-            (block) =>
-              block.isVisible && (
-                <section key={block.id} className="mb-16">
-                  <Card className="shadow-elegant">
-                    <CardContent className="p-12 text-center">
-                      <h2 className="text-3xl font-semibold mb-6 text-foreground">
-                        {block.title}
-                      </h2>
-                      <div
-                        className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto whitespace-pre-line"
-                        dangerouslySetInnerHTML={{
-                          __html: block.content.replace(/\n/g, "<br>"),
-                        }}
-                      />
-                    </CardContent>
-                  </Card>
-                </section>
-              )
+          {blocksLoading ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Loading content blocks...</p>
+            </div>
+          ) : (
+            visibleBlocks.map((block) => (
+              <section key={block.id} className="mb-16">
+                <Card className="shadow-elegant">
+                  <CardContent className="p-12 text-center">
+                    <h2 className="text-3xl font-semibold mb-4 text-foreground">
+                      {block.title}
+                    </h2>
+                    <div
+                      className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto whitespace-pre-line"
+                      dangerouslySetInnerHTML={{
+                        __html: block.content.replace(/\n/g, "<br>"),
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              </section>
+            ))
           )}
         </div>
       </div>

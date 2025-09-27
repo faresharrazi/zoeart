@@ -17,7 +17,17 @@ export const useHeroImages = () => {
   const fetchHeroImages = async () => {
     try {
       setLoading(true);
-      const images = await apiClient.getHeroImages();
+      const response = await apiClient.getHeroImages();
+      
+      // Handle the response structure: { success: true, data: [...] }
+      const images = response.data || response || [];
+
+      // Ensure images is an array
+      if (!Array.isArray(images)) {
+        console.warn("Hero images response is not an array:", images);
+        setHeroImages([]);
+        return;
+      }
 
       // Map file_path to url and convert snake_case to camelCase
       const mappedImages = images.map((image: any) => ({

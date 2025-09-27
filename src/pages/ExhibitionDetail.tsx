@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ExhibitionGallery from "@/components/ExhibitionGallery";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
@@ -13,26 +13,51 @@ import {
   UserCheck,
   Image as ImageIcon,
   Loader2,
-  Clock,
-  ExternalLink,
-  Share2,
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 
 const ExhibitionDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [exhibition, setExhibition] = useState<any>(null);
+  const [exhibition, setExhibition] = useState<{
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    location: string;
+    curator: string;
+    status: string;
+    featured_image: string;
+    gallery_images: string[];
+    assigned_artists: string[];
+    call_for_artists: boolean;
+    cta_link: string;
+  } | null>(null);
+  const [artists, setArtists] = useState<
+    {
+      id: number;
+      name: string;
+      slug: string;
+      specialty?: string;
+      profile_image?: string;
+      is_visible?: boolean;
+    }[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchExhibition = async () => {
       try {
-        const exhibitions = await apiClient.getExhibitions();
-        const foundExhibition = (exhibitions as any[]).find(
-          (ex: any) => ex.slug === slug
-        );
+        const [exhibitions, artistsData] = await Promise.all([
+          apiClient.getExhibitions(),
+          apiClient.getArtists(),
+        ]);
+
+        const foundExhibition = exhibitions.find((ex) => ex.slug === slug);
         setExhibition(foundExhibition);
+        setArtists(artistsData);
       } catch (error) {
         console.error("Error fetching exhibition:", error);
       } finally {
@@ -53,9 +78,9 @@ const ExhibitionDetail = () => {
           <div className="absolute inset-0 bg-black/40" />
           <div className="container mx-auto px-6 text-center relative z-10">
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl max-w-4xl mx-auto">
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-white" />
-                <span className="ml-2 text-white/95">
+              <div className="flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-white mr-3" />
+                <span className="text-xl text-white">
                   Loading exhibition...
                 </span>
               </div>
@@ -121,36 +146,60 @@ const ExhibitionDetail = () => {
     <div className="min-h-screen">
       <Navigation />
 
-      {/* Hero Section with Featured Image */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Featured Image Background */}
-        {exhibition.featured_image &&
-        exhibition.featured_image !== "null" &&
-        exhibition.featured_image !== "undefined" ? (
-          <div className="absolute inset-0">
-            <img
-              src={exhibition.featured_image}
-              alt={exhibition.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/60"></div>
+      {/* Featured Image Section */}
+      {exhibition.featured_image &&
+      exhibition.featured_image !== "null" &&
+      exhibition.featured_image !== "undefined" ? (
+        <section className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden">
+          <img
+            src={exhibition.featured_image}
+            alt={exhibition.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/20"></div>
+          {/* Back Button Overlay */}
+          <div className="absolute top-6 left-6 z-10">
+            <Button
+              onClick={() => navigate("/exhibitions")}
+              variant="secondary"
+              className="bg-white/90 hover:bg-white text-gray-900 backdrop-blur-sm"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Exhibitions
+            </Button>
           </div>
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800">
-            <div className="absolute inset-0 bg-black/40"></div>
+        </section>
+      ) : (
+        <section className="w-full h-[40vh] bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center relative">
+          <div className="text-center">
+            <ImageIcon className="w-16 h-16 text-white/50 mx-auto mb-4" />
+            <p className="text-white/70 text-lg">No featured image</p>
           </div>
-        )}
+          {/* Back Button Overlay */}
+          <div className="absolute top-6 left-6 z-10">
+            <Button
+              onClick={() => navigate("/exhibitions")}
+              variant="secondary"
+              className="bg-white/90 hover:bg-white text-gray-900 backdrop-blur-sm"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Exhibitions
+            </Button>
+          </div>
+        </section>
+      )}
 
-        {/* Content Overlay */}
-        <div className="relative z-10 container mx-auto px-6 text-center">
+      {/* Content Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
             {/* Status Badge */}
-            <div className="mt-8 md:mt-12 mb-6 md:mb-8">
+            <div className="mb-6">
               <Badge
                 variant={
                   exhibition.status === "upcoming" ? "default" : "secondary"
                 }
-                className="px-6 py-2 text-lg font-semibold"
+                className="px-4 py-2 text-base font-semibold"
               >
                 {exhibition.status === "upcoming"
                   ? "Upcoming Exhibition"
@@ -159,284 +208,152 @@ const ExhibitionDetail = () => {
             </div>
 
             {/* Title */}
-            <h1 className="text-6xl md:text-8xl text-white mb-6 drop-shadow-2xl font-bold">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
               {exhibition.title}
             </h1>
 
             {/* Description */}
             {exhibition.description && (
-              <p className="text-xl md:text-2xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-lg mb-8">
-                {exhibition.description}
-              </p>
+              <div className="prose prose-lg max-w-none mb-8">
+                <p className="text-gray-700 leading-relaxed text-lg">
+                  {exhibition.description}
+                </p>
+              </div>
             )}
 
-            {/* Event Details */}
-            <div className="flex flex-wrap justify-center gap-6 mb-8">
-              {exhibition.start_date && (
-                <div className="flex items-center gap-2 text-white/90">
-                  <Calendar className="w-5 h-5" />
-                  <span className="text-lg">
-                    {new Date(exhibition.start_date).toLocaleDateString(
-                      "en-US",
-                      {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      }
-                    )}
-                    {exhibition.end_date &&
-                      exhibition.end_date !== exhibition.start_date && (
-                        <>
-                          {" "}
-                          -{" "}
-                          {new Date(exhibition.end_date).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                            }
-                          )}
-                        </>
-                      )}
-                  </span>
-                </div>
-              )}
-
-              {exhibition.location && (
-                <div className="flex items-center gap-2 text-white/90">
-                  <MapPin className="w-5 h-5" />
-                  <span className="text-lg">{exhibition.location}</span>
-                </div>
-              )}
-            </div>
-
-            {/* CTA Button */}
-            {(exhibition.call_for_artists === true ||
-              exhibition.call_for_artists === 1) &&
-              exhibition.cta_link && (
-                <div className="mb-8 md:mb-12">
-                  <Button
-                    size="lg"
-                    className="bg-white text-black hover:bg-white/90 px-8 py-4 text-lg font-semibold"
-                    onClick={() => window.open(exhibition.cta_link, "_blank")}
-                  >
-                    <ExternalLink className="w-5 h-5 mr-2" />
-                    Join as an Artist
-                  </Button>
-                </div>
-              )}
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mt-8 md:mt-12 mb-8 md:mb-12">
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-white/30 text-white hover:bg-white/10 px-6 py-3"
-                onClick={() => navigate("/exhibitions")}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Exhibitions
-              </Button>
-
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-white/30 text-white hover:bg-white/10 px-6 py-3"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: exhibition.title,
-                      text: exhibition.description,
-                      url: window.location.href,
-                    });
-                  } else {
-                    navigator.clipboard.writeText(window.location.href);
-                    // You could add a toast notification here
-                  }
-                }}
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Exhibition Details */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div className="container mx-auto px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              {/* Main Content */}
-              <div className="lg:col-span-2">
-                {/* Gallery */}
-                {exhibition.gallery_images &&
-                  exhibition.gallery_images.length > 0 && (
-                    <div className="mb-12">
-                      <ExhibitionGallery images={exhibition.gallery_images} />
-                    </div>
+            {/* Exhibition Details */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              {/* Date */}
+              <Card className="p-6">
+                <CardContent className="text-center">
+                  <Calendar className="w-8 h-8 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-600 text-sm font-medium mb-2">
+                    Start Date
+                  </p>
+                  <p className="text-gray-900 font-semibold text-lg">
+                    {formatDate(exhibition.start_date)}
+                  </p>
+                  {exhibition.end_date && (
+                    <p className="text-gray-500 text-sm mt-1">
+                      to {formatDate(exhibition.end_date)}
+                    </p>
                   )}
+                </CardContent>
+              </Card>
 
-                {/* Additional Info */}
-                {(exhibition.assigned_artists?.length > 0 ||
-                  exhibition.assigned_artworks?.length > 0) && (
-                  <Card className="shadow-elegant">
-                    <CardHeader>
-                      <CardTitle className="text-2xl text-gray-900">
-                        Exhibition Details
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {exhibition.assigned_artists?.length > 0 && (
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                            Featured Artists
-                          </h3>
-                          <div className="flex flex-wrap gap-2">
-                            {exhibition.assigned_artists.map(
-                              (artist: any, index: number) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="px-3 py-1"
-                                >
-                                  {typeof artist === "string"
-                                    ? artist
-                                    : artist.name || artist}
-                                </Badge>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {exhibition.assigned_artworks?.length > 0 && (
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                            Featured Artworks
-                          </h3>
-                          <p className="text-gray-600">
-                            This exhibition showcases{" "}
-                            {exhibition.assigned_artworks.length} carefully
-                            selected artworks.
-                          </p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-
-              {/* Sidebar */}
-              <div className="space-y-6">
-                {/* Event Info Card */}
-                <Card className="shadow-elegant">
-                  <CardHeader>
-                    <CardTitle className="text-xl text-gray-900">
-                      Event Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {exhibition.start_date && (
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-theme-primary" />
-                        <div>
-                          <p className="text-sm text-gray-500">Date</p>
-                          <p className="font-semibold text-gray-900">
-                            {new Date(exhibition.start_date).toLocaleDateString(
-                              "en-US",
-                              {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              }
-                            )}
-                            {exhibition.end_date &&
-                              exhibition.end_date !== exhibition.start_date && (
-                                <>
-                                  {" "}
-                                  -{" "}
-                                  {new Date(
-                                    exhibition.end_date
-                                  ).toLocaleDateString("en-US", {
-                                    month: "long",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })}
-                                </>
-                              )}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {exhibition.location && (
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="w-5 h-5 text-theme-primary" />
-                        <div>
-                          <p className="text-sm text-gray-500">Location</p>
-                          <p className="font-semibold text-gray-900">
-                            {exhibition.location}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {exhibition.curator && (
-                      <div className="flex items-center space-x-3">
-                        <UserCheck className="w-5 h-5 text-theme-primary" />
-                        <div>
-                          <p className="text-sm text-gray-500">Curator</p>
-                          <p className="font-semibold text-gray-900">
-                            {exhibition.curator}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {exhibition.assigned_artworks?.length > 0 && (
-                      <div className="flex items-center space-x-3">
-                        <ImageIcon className="w-5 h-5 text-theme-primary" />
-                        <div>
-                          <p className="text-sm text-gray-500">Artworks</p>
-                          <p className="font-semibold text-gray-900">
-                            {exhibition.assigned_artworks.length} pieces
-                          </p>
-                        </div>
-                      </div>
-                    )}
+              {/* Location */}
+              {exhibition.location && (
+                <Card className="p-6">
+                  <CardContent className="text-center">
+                    <MapPin className="w-8 h-8 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-600 text-sm font-medium mb-2">
+                      Location
+                    </p>
+                    <p className="text-gray-900 font-semibold text-lg">
+                      {exhibition.location}
+                    </p>
                   </CardContent>
                 </Card>
+              )}
 
-                {/* CTA Card */}
-                {(exhibition.call_for_artists === true ||
-                  exhibition.call_for_artists === 1) &&
-                  exhibition.cta_link && (
-                    <Card className="shadow-elegant bg-gradient-to-br from-theme-primary/5 to-theme-primary/10 border-theme-primary/20">
-                      <CardContent className="p-6 text-center">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                          Join This Exhibition
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                          Artists are invited to participate in this exhibition.
-                        </p>
-                        <Button
-                          className="w-full bg-theme-primary hover:bg-theme-primary/90 text-white"
-                          onClick={() =>
-                            window.open(exhibition.cta_link, "_blank")
-                          }
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Apply Now
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  )}
-              </div>
+              {/* Curator */}
+              {exhibition.curator && (
+                <Card className="p-6">
+                  <CardContent className="text-center">
+                    <UserCheck className="w-8 h-8 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-600 text-sm font-medium mb-2">
+                      Curator
+                    </p>
+                    <p className="text-gray-900 font-semibold text-lg">
+                      {exhibition.curator}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
+
+            {/* Call for Artists Button */}
+            {exhibition.call_for_artists && (
+              <div className="text-center mb-12">
+                <Button
+                  size="lg"
+                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 text-lg font-semibold"
+                  onClick={() => {
+                    if (exhibition.cta_link) {
+                      window.open(exhibition.cta_link, "_blank");
+                    }
+                  }}
+                >
+                  Join as Artist
+                </Button>
+              </div>
+            )}
+
+            {/* Assigned Artists Section */}
+            {exhibition.assigned_artists &&
+              Array.isArray(exhibition.assigned_artists) &&
+              exhibition.assigned_artists.length > 0 && (
+                <div className="mb-12">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+                    Featured Artists
+                  </h2>
+                  <div className="flex flex-wrap justify-center gap-6">
+                    {exhibition.assigned_artists.map((artistId: string) => {
+                      const artist = artists.find(
+                        (a) => a.id.toString() === artistId
+                      );
+
+                      const isArtistVisible = artist?.is_visible !== false;
+                      const handleArtistClick = () => {
+                        if (isArtistVisible && artist?.slug) {
+                          navigate(`/artist/${artist.slug}`);
+                        }
+                      };
+
+                      return (
+                        <div
+                          key={artistId}
+                          className={`text-center w-32 ${
+                            isArtistVisible
+                              ? "cursor-pointer hover:scale-105 transition-all duration-300"
+                              : ""
+                          }`}
+                          onClick={handleArtistClick}
+                        >
+                          {artist?.profile_image ? (
+                            <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden">
+                              <img
+                                src={artist.profile_image}
+                                alt={artist.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-gray-200 flex items-center justify-center">
+                              <UserCheck className="w-8 h-8 text-gray-600" />
+                            </div>
+                          )}
+                          <p className="text-gray-900 font-semibold text-lg">
+                            {artist?.name || `Artist ${artistId}`}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+            {/* Gallery Section */}
+            {exhibition.gallery_images &&
+              Array.isArray(exhibition.gallery_images) &&
+              exhibition.gallery_images.length > 0 && (
+                <div className="mb-12">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+                    Gallery
+                  </h2>
+                  <ExhibitionGallery images={exhibition.gallery_images} />
+                </div>
+              )}
           </div>
         </div>
       </section>

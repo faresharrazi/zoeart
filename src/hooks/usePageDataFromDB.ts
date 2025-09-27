@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { apiClient } from "@/lib/apiClient";
 
 interface PageData {
@@ -26,7 +26,7 @@ export const usePageDataFromDB = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPageData = async () => {
+  const fetchPageData = useCallback(async () => {
     try {
       setLoading(true);
       const data = await apiClient.getPageContent();
@@ -54,11 +54,11 @@ export const usePageDataFromDB = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchPageData();
-  }, []);
+  }, [fetchPageData]);
 
   return {
     pageData,

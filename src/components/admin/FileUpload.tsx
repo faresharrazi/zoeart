@@ -42,7 +42,7 @@ const FileUpload = ({
   // Sync internal state with existingFiles prop
   useEffect(() => {
     setFiles(existingFiles);
-  }, [existingFiles]);
+  }, [JSON.stringify(existingFiles)]);
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>

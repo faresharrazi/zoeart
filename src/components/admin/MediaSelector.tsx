@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Check, X, Search } from "lucide-react";
+import { Upload, Check, X, Search, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/apiClient";
 
 interface MediaFile {
   id: string;
@@ -11,9 +12,6 @@ interface MediaFile {
   url: string;
   type: "image" | "document";
 }
-
-// Empty media files array - will be populated from actual file system
-const mockMediaFiles: MediaFile[] = [];
 
 interface MediaSelectorProps {
   selectedImage?: string;
@@ -29,15 +27,46 @@ const MediaSelector = ({
   type = "all",
 }: MediaSelectorProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(mockMediaFiles);
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Load media files on component mount
+  useEffect(() => {
+    const loadMediaFiles = async () => {
+      try {
+        setLoading(true);
+        const files = await apiClient.getFiles();
+        const mediaFiles: MediaFile[] = files.map((file: any) => ({
+          id: file.id.toString(),
+          name: file.originalName || file.filename,
+          url: `/api/file/${file.id}`,
+          type: file.mimeType?.startsWith("image/") ? "image" : "document",
+        }));
+        setMediaFiles(mediaFiles);
+      } catch (error) {
+        console.error("Error loading media files:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load media files",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMediaFiles();
+  }, [toast]);
 
   const handleUpload = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -51,25 +80,35 @@ const MediaSelector = ({
       return;
     }
 
-    // Create a local URL for the uploaded file
-    const fileUrl = URL.createObjectURL(file);
+    try {
+      // Upload file to server
+      const response = await apiClient.uploadFile(
+        file,
+        type === "all" ? "exhibition" : type
+      );
+      const newFile: MediaFile = {
+        id: response.file.id.toString(),
+        name: response.file.originalName,
+        url: `/api/file/${response.file.id}`,
+        type: "image",
+      };
 
-    // Create new media file entry
-    const newFile: MediaFile = {
-      id: Date.now().toString(),
-      name: file.name,
-      url: fileUrl,
-      type: "image",
-    };
+      // Add to media files and auto-select
+      setMediaFiles([newFile, ...mediaFiles]);
+      onSelect(newFile.url);
 
-    // Add to media files and auto-select
-    setMediaFiles([newFile, ...mediaFiles]);
-    onSelect(fileUrl);
-
-    toast({
-      title: "Image Uploaded",
-      description: `${file.name} has been added to the media library.`,
-    });
+      toast({
+        title: "Image Uploaded",
+        description: `${file.name} has been uploaded and added to the media library.`,
+      });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload file",
+        variant: "destructive",
+      });
+    }
 
     // Clear the input
     if (event.target) {

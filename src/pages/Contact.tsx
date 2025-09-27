@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone, MapPin, Instagram } from "lucide-react";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient } from "@/lib/apiClient";
 import { Toaster } from "@/components/ui/toaster";
 
 const Contact = () => {
@@ -30,15 +31,10 @@ const Contact = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newsletterData),
-      });
-
-      const data = await response.json();
+      const data = await apiClient.subscribeToNewsletter(
+        newsletterData.email,
+        newsletterData.name
+      );
 
       if (data.success) {
         toast({
@@ -57,13 +53,23 @@ const Contact = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Newsletter subscription error:", error);
-      toast({
-        title: "Error",
-        description: "Error subscribing to newsletter. Please try again.",
-        variant: "destructive",
-      });
+
+      // Handle specific error cases
+      if (error.message.includes("already subscribed")) {
+        toast({
+          title: "Already Subscribed",
+          description: "This email is already subscribed to our newsletter.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Error subscribing to newsletter. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

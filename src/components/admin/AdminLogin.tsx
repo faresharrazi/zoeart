@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/apiClient";
 
 interface AdminLoginProps {
   onLogin: (token: string, user: any) => void;
@@ -20,15 +21,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
+      const data = await apiClient.login(username, password);
 
       if (data.success) {
         // Store token in localStorage
@@ -47,11 +40,11 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
       toast({
         title: "Login Failed",
-        description: "Unable to connect to server",
+        description: error.message || "Unable to connect to server",
         variant: "destructive",
       });
     } finally {
@@ -117,7 +110,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
               )}
             </Button>
             <p className="text-xs text-center text-theme-text-muted mt-4">
-              Default credentials: admin / admin123
+              Default credentials: admin / admin
             </p>
           </form>
         </CardContent>

@@ -5,7 +5,6 @@ import {
   Users,
   Calendar,
   FileText,
-  Home,
   Menu,
   X,
   Mail,
@@ -22,7 +21,6 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
-  { id: "overview", label: "Overview", icon: Home },
   { id: "exhibitions", label: "Exhibitions", icon: Calendar },
   { id: "artists", label: "Artists", icon: Users },
   { id: "artworks", label: "Artworks", icon: Palette },

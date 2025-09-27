@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 // import { usePageHero } from "@/contexts/PageHeroContext";
-import AdminOverview from "./AdminOverview";
-import ArtworkManagement from "./ArtworkManagement";
-import ArtistManagement from "./ArtistManagement";
-import ExhibitionManagement from "./ExhibitionManagement";
-import NewsletterManagement from "./NewsletterManagement";
-import PageContentManagement from "./PageContentManagement";
+// import AdminOverview from "./AdminOverview"; // Removed overview tab
+import ArtworkManagement from "./artworks/ArtworkManagement";
+import ArtistManagement from "./artists/ArtistManagement";
+import ExhibitionManagement from "./exhibitions/ExhibitionManagement";
+import NewsletterManagement from "./newsletter/NewsletterManagement";
+import PageContentManagement from "./page-content/PageContentManagement";
 import UserManagement from "./UserManagement";
 // import ThemeControl from "./ThemeControl"; // Removed theme management
 
@@ -16,7 +16,7 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
-  const [activeSection, setActiveSection] = useState("overview");
+  const [activeSection, setActiveSection] = useState("exhibitions");
   // const { heroBackgrounds, setHeroBackground } = usePageHero();
 
   // Check if user is authenticated on component mount
@@ -29,8 +29,6 @@ const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
 
   const renderActiveSection = () => {
     switch (activeSection) {
-      case "overview":
-        return <AdminOverview onNavigate={setActiveSection} />;
       case "artworks":
         return <ArtworkManagement />;
       case "artists":
@@ -46,7 +44,7 @@ const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
       // case "theme":
       //   return <ThemeControl />; // Removed theme management
       default:
-        return <AdminOverview />;
+        return <ExhibitionManagement />;
     }
   };
 
