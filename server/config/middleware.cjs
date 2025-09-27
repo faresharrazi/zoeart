@@ -15,7 +15,9 @@ const corsOptions = {
     // In production, you can add specific domains here
     const allowedOrigins = [
       "https://zoeart.vercel.app",
-      "https://www.zoeart.vercel.app"
+      "https://www.zoeart.vercel.app",
+      "https://aetherartspace.com",
+      "https://www.aetherartspace.com"
     ];
     
     if (allowedOrigins.includes(origin)) {
