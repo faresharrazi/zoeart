@@ -10,7 +10,7 @@
       }
     },
     {
-      "src": "server-minimal.cjs",
+      "src": "server/index.cjs",
       "use": "@vercel/node",
       "config": {
         "maxDuration": 30
@@ -20,11 +20,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "server-minimal.cjs"
+      "destination": "server/index.cjs"
     },
     {
       "source": "/admin/(.*)",
-      "destination": "server-minimal.cjs"
+      "destination": "server/index.cjs"
     },
     {
       "source": "/(.*)",
