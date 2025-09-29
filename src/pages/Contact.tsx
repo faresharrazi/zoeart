@@ -362,28 +362,39 @@ const Contact = () => {
                                         Closed
                                       </span>
                                     ) : (
-                                      <div className="text-sm font-medium text-gray-900 whitespace-pre-line">
+                                      <div className="text-sm font-medium text-gray-900">
                                         {(() => {
                                           if (!hour.time_frame) return '';
                                           
                                           // Handle different time formats
                                           let formattedTime = hour.time_frame.trim();
                                           
-                                          // If it contains commas, split by comma and join with newlines
-                                          if (formattedTime.includes(',')) {
-                                            formattedTime = formattedTime
-                                              .split(',')
-                                              .map(part => part.trim())
-                                              .join('\n');
-                                          }
-                                          
-                                          // Clean up spacing around dashes
+                                          // Clean up spacing around dashes first
                                           formattedTime = formattedTime.replace(/\s*-\s*/g, ' - ');
                                           
                                           // Clean up multiple spaces
                                           formattedTime = formattedTime.replace(/\s+/g, ' ');
                                           
-                                          return formattedTime;
+                                          // Split by comma and create proper line breaks
+                                          if (formattedTime.includes(',')) {
+                                            const timeChunks = formattedTime
+                                              .split(',')
+                                              .map(part => part.trim())
+                                              .filter(part => part.length > 0);
+                                            
+                                            return (
+                                              <div className="space-y-1">
+                                                {timeChunks.map((chunk, index) => (
+                                                  <div key={index} className="block">
+                                                    {chunk}
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            );
+                                          }
+                                          
+                                          // Single time chunk
+                                          return <div className="block">{formattedTime}</div>;
                                         })()}
                                       </div>
                                     )}
