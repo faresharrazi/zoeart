@@ -96,9 +96,14 @@ const Footer = () => {
                     <div className="flex items-start justify-center md:justify-start space-x-3 group">
                       <MapPin className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-gray-600 text-sm whitespace-pre-line">
+                        <a
+                          href="https://maps.google.com/?q=Mark.+Mpostsari+7+Glyfada+16675"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm whitespace-pre-line"
+                        >
                           {contactInfo.address}
-                        </p>
+                        </a>
                       </div>
                     </div>
                   )}

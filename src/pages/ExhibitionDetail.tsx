@@ -363,19 +363,18 @@ const ExhibitionDetail = () => {
             {/* Article Section */}
             {article && (
               <div className="mb-12">
-                {/* Article Title - Centered like Exhibition Gallery */}
-                <div className="text-center mb-12">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                    {article.title}
-                  </h2>
-                  {article.author && (
-                    <div className="text-gray-600 text-sm">
-                      By {article.author}
-                    </div>
-                  )}
-                </div>
-
                 <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                  {/* Article Title - Centered like Exhibition Gallery */}
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                      {article.title}
+                    </h2>
+                    {article.author && (
+                      <div className="text-gray-600 text-sm">
+                        By {article.author}
+                      </div>
+                    )}
+                  </div>
                   {/* Featured Image */}
                   {article.featured_image && (
                     <div className="mb-6">
