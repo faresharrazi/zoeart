@@ -38,6 +38,23 @@ const ArticlesManagement = () => {
   const [exhibitions, setExhibitions] = useState<any[]>([]);
   const [exhibitionsLoading, setExhibitionsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [articlesList, setArticlesList] = useState<Article[]>([]);
+  const [articlesLoading, setArticlesLoading] = useState(true);
+
+  // Fetch articles
+  const fetchArticles = async () => {
+    try {
+      setArticlesLoading(true);
+      const response = await apiClient.getAdminArticles();
+      if (response.success) {
+        setArticlesList(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    } finally {
+      setArticlesLoading(false);
+    }
+  };
 
   // Fetch exhibitions
   useEffect(() => {
@@ -53,6 +70,7 @@ const ArticlesManagement = () => {
     };
 
     fetchExhibitions();
+    fetchArticles();
   }, []);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [formData, setFormData] = useState({
@@ -97,7 +115,7 @@ const ArticlesManagement = () => {
         setIsCreating(false);
         resetForm();
         // Refresh articles list
-        window.location.reload();
+        fetchArticles();
       } else {
         toast({
           title: "Error",
@@ -134,7 +152,7 @@ const ArticlesManagement = () => {
         setEditingArticle(null);
         resetForm();
         // Refresh articles list
-        window.location.reload();
+        fetchArticles();
       } else {
         toast({
           title: "Error",
@@ -161,7 +179,7 @@ const ArticlesManagement = () => {
           description: "Article deleted successfully",
         });
         // Refresh articles list
-        window.location.reload();
+        fetchArticles();
       } else {
         toast({
           title: "Error",
@@ -205,7 +223,7 @@ const ArticlesManagement = () => {
     return exhibition?.title || `Exhibition #${exhibitionId}`;
   };
 
-  if (loading) {
+  if (articlesLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -322,7 +340,7 @@ const ArticlesManagement = () => {
 
       {/* Articles List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {articles.map((article) => (
+        {articlesList.map((article) => (
           <Card key={article.id} className="h-fit">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -372,6 +390,20 @@ const ArticlesManagement = () => {
 
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      // Find the exhibition for this article
+                      const exhibition = exhibitions.find(e => e.id === article.exhibition_id);
+                      if (exhibition?.slug) {
+                        window.open(`/exhibition/${exhibition.slug}`, '_blank');
+                      }
+                    }}
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    View
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
