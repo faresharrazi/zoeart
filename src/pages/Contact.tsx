@@ -342,13 +342,13 @@ const Contact = () => {
                               return (
                                 <div
                                   key={hour.id}
-                                  className={`flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 ${
+                                  className={`p-4 ${
                                     isFirst ? 'rounded-t-xl' : ''
                                   } ${isLast ? 'rounded-b-xl' : ''} ${
                                     isClosed ? 'bg-gray-50' : 'bg-gray-50'
                                   }`}
                                 >
-                                  <div className="flex items-center space-x-3 mb-2 sm:mb-0">
+                                  <div className="flex items-center space-x-3 mb-2">
                                     {isClosed && (
                                       <div className="w-2 h-2 bg-gray-400 rounded-full flex-shrink-0"></div>
                                     )}
@@ -356,7 +356,7 @@ const Contact = () => {
                                       {hour.day}
                                     </span>
                                   </div>
-                                  <div className="text-left sm:text-right">
+                                  <div className="ml-5">
                                     {isClosed ? (
                                       <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium inline-block">
                                         Closed
