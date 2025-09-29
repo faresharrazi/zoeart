@@ -26,7 +26,8 @@ import {
   Undo,
   Redo
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { apiClient } from '@/lib/apiClient';
 
 interface RichTextEditorProps {
   content: string;
@@ -36,7 +37,8 @@ interface RichTextEditorProps {
 
 const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps) => {
   const [showImageDialog, setShowImageDialog] = useState(false);
-  const [imageUrl, setImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
@@ -68,9 +70,7 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
     ],
     content,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      console.log('Editor HTML output:', html);
-      onChange(html);
+      onChange(editor.getHTML());
     },
     editorProps: {
       attributes: {
@@ -83,47 +83,53 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
   // Update editor content when content prop changes
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      console.log('Setting editor content:', content);
       editor.commands.setContent(content);
     }
   }, [content, editor]);
 
-  const addImage = () => {
-    if (imageUrl && editor) {
-      // Handle Google Drive links
-      let processedUrl = imageUrl.trim();
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !editor) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image size must be less than 10MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      // Upload the image
+      const response = await apiClient.uploadFile(file, 'article');
       
-      // Handle different Google Drive link formats
-      if (processedUrl.includes('drive.google.com')) {
-        // Extract file ID from various Google Drive link formats
-        let fileId = null;
+      if (response.success && response.file) {
+        // Insert the uploaded image into the editor
+        editor.chain().focus().setImage({ 
+          src: `/api/files/${response.file.id}`,
+          alt: response.file.originalName || 'Image',
+          class: 'max-w-full h-auto rounded-lg'
+        }).run();
         
-        // Format 1: https://drive.google.com/file/d/FILE_ID/view
-        const fileMatch = processedUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-        if (fileMatch) {
-          fileId = fileMatch[1];
-        }
-        
-        // Format 2: https://drive.google.com/uc?export=view&id=FILE_ID
-        const ucMatch = processedUrl.match(/[?&]id=([a-zA-Z0-9-_]+)/);
-        if (ucMatch) {
-          fileId = ucMatch[1];
-        }
-        
-        if (fileId) {
-          processedUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-        }
+        setShowImageDialog(false);
+      } else {
+        alert('Failed to upload image');
       }
-      
-      // Insert image with proper attributes
-      editor.chain().focus().setImage({ 
-        src: processedUrl,
-        alt: 'Image',
-        class: 'max-w-full h-auto rounded-lg'
-      }).run();
-      
-      setImageUrl('');
-      setShowImageDialog(false);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image');
+    } finally {
+      setUploadingImage(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -409,20 +415,27 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
           <div className="bg-white p-6 rounded-lg w-96">
             <h3 className="text-lg font-semibold mb-4">Add Image</h3>
             <input
-              type="url"
-              placeholder="Enter image URL or Google Drive link"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
               className="w-full p-2 border border-gray-300 rounded mb-2"
             />
             <p className="text-sm text-gray-600 mb-4">
-              💡 Supports direct image URLs and Google Drive share links
+              💡 Supported formats: JPG, PNG, GIF, WebP (max 10MB)
             </p>
             <div className="flex gap-2">
-              <Button onClick={addImage} disabled={!imageUrl}>
-                Add Image
-              </Button>
-              <Button variant="outline" onClick={() => setShowImageDialog(false)}>
+              {uploadingImage && (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  <span className="text-sm text-gray-600">Uploading...</span>
+                </div>
+              )}
+              <Button 
+                variant="outline" 
+                onClick={() => setShowImageDialog(false)}
+                disabled={uploadingImage}
+              >
                 Cancel
               </Button>
             </div>
