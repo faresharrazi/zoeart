@@ -192,8 +192,10 @@ router.post(
 );
 
 // PUT /api/admin/articles/:id - Update article (admin)
-router.put("/:id", authenticateToken, async (req, res) => {
-  try {
+router.put(
+  "/:id",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
     const { id } = req.params;
     const {
       title,
@@ -205,92 +207,61 @@ router.put("/:id", authenticateToken, async (req, res) => {
     } = req.body;
 
     // Check if article exists
-    const existingArticle = await query(
-      "SELECT id, is_published FROM articles WHERE id = $1",
-      [id]
-    );
-
-    if (existingArticle.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Article not found",
-      });
+    const existingArticle = await DatabaseService.findById("articles", id);
+    if (!existingArticle) {
+      throw new NotFoundError("Article not found");
     }
 
-    const currentPublished = existingArticle.rows[0].is_published;
+    const currentPublished = existingArticle.is_published;
     const newPublished = is_published || false;
     
     // Set published_at if publishing for the first time
-    let publishedAt = null;
+    let publishedAt = existingArticle.published_at;
     if (!currentPublished && newPublished) {
       publishedAt = new Date();
     }
 
-    const result = await query(`
-      UPDATE articles SET
-        title = COALESCE($2, title),
-        content = COALESCE($3, content),
-        featured_image = COALESCE($4, featured_image),
-        media_files = COALESCE($5, media_files),
-        author = COALESCE($6, author),
-        is_published = COALESCE($7, is_published),
-        published_at = COALESCE($8, published_at),
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $1
-      RETURNING *
-    `, [
-      id,
-      title,
-      content,
-      featured_image,
-      media_files ? JSON.stringify(media_files) : null,
-      author,
-      is_published,
-      publishedAt
-    ]);
+    const updateData = {
+      title: title || existingArticle.title,
+      content: content || existingArticle.content,
+      featured_image: featured_image || existingArticle.featured_image,
+      media_files: media_files ? JSON.stringify(media_files) : existingArticle.media_files,
+      author: author || existingArticle.author,
+      is_published: is_published !== undefined ? is_published : existingArticle.is_published,
+      published_at: publishedAt,
+      updated_at: new Date()
+    };
+
+    const updatedArticle = await DatabaseService.update("articles", id, updateData);
 
     res.json({
       success: true,
-      data: result.rows[0],
+      data: updatedArticle,
       message: "Article updated successfully",
     });
-  } catch (error) {
-    console.error("Error updating article:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update article",
-    });
-  }
-});
+  })
+);
 
 // DELETE /api/admin/articles/:id - Delete article (admin)
-router.delete("/:id", authenticateToken, async (req, res) => {
-  try {
+router.delete(
+  "/:id",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    const result = await query(
-      "DELETE FROM articles WHERE id = $1 RETURNING id",
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Article not found",
-      });
+    // Check if article exists
+    const existingArticle = await DatabaseService.findById("articles", id);
+    if (!existingArticle) {
+      throw new NotFoundError("Article not found");
     }
+
+    await DatabaseService.delete("articles", id);
 
     res.json({
       success: true,
       message: "Article deleted successfully",
     });
-  } catch (error) {
-    console.error("Error deleting article:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete article",
-    });
-  }
-});
+  })
+);
 
 module.exports = router;
