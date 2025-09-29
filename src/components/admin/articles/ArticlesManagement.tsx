@@ -59,7 +59,6 @@ const ArticlesManagement = () => {
     exhibition_id: "",
     content: "",
     media_files: [] as string[],
-    author: "",
     is_published: false,
   });
 
@@ -86,7 +85,6 @@ const ArticlesManagement = () => {
         title: `Article for Exhibition #${formData.exhibition_id}`, // Auto-generate title
         content: formData.content,
         media_files: formData.media_files.length > 0 ? formData.media_files : undefined,
-        author: formData.author || undefined,
         is_published: formData.is_published,
       });
 
@@ -123,7 +121,6 @@ const ArticlesManagement = () => {
       const response = await apiClient.updateArticle(editingArticle.id, {
         content: formData.content,
         media_files: formData.media_files.length > 0 ? formData.media_files : undefined,
-        author: formData.author || undefined,
         is_published: formData.is_published,
       });
 
@@ -185,7 +182,6 @@ const ArticlesManagement = () => {
       exhibition_id: "",
       content: "",
       media_files: [],
-      author: "",
       is_published: false,
     });
   };
@@ -196,7 +192,6 @@ const ArticlesManagement = () => {
       exhibition_id: article.exhibition_id.toString(),
       content: article.content,
       media_files: article.media_files || [],
-      author: article.author || "",
       is_published: article.is_published,
     });
   };
@@ -250,36 +245,24 @@ const ArticlesManagement = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="exhibition_id">Exhibition *</Label>
-                <Select
-                  value={formData.exhibition_id}
-                  onValueChange={(value) => handleInputChange("exhibition_id", value)}
-                  disabled={!!editingArticle}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select exhibition" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {exhibitions.map((exhibition) => (
-                      <SelectItem key={exhibition.id} value={exhibition.id.toString()}>
-                        {exhibition.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="author">Author</Label>
-                <Input
-                  id="author"
-                  value={formData.author}
-                  onChange={(e) => handleInputChange("author", e.target.value)}
-                  placeholder="Article author"
-                />
-              </div>
+            <div>
+              <Label htmlFor="exhibition_id">Exhibition *</Label>
+              <Select
+                value={formData.exhibition_id}
+                onValueChange={(value) => handleInputChange("exhibition_id", value)}
+                disabled={!!editingArticle}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select exhibition" />
+                </SelectTrigger>
+                <SelectContent>
+                  {exhibitions.map((exhibition) => (
+                    <SelectItem key={exhibition.id} value={exhibition.id.toString()}>
+                      {exhibition.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -289,9 +272,6 @@ const ArticlesManagement = () => {
                 onChange={(content) => handleInputChange("content", content)}
                 placeholder="Write your article content here... Use the toolbar above to format text, add images, videos, and links."
               />
-              <p className="text-sm text-gray-600 mt-2">
-                💡 <strong>Tips:</strong> Use the toolbar to format your text. Click the image icon to add pictures, the video icon for videos, and the link icon for hyperlinks.
-              </p>
             </div>
 
             <div className="flex items-center space-x-2">

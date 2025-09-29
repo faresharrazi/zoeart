@@ -162,8 +162,10 @@ router.get(
 );
 
 // POST /api/admin/articles - Create new article (admin)
-router.post("/admin", authenticateToken, async (req, res) => {
-  try {
+router.post(
+  "/admin",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
     const {
       exhibition_id,
       title,
@@ -176,68 +178,41 @@ router.post("/admin", authenticateToken, async (req, res) => {
 
     // Validate required fields
     if (!exhibition_id || !title || !content) {
-      return res.status(400).json({
-        success: false,
-        message: "Exhibition ID, title, and content are required",
-      });
+      throw new ValidationError("Exhibition ID, title, and content are required");
     }
 
     // Check if exhibition exists
-    const exhibitionCheck = await query(
-      "SELECT id FROM exhibitions WHERE id = $1",
-      [exhibition_id]
-    );
-
-    if (exhibitionCheck.rows.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Exhibition not found",
-      });
+    const exhibition = await DatabaseService.findById("exhibitions", exhibition_id);
+    if (!exhibition) {
+      throw new NotFoundError("Exhibition not found");
     }
 
     // Check if article already exists for this exhibition
-    const existingArticle = await query(
-      "SELECT id FROM articles WHERE exhibition_id = $1",
-      [exhibition_id]
-    );
-
-    if (existingArticle.rows.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Article already exists for this exhibition",
-      });
+    const existingArticle = await DatabaseService.findOne("articles", { exhibition_id });
+    if (existingArticle) {
+      throw new ValidationError("Article already exists for this exhibition");
     }
 
-    const result = await query(`
-      INSERT INTO articles (
-        exhibition_id, title, content, featured_image, 
-        media_files, author, is_published, published_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *
-    `, [
-      exhibition_id,
+    const articleData = {
+      exhibition_id: parseInt(exhibition_id),
       title,
       content,
-      featured_image || null,
-      media_files ? JSON.stringify(media_files) : null,
-      author || null,
-      is_published || false,
-      is_published ? new Date() : null
-    ]);
+      featured_image: featured_image || null,
+      media_files: media_files ? JSON.stringify(media_files) : null,
+      author: author || null,
+      is_published: is_published || false,
+      published_at: is_published ? new Date() : null
+    };
+
+    const newArticle = await DatabaseService.create("articles", articleData);
 
     res.status(201).json({
       success: true,
-      data: result.rows[0],
+      data: newArticle,
       message: "Article created successfully",
     });
-  } catch (error) {
-    console.error("Error creating article:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to create article",
-    });
-  }
-});
+  })
+);
 
 // PUT /api/admin/articles/:id - Update article (admin)
 router.put("/admin/:id", authenticateToken, async (req, res) => {

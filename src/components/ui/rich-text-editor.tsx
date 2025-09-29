@@ -78,7 +78,17 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
 
   const addImage = () => {
     if (imageUrl && editor) {
-      editor.chain().focus().setImage({ src: imageUrl }).run();
+      // Handle Google Drive links
+      let processedUrl = imageUrl;
+      if (imageUrl.includes('drive.google.com')) {
+        // Convert Google Drive share link to direct image link
+        const fileId = imageUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
+        if (fileId) {
+          processedUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+        }
+      }
+      
+      editor.chain().focus().setImage({ src: processedUrl }).run();
       setImageUrl('');
       setShowImageDialog(false);
     }
@@ -98,9 +108,24 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
   };
 
   const addVideo = () => {
-    const videoUrl = prompt('Enter video URL:');
+    const videoUrl = prompt('Enter YouTube URL or video URL:');
     if (videoUrl && editor) {
-      editor.chain().focus().insertContent(`<video src="${videoUrl}" controls class="max-w-full h-auto rounded-lg"></video>`).run();
+      let videoHtml = '';
+      
+      // Check if it's a YouTube URL
+      if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+        const videoId = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
+        if (videoId) {
+          videoHtml = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="max-w-full h-auto rounded-lg"></iframe>`;
+        }
+      } else {
+        // Regular video URL
+        videoHtml = `<video src="${videoUrl}" controls class="max-w-full h-auto rounded-lg"></video>`;
+      }
+      
+      if (videoHtml) {
+        editor.chain().focus().insertContent(videoHtml).run();
+      }
     }
   };
 
@@ -233,14 +258,6 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
         >
           <Quote className="w-4 h-4" />
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          className={editor.isActive('code') ? 'bg-gray-200' : ''}
-        >
-          <Code className="w-4 h-4" />
-        </Button>
 
         <div className="w-px h-6 bg-gray-300 mx-1" />
 
@@ -298,11 +315,14 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
             <h3 className="text-lg font-semibold mb-4">Add Image</h3>
             <input
               type="url"
-              placeholder="Enter image URL"
+              placeholder="Enter image URL or Google Drive link"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded mb-4"
+              className="w-full p-2 border border-gray-300 rounded mb-2"
             />
+            <p className="text-sm text-gray-600 mb-4">
+              💡 Supports direct image URLs and Google Drive share links
+            </p>
             <div className="flex gap-2">
               <Button onClick={addImage} disabled={!imageUrl}>
                 Add Image
