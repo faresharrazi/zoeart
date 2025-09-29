@@ -207,9 +207,9 @@ const Contact = () => {
                   </div>
 
                   {/* Contact Cards Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                     {/* Contact Information Card */}
-                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg border border-gray-100">
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100">
                       <div className="flex items-center mb-6">
                         <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4">
                           <Mail className="w-6 h-6 text-white" />
@@ -295,7 +295,7 @@ const Contact = () => {
 
                     {/* Working Hours Card */}
                     {workingHours && workingHours.length > 0 && (
-                      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg border border-gray-100">
+                      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100">
                         <div className="flex items-center mb-6">
                           <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4">
                             <Clock className="w-6 h-6 text-white" />
@@ -342,13 +342,6 @@ const Contact = () => {
                               </span>
                             </div>
                           ))}
-                        </div>
-
-                        <div className="mt-6 p-4 bg-palette-medium-blue/5 rounded-xl border border-palette-medium-blue/20">
-                          <p className="text-palette-medium-blue text-sm font-medium text-center">
-                            💡 We welcome conversations that spark new artistic
-                            connections
-                          </p>
                         </div>
                       </div>
                     )}
