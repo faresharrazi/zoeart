@@ -69,7 +69,6 @@ app.use("/api/files", fileRoutes);
 app.use("/api/about-blocks", aboutBlocksRoutes);
 app.use("/api/admin/user", userRoutes);
 app.use("/api/working-hours", workingHoursRoutes);
-app.use("/api/articles", articlesRoutes);
 
 // Admin API Routes (with authentication)
 app.use("/api/admin/newsletter", newsletterRoutes);
