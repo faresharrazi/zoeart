@@ -57,6 +57,7 @@ const ArticlesManagement = () => {
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [formData, setFormData] = useState({
     exhibition_id: "",
+    title: "",
     content: "",
     media_files: [] as string[],
     is_published: false,
@@ -71,10 +72,10 @@ const ArticlesManagement = () => {
 
   const handleCreate = async () => {
     try {
-      if (!formData.exhibition_id || !formData.content) {
+      if (!formData.exhibition_id || !formData.title || !formData.content) {
         toast({
           title: "Error",
-          description: "Please select an exhibition and add content",
+          description: "Please select an exhibition, add a title, and add content",
           variant: "destructive",
         });
         return;
@@ -82,7 +83,7 @@ const ArticlesManagement = () => {
 
       const response = await apiClient.createArticle({
         exhibition_id: parseInt(formData.exhibition_id),
-        title: `Article for Exhibition #${formData.exhibition_id}`, // Auto-generate title
+        title: formData.title,
         content: formData.content,
         media_files: formData.media_files.length > 0 ? formData.media_files : undefined,
         is_published: formData.is_published,
@@ -119,6 +120,7 @@ const ArticlesManagement = () => {
 
     try {
       const response = await apiClient.updateArticle(editingArticle.id, {
+        title: formData.title,
         content: formData.content,
         media_files: formData.media_files.length > 0 ? formData.media_files : undefined,
         is_published: formData.is_published,
@@ -180,6 +182,7 @@ const ArticlesManagement = () => {
   const resetForm = () => {
     setFormData({
       exhibition_id: "",
+      title: "",
       content: "",
       media_files: [],
       is_published: false,
@@ -190,6 +193,7 @@ const ArticlesManagement = () => {
     setEditingArticle(article);
     setFormData({
       exhibition_id: article.exhibition_id.toString(),
+      title: article.title,
       content: article.content,
       media_files: article.media_files || [],
       is_published: article.is_published,
@@ -266,6 +270,17 @@ const ArticlesManagement = () => {
             </div>
 
             <div>
+              <Label htmlFor="title">Article Title *</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                placeholder="Enter article title"
+                className="w-full"
+              />
+            </div>
+
+            <div>
               <Label htmlFor="content">Article Content *</Label>
               <RichTextEditor
                 content={formData.content}
@@ -286,7 +301,7 @@ const ArticlesManagement = () => {
             <div className="flex gap-2">
               <Button
                 onClick={editingArticle ? handleUpdate : handleCreate}
-                disabled={!formData.exhibition_id || !formData.content}
+                disabled={!formData.exhibition_id || !formData.title || !formData.content}
               >
                 {editingArticle ? "Update Article" : "Create Article"}
               </Button>

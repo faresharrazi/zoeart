@@ -229,78 +229,6 @@ const ExhibitionDetail = () => {
               </div>
             )}
 
-            {/* Article Section */}
-            {article && (
-              <div className="mb-12">
-                <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 shadow-lg border border-gray-100">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900">
-                        {article.title}
-                      </h2>
-                      {article.author && (
-                        <div className="flex items-center gap-2 mt-1">
-                          <User className="w-4 h-4 text-gray-600" />
-                          <span className="text-gray-600 text-sm">
-                            By {article.author}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Featured Image */}
-                  {article.featured_image && (
-                    <div className="mb-6">
-                      <img
-                        src={article.featured_image}
-                        alt={article.title}
-                        className="w-full h-auto rounded-lg shadow-md"
-                      />
-                    </div>
-                  )}
-
-                  {/* Article Content */}
-                  <div 
-                    className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: article.content }}
-                  />
-
-                  {/* Media Files */}
-                  {article.media_files && article.media_files.length > 0 && (
-                    <div className="mt-8">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                        Additional Media
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {article.media_files.map((mediaUrl, index) => (
-                          <div key={index} className="rounded-lg overflow-hidden shadow-md">
-                            {mediaUrl.match(/\.(mp4|webm|ogg)$/i) ? (
-                              <video
-                                src={mediaUrl}
-                                controls
-                                className="w-full h-auto"
-                              >
-                                Your browser does not support the video tag.
-                              </video>
-                            ) : (
-                              <img
-                                src={mediaUrl}
-                                alt={`Media ${index + 1}`}
-                                className="w-full h-auto"
-                              />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Exhibition Details */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -435,6 +363,79 @@ const ExhibitionDetail = () => {
                   <ExhibitionGallery images={exhibition.gallery_images} />
                 </div>
               )}
+
+            {/* Article Section */}
+            {article && (
+              <div className="mb-12">
+                <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        {article.title}
+                      </h2>
+                      {article.author && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <User className="w-4 h-4 text-gray-600" />
+                          <span className="text-gray-600 text-sm">
+                            By {article.author}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Featured Image */}
+                  {article.featured_image && (
+                    <div className="mb-6">
+                      <img
+                        src={article.featured_image}
+                        alt={article.title}
+                        className="w-full h-auto rounded-lg shadow-md"
+                      />
+                    </div>
+                  )}
+
+                  {/* Article Content */}
+                  <div 
+                    className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: article.content }}
+                  />
+
+                  {/* Media Files */}
+                  {article.media_files && article.media_files.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                        Additional Media
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {article.media_files.map((mediaUrl, index) => (
+                          <div key={index} className="rounded-lg overflow-hidden shadow-md">
+                            {mediaUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+                              <video
+                                src={mediaUrl}
+                                controls
+                                className="w-full h-auto"
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            ) : (
+                              <img
+                                src={mediaUrl}
+                                alt={`Media ${index + 1}`}
+                                className="w-full h-auto"
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
