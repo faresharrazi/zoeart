@@ -16,10 +16,21 @@ const router = express.Router();
 router.get(
   "/",
   asyncHandler(async (req, res) => {
+    // Check if this is an admin request
+    const isAdminRequest = req.originalUrl.includes('/admin/');
+    
+    let whereClause = {};
+    let orderBy = "created_at DESC";
+    
+    if (!isAdminRequest) {
+      whereClause = { is_published: true };
+      orderBy = "published_at DESC";
+    }
+
     const articles = await DatabaseService.findAll(
       "articles",
-      { is_published: true },
-      "published_at DESC"
+      whereClause,
+      orderBy
     );
 
     // Get exhibition details for each article
@@ -126,40 +137,6 @@ router.get("/exhibition/:exhibitionId", async (req, res) => {
 });
 
 // Admin routes (require authentication)
-
-// GET /api/admin/articles - Get all articles (admin)
-router.get(
-  "/admin",
-  authenticateToken,
-  asyncHandler(async (req, res) => {
-    const articles = await DatabaseService.findAll(
-      "articles",
-      {},
-      "created_at DESC"
-    );
-
-    // Get exhibition details for each article
-    const articlesWithExhibitions = await Promise.all(
-      articles.map(async (article) => {
-        let exhibition = null;
-        if (article.exhibition_id) {
-          exhibition = await DatabaseService.findById("exhibitions", article.exhibition_id);
-        }
-        
-        return {
-          ...article,
-          exhibition_title: exhibition?.title || null,
-          exhibition_slug: exhibition?.slug || null,
-        };
-      })
-    );
-
-    res.json({
-      success: true,
-      data: articlesWithExhibitions,
-    });
-  })
-);
 
 // POST /api/admin/articles - Create new article (admin)
 router.post(
