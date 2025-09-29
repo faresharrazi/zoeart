@@ -43,8 +43,6 @@ export interface ContactInfo {
 export interface HomeSettings {
   title: string;
   description: string;
-  footerDescription: string;
-  galleryHours: string;
   heroImages: string[];
   heroImageIds: number[];
 }
@@ -127,10 +125,6 @@ export const defaultHomeSettings: HomeSettings = {
   title: "Explore the Art of Tomorrow",
   description:
     "Discover extraordinary works from emerging and established artists. Experience art that challenges, inspires, and transforms.",
-  footerDescription:
-    "A contemporary art space dedicated to showcasing extraordinary works from emerging and established artists. Visit us to experience art that challenges, inspires, and transforms.",
-  galleryHours:
-    "Tuesday - Saturday: 10:00 AM - 6:00 PM\nSunday: 12:00 PM - 5:00 PM\nMonday: Closed",
   heroImages: [
     "https://via.placeholder.com/1920x1080/393E46/FFFFFF?text=Aether+Art+Space",
     "https://via.placeholder.com/1920x1080/393E46/FFFFFF?text=Contemporary+Art",

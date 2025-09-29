@@ -415,6 +415,29 @@ class ApiClient {
     });
   }
 
+  // Working hours operations
+  async getWorkingHours() {
+    return this.request("/working-hours");
+  }
+
+  async getAdminWorkingHours() {
+    return this.request("/admin/working-hours");
+  }
+
+  async updateWorkingHours(workingHours: any[]) {
+    return this.request("/admin/working-hours", {
+      method: "PUT",
+      body: JSON.stringify({ workingHours }),
+    });
+  }
+
+  async updateWorkingHour(id: number, data: any) {
+    return this.request(`/admin/working-hours/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
   // Home settings operations
   async updateHomeSettings(data: any) {
     return this.request("/admin/home-settings", {

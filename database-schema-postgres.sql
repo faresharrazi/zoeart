@@ -112,6 +112,16 @@ CREATE TABLE IF NOT EXISTS contact_info (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Working hours table
+CREATE TABLE IF NOT EXISTS working_hours (
+    id SERIAL PRIMARY KEY,
+    day VARCHAR(20) NOT NULL,
+    time_frame VARCHAR(100) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Insert default admin user (password: admin)
 INSERT INTO users (username, email, password_hash, role) VALUES 
 ('admin', 'admin@aetherartspace.com', '$2b$10$cRiBpAKdF3FFdYgW8gwGteiELv91PVX3TKIIh2NnDkYNDGv.s/WBy', 'admin')
@@ -122,9 +132,20 @@ INSERT INTO contact_info (email, phone, instagram, address) VALUES
 ('info@aetherartspace.com', '+1 (555) 123-4567', '@aetherartspace', '123 Art Street, Creative District, NY 10001')
 ON CONFLICT (id) DO NOTHING;
 
+-- Insert default working hours
+INSERT INTO working_hours (day, time_frame, is_active) VALUES 
+('Monday', 'Closed', true),
+('Tuesday', '10:00 AM - 6:00 PM', true),
+('Wednesday', '10:00 AM - 6:00 PM', true),
+('Thursday', '10:00 AM - 6:00 PM', true),
+('Friday', '10:00 AM - 6:00 PM', true),
+('Saturday', '10:00 AM - 6:00 PM', true),
+('Sunday', '12:00 PM - 5:00 PM', true)
+ON CONFLICT DO NOTHING;
+
 -- Insert default page content
 INSERT INTO page_content (page_name, title, description, content, is_visible) VALUES 
-('home', 'Aether Art Space', 'Explore the Art of Tomorrow', '{"footerDescription": "A contemporary art space dedicated to showcasing extraordinary works from emerging and established artists. Visit us to experience art that challenges, inspires, and transforms.", "galleryHours": "Tuesday - Sunday: 10:00 AM - 6:00 PM"}', TRUE),
+('home', 'Aether Art Space', 'Explore the Art of Tomorrow', '{}', TRUE),
 ('exhibitions', 'Gallery Exhibitions', 'Discover our curated exhibitions that showcase the finest in contemporary art. From solo presentations to thematic group shows, each exhibition offers a unique journey through artistic vision.', '{}', TRUE),
 ('artists', 'Featured Artists', 'Meet the visionary artists whose works define our contemporary collection. Each brings a unique perspective and mastery of their craft to create pieces that inspire and provoke.', '{}', TRUE),
 ('gallery', 'Complete Collection', 'Explore our entire collection of contemporary artworks. Use the search and filter tools to discover pieces that speak to you.', '{}', TRUE),
@@ -157,3 +178,4 @@ CREATE TRIGGER update_artworks_updated_at BEFORE UPDATE ON artworks FOR EACH ROW
 CREATE TRIGGER update_exhibitions_updated_at BEFORE UPDATE ON exhibitions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_page_content_updated_at BEFORE UPDATE ON page_content FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_contact_info_updated_at BEFORE UPDATE ON contact_info FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_working_hours_updated_at BEFORE UPDATE ON working_hours FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

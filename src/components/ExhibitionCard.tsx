@@ -64,7 +64,7 @@ const ExhibitionCard = ({
       className="border-2 border-transparent overflow-hidden cursor-pointer h-full flex flex-col"
       onClick={() => onExhibitionClick(exhibition.slug)}
     >
-      <div className="aspect-[4/3] bg-gradient-to-br from-theme-primary/20 to-theme-primary/5 relative overflow-hidden flex-shrink-0">
+      <div className="aspect-[3/4] bg-gradient-to-br from-theme-primary/20 to-theme-primary/5 relative overflow-hidden flex-shrink-0">
         {/* Featured Image Background */}
         {exhibition.featured_image &&
         exhibition.featured_image !== "null" &&

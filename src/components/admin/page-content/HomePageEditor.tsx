@@ -148,33 +148,6 @@ const HomePageEditor = ({
               />
             </div>
 
-            <div>
-              <Label htmlFor="footer-description">Footer Description</Label>
-              <Textarea
-                id="footer-description"
-                value={formData.footerDescription || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    footerDescription: e.target.value,
-                  })
-                }
-                placeholder="Enter footer description"
-                rows={2}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="gallery-hours">Gallery Hours</Label>
-              <Input
-                id="gallery-hours"
-                value={formData.galleryHours || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, galleryHours: e.target.value })
-                }
-                placeholder="e.g., Mon-Fri: 10AM-6PM, Sat-Sun: 12PM-8PM"
-              />
-            </div>
 
             <div>
               <Label>Hero Images</Label>
@@ -260,18 +233,6 @@ const HomePageEditor = ({
               <h3 className="font-semibold text-lg">Description</h3>
               <p className="text-gray-600">
                 {pageData?.description || "Not set"}
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg">Footer Description</h3>
-              <p className="text-gray-600">
-                {pageData?.footerDescription || "Not set"}
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg">Gallery Hours</h3>
-              <p className="text-gray-600">
-                {pageData?.galleryHours || "Not set"}
               </p>
             </div>
             <div>

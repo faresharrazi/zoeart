@@ -47,19 +47,6 @@ const Footer = () => {
                     className="h-32 w-auto object-contain"
                   />
                 </div>
-                {homeSettings?.footerDescription && (
-                  <p className="text-gray-600 leading-relaxed max-w-md mb-6 whitespace-pre-line">
-                    {homeSettings.footerDescription}
-                  </p>
-                )}
-                {homeSettings?.galleryHours && (
-                  <div className="mt-6">
-                    <p className="text-gray-900  text-lg mb-2">Gallery Hours</p>
-                    <p className="text-gray-600 text-sm whitespace-pre-line">
-                      {homeSettings.galleryHours}
-                    </p>
-                  </div>
-                )}
               </div>
 
               <div className="text-center md:text-left">

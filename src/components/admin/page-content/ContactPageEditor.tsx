@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
+import WorkingHoursManagement from "../WorkingHoursManagement";
 import { Edit, Save, X, Mail, Phone, MapPin, Instagram } from "lucide-react";
 
 interface ContactPageEditorProps {
@@ -286,6 +287,9 @@ const ContactPageEditor = ({
           )}
         </CardContent>
       </Card>
+
+      {/* Working Hours Management */}
+      <WorkingHoursManagement />
     </div>
   );
 };

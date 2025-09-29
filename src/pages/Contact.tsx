@@ -4,14 +4,16 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Instagram } from "lucide-react";
+import { Mail, Phone, MapPin, Instagram, Clock } from "lucide-react";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
+import { useWorkingHours } from "@/hooks/useWorkingHours";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import { Toaster } from "@/components/ui/toaster";
 
 const Contact = () => {
   const { pageData, contactInfo, loading } = usePageDataFromDB();
+  const { workingHours, loading: workingHoursLoading } = useWorkingHours();
   const { toast } = useToast();
 
   const [newsletterData, setNewsletterData] = useState({
@@ -36,7 +38,7 @@ const Contact = () => {
         newsletterData.name
       );
 
-      if (data.success) {
+      if ((data as any).success) {
         toast({
           title: "Success!",
           description: "Thank you for subscribing to our newsletter!",
@@ -53,11 +55,11 @@ const Contact = () => {
           variant: "destructive",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Newsletter subscription error:", error);
 
       // Handle specific error cases
-      if (error.message.includes("already subscribed")) {
+      if (error instanceof Error && error.message.includes("already subscribed")) {
         toast({
           title: "Already Subscribed",
           description: "This email is already subscribed to our newsletter.",
@@ -74,7 +76,7 @@ const Contact = () => {
   };
 
   // Show loading state while data is being fetched
-  if (loading) {
+  if (loading || workingHoursLoading) {
     return (
       <div className="min-h-screen">
         <Navigation />
@@ -203,9 +205,12 @@ const Contact = () => {
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <Mail className="w-6 h-6 text-palette-medium-blue" />
                         </div>
-                        <p className="text-muted-foreground">
+                        <a 
+                          href={`mailto:${contactInfo.email}`}
+                          className="text-muted-foreground hover:text-palette-medium-blue transition-colors cursor-pointer"
+                        >
                           {contactInfo.email}
-                        </p>
+                        </a>
                       </div>
                     )}
 
@@ -214,9 +219,12 @@ const Contact = () => {
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <Phone className="w-6 h-6 text-palette-medium-blue" />
                         </div>
-                        <p className="text-muted-foreground">
+                        <a 
+                          href={`tel:${contactInfo.phone}`}
+                          className="text-muted-foreground hover:text-palette-medium-blue transition-colors cursor-pointer"
+                        >
                           {contactInfo.phone}
-                        </p>
+                        </a>
                       </div>
                     )}
 
@@ -225,9 +233,14 @@ const Contact = () => {
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <Instagram className="w-6 h-6 text-palette-medium-blue" />
                         </div>
-                        <p className="text-muted-foreground">
+                        <a 
+                          href={`https://instagram.com/${contactInfo.instagram.replace('@', '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-palette-medium-blue transition-colors cursor-pointer"
+                        >
                           {contactInfo.instagram}
-                        </p>
+                        </a>
                       </div>
                     )}
 
@@ -239,6 +252,26 @@ const Contact = () => {
                         <p className="text-muted-foreground whitespace-pre-line">
                           {contactInfo.address}
                         </p>
+                      </div>
+                    )}
+
+                    {/* Working Hours Section */}
+                    {workingHours && workingHours.length > 0 && (
+                      <div className="mt-8">
+                        <div className="flex items-center space-x-4 mb-4">
+                          <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-palette-medium-blue" />
+                          </div>
+                          <h3 className="text-xl font-semibold text-foreground">Working Hours</h3>
+                        </div>
+                        <div className="space-y-2 ml-16">
+                          {workingHours.map((hour) => (
+                            <div key={hour.id} className="flex justify-between items-center">
+                              <span className="font-medium text-foreground">{hour.day}</span>
+                              <span className="text-muted-foreground">{hour.time_frame}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
