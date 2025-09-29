@@ -32,9 +32,7 @@ router.get(
   asyncHandler(async (req, res) => {
     console.log("Fetching all working hours for admin...");
 
-    const result = await query(
-      "SELECT * FROM working_hours ORDER BY id"
-    );
+    const result = await query("SELECT * FROM working_hours ORDER BY id");
 
     console.log("All working hours found:", result.rows.length);
 
@@ -57,7 +55,7 @@ router.put(
 
     // Start transaction
     const client = await query.getClient();
-    await client.query('BEGIN');
+    await client.query("BEGIN");
 
     try {
       // Clear existing working hours
@@ -66,7 +64,9 @@ router.put(
       // Insert new working hours
       for (const hour of workingHours) {
         if (!hour.day || !hour.time_frame) {
-          throw new ValidationError("Each working hour must have day and time_frame");
+          throw new ValidationError(
+            "Each working hour must have day and time_frame"
+          );
         }
 
         await client.query(
@@ -75,16 +75,14 @@ router.put(
         );
       }
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       // Return updated working hours
-      const result = await query(
-        "SELECT * FROM working_hours ORDER BY id"
-      );
+      const result = await query("SELECT * FROM working_hours ORDER BY id");
 
       res.json(result.rows);
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();

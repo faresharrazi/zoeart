@@ -59,7 +59,10 @@ const Contact = () => {
       console.error("Newsletter subscription error:", error);
 
       // Handle specific error cases
-      if (error instanceof Error && error.message.includes("already subscribed")) {
+      if (
+        error instanceof Error &&
+        error.message.includes("already subscribed")
+      ) {
         toast({
           title: "Already Subscribed",
           description: "This email is already subscribed to our newsletter.",
@@ -205,7 +208,7 @@ const Contact = () => {
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <Mail className="w-6 h-6 text-palette-medium-blue" />
                         </div>
-                        <a 
+                        <a
                           href={`mailto:${contactInfo.email}`}
                           className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium"
                         >
@@ -219,7 +222,7 @@ const Contact = () => {
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <Phone className="w-6 h-6 text-palette-medium-blue" />
                         </div>
-                        <a 
+                        <a
                           href={`tel:${contactInfo.phone}`}
                           className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium"
                         >
@@ -233,8 +236,11 @@ const Contact = () => {
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <Instagram className="w-6 h-6 text-palette-medium-blue" />
                         </div>
-                        <a 
-                          href={`https://instagram.com/${contactInfo.instagram.replace('@', '')}`}
+                        <a
+                          href={`https://instagram.com/${contactInfo.instagram.replace(
+                            "@",
+                            ""
+                          )}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium"
@@ -245,13 +251,18 @@ const Contact = () => {
                     )}
 
                     {contactInfo?.address && (
-                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <MapPin className="w-6 h-6 text-palette-medium-blue" />
                         </div>
-                        <p className="text-foreground whitespace-pre-line font-medium">
+                        <a 
+                          href="https://maps.google.com/?q=Mark.+Mpostsari+7+Glyfada+16675"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium whitespace-pre-line"
+                        >
                           {contactInfo.address}
-                        </p>
+                        </a>
                       </div>
                     )}
 
@@ -262,14 +273,23 @@ const Contact = () => {
                           <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                             <Clock className="w-6 h-6 text-palette-medium-blue" />
                           </div>
-                          <h3 className="text-xl font-semibold text-foreground">Working Hours</h3>
+                          <h3 className="text-xl font-semibold text-foreground">
+                            Working Hours
+                          </h3>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-4 md:p-6 ml-0 md:ml-16">
                           <div className="space-y-3">
                             {workingHours.map((hour) => (
-                              <div key={hour.id} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
-                                <span className="font-medium text-foreground text-sm">{hour.day}</span>
-                                <span className="text-muted-foreground text-sm font-medium text-right">{hour.time_frame}</span>
+                              <div
+                                key={hour.id}
+                                className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0"
+                              >
+                                <span className="font-medium text-foreground text-sm">
+                                  {hour.day}
+                                </span>
+                                <span className="text-muted-foreground text-sm font-medium text-right">
+                                  {hour.time_frame}
+                                </span>
                               </div>
                             ))}
                           </div>

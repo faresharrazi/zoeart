@@ -72,7 +72,7 @@ const ExhibitionCard = ({
           <img
             src={exhibition.featured_image}
             alt={exhibition.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             onError={(e) => {
               // Fallback to placeholder if image fails to load
               const target = e.target as HTMLImageElement;

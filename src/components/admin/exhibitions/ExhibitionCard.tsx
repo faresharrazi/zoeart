@@ -141,7 +141,7 @@ const ExhibitionCard = ({
             <img
               src={exhibition.featuredImage}
               alt={exhibition.title}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           </div>
         )}
