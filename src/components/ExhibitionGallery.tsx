@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 
 // Fallback gallery images - placeholder URLs for when no real exhibition images are provided
 const sampleImages = [
@@ -30,13 +30,21 @@ const ExhibitionGallery = ({
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null
   );
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const openModal = (index: number) => {
     setSelectedImageIndex(index);
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   const closeModal = () => {
     setSelectedImageIndex(null);
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   const navigateImage = (direction: "prev" | "next") => {
@@ -51,12 +59,57 @@ const ExhibitionGallery = ({
         selectedImageIndex === images.length - 1 ? 0 : selectedImageIndex + 1
       );
     }
+    // Reset zoom and position when navigating
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") closeModal();
     if (e.key === "ArrowLeft") navigateImage("prev");
     if (e.key === "ArrowRight") navigateImage("next");
+  };
+
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 0.5, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 0.5, 0.5));
+  };
+
+  const handleResetZoom = () => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 1) {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      handleZoomIn();
+    } else {
+      handleZoomOut();
+    }
   };
 
   return (
@@ -343,7 +396,7 @@ const ExhibitionGallery = ({
             onKeyDown={handleKeyDown}
             tabIndex={-1}
           >
-            <div className="relative max-w-4xl max-h-full">
+            <div className="relative w-full h-full flex items-center justify-center">
               {/* Close Button */}
               <Button
                 variant="outline"
@@ -353,6 +406,43 @@ const ExhibitionGallery = ({
               >
                 <X className="w-4 h-4" />
               </Button>
+
+              {/* Zoom Controls */}
+              <div className="absolute top-4 left-4 z-10 flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleZoomOut();
+                  }}
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleZoomIn();
+                  }}
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleResetZoom();
+                  }}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </Button>
+              </div>
 
               {/* Navigation Buttons */}
               <Button
@@ -379,37 +469,51 @@ const ExhibitionGallery = ({
                 <ChevronRight className="w-4 h-4" />
               </Button>
 
-              {/* Image */}
-              <img
-                src={images[selectedImageIndex]}
-                alt={`Gallery image ${selectedImageIndex + 1}`}
-                className="max-w-full max-h-full object-contain rounded-lg"
-                onClick={(e) => e.stopPropagation()}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = "none";
-                  target.parentElement!.innerHTML = `
-                    <div class="w-full h-64 flex items-center justify-center bg-gray-800 rounded-lg">
-                      <div class="text-center text-white">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center">
-                          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                          </svg>
+              {/* Image Container */}
+              <div
+                className="flex items-center justify-center w-full h-full overflow-hidden"
+                onWheel={handleWheel}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+              >
+                <img
+                  src={images[selectedImageIndex]}
+                  alt={`Gallery image ${selectedImageIndex + 1}`}
+                  className="max-w-none max-h-none object-contain"
+                  style={{
+                    transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                    transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                    target.parentElement!.innerHTML = `
+                      <div class="w-full h-64 flex items-center justify-center bg-gray-800 rounded-lg">
+                        <div class="text-center text-white">
+                          <div class="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                          </div>
+                          <p class="text-lg">Image not available</p>
+                          <p class="text-sm text-gray-300">${
+                            selectedImageIndex + 1
+                          } of ${images.length}</p>
                         </div>
-                        <p class="text-lg">Image not available</p>
-                        <p class="text-sm text-gray-300">${
-                          selectedImageIndex + 1
-                        } of ${images.length}</p>
                       </div>
-                    </div>
-                  `;
-                }}
-              />
+                    `;
+                  }}
+                />
+              </div>
 
               {/* Image Counter */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                 <span className="text-white text-sm">
-                  {selectedImageIndex + 1} of {images.length}
+                  {selectedImageIndex + 1} of {images.length} • Zoom: {Math.round(zoom * 100)}%
                 </span>
               </div>
             </div>
