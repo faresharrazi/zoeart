@@ -104,11 +104,14 @@ const ExhibitionGallery = ({
   };
 
   const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    if (e.deltaY < 0) {
-      handleZoomIn();
-    } else {
-      handleZoomOut();
+    // Only enable wheel zoom on desktop (md and up)
+    if (window.innerWidth >= 768) {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        handleZoomIn();
+      } else {
+        handleZoomOut();
+      }
     }
   };
 
@@ -407,8 +410,8 @@ const ExhibitionGallery = ({
                 <X className="w-4 h-4" />
               </Button>
 
-              {/* Zoom Controls */}
-              <div className="absolute top-4 left-4 z-10 flex gap-2">
+              {/* Zoom Controls - Desktop only */}
+              <div className="absolute top-4 left-4 z-10 flex gap-2 hidden md:flex">
                 <Button
                   variant="outline"
                   size="sm"
@@ -482,8 +485,12 @@ const ExhibitionGallery = ({
                 <img
                   src={images[selectedImageIndex]}
                   alt={`Gallery image ${selectedImageIndex + 1}`}
-                  className="max-w-none max-h-none object-contain"
+                  className="object-contain"
                   style={{
+                    maxWidth: '100vw',
+                    maxHeight: '100vh',
+                    width: 'auto',
+                    height: 'auto',
                     transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
                     transition: isDragging ? 'none' : 'transform 0.2s ease-out',
                   }}
@@ -513,7 +520,8 @@ const ExhibitionGallery = ({
               {/* Image Counter */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                 <span className="text-white text-sm">
-                  {selectedImageIndex + 1} of {images.length} • Zoom: {Math.round(zoom * 100)}%
+                  {selectedImageIndex + 1} of {images.length}
+                  <span className="hidden md:inline"> • Zoom: {Math.round(zoom * 100)}%</span>
                 </span>
               </div>
             </div>
