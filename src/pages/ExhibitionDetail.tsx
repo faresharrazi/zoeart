@@ -401,8 +401,72 @@ const ExhibitionDetail = () => {
                   {/* Article Content */}
                   <div 
                     className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                    style={{
+                      '--tw-prose-headings': '#1f2937',
+                      '--tw-prose-links': '#1f2937',
+                      '--tw-prose-bold': '#1f2937',
+                      '--tw-prose-counters': '#6b7280',
+                      '--tw-prose-bullets': '#6b7280',
+                    } as React.CSSProperties}
                     dangerouslySetInnerHTML={{ __html: article.content }}
                   />
+                  
+                  {/* Custom CSS for article content */}
+                  <style jsx>{`
+                    .prose h1 {
+                      font-size: 2rem !important;
+                      font-weight: bold !important;
+                      margin: 1rem 0 0.5rem 0 !important;
+                      line-height: 1.2 !important;
+                      color: #1f2937 !important;
+                    }
+                    .prose h2 {
+                      font-size: 1.5rem !important;
+                      font-weight: bold !important;
+                      margin: 0.8rem 0 0.4rem 0 !important;
+                      line-height: 1.3 !important;
+                      color: #1f2937 !important;
+                    }
+                    .prose h3 {
+                      font-size: 1.25rem !important;
+                      font-weight: bold !important;
+                      margin: 0.6rem 0 0.3rem 0 !important;
+                      line-height: 1.4 !important;
+                      color: #1f2937 !important;
+                    }
+                    .prose ul {
+                      list-style-type: disc !important;
+                      margin: 0.5rem 0 !important;
+                      padding-left: 1.5rem !important;
+                    }
+                    .prose ol {
+                      list-style-type: decimal !important;
+                      margin: 0.5rem 0 !important;
+                      padding-left: 1.5rem !important;
+                    }
+                    .prose li {
+                      margin: 0.25rem 0 !important;
+                    }
+                    .prose p {
+                      margin: 0.5rem 0 !important;
+                    }
+                    .prose strong {
+                      font-weight: bold !important;
+                    }
+                    .prose em {
+                      font-style: italic !important;
+                    }
+                    .prose u {
+                      text-decoration: underline !important;
+                    }
+                    .prose blockquote {
+                      border-left: 4px solid #e5e7eb !important;
+                      padding-left: 1rem !important;
+                      margin: 1rem 0 !important;
+                      font-style: italic !important;
+                      color: #6b7280 !important;
+                    }
+                  `}</style>
 
                   {/* Media Files */}
                   {article.media_files && article.media_files.length > 0 && (

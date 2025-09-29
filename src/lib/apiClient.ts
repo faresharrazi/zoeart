@@ -107,22 +107,20 @@ class ApiClient {
         ? exhibition.featured_image.startsWith("http")
           ? exhibition.featured_image
           : exhibition.featured_image.startsWith("/api/file/")
-          ? `${API_BASE_URL.replace(
-              "/api",
-              ""
-            )}${exhibition.featured_image.replace("/api/file/", "/api/files/")}`
-          : `${API_BASE_URL.replace("/api", "")}${exhibition.featured_image}`
+          ? `${API_BASE_URL}${exhibition.featured_image.replace("/api/file/", "/files/")}`
+          : exhibition.featured_image.startsWith("/api/files/")
+          ? `${API_BASE_URL}${exhibition.featured_image.replace("/api/files/", "/files/")}`
+          : `${API_BASE_URL}/files/${exhibition.featured_image}`
         : null,
       gallery_images: Array.isArray(exhibition.gallery_images)
         ? exhibition.gallery_images.map((img: string) =>
             img.startsWith("http")
               ? img
               : img.startsWith("/api/file/")
-              ? `${API_BASE_URL.replace("/api", "")}${img.replace(
-                  "/api/file/",
-                  "/api/files/"
-                )}`
-              : `${API_BASE_URL.replace("/api", "")}${img}`
+              ? `${API_BASE_URL}${img.replace("/api/file/", "/files/")}`
+              : img.startsWith("/api/files/")
+              ? `${API_BASE_URL}${img.replace("/api/files/", "/files/")}`
+              : `${API_BASE_URL}/files/${img}`
           )
         : [],
     }));
@@ -141,11 +139,10 @@ class ApiClient {
         ? artist.profile_image.startsWith("http")
           ? artist.profile_image
           : artist.profile_image.startsWith("/api/file/")
-          ? `${API_BASE_URL.replace("/api", "")}${artist.profile_image.replace(
-              "/api/file/",
-              "/api/files/"
-            )}`
-          : `${API_BASE_URL.replace("/api", "")}${artist.profile_image}`
+          ? `${API_BASE_URL}${artist.profile_image.replace("/api/file/", "/files/")}`
+          : artist.profile_image.startsWith("/api/files/")
+          ? `${API_BASE_URL}${artist.profile_image.replace("/api/files/", "/files/")}`
+          : `${API_BASE_URL}/files/${artist.profile_image}`
         : null,
     }));
   }
@@ -164,11 +161,10 @@ class ApiClient {
             img.startsWith("http")
               ? img
               : img.startsWith("/api/file/")
-              ? `${API_BASE_URL.replace("/api", "")}${img.replace(
-                  "/api/file/",
-                  "/api/files/"
-                )}`
-              : `${API_BASE_URL.replace("/api", "")}${img}`
+              ? `${API_BASE_URL}${img.replace("/api/file/", "/files/")}`
+              : img.startsWith("/api/files/")
+              ? `${API_BASE_URL}${img.replace("/api/files/", "/files/")}`
+              : `${API_BASE_URL}/files/${img}`
           )
         : [],
     }));
@@ -188,22 +184,20 @@ class ApiClient {
         ? exhibition.featured_image.startsWith("http")
           ? exhibition.featured_image
           : exhibition.featured_image.startsWith("/api/file/")
-          ? `${API_BASE_URL.replace(
-              "/api",
-              ""
-            )}${exhibition.featured_image.replace("/api/file/", "/api/files/")}`
-          : `${API_BASE_URL.replace("/api", "")}${exhibition.featured_image}`
+          ? `${API_BASE_URL}${exhibition.featured_image.replace("/api/file/", "/files/")}`
+          : exhibition.featured_image.startsWith("/api/files/")
+          ? `${API_BASE_URL}${exhibition.featured_image.replace("/api/files/", "/files/")}`
+          : `${API_BASE_URL}/files/${exhibition.featured_image}`
         : null,
       gallery_images: Array.isArray(exhibition.gallery_images)
         ? exhibition.gallery_images.map((img: string) =>
             img.startsWith("http")
               ? img
               : img.startsWith("/api/file/")
-              ? `${API_BASE_URL.replace("/api", "")}${img.replace(
-                  "/api/file/",
-                  "/api/files/"
-                )}`
-              : `${API_BASE_URL.replace("/api", "")}${img}`
+              ? `${API_BASE_URL}${img.replace("/api/file/", "/files/")}`
+              : img.startsWith("/api/files/")
+              ? `${API_BASE_URL}${img.replace("/api/files/", "/files/")}`
+              : `${API_BASE_URL}/files/${img}`
           )
         : [],
     }));

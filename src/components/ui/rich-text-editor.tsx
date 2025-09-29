@@ -138,6 +138,65 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
 
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden">
+      {/* Editor Styles */}
+      <style jsx>{`
+        .ProseMirror {
+          padding: 1rem;
+          min-height: 200px;
+          outline: none;
+        }
+        .ProseMirror h1 {
+          font-size: 2rem;
+          font-weight: bold;
+          margin: 1rem 0 0.5rem 0;
+          line-height: 1.2;
+        }
+        .ProseMirror h2 {
+          font-size: 1.5rem;
+          font-weight: bold;
+          margin: 0.8rem 0 0.4rem 0;
+          line-height: 1.3;
+        }
+        .ProseMirror h3 {
+          font-size: 1.25rem;
+          font-weight: bold;
+          margin: 0.6rem 0 0.3rem 0;
+          line-height: 1.4;
+        }
+        .ProseMirror ul {
+          list-style-type: disc;
+          margin: 0.5rem 0;
+          padding-left: 1.5rem;
+        }
+        .ProseMirror ol {
+          list-style-type: decimal;
+          margin: 0.5rem 0;
+          padding-left: 1.5rem;
+        }
+        .ProseMirror li {
+          margin: 0.25rem 0;
+        }
+        .ProseMirror p {
+          margin: 0.5rem 0;
+        }
+        .ProseMirror strong {
+          font-weight: bold;
+        }
+        .ProseMirror em {
+          font-style: italic;
+        }
+        .ProseMirror u {
+          text-decoration: underline;
+        }
+        .ProseMirror blockquote {
+          border-left: 4px solid #e5e7eb;
+          padding-left: 1rem;
+          margin: 1rem 0;
+          font-style: italic;
+          color: #6b7280;
+        }
+      `}</style>
+      
       {/* Toolbar */}
       <div className="border-b border-gray-300 p-2 bg-gray-50 flex flex-wrap gap-1">
         {/* Text Formatting */}
