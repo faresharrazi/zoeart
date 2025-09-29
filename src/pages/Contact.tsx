@@ -136,7 +136,7 @@ const Contact = () => {
                     </p>
                 </div>
                 <Card className="border-2 border-palette-medium-blue/20">
-                  <CardContent>
+                  <CardContent className="pt-8">
                     <form
                       onSubmit={handleNewsletterSubmit}
                       className="space-y-6"
