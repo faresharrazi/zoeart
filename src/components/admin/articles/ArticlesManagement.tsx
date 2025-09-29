@@ -21,7 +21,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import { useAdminArticles, Article } from "@/hooks/useArticles";
-import { useExhibitions } from "@/hooks/useExhibitions";
 import {
   Plus,
   Edit,
@@ -36,8 +35,27 @@ import {
 const ArticlesManagement = () => {
   const { toast } = useToast();
   const { articles, loading, error } = useAdminArticles();
-  const { exhibitions } = useExhibitions();
+  const [exhibitions, setExhibitions] = useState<any[]>([]);
+  const [exhibitionsLoading, setExhibitionsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+
+  // Fetch exhibitions
+  useEffect(() => {
+    const fetchExhibitions = async () => {
+      try {
+        const response = await apiClient.getExhibitions();
+        if (response.success) {
+          setExhibitions(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching exhibitions:", error);
+      } finally {
+        setExhibitionsLoading(false);
+      }
+    };
+
+    fetchExhibitions();
+  }, []);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [formData, setFormData] = useState({
     exhibition_id: "",
