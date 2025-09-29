@@ -1,46 +1,51 @@
 const express = require("express");
-const { query } = require("../services/database.cjs");
+const {
+  DatabaseService,
+} = require("../services/database.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
+const {
+  asyncHandler,
+  ValidationError,
+  NotFoundError,
+} = require("../middleware/errorHandler.cjs");
 
 const router = express.Router();
 
-// Test route to verify the router is working
-router.get("/test", (req, res) => {
-  res.json({
-    success: true,
-    message: "Articles router is working",
-    timestamp: new Date().toISOString()
-  });
-});
 
 // GET /api/articles - Get all published articles (public)
-router.get("/", async (req, res) => {
-  try {
-    const result = await query(`
-      SELECT 
-        a.*,
-        e.title as exhibition_title,
-        e.slug as exhibition_slug,
-        e.start_date,
-        e.end_date
-      FROM articles a
-      LEFT JOIN exhibitions e ON a.exhibition_id = e.id
-      WHERE a.is_published = true
-      ORDER BY a.published_at DESC
-    `);
+router.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const articles = await DatabaseService.findAll(
+      "articles",
+      { is_published: true },
+      "published_at DESC"
+    );
+
+    // Get exhibition details for each article
+    const articlesWithExhibitions = await Promise.all(
+      articles.map(async (article) => {
+        let exhibition = null;
+        if (article.exhibition_id) {
+          exhibition = await DatabaseService.findById("exhibitions", article.exhibition_id);
+        }
+        
+        return {
+          ...article,
+          exhibition_title: exhibition?.title || null,
+          exhibition_slug: exhibition?.slug || null,
+          start_date: exhibition?.start_date || null,
+          end_date: exhibition?.end_date || null,
+        };
+      })
+    );
 
     res.json({
       success: true,
-      data: result.rows,
+      data: articlesWithExhibitions,
     });
-  } catch (error) {
-    console.error("Error fetching articles:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch articles",
-    });
-  }
-});
+  })
+);
 
 // GET /api/articles/:id - Get specific article (public)
 router.get("/:id", async (req, res) => {
@@ -123,41 +128,38 @@ router.get("/exhibition/:exhibitionId", async (req, res) => {
 // Admin routes (require authentication)
 
 // GET /api/admin/articles - Get all articles (admin)
-router.get("/admin", authenticateToken, async (req, res) => {
-  try {
-    console.log("Fetching admin articles...");
-    
-    const result = await query(`
-      SELECT 
-        a.*,
-        e.title as exhibition_title,
-        e.slug as exhibition_slug
-      FROM articles a
-      LEFT JOIN exhibitions e ON a.exhibition_id = e.id
-      ORDER BY a.created_at DESC
-    `);
+router.get(
+  "/admin",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const articles = await DatabaseService.findAll(
+      "articles",
+      {},
+      "created_at DESC"
+    );
 
-    console.log("Articles query successful, found:", result.rows.length, "articles");
-    
+    // Get exhibition details for each article
+    const articlesWithExhibitions = await Promise.all(
+      articles.map(async (article) => {
+        let exhibition = null;
+        if (article.exhibition_id) {
+          exhibition = await DatabaseService.findById("exhibitions", article.exhibition_id);
+        }
+        
+        return {
+          ...article,
+          exhibition_title: exhibition?.title || null,
+          exhibition_slug: exhibition?.slug || null,
+        };
+      })
+    );
+
     res.json({
       success: true,
-      data: result.rows,
+      data: articlesWithExhibitions,
     });
-  } catch (error) {
-    console.error("Error fetching admin articles:", error);
-    console.error("Error details:", {
-      message: error.message,
-      code: error.code,
-      detail: error.detail,
-      hint: error.hint
-    });
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch articles",
-      error: error.message
-    });
-  }
-});
+  })
+);
 
 // POST /api/admin/articles - Create new article (admin)
 router.post("/admin", authenticateToken, async (req, res) => {
