@@ -15,13 +15,17 @@ router.get(
   asyncHandler(async (req, res) => {
     console.log("Fetching working hours...");
 
-    const result = await query(
-      "SELECT * FROM working_hours WHERE is_active = true ORDER BY id"
-    );
+    try {
+      const result = await query(
+        "SELECT * FROM working_hours WHERE is_active = true ORDER BY id"
+      );
 
-    console.log("Working hours found:", result.rows.length);
-
-    res.json(result.rows);
+      console.log("Working hours found:", result.rows.length);
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error fetching working hours:", error);
+      throw error;
+    }
   })
 );
 
@@ -32,11 +36,15 @@ router.get(
   asyncHandler(async (req, res) => {
     console.log("Fetching all working hours for admin...");
 
-    const result = await query("SELECT * FROM working_hours ORDER BY id");
+    try {
+      const result = await query("SELECT * FROM working_hours ORDER BY id");
 
-    console.log("All working hours found:", result.rows.length);
-
-    res.json(result.rows);
+      console.log("All working hours found:", result.rows.length);
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error fetching admin working hours:", error);
+      throw error;
+    }
   })
 );
 
@@ -53,15 +61,13 @@ router.put(
 
     console.log("Updating working hours:", workingHours);
 
-    // Start transaction
-    const client = await query.getClient();
-    await client.query("BEGIN");
-
     try {
       // Clear existing working hours
-      await client.query("DELETE FROM working_hours");
+      console.log("Clearing existing working hours...");
+      await query("DELETE FROM working_hours");
 
       // Insert new working hours
+      console.log("Inserting new working hours...");
       for (const hour of workingHours) {
         if (!hour.day || !hour.time_frame) {
           throw new ValidationError(
@@ -69,23 +75,22 @@ router.put(
           );
         }
 
-        await client.query(
+        console.log(`Inserting: ${hour.day} - ${hour.time_frame} (active: ${hour.is_active})`);
+        await query(
           "INSERT INTO working_hours (day, time_frame, is_active) VALUES ($1, $2, $3)",
           [hour.day, hour.time_frame, hour.is_active !== false]
         );
       }
 
-      await client.query("COMMIT");
-
       // Return updated working hours
+      console.log("Fetching updated working hours...");
       const result = await query("SELECT * FROM working_hours ORDER BY id");
 
+      console.log("Successfully updated working hours:", result.rows.length);
       res.json(result.rows);
     } catch (error) {
-      await client.query("ROLLBACK");
+      console.error("Error updating working hours:", error);
       throw error;
-    } finally {
-      client.release();
     }
   })
 );
