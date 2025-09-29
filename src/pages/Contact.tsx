@@ -207,11 +207,11 @@ const Contact = () => {
                   </div>
 
                   {/* Contact Cards Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
                     {/* Contact Information Card */}
-                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100 w-full">
                       <div className="flex items-center mb-6">
-                        <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
                           <Mail className="w-6 h-6 text-white" />
                         </div>
                         <h3 className="text-xl font-bold text-foreground">
@@ -223,12 +223,12 @@ const Contact = () => {
                         {contactInfo?.email && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
-                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
+                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors flex-shrink-0">
                                 <Mail className="w-5 h-5 text-palette-medium-blue" />
                               </div>
                               <a
                                 href={`mailto:${contactInfo.email}`}
-                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium"
+                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium break-all"
                               >
                                 {contactInfo.email}
                               </a>
@@ -239,12 +239,12 @@ const Contact = () => {
                         {contactInfo?.phone && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
-                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
+                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors flex-shrink-0">
                                 <Phone className="w-5 h-5 text-palette-medium-blue" />
                               </div>
                               <a
                                 href={`tel:${contactInfo.phone}`}
-                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium"
+                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium break-all"
                               >
                                 {contactInfo.phone}
                               </a>
@@ -255,7 +255,7 @@ const Contact = () => {
                         {contactInfo?.instagram && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
-                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
+                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors flex-shrink-0">
                                 <Instagram className="w-5 h-5 text-palette-medium-blue" />
                               </div>
                               <a
@@ -265,7 +265,7 @@ const Contact = () => {
                                 )}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium"
+                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium break-all"
                               >
                                 {contactInfo.instagram}
                               </a>
@@ -276,14 +276,14 @@ const Contact = () => {
                         {contactInfo?.address && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
-                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
+                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors flex-shrink-0">
                                 <MapPin className="w-5 h-5 text-palette-medium-blue" />
                               </div>
                               <a
                                 href="https://maps.google.com/?q=Mark.+Mpostsari+7+Glyfada+16675"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium whitespace-pre-line"
+                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium whitespace-pre-line break-words"
                               >
                                 {contactInfo.address}
                               </a>
@@ -295,7 +295,7 @@ const Contact = () => {
 
                     {/* Working Hours Card */}
                     {workingHours && workingHours.length > 0 && (
-                      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                      <div className="bg-white rounded-2xl p-6 lg:p-8 shadow-lg border border-gray-100 w-full">
                         <h3 className="text-xl font-bold text-center text-gray-900 mb-6">
                           Gallery Hours
                         </h3>
@@ -342,23 +342,23 @@ const Contact = () => {
                               return (
                                 <div
                                   key={hour.id}
-                                  className={`flex justify-between items-center p-4 ${
+                                  className={`flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 ${
                                     isFirst ? 'rounded-t-xl' : ''
                                   } ${isLast ? 'rounded-b-xl' : ''} ${
                                     isClosed ? 'bg-gray-50' : 'bg-gray-50'
                                   }`}
                                 >
-                                  <div className="flex items-center space-x-3">
+                                  <div className="flex items-center space-x-3 mb-2 sm:mb-0">
                                     {isClosed && (
-                                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                      <div className="w-2 h-2 bg-gray-400 rounded-full flex-shrink-0"></div>
                                     )}
                                     <span className="font-semibold text-gray-900">
                                       {hour.day}
                                     </span>
                                   </div>
-                                  <div className="text-right">
+                                  <div className="text-left sm:text-right">
                                     {isClosed ? (
-                                      <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                                      <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium inline-block">
                                         Closed
                                       </span>
                                     ) : (
