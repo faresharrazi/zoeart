@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { apiClient } from '@/lib/apiClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface RichTextEditorProps {
   content: string;
@@ -36,12 +37,15 @@ interface RichTextEditorProps {
 }
 
 const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps) => {
+  const { toast } = useToast();
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
+  const [showVideoDialog, setShowVideoDialog] = useState(false);
+  const [videoUrl, setVideoUrl] = useState('');
 
   const editor = useEditor({
     extensions: [
@@ -93,13 +97,21 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast({
+        title: "Invalid File",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert('Image size must be less than 10MB');
+      toast({
+        title: "File Too Large",
+        description: "Image size must be less than 10MB",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -124,11 +136,19 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       
       setShowImageDialog(false);
       } else {
-        alert('Failed to upload image');
+        toast({
+          title: "Upload Failed",
+          description: "Failed to upload image",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Error uploading image');
+      toast({
+        title: "Upload Error",
+        description: "Error uploading image",
+        variant: "destructive",
+      });
     } finally {
       setUploadingImage(false);
       // Reset file input
@@ -158,18 +178,44 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
   };
 
   const addVideo = () => {
-    const videoUrl = prompt('Enter YouTube URL or video URL:');
     if (videoUrl && editor) {
       let videoHtml = '';
       
       // Check if it's a YouTube URL
       if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-        const videoId = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
+        // Extract video ID from various YouTube URL formats
+        let videoId = null;
+        
+        // Format 1: https://www.youtube.com/watch?v=VIDEO_ID
+        const watchMatch = videoUrl.match(/[?&]v=([^&\n?#]+)/);
+        if (watchMatch) {
+          videoId = watchMatch[1];
+        }
+        
+        // Format 2: https://youtu.be/VIDEO_ID
+        const shortMatch = videoUrl.match(/youtu\.be\/([^&\n?#]+)/);
+        if (shortMatch) {
+          videoId = shortMatch[1];
+        }
+        
+        // Format 3: https://www.youtube.com/embed/VIDEO_ID
+        const embedMatch = videoUrl.match(/\/embed\/([^&\n?#]+)/);
+        if (embedMatch) {
+          videoId = embedMatch[1];
+        }
+        
         if (videoId) {
-          // Use a safer approach - create a div with YouTube embed
-          videoHtml = `<div class="youtube-embed" data-video-id="${videoId}" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 8px;">
+          // Store only the YouTube URL for database efficiency
+          videoHtml = `<div class="youtube-embed" data-youtube-url="${videoUrl}" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 8px;">
             <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>`;
+        } else {
+          toast({
+            title: "Invalid URL",
+            description: "Please use a valid YouTube link (e.g., https://www.youtube.com/watch?v=...)",
+            variant: "destructive",
+          });
+          return;
         }
       } else {
         // Regular video URL
@@ -183,6 +229,9 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
         setTimeout(() => {
           onChange(editor.getHTML());
         }, 100);
+        
+        setVideoUrl('');
+        setShowVideoDialog(false);
       }
     }
   };
@@ -396,7 +445,7 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
         <Button
           variant="outline"
           size="sm"
-          onClick={addVideo}
+          onClick={() => setShowVideoDialog(true)}
         >
           📹
         </Button>
@@ -483,6 +532,33 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
                 Add Link
               </Button>
               <Button variant="outline" onClick={() => setShowLinkDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Dialog */}
+      {showVideoDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h3 className="text-lg font-semibold mb-4">Add Video</h3>
+            <input
+              type="url"
+              placeholder="Enter YouTube URL (e.g., https://www.youtube.com/watch?v=...)"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+            <p className="text-sm text-gray-600 mb-4">
+              💡 Paste any YouTube URL and it will be automatically embedded
+            </p>
+            <div className="flex gap-2">
+              <Button onClick={addVideo} disabled={!videoUrl}>
+                Add Video
+              </Button>
+              <Button variant="outline" onClick={() => setShowVideoDialog(false)}>
                 Cancel
               </Button>
             </div>
