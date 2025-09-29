@@ -295,17 +295,12 @@ const Contact = () => {
 
                     {/* Working Hours Card */}
                     {workingHours && workingHours.length > 0 && (
-                      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100">
-                        <div className="flex items-center mb-6">
-                          <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4">
-                            <Clock className="w-6 h-6 text-white" />
-                          </div>
-                          <h3 className="text-xl font-bold text-foreground">
-                            Gallery Hours
-                          </h3>
-                        </div>
+                      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                        <h3 className="text-xl font-bold text-center text-gray-900 mb-6">
+                          Gallery Hours
+                        </h3>
 
-                        <div className="space-y-3">
+                        <div className="space-y-0">
                           {(() => {
                             // Group working hours: Monday-Friday, Saturday, Sunday
                             const weekdays = workingHours.filter(hour => 
@@ -339,63 +334,63 @@ const Contact = () => {
                             if (saturday) groupedHours.push(saturday);
                             if (sunday) groupedHours.push(sunday);
                             
-                            return groupedHours.map((hour, index) => (
-                              <div
-                                key={hour.id}
-                                className={`flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 rounded-xl transition-all duration-200 ${
-                                  index % 2 === 0
-                                    ? "bg-white shadow-sm hover:shadow-md"
-                                    : "bg-gray-50 hover:bg-white hover:shadow-sm"
-                                }`}
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <div
-                                    className={`w-2 h-2 rounded-full ${
-                                      hour.time_frame
-                                        .toLowerCase()
-                                        .includes("closed")
-                                        ? "bg-gray-400"
-                                        : "bg-palette-medium-blue"
-                                    }`}
-                                  ></div>
-                                  <span className="font-semibold text-foreground">
-                                    {hour.day}
-                                  </span>
-                                </div>
-                                <span
-                                  className={`font-medium px-3 py-1 rounded-full text-sm whitespace-pre-line text-center min-w-[120px] mt-2 sm:mt-0 ${
-                                    hour.time_frame
-                                      .toLowerCase()
-                                      .includes("closed")
-                                      ? "bg-gray-100 text-gray-700"
-                                      : "bg-palette-medium-blue/10 text-palette-medium-blue"
+                            return groupedHours.map((hour, index) => {
+                              const isClosed = hour.time_frame?.toLowerCase().includes("closed");
+                              const isFirst = index === 0;
+                              const isLast = index === groupedHours.length - 1;
+                              
+                              return (
+                                <div
+                                  key={hour.id}
+                                  className={`flex justify-between items-center p-4 ${
+                                    isFirst ? 'rounded-t-xl' : ''
+                                  } ${isLast ? 'rounded-b-xl' : ''} ${
+                                    isClosed ? 'bg-gray-50' : 'bg-gray-50'
                                   }`}
                                 >
-                                  {(() => {
-                                    if (!hour.time_frame) return '';
-                                    
-                                    // Handle different time formats
-                                    let formattedTime = hour.time_frame.trim();
-                                    
-                                    // If it contains commas, split by comma and join with newlines
-                                    if (formattedTime.includes(',')) {
-                                      formattedTime = formattedTime
-                                        .split(',')
-                                        .map(part => part.trim())
-                                        .join('\n');
-                                    }
-                                    
-                                    // Clean up spacing around dashes
-                                    formattedTime = formattedTime.replace(/\s*-\s*/g, ' - ');
-                                    
-                                    // Clean up multiple spaces
-                                    formattedTime = formattedTime.replace(/\s+/g, ' ');
-                                    
-                                    return formattedTime;
-                                  })()}
-                                </span>
-                              </div>
-                            ));
+                                  <div className="flex items-center space-x-3">
+                                    {isClosed && (
+                                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                    )}
+                                    <span className="font-semibold text-gray-900">
+                                      {hour.day}
+                                    </span>
+                                  </div>
+                                  <div className="text-right">
+                                    {isClosed ? (
+                                      <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                                        Closed
+                                      </span>
+                                    ) : (
+                                      <div className="text-sm font-medium text-gray-900 whitespace-pre-line">
+                                        {(() => {
+                                          if (!hour.time_frame) return '';
+                                          
+                                          // Handle different time formats
+                                          let formattedTime = hour.time_frame.trim();
+                                          
+                                          // If it contains commas, split by comma and join with newlines
+                                          if (formattedTime.includes(',')) {
+                                            formattedTime = formattedTime
+                                              .split(',')
+                                              .map(part => part.trim())
+                                              .join('\n');
+                                          }
+                                          
+                                          // Clean up spacing around dashes
+                                          formattedTime = formattedTime.replace(/\s*-\s*/g, ' - ');
+                                          
+                                          // Clean up multiple spaces
+                                          formattedTime = formattedTime.replace(/\s+/g, ' ');
+                                          
+                                          return formattedTime;
+                                        })()}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            });
                           })()}
                         </div>
                       </div>
