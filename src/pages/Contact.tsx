@@ -123,9 +123,9 @@ const Contact = () => {
           contactInfo?.instagram ||
           contactInfo?.address ? (
             /* Two-column layout when contact info exists */
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Newsletter Subscription */}
-              <div>
+              <div className="lg:col-span-1">
                 <Card className="border-2 border-palette-medium-blue/20">
                   <CardHeader>
                     <CardTitle className="text-2xl  text-foreground">
@@ -195,7 +195,7 @@ const Contact = () => {
                 contactInfo?.phone ||
                 contactInfo?.instagram ||
                 contactInfo?.address) && (
-                <div className="space-y-8">
+                <div className="space-y-8 lg:col-span-2">
                   <div className="text-center">
                     <h2 className="text-3xl font-bold text-foreground mb-4">
                       Get In Touch
@@ -348,10 +348,7 @@ const Contact = () => {
                                     isClosed ? 'bg-gray-50' : 'bg-gray-50'
                                   }`}
                                 >
-                                  <div className="flex items-center space-x-3 mb-2">
-                                    {isClosed && (
-                                      <div className="w-2 h-2 bg-gray-400 rounded-full flex-shrink-0"></div>
-                                    )}
+                                  <div className="mb-2">
                                     <span className="font-semibold text-gray-900">
                                       {hour.day}
                                     </span>
