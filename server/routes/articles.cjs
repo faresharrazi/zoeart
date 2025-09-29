@@ -59,82 +59,76 @@ router.get(
 );
 
 // GET /api/articles/:id - Get specific article (public)
-router.get("/:id", async (req, res) => {
-  try {
+router.get(
+  "/:id",
+  asyncHandler(async (req, res) => {
     const { id } = req.params;
     
-    const result = await query(`
-      SELECT 
-        a.*,
-        e.title as exhibition_title,
-        e.slug as exhibition_slug,
-        e.start_date,
-        e.end_date,
-        e.location,
-        e.curator
-      FROM articles a
-      LEFT JOIN exhibitions e ON a.exhibition_id = e.id
-      WHERE a.id = $1 AND a.is_published = true
-    `, [id]);
+    // Find published article by ID
+    const article = await DatabaseService.findOne("articles", {
+      id: parseInt(id),
+      is_published: true
+    });
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Article not found",
-      });
+    if (!article) {
+      throw new NotFoundError("Article not found");
     }
+
+    // Get exhibition details
+    const exhibition = await DatabaseService.findById("exhibitions", article.exhibition_id);
+    
+    const articleWithExhibition = {
+      ...article,
+      exhibition_title: exhibition?.title || null,
+      exhibition_slug: exhibition?.slug || null,
+      start_date: exhibition?.start_date || null,
+      end_date: exhibition?.end_date || null,
+      location: exhibition?.location || null,
+      curator: exhibition?.curator || null,
+    };
 
     res.json({
       success: true,
-      data: result.rows[0],
+      data: articleWithExhibition,
     });
-  } catch (error) {
-    console.error("Error fetching article:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch article",
-    });
-  }
-});
+  })
+);
 
 // GET /api/articles/exhibition/:exhibitionId - Get article for specific exhibition (public)
-router.get("/exhibition/:exhibitionId", async (req, res) => {
-  try {
+router.get(
+  "/exhibition/:exhibitionId",
+  asyncHandler(async (req, res) => {
     const { exhibitionId } = req.params;
     
-    const result = await query(`
-      SELECT 
-        a.*,
-        e.title as exhibition_title,
-        e.slug as exhibition_slug,
-        e.start_date,
-        e.end_date,
-        e.location,
-        e.curator
-      FROM articles a
-      LEFT JOIN exhibitions e ON a.exhibition_id = e.id
-      WHERE a.exhibition_id = $1 AND a.is_published = true
-    `, [exhibitionId]);
+    // Find published article for this exhibition
+    const article = await DatabaseService.findOne("articles", {
+      exhibition_id: parseInt(exhibitionId),
+      is_published: true
+    });
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No article found for this exhibition",
-      });
+    if (!article) {
+      throw new NotFoundError("No article found for this exhibition");
     }
+
+    // Get exhibition details
+    const exhibition = await DatabaseService.findById("exhibitions", article.exhibition_id);
+    
+    const articleWithExhibition = {
+      ...article,
+      exhibition_title: exhibition?.title || null,
+      exhibition_slug: exhibition?.slug || null,
+      start_date: exhibition?.start_date || null,
+      end_date: exhibition?.end_date || null,
+      location: exhibition?.location || null,
+      curator: exhibition?.curator || null,
+    };
 
     res.json({
       success: true,
-      data: result.rows[0],
+      data: articleWithExhibition,
     });
-  } catch (error) {
-    console.error("Error fetching exhibition article:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch exhibition article",
-    });
-  }
-});
+  })
+);
 
 // Admin routes (require authentication)
 
