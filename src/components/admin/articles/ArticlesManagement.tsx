@@ -43,10 +43,8 @@ const ArticlesManagement = () => {
   useEffect(() => {
     const fetchExhibitions = async () => {
       try {
-        const response = await apiClient.getExhibitions();
-        if (response.success) {
-          setExhibitions(response.data);
-        }
+        const exhibitions = await apiClient.getExhibitions();
+        setExhibitions(exhibitions);
       } catch (error) {
         console.error("Error fetching exhibitions:", error);
       } finally {
@@ -59,9 +57,7 @@ const ArticlesManagement = () => {
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [formData, setFormData] = useState({
     exhibition_id: "",
-    title: "",
     content: "",
-    featured_image: "",
     media_files: [] as string[],
     author: "",
     is_published: false,
@@ -76,10 +72,10 @@ const ArticlesManagement = () => {
 
   const handleCreate = async () => {
     try {
-      if (!formData.exhibition_id || !formData.title || !formData.content) {
+      if (!formData.exhibition_id || !formData.content) {
         toast({
           title: "Error",
-          description: "Please fill in all required fields",
+          description: "Please select an exhibition and add content",
           variant: "destructive",
         });
         return;
@@ -87,9 +83,8 @@ const ArticlesManagement = () => {
 
       const response = await apiClient.createArticle({
         exhibition_id: parseInt(formData.exhibition_id),
-        title: formData.title,
+        title: `Article for Exhibition #${formData.exhibition_id}`, // Auto-generate title
         content: formData.content,
-        featured_image: formData.featured_image || undefined,
         media_files: formData.media_files.length > 0 ? formData.media_files : undefined,
         author: formData.author || undefined,
         is_published: formData.is_published,
@@ -126,9 +121,7 @@ const ArticlesManagement = () => {
 
     try {
       const response = await apiClient.updateArticle(editingArticle.id, {
-        title: formData.title,
         content: formData.content,
-        featured_image: formData.featured_image || undefined,
         media_files: formData.media_files.length > 0 ? formData.media_files : undefined,
         author: formData.author || undefined,
         is_published: formData.is_published,
@@ -190,9 +183,7 @@ const ArticlesManagement = () => {
   const resetForm = () => {
     setFormData({
       exhibition_id: "",
-      title: "",
       content: "",
-      featured_image: "",
       media_files: [],
       author: "",
       is_published: false,
@@ -203,9 +194,7 @@ const ArticlesManagement = () => {
     setEditingArticle(article);
     setFormData({
       exhibition_id: article.exhibition_id.toString(),
-      title: article.title,
       content: article.content,
-      featured_image: article.featured_image || "",
       media_files: article.media_files || [],
       author: article.author || "",
       is_published: article.is_published,
@@ -294,34 +283,18 @@ const ArticlesManagement = () => {
             </div>
 
             <div>
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="Article title"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="content">Content *</Label>
+              <Label htmlFor="content">Article Content *</Label>
               <Textarea
                 id="content"
                 value={formData.content}
                 onChange={(e) => handleInputChange("content", e.target.value)}
-                placeholder="Article content (HTML supported)"
-                rows={8}
+                placeholder="Write your article content here... You can use HTML tags for formatting, images, and videos. Example: &lt;p&gt;Your text here&lt;/p&gt; &lt;img src='image-url' /&gt; &lt;video src='video-url' controls&gt;&lt;/video&gt;"
+                rows={12}
+                className="font-mono text-sm"
               />
-            </div>
-
-            <div>
-              <Label htmlFor="featured_image">Featured Image URL</Label>
-              <Input
-                id="featured_image"
-                value={formData.featured_image}
-                onChange={(e) => handleInputChange("featured_image", e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
+              <p className="text-sm text-gray-600 mt-2">
+                💡 <strong>Tips:</strong> Use HTML tags for formatting. For images: &lt;img src="url" /&gt; For videos: &lt;video src="url" controls&gt;&lt;/video&gt;
+              </p>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -336,7 +309,7 @@ const ArticlesManagement = () => {
             <div className="flex gap-2">
               <Button
                 onClick={editingArticle ? handleUpdate : handleCreate}
-                disabled={!formData.exhibition_id || !formData.title || !formData.content}
+                disabled={!formData.exhibition_id || !formData.content}
               >
                 {editingArticle ? "Update Article" : "Create Article"}
               </Button>
