@@ -199,15 +199,15 @@ const Contact = () => {
                     </h2>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {contactInfo?.email && (
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <Mail className="w-6 h-6 text-palette-medium-blue" />
                         </div>
                         <a 
                           href={`mailto:${contactInfo.email}`}
-                          className="text-muted-foreground hover:text-palette-medium-blue transition-colors cursor-pointer"
+                          className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium"
                         >
                           {contactInfo.email}
                         </a>
@@ -215,13 +215,13 @@ const Contact = () => {
                     )}
 
                     {contactInfo?.phone && (
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <Phone className="w-6 h-6 text-palette-medium-blue" />
                         </div>
                         <a 
                           href={`tel:${contactInfo.phone}`}
-                          className="text-muted-foreground hover:text-palette-medium-blue transition-colors cursor-pointer"
+                          className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium"
                         >
                           {contactInfo.phone}
                         </a>
@@ -229,7 +229,7 @@ const Contact = () => {
                     )}
 
                     {contactInfo?.instagram && (
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <Instagram className="w-6 h-6 text-palette-medium-blue" />
                         </div>
@@ -237,7 +237,7 @@ const Contact = () => {
                           href={`https://instagram.com/${contactInfo.instagram.replace('@', '')}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-palette-medium-blue transition-colors cursor-pointer"
+                          className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium"
                         >
                           {contactInfo.instagram}
                         </a>
@@ -245,11 +245,11 @@ const Contact = () => {
                     )}
 
                     {contactInfo?.address && (
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
                         <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                           <MapPin className="w-6 h-6 text-palette-medium-blue" />
                         </div>
-                        <p className="text-muted-foreground whitespace-pre-line">
+                        <p className="text-foreground whitespace-pre-line font-medium">
                           {contactInfo.address}
                         </p>
                       </div>
@@ -258,19 +258,21 @@ const Contact = () => {
                     {/* Working Hours Section */}
                     {workingHours && workingHours.length > 0 && (
                       <div className="mt-8">
-                        <div className="flex items-center space-x-4 mb-4">
+                        <div className="flex items-center space-x-4 mb-6">
                           <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
                             <Clock className="w-6 h-6 text-palette-medium-blue" />
                           </div>
                           <h3 className="text-xl font-semibold text-foreground">Working Hours</h3>
                         </div>
-                        <div className="space-y-2 ml-16">
-                          {workingHours.map((hour) => (
-                            <div key={hour.id} className="flex justify-between items-center">
-                              <span className="font-medium text-foreground">{hour.day}</span>
-                              <span className="text-muted-foreground">{hour.time_frame}</span>
-                            </div>
-                          ))}
+                        <div className="bg-gray-50 rounded-lg p-4 md:p-6 ml-0 md:ml-16">
+                          <div className="space-y-3">
+                            {workingHours.map((hour) => (
+                              <div key={hour.id} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+                                <span className="font-medium text-foreground text-sm">{hour.day}</span>
+                                <span className="text-muted-foreground text-sm font-medium text-right">{hour.time_frame}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     )}
