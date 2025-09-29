@@ -38,7 +38,7 @@ const Contact = () => {
         newsletterData.name
       );
 
-      if ((data as any).success) {
+      if ((data as { success: boolean }).success) {
         toast({
           title: "Success!",
           description: "Thank you for subscribing to our newsletter!",
@@ -306,42 +306,76 @@ const Contact = () => {
                         </div>
 
                         <div className="space-y-3">
-                          {workingHours.map((hour, index) => (
-                            <div
-                              key={hour.id}
-                              className={`flex justify-between items-center p-4 rounded-xl transition-all duration-200 ${
-                                index % 2 === 0
-                                  ? "bg-white shadow-sm hover:shadow-md"
-                                  : "bg-gray-50 hover:bg-white hover:shadow-sm"
-                              }`}
-                            >
-                              <div className="flex items-center space-x-3">
-                                <div
-                                  className={`w-2 h-2 rounded-full ${
+                          {(() => {
+                            // Group working hours: Monday-Friday, Saturday, Sunday
+                            const weekdays = workingHours.filter(hour => 
+                              ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(hour.day)
+                            );
+                            const saturday = workingHours.find(hour => hour.day === 'Saturday');
+                            const sunday = workingHours.find(hour => hour.day === 'Sunday');
+                            
+                            const groupedHours = [];
+                            
+                            // Add Monday-Friday if all weekdays have the same time
+                            if (weekdays.length === 5) {
+                              const weekdayTimes = weekdays.map(h => h.time_frame);
+                              const allSameTime = weekdayTimes.every(time => time === weekdayTimes[0]);
+                              if (allSameTime) {
+                                groupedHours.push({
+                                  id: 'weekdays',
+                                  day: 'Monday - Friday',
+                                  time_frame: weekdayTimes[0],
+                                  is_active: weekdays[0].is_active
+                                });
+                              } else {
+                                // If different times, show individual days
+                                groupedHours.push(...weekdays);
+                              }
+                            } else {
+                              groupedHours.push(...weekdays);
+                            }
+                            
+                            // Add Saturday and Sunday
+                            if (saturday) groupedHours.push(saturday);
+                            if (sunday) groupedHours.push(sunday);
+                            
+                            return groupedHours.map((hour, index) => (
+                              <div
+                                key={hour.id}
+                                className={`flex justify-between items-center p-4 rounded-xl transition-all duration-200 ${
+                                  index % 2 === 0
+                                    ? "bg-white shadow-sm hover:shadow-md"
+                                    : "bg-gray-50 hover:bg-white hover:shadow-sm"
+                                }`}
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <div
+                                    className={`w-2 h-2 rounded-full ${
+                                      hour.time_frame
+                                        .toLowerCase()
+                                        .includes("closed")
+                                        ? "bg-gray-400"
+                                        : "bg-palette-medium-blue"
+                                    }`}
+                                  ></div>
+                                  <span className="font-semibold text-foreground">
+                                    {hour.day}
+                                  </span>
+                                </div>
+                                <span
+                                  className={`font-medium px-3 py-1 rounded-full text-sm whitespace-pre-line ${
                                     hour.time_frame
                                       .toLowerCase()
                                       .includes("closed")
-                                      ? "bg-gray-400"
-                                      : "bg-palette-medium-blue"
+                                      ? "bg-gray-100 text-gray-700"
+                                      : "bg-palette-medium-blue/10 text-palette-medium-blue"
                                   }`}
-                                ></div>
-                                <span className="font-semibold text-foreground">
-                                  {hour.day}
+                                >
+                                  {hour.time_frame?.replace(/,/g, "\n")}
                                 </span>
                               </div>
-                              <span
-                                className={`font-medium px-3 py-1 rounded-full text-sm whitespace-pre-line ${
-                                  hour.time_frame
-                                    .toLowerCase()
-                                    .includes("closed")
-                                    ? "bg-gray-100 text-gray-700"
-                                    : "bg-palette-medium-blue/10 text-palette-medium-blue"
-                                }`}
-                              >
-                                {hour.time_frame?.replace(/,/g, "\n")}
-                              </span>
-                            </div>
-                          ))}
+                            ));
+                          })()}
                         </div>
                       </div>
                     )}

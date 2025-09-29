@@ -18,7 +18,7 @@ interface ExhibitionCardProps {
     cta_link?: string;
     featured_image?: string;
     gallery_images?: string[];
-    assigned_artworks?: any[];
+    assigned_artworks?: unknown[];
   };
   onExhibitionClick: (slug: string) => void;
 }
@@ -64,7 +64,7 @@ const ExhibitionCard = ({
       className="border-2 border-transparent overflow-hidden cursor-pointer h-full flex flex-col"
       onClick={() => onExhibitionClick(exhibition.slug)}
     >
-      <div className="aspect-[3/4] bg-gradient-to-br from-theme-primary/20 to-theme-primary/5 relative overflow-hidden flex-shrink-0">
+      <div className="bg-gradient-to-br from-theme-primary/20 to-theme-primary/5 relative overflow-hidden flex-shrink-0">
         {/* Featured Image Background */}
         {exhibition.featured_image &&
         exhibition.featured_image !== "null" &&
@@ -72,13 +72,13 @@ const ExhibitionCard = ({
           <img
             src={exhibition.featured_image}
             alt={exhibition.title}
-            className="w-full h-full object-contain"
+            className="w-full h-auto object-contain"
             onError={(e) => {
               // Fallback to placeholder if image fails to load
               const target = e.target as HTMLImageElement;
               target.style.display = "none";
               target.parentElement!.innerHTML = `
-                          <div class="w-full h-full flex items-center justify-center">
+                          <div class="w-full h-64 flex items-center justify-center">
                             <div class="text-center text-theme-text-muted">
                               <div class="w-16 h-16 mx-auto mb-4 bg-theme-primary/20 rounded-full flex items-center justify-center">
                                 <svg class="w-8 h-8 text-theme-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@ const ExhibitionCard = ({
             }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="w-full h-64 flex items-center justify-center">
             <div className="text-center text-theme-text-muted">
               <div className="w-16 h-16 mx-auto mb-4 bg-theme-primary/20 rounded-full flex items-center justify-center">
                 <Calendar className="w-8 h-8 text-theme-primary" />
@@ -155,7 +155,7 @@ const ExhibitionCard = ({
           )}
 
           {(exhibition.call_for_artists === true ||
-            exhibition.call_for_artists === 1) &&
+            String(exhibition.call_for_artists) === "1") &&
             exhibition.cta_link && (
               <div className="mt-auto">
                 <Button

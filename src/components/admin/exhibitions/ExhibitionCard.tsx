@@ -137,11 +137,11 @@ const ExhibitionCard = ({
       </CardHeader>
       <CardContent className="space-y-4">
         {exhibition.featuredImage && (
-          <div className="aspect-[3/4] w-full overflow-hidden rounded-lg">
+          <div className="w-full overflow-hidden rounded-lg">
             <img
               src={exhibition.featuredImage}
               alt={exhibition.title}
-              className="h-full w-full object-contain"
+              className="w-full h-auto object-contain"
             />
           </div>
         )}
