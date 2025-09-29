@@ -26,7 +26,7 @@ import {
   Undo,
   Redo
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface RichTextEditorProps {
   content: string;
@@ -48,6 +48,8 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded-lg',
         },
+        allowBase64: true,
+        inline: false,
       }),
       Link.configure({
         openOnClick: false,
@@ -66,7 +68,9 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
     ],
     content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      console.log('Editor HTML output:', html);
+      onChange(html);
     },
     editorProps: {
       attributes: {
@@ -76,19 +80,48 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
     },
   });
 
+  // Update editor content when content prop changes
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      console.log('Setting editor content:', content);
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
+
   const addImage = () => {
     if (imageUrl && editor) {
       // Handle Google Drive links
-      let processedUrl = imageUrl;
-      if (imageUrl.includes('drive.google.com')) {
-        // Convert Google Drive share link to direct image link
-        const fileId = imageUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1];
+      let processedUrl = imageUrl.trim();
+      
+      // Handle different Google Drive link formats
+      if (processedUrl.includes('drive.google.com')) {
+        // Extract file ID from various Google Drive link formats
+        let fileId = null;
+        
+        // Format 1: https://drive.google.com/file/d/FILE_ID/view
+        const fileMatch = processedUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+        if (fileMatch) {
+          fileId = fileMatch[1];
+        }
+        
+        // Format 2: https://drive.google.com/uc?export=view&id=FILE_ID
+        const ucMatch = processedUrl.match(/[?&]id=([a-zA-Z0-9-_]+)/);
+        if (ucMatch) {
+          fileId = ucMatch[1];
+        }
+        
         if (fileId) {
           processedUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
         }
       }
       
-      editor.chain().focus().setImage({ src: processedUrl }).run();
+      // Insert image with proper attributes
+      editor.chain().focus().setImage({ 
+        src: processedUrl,
+        alt: 'Image',
+        class: 'max-w-full h-auto rounded-lg'
+      }).run();
+      
       setImageUrl('');
       setShowImageDialog(false);
     }
