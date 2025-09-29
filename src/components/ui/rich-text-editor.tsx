@@ -6,6 +6,7 @@ import { TextAlign } from '@tiptap/extension-text-align';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { FontFamily } from '@tiptap/extension-font-family';
+import { HTML } from '@tiptap/extension-html';
 import { Button } from './button';
 import { 
   Bold, 
@@ -70,6 +71,9 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       TextStyle,
       FontFamily.configure({
         types: ['textStyle'],
+      }),
+      HTML.configure({
+        allowEmpty: true,
       }),
     ],
     content,
@@ -208,14 +212,13 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
         console.log('Extracted video ID:', videoId);
         
         if (videoId) {
-          // Try a simpler approach first - just insert a placeholder div
-          const simpleHtml = `<div class="youtube-placeholder" data-youtube-url="${videoUrl}" data-video-id="${videoId}" style="background: #f0f0f0; border: 2px dashed #ccc; padding: 20px; text-align: center; margin: 10px 0; border-radius: 8px;">
-            <p style="margin: 0; color: #666;">📺 YouTube Video: ${videoId}</p>
-            <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">${videoUrl}</p>
-          </div>`;
+          // Try inserting as a blockquote with special content
+          const videoContent = `[YOUTUBE:${videoId}:${videoUrl}]`;
           
-          console.log('Inserting HTML:', simpleHtml);
-          editor.chain().focus().insertContent(simpleHtml).run();
+          console.log('Inserting video content:', videoContent);
+          
+          // Insert as text first, then we'll convert it on the frontend
+          editor.chain().focus().insertContent(videoContent).run();
           
           // Ensure onChange is called immediately after video insertion
           setTimeout(() => {
@@ -226,7 +229,7 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
           
           toast({
             title: "Video Added",
-            description: "YouTube video placeholder added to editor",
+            description: "YouTube video added to editor",
           });
           
           setVideoUrl('');

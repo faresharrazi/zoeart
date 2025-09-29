@@ -401,14 +401,13 @@ const ExhibitionDetail = () => {
                     dangerouslySetInnerHTML={{ __html: article.content }}
                     ref={(el) => {
                       if (el) {
-                        // Convert YouTube placeholders to actual embeds
-                        const placeholders = el.querySelectorAll('.youtube-placeholder');
-                        placeholders.forEach((placeholder) => {
-                          const videoId = placeholder.getAttribute('data-video-id');
-                          const youtubeUrl = placeholder.getAttribute('data-youtube-url');
-                          
-                          if (videoId) {
-                            const embedHtml = `
+                        // Convert YouTube markers to actual embeds
+                        const html = el.innerHTML;
+                        const youtubeRegex = /\[YOUTUBE:([^:]+):([^\]]+)\]/g;
+                        
+                        if (youtubeRegex.test(html)) {
+                          const newHtml = html.replace(youtubeRegex, (match, videoId, youtubeUrl) => {
+                            return `
                               <div class="youtube-embed" data-youtube-url="${youtubeUrl}" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 8px; margin: 1rem 0;">
                                 <iframe 
                                   style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
@@ -419,9 +418,9 @@ const ExhibitionDetail = () => {
                                 </iframe>
                               </div>
                             `;
-                            placeholder.outerHTML = embedHtml;
-                          }
-                        });
+                          });
+                          el.innerHTML = newHtml;
+                        }
                       }
                     }}
                   />
