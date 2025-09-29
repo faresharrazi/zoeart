@@ -110,14 +110,19 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       const response = await apiClient.uploadFile(file, 'article');
       
       if (response.success && response.file) {
-        // Insert the uploaded image into the editor
-        editor.chain().focus().setImage({ 
-          src: `/api/files/${response.file.id}`,
-          alt: response.file.originalName || 'Image',
-          class: 'max-w-full h-auto rounded-lg'
-        }).run();
-        
-        setShowImageDialog(false);
+      // Insert the uploaded image into the editor
+      editor.chain().focus().setImage({ 
+        src: `/api/files/${response.file.id}`,
+        alt: response.file.originalName || 'Image',
+        class: 'max-w-full h-auto rounded-lg'
+      }).run();
+      
+      // Ensure onChange is called immediately after image insertion
+      setTimeout(() => {
+        onChange(editor.getHTML());
+      }, 100);
+      
+      setShowImageDialog(false);
       } else {
         alert('Failed to upload image');
       }
@@ -140,6 +145,12 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       } else {
         editor.chain().focus().setLink({ href: linkUrl }).run();
       }
+      
+      // Ensure onChange is called immediately after link insertion
+      setTimeout(() => {
+        onChange(editor.getHTML());
+      }, 100);
+      
       setLinkUrl('');
       setLinkText('');
       setShowLinkDialog(false);
@@ -167,6 +178,11 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       
       if (videoHtml) {
         editor.chain().focus().insertContent(videoHtml).run();
+        
+        // Ensure onChange is called immediately after video insertion
+        setTimeout(() => {
+          onChange(editor.getHTML());
+        }, 100);
       }
     }
   };
