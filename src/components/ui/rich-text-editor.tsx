@@ -6,7 +6,6 @@ import { TextAlign } from '@tiptap/extension-text-align';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { FontFamily } from '@tiptap/extension-font-family';
-import { HTML } from '@tiptap/extension-html';
 import { Button } from './button';
 import { 
   Bold, 
@@ -71,9 +70,6 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       TextStyle,
       FontFamily.configure({
         types: ['textStyle'],
-      }),
-      HTML.configure({
-        allowEmpty: true,
       }),
     ],
     content,
