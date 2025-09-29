@@ -116,7 +116,10 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
         const videoId = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
         if (videoId) {
-          videoHtml = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="max-w-full h-auto rounded-lg"></iframe>`;
+          // Use a safer approach - create a div with YouTube embed
+          videoHtml = `<div class="youtube-embed" data-video-id="${videoId}" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 8px;">
+            <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>`;
         }
       } else {
         // Regular video URL

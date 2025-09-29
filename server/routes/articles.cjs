@@ -163,7 +163,7 @@ router.get(
 
 // POST /api/admin/articles - Create new article (admin)
 router.post(
-  "/admin",
+  "/",
   authenticateToken,
   asyncHandler(async (req, res) => {
     const {
@@ -215,7 +215,7 @@ router.post(
 );
 
 // PUT /api/admin/articles/:id - Update article (admin)
-router.put("/admin/:id", authenticateToken, async (req, res) => {
+router.put("/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -287,7 +287,7 @@ router.put("/admin/:id", authenticateToken, async (req, res) => {
 });
 
 // DELETE /api/admin/articles/:id - Delete article (admin)
-router.delete("/admin/:id", authenticateToken, async (req, res) => {
+router.delete("/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
