@@ -196,103 +196,142 @@ const Contact = () => {
                 contactInfo?.instagram ||
                 contactInfo?.address) && (
                 <div className="space-y-8">
-                  <div>
-                    <h2 className="text-3xl  text-foreground mb-6">
-                      Contact Information
+                  <div className="text-center">
+                    <h2 className="text-3xl font-bold text-foreground mb-4">
+                      Get In Touch
                     </h2>
+                    <p className="text-muted-foreground text-lg">
+                      Visit our gallery or reach out for exhibition details, collaborations, and artist inquiries.
+                    </p>
                   </div>
 
-                  <div className="space-y-4">
-                    {contactInfo?.email && (
-                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
-                          <Mail className="w-6 h-6 text-palette-medium-blue" />
+                  {/* Contact Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Contact Information Card */}
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg border border-gray-100">
+                      <div className="flex items-center mb-6">
+                        <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-blue-600 rounded-xl flex items-center justify-center mr-4">
+                          <Mail className="w-6 h-6 text-white" />
                         </div>
-                        <a
-                          href={`mailto:${contactInfo.email}`}
-                          className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium"
-                        >
-                          {contactInfo.email}
-                        </a>
+                        <h3 className="text-xl font-bold text-foreground">Contact Us</h3>
                       </div>
-                    )}
-
-                    {contactInfo?.phone && (
-                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
-                          <Phone className="w-6 h-6 text-palette-medium-blue" />
-                        </div>
-                        <a
-                          href={`tel:${contactInfo.phone}`}
-                          className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium"
-                        >
-                          {contactInfo.phone}
-                        </a>
-                      </div>
-                    )}
-
-                    {contactInfo?.instagram && (
-                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
-                          <Instagram className="w-6 h-6 text-palette-medium-blue" />
-                        </div>
-                        <a
-                          href={`https://instagram.com/${contactInfo.instagram.replace(
-                            "@",
-                            ""
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium"
-                        >
-                          {contactInfo.instagram}
-                        </a>
-                      </div>
-                    )}
-
-                    {contactInfo?.address && (
-                      <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
-                          <MapPin className="w-6 h-6 text-palette-medium-blue" />
-                        </div>
-                        <a 
-                          href="https://maps.google.com/?q=Mark.+Mpostsari+7+Glyfada+16675"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-foreground hover:text-palette-medium-blue transition-colors cursor-pointer font-medium whitespace-pre-line"
-                        >
-                          {contactInfo.address}
-                        </a>
-                      </div>
-                    )}
-
-                    {/* Working Hours Section */}
-                    {workingHours && workingHours.length > 0 && (
-                      <div className="mt-8">
-                        <div className="flex items-center space-x-4 mb-6">
-                          <div className="flex-shrink-0 w-12 h-12 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-palette-medium-blue" />
-                          </div>
-                          <h3 className="text-xl font-semibold text-foreground">
-                            Working Hours
-                          </h3>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-4 md:p-6 ml-0 md:ml-16">
-                          <div className="space-y-3">
-                            {workingHours.map((hour) => (
-                              <div
-                                key={hour.id}
-                                className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0"
+                      
+                      <div className="space-y-4">
+                        {contactInfo?.email && (
+                          <div className="group">
+                            <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
+                              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                                <Mail className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <a 
+                                href={`mailto:${contactInfo.email}`}
+                                className="text-foreground hover:text-blue-600 transition-colors font-medium"
                               >
-                                <span className="font-medium text-foreground text-sm">
+                                {contactInfo.email}
+                              </a>
+                            </div>
+                          </div>
+                        )}
+
+                        {contactInfo?.phone && (
+                          <div className="group">
+                            <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
+                              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors">
+                                <Phone className="w-5 h-5 text-green-600" />
+                              </div>
+                              <a 
+                                href={`tel:${contactInfo.phone}`}
+                                className="text-foreground hover:text-green-600 transition-colors font-medium"
+                              >
+                                {contactInfo.phone}
+                              </a>
+                            </div>
+                          </div>
+                        )}
+
+                        {contactInfo?.instagram && (
+                          <div className="group">
+                            <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
+                              <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center group-hover:bg-pink-100 transition-colors">
+                                <Instagram className="w-5 h-5 text-pink-600" />
+                              </div>
+                              <a 
+                                href={`https://instagram.com/${contactInfo.instagram.replace("@", "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-foreground hover:text-pink-600 transition-colors font-medium"
+                              >
+                                {contactInfo.instagram}
+                              </a>
+                            </div>
+                          </div>
+                        )}
+
+                        {contactInfo?.address && (
+                          <div className="group">
+                            <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
+                              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+                                <MapPin className="w-5 h-5 text-purple-600" />
+                              </div>
+                              <a 
+                                href="https://maps.google.com/?q=Mark.+Mpostsari+7+Glyfada+16675"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-foreground hover:text-purple-600 transition-colors font-medium whitespace-pre-line"
+                              >
+                                {contactInfo.address}
+                              </a>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Working Hours Card */}
+                    {workingHours && workingHours.length > 0 && (
+                      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg border border-gray-100">
+                        <div className="flex items-center mb-6">
+                          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
+                            <Clock className="w-6 h-6 text-white" />
+                          </div>
+                          <h3 className="text-xl font-bold text-foreground">Gallery Hours</h3>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          {workingHours.map((hour, index) => (
+                            <div
+                              key={hour.id}
+                              className={`flex justify-between items-center p-4 rounded-xl transition-all duration-200 ${
+                                index % 2 === 0 
+                                  ? 'bg-white shadow-sm hover:shadow-md' 
+                                  : 'bg-gray-50 hover:bg-white hover:shadow-sm'
+                              }`}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <div className={`w-2 h-2 rounded-full ${
+                                  hour.time_frame.toLowerCase().includes('closed') 
+                                    ? 'bg-red-400' 
+                                    : 'bg-green-400'
+                                }`}></div>
+                                <span className="font-semibold text-foreground">
                                   {hour.day}
                                 </span>
-                                <span className="text-muted-foreground text-sm font-medium text-right">
-                                  {hour.time_frame}
-                                </span>
                               </div>
-                            ))}
-                          </div>
+                              <span className={`font-medium px-3 py-1 rounded-full text-sm ${
+                                hour.time_frame.toLowerCase().includes('closed')
+                                  ? 'bg-red-100 text-red-700'
+                                  : 'bg-green-100 text-green-700'
+                              }`}>
+                                {hour.time_frame}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                          <p className="text-blue-800 text-sm font-medium text-center">
+                            💡 We welcome conversations that spark new artistic connections
+                          </p>
                         </div>
                       </div>
                     )}
