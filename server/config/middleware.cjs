@@ -12,7 +12,7 @@ const corsOptions = {
       return callback(null, true);
     }
     
-    // In production, you can add specific domains here
+    // In production, allow specific domains and Vercel preview URLs
     const allowedOrigins = [
       "https://zoeart.vercel.app",
       "https://www.zoeart.vercel.app",
@@ -20,10 +20,38 @@ const corsOptions = {
       "https://www.aetherartspace.com"
     ];
     
+    // Check if it's an allowed origin
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     
+    // Allow Vercel preview URLs (dynamic subdomains)
+    // Pattern: https://zoeart-[hash]-[username].vercel.app
+    const vercelPreviewPattern = /^https:\/\/zoeart-[a-zA-Z0-9]+-[a-zA-Z0-9-]+\.vercel\.app$/;
+    if (vercelPreviewPattern.test(origin)) {
+      console.log(`Allowing Vercel preview URL: ${origin}`);
+      return callback(null, true);
+    }
+    
+    // Allow any Vercel preview URL for this project
+    // Pattern: https://[project-name]-[hash]-[username].vercel.app
+    const vercelProjectPattern = /^https:\/\/[a-zA-Z0-9-]+-[a-zA-Z0-9]+-[a-zA-Z0-9-]+\.vercel\.app$/;
+    if (vercelProjectPattern.test(origin)) {
+      console.log(`Allowing Vercel project URL: ${origin}`);
+      return callback(null, true);
+    }
+    
+    // Allow additional origins from environment variable (comma-separated)
+    const additionalOrigins = process.env.ALLOWED_ORIGINS;
+    if (additionalOrigins) {
+      const origins = additionalOrigins.split(',').map(o => o.trim());
+      if (origins.includes(origin)) {
+        console.log(`Allowing additional origin: ${origin}`);
+        return callback(null, true);
+      }
+    }
+    
+    console.log(`CORS blocked origin: ${origin}`);
     callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
