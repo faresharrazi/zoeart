@@ -102,13 +102,6 @@ const ExhibitionCard = ({
           </div>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-        <div className="absolute top-4 left-4">
-          <Badge className={`${getStatusColor(exhibition.status)} `}>
-            {exhibition.status}
-          </Badge>
-        </div>
-
         {/* Picture Count Badge */}
         {exhibition.gallery_images && exhibition.gallery_images.length > 1 && (
           <div className="absolute top-4 right-4">
@@ -123,9 +116,14 @@ const ExhibitionCard = ({
       <CardContent className="p-6 flex-grow flex flex-col">
         <div className="space-y-4 flex-grow">
           <div>
-            <h3 className="text-xl  text-theme-text-primary mb-2">
-              {exhibition.title}
-            </h3>
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="text-xl text-theme-text-primary">
+                {exhibition.title}
+              </h3>
+              <Badge className={`${getStatusColor(exhibition.status)} text-xs`}>
+                {exhibition.status}
+              </Badge>
+            </div>
             {exhibition.curator && (
               <p className="text-sm text-theme-text-muted ">
                 Curated by {exhibition.curator}
