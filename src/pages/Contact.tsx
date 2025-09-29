@@ -207,7 +207,7 @@ const Contact = () => {
                   </div>
 
                   {/* Contact Cards Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto items-stretch">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl md:max-w-3xl lg:max-w-6xl mx-auto items-stretch">
                     {/* Contact Information Card */}
                     <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100 w-full h-full flex flex-col">
                       <div className="flex items-center mb-6">
