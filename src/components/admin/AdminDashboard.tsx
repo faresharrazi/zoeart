@@ -5,6 +5,7 @@ import AdminSidebar from "./AdminSidebar";
 import ArtworkManagement from "./artworks/ArtworkManagement";
 import ArtistManagement from "./artists/ArtistManagement";
 import ExhibitionManagement from "./exhibitions/ExhibitionManagement";
+import ArticlesManagement from "./articles/ArticlesManagement";
 import NewsletterManagement from "./newsletter/NewsletterManagement";
 import PageContentManagement from "./page-content/PageContentManagement";
 import UserManagement from "./UserManagement";
@@ -35,6 +36,8 @@ const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
         return <ArtistManagement />;
       case "exhibitions":
         return <ExhibitionManagement />;
+      case "articles":
+        return <ArticlesManagement />;
       case "newsletter":
         return <NewsletterManagement />;
       case "pages":

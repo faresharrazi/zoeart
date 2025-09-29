@@ -9,6 +9,7 @@ import {
   X,
   Mail,
   UserCog,
+  BookOpen,
   // Settings, // Removed theme management
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ interface AdminSidebarProps {
 
 const menuItems = [
   { id: "exhibitions", label: "Exhibitions", icon: Calendar },
+  { id: "articles", label: "Articles", icon: BookOpen },
   { id: "artists", label: "Artists", icon: Users },
   { id: "artworks", label: "Artworks", icon: Palette },
   { id: "newsletter", label: "Newsletter", icon: Mail },

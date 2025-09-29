@@ -466,6 +466,59 @@ class ApiClient {
     });
   }
 
+  // Articles
+  async getArticles() {
+    return this.request("/articles");
+  }
+
+  async getArticle(id: number) {
+    return this.request(`/articles/${id}`);
+  }
+
+  async getArticleByExhibition(exhibitionId: number) {
+    return this.request(`/articles/exhibition/${exhibitionId}`);
+  }
+
+  // Admin Articles
+  async getAdminArticles() {
+    return this.request("/admin/articles");
+  }
+
+  async createArticle(articleData: {
+    exhibition_id: number;
+    title: string;
+    content: string;
+    featured_image?: string;
+    media_files?: string[];
+    author?: string;
+    is_published?: boolean;
+  }) {
+    return this.request("/admin/articles", {
+      method: "POST",
+      body: JSON.stringify(articleData),
+    });
+  }
+
+  async updateArticle(id: number, articleData: {
+    title?: string;
+    content?: string;
+    featured_image?: string;
+    media_files?: string[];
+    author?: string;
+    is_published?: boolean;
+  }) {
+    return this.request(`/admin/articles/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(articleData),
+    });
+  }
+
+  async deleteArticle(id: number) {
+    return this.request(`/admin/articles/${id}`, {
+      method: "DELETE",
+    });
+  }
+
   // Health check
   async healthCheck() {
     return this.request("/health");

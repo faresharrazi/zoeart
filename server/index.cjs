@@ -30,6 +30,7 @@ const fileRoutes = require("./routes/files.cjs");
 const aboutBlocksRoutes = require("./routes/about-blocks.cjs");
 const userRoutes = require("./routes/users.cjs");
 const workingHoursRoutes = require("./routes/working-hours.cjs");
+const articlesRoutes = require("./routes/articles.cjs");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -68,6 +69,7 @@ app.use("/api/files", fileRoutes);
 app.use("/api/about-blocks", aboutBlocksRoutes);
 app.use("/api/admin/user", userRoutes);
 app.use("/api/working-hours", workingHoursRoutes);
+app.use("/api/articles", articlesRoutes);
 
 // Admin API Routes (with authentication)
 app.use("/api/admin/newsletter", newsletterRoutes);
@@ -79,6 +81,7 @@ app.use("/api/admin/contact-info", pageRoutes);
 app.use("/api/admin/files", fileRoutes);
 app.use("/api/admin/about-blocks", aboutBlocksRoutes);
 app.use("/api/admin/working-hours", workingHoursRoutes);
+app.use("/api/admin/articles", articlesRoutes);
 
 // Error handling middleware
 app.use(errorLogger);
