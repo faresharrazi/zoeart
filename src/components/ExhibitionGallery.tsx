@@ -66,10 +66,6 @@ const ExhibitionGallery = ({
           <h2 className="text-3xl  text-theme-text-primary mb-4">
             {title}
           </h2>
-          <p className="text-theme-text-muted">
-            Click on any image to view in full size and navigate through the
-            gallery
-          </p>
         </div>
 
         {/* Album View */}

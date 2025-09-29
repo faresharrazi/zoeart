@@ -1,5 +1,5 @@
 import { Instagram, MapPin, Phone, Mail } from "lucide-react";
-const logoFooter = "/logo/Aether_art_space_footer_logo.png";
+const logoFooter = "/logo/logo-footer.png";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 
 const Footer = () => {

@@ -357,9 +357,6 @@ const ExhibitionDetail = () => {
               Array.isArray(exhibition.gallery_images) &&
               exhibition.gallery_images.length > 0 && (
                 <div className="mb-12">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                    Gallery
-                  </h2>
                   <ExhibitionGallery images={exhibition.gallery_images} />
                 </div>
               )}
@@ -412,7 +409,7 @@ const ExhibitionDetail = () => {
                   />
                   
                   {/* Custom CSS for article content */}
-                  <style jsx>{`
+                  <style>{`
                     .prose h1 {
                       font-size: 2rem !important;
                       font-weight: bold !important;

@@ -342,7 +342,7 @@ const Contact = () => {
                             return groupedHours.map((hour, index) => (
                               <div
                                 key={hour.id}
-                                className={`flex justify-between items-center p-4 rounded-xl transition-all duration-200 ${
+                                className={`flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 rounded-xl transition-all duration-200 ${
                                   index % 2 === 0
                                     ? "bg-white shadow-sm hover:shadow-md"
                                     : "bg-gray-50 hover:bg-white hover:shadow-sm"
@@ -363,7 +363,7 @@ const Contact = () => {
                                   </span>
                                 </div>
                                 <span
-                                  className={`font-medium px-3 py-1 rounded-full text-sm whitespace-pre-line ${
+                                  className={`font-medium px-3 py-1 rounded-full text-sm whitespace-pre-line text-center min-w-[120px] mt-2 sm:mt-0 ${
                                     hour.time_frame
                                       .toLowerCase()
                                       .includes("closed")
@@ -371,7 +371,10 @@ const Contact = () => {
                                       : "bg-palette-medium-blue/10 text-palette-medium-blue"
                                   }`}
                                 >
-                                  {hour.time_frame?.replace(/,/g, "\n")}
+                                  {hour.time_frame
+                                    ?.replace(/,/g, "\n")
+                                    ?.replace(/\s+/g, " ")
+                                    ?.trim()}
                                 </span>
                               </div>
                             ));
