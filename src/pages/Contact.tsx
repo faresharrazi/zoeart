@@ -210,7 +210,7 @@ const Contact = () => {
                     {/* Contact Information Card */}
                     <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg border border-gray-100">
                       <div className="flex items-center mb-6">
-                        <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-blue-600 rounded-xl flex items-center justify-center mr-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4">
                           <Mail className="w-6 h-6 text-white" />
                         </div>
                         <h3 className="text-xl font-bold text-foreground">Contact Us</h3>
@@ -220,12 +220,12 @@ const Contact = () => {
                         {contactInfo?.email && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
-                              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                                <Mail className="w-5 h-5 text-blue-600" />
+                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
+                                <Mail className="w-5 h-5 text-palette-medium-blue" />
                               </div>
                               <a 
                                 href={`mailto:${contactInfo.email}`}
-                                className="text-foreground hover:text-blue-600 transition-colors font-medium"
+                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium"
                               >
                                 {contactInfo.email}
                               </a>
@@ -236,12 +236,12 @@ const Contact = () => {
                         {contactInfo?.phone && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
-                              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                                <Phone className="w-5 h-5 text-green-600" />
+                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
+                                <Phone className="w-5 h-5 text-palette-medium-blue" />
                               </div>
                               <a 
                                 href={`tel:${contactInfo.phone}`}
-                                className="text-foreground hover:text-green-600 transition-colors font-medium"
+                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium"
                               >
                                 {contactInfo.phone}
                               </a>
@@ -252,14 +252,14 @@ const Contact = () => {
                         {contactInfo?.instagram && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
-                              <div className="w-10 h-10 bg-pink-50 rounded-lg flex items-center justify-center group-hover:bg-pink-100 transition-colors">
-                                <Instagram className="w-5 h-5 text-pink-600" />
+                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
+                                <Instagram className="w-5 h-5 text-palette-medium-blue" />
                               </div>
                               <a 
                                 href={`https://instagram.com/${contactInfo.instagram.replace("@", "")}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-foreground hover:text-pink-600 transition-colors font-medium"
+                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium"
                               >
                                 {contactInfo.instagram}
                               </a>
@@ -270,14 +270,14 @@ const Contact = () => {
                         {contactInfo?.address && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
-                              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center group-hover:bg-purple-100 transition-colors">
-                                <MapPin className="w-5 h-5 text-purple-600" />
+                              <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
+                                <MapPin className="w-5 h-5 text-palette-medium-blue" />
                               </div>
                               <a 
                                 href="https://maps.google.com/?q=Mark.+Mpostsari+7+Glyfada+16675"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-foreground hover:text-purple-600 transition-colors font-medium whitespace-pre-line"
+                                className="text-foreground hover:text-palette-medium-blue transition-colors font-medium whitespace-pre-line"
                               >
                                 {contactInfo.address}
                               </a>
@@ -291,7 +291,7 @@ const Contact = () => {
                     {workingHours && workingHours.length > 0 && (
                       <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg border border-gray-100">
                         <div className="flex items-center mb-6">
-                          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4">
                             <Clock className="w-6 h-6 text-white" />
                           </div>
                           <h3 className="text-xl font-bold text-foreground">Gallery Hours</h3>
@@ -310,8 +310,8 @@ const Contact = () => {
                               <div className="flex items-center space-x-3">
                                 <div className={`w-2 h-2 rounded-full ${
                                   hour.time_frame.toLowerCase().includes('closed') 
-                                    ? 'bg-red-400' 
-                                    : 'bg-green-400'
+                                    ? 'bg-gray-400' 
+                                    : 'bg-palette-medium-blue'
                                 }`}></div>
                                 <span className="font-semibold text-foreground">
                                   {hour.day}
@@ -319,8 +319,8 @@ const Contact = () => {
                               </div>
                               <span className={`font-medium px-3 py-1 rounded-full text-sm ${
                                 hour.time_frame.toLowerCase().includes('closed')
-                                  ? 'bg-red-100 text-red-700'
-                                  : 'bg-green-100 text-green-700'
+                                  ? 'bg-gray-100 text-gray-700'
+                                  : 'bg-palette-medium-blue/10 text-palette-medium-blue'
                               }`}>
                                 {hour.time_frame}
                               </span>
@@ -328,8 +328,8 @@ const Contact = () => {
                           ))}
                         </div>
                         
-                        <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                          <p className="text-blue-800 text-sm font-medium text-center">
+                        <div className="mt-6 p-4 bg-palette-medium-blue/5 rounded-xl border border-palette-medium-blue/20">
+                          <p className="text-palette-medium-blue text-sm font-medium text-center">
                             💡 We welcome conversations that spark new artistic connections
                           </p>
                         </div>
