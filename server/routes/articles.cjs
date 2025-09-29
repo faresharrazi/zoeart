@@ -116,6 +116,8 @@ router.get("/exhibition/:exhibitionId", async (req, res) => {
 // GET /api/admin/articles - Get all articles (admin)
 router.get("/admin", authenticateToken, async (req, res) => {
   try {
+    console.log("Fetching admin articles...");
+    
     const result = await query(`
       SELECT 
         a.*,
@@ -126,15 +128,24 @@ router.get("/admin", authenticateToken, async (req, res) => {
       ORDER BY a.created_at DESC
     `);
 
+    console.log("Articles query successful, found:", result.rows.length, "articles");
+    
     res.json({
       success: true,
       data: result.rows,
     });
   } catch (error) {
     console.error("Error fetching admin articles:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      detail: error.detail,
+      hint: error.hint
+    });
     res.status(500).json({
       success: false,
       message: "Failed to fetch articles",
+      error: error.message
     });
   }
 });
