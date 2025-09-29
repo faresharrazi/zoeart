@@ -228,35 +228,6 @@ const ArticlesManagement = () => {
     );
   }
 
-  // Check if we got a message about table not existing
-  if (articles.length === 0 && !error) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-foreground">Articles Management</h2>
-        </div>
-        
-        <div className="text-center py-12">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold text-blue-900 mb-4">
-              Database Migration Required
-            </h3>
-            <p className="text-blue-700 mb-4">
-              The articles table hasn't been created yet. To use the articles feature, you need to run the database migration.
-            </p>
-            <div className="bg-blue-100 rounded-lg p-4 text-left">
-              <p className="text-sm text-blue-800 font-mono">
-                1. Run the SQL script: <code>create-articles-table.sql</code>
-              </p>
-              <p className="text-sm text-blue-800 font-mono mt-2">
-                2. Or execute the migration in your database admin panel
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
