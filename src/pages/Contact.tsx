@@ -201,7 +201,8 @@ const Contact = () => {
                       Get In Touch
                     </h2>
                     <p className="text-muted-foreground text-lg">
-                      Visit our gallery or reach out for exhibition details, collaborations, and artist inquiries.
+                      Visit our gallery or reach out for exhibition details,
+                      collaborations, and artist inquiries.
                     </p>
                   </div>
 
@@ -213,9 +214,11 @@ const Contact = () => {
                         <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4">
                           <Mail className="w-6 h-6 text-white" />
                         </div>
-                        <h3 className="text-xl font-bold text-foreground">Contact Us</h3>
+                        <h3 className="text-xl font-bold text-foreground">
+                          Contact Us
+                        </h3>
                       </div>
-                      
+
                       <div className="space-y-4">
                         {contactInfo?.email && (
                           <div className="group">
@@ -223,7 +226,7 @@ const Contact = () => {
                               <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
                                 <Mail className="w-5 h-5 text-palette-medium-blue" />
                               </div>
-                              <a 
+                              <a
                                 href={`mailto:${contactInfo.email}`}
                                 className="text-foreground hover:text-palette-medium-blue transition-colors font-medium"
                               >
@@ -239,7 +242,7 @@ const Contact = () => {
                               <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
                                 <Phone className="w-5 h-5 text-palette-medium-blue" />
                               </div>
-                              <a 
+                              <a
                                 href={`tel:${contactInfo.phone}`}
                                 className="text-foreground hover:text-palette-medium-blue transition-colors font-medium"
                               >
@@ -255,8 +258,11 @@ const Contact = () => {
                               <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
                                 <Instagram className="w-5 h-5 text-palette-medium-blue" />
                               </div>
-                              <a 
-                                href={`https://instagram.com/${contactInfo.instagram.replace("@", "")}`}
+                              <a
+                                href={`https://instagram.com/${contactInfo.instagram.replace(
+                                  "@",
+                                  ""
+                                )}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-foreground hover:text-palette-medium-blue transition-colors font-medium"
@@ -273,7 +279,7 @@ const Contact = () => {
                               <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors">
                                 <MapPin className="w-5 h-5 text-palette-medium-blue" />
                               </div>
-                              <a 
+                              <a
                                 href="https://maps.google.com/?q=Mark.+Mpostsari+7+Glyfada+16675"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -294,43 +300,54 @@ const Contact = () => {
                           <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4">
                             <Clock className="w-6 h-6 text-white" />
                           </div>
-                          <h3 className="text-xl font-bold text-foreground">Gallery Hours</h3>
+                          <h3 className="text-xl font-bold text-foreground">
+                            Gallery Hours
+                          </h3>
                         </div>
-                        
+
                         <div className="space-y-3">
                           {workingHours.map((hour, index) => (
                             <div
                               key={hour.id}
                               className={`flex justify-between items-center p-4 rounded-xl transition-all duration-200 ${
-                                index % 2 === 0 
-                                  ? 'bg-white shadow-sm hover:shadow-md' 
-                                  : 'bg-gray-50 hover:bg-white hover:shadow-sm'
+                                index % 2 === 0
+                                  ? "bg-white shadow-sm hover:shadow-md"
+                                  : "bg-gray-50 hover:bg-white hover:shadow-sm"
                               }`}
                             >
                               <div className="flex items-center space-x-3">
-                                <div className={`w-2 h-2 rounded-full ${
-                                  hour.time_frame.toLowerCase().includes('closed') 
-                                    ? 'bg-gray-400' 
-                                    : 'bg-palette-medium-blue'
-                                }`}></div>
+                                <div
+                                  className={`w-2 h-2 rounded-full ${
+                                    hour.time_frame
+                                      .toLowerCase()
+                                      .includes("closed")
+                                      ? "bg-gray-400"
+                                      : "bg-palette-medium-blue"
+                                  }`}
+                                ></div>
                                 <span className="font-semibold text-foreground">
                                   {hour.day}
                                 </span>
                               </div>
-                              <span className={`font-medium px-3 py-1 rounded-full text-sm ${
-                                hour.time_frame.toLowerCase().includes('closed')
-                                  ? 'bg-gray-100 text-gray-700'
-                                  : 'bg-palette-medium-blue/10 text-palette-medium-blue'
-                              }`}>
-                                {hour.time_frame}
+                              <span
+                                className={`font-medium px-3 py-1 rounded-full text-sm whitespace-pre-line ${
+                                  hour.time_frame
+                                    .toLowerCase()
+                                    .includes("closed")
+                                    ? "bg-gray-100 text-gray-700"
+                                    : "bg-palette-medium-blue/10 text-palette-medium-blue"
+                                }`}
+                              >
+                                {hour.time_frame?.replace(/,/g, "\n")}
                               </span>
                             </div>
                           ))}
                         </div>
-                        
+
                         <div className="mt-6 p-4 bg-palette-medium-blue/5 rounded-xl border border-palette-medium-blue/20">
                           <p className="text-palette-medium-blue text-sm font-medium text-center">
-                            💡 We welcome conversations that spark new artistic connections
+                            💡 We welcome conversations that spark new artistic
+                            connections
                           </p>
                         </div>
                       </div>
