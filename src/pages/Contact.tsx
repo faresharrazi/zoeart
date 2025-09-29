@@ -371,10 +371,28 @@ const Contact = () => {
                                       : "bg-palette-medium-blue/10 text-palette-medium-blue"
                                   }`}
                                 >
-                                  {hour.time_frame
-                                    ?.replace(/,/g, "\n")
-                                    ?.replace(/\s+/g, " ")
-                                    ?.trim()}
+                                  {(() => {
+                                    if (!hour.time_frame) return '';
+                                    
+                                    // Handle different time formats
+                                    let formattedTime = hour.time_frame.trim();
+                                    
+                                    // If it contains commas, split by comma and join with newlines
+                                    if (formattedTime.includes(',')) {
+                                      formattedTime = formattedTime
+                                        .split(',')
+                                        .map(part => part.trim())
+                                        .join('\n');
+                                    }
+                                    
+                                    // Clean up spacing around dashes
+                                    formattedTime = formattedTime.replace(/\s*-\s*/g, ' - ');
+                                    
+                                    // Clean up multiple spaces
+                                    formattedTime = formattedTime.replace(/\s+/g, ' ');
+                                    
+                                    return formattedTime;
+                                  })()}
                                 </span>
                               </div>
                             ));
