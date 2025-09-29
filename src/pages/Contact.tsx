@@ -126,16 +126,16 @@ const Contact = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Newsletter Subscription */}
               <div className="lg:col-span-1">
-                <Card className="border-2 border-palette-medium-blue/20">
-                  <CardHeader>
-                    <CardTitle className="text-2xl  text-foreground">
+                <div className="text-center mb-6">
+                  <h2 className="text-3xl font-bold text-foreground mb-4">
                       Newsletter Subscription
-                    </CardTitle>
-                    <p className="text-muted-foreground">
+                  </h2>
+                  <p className="text-muted-foreground text-lg">
                       Get exclusive updates about new exhibitions, artist
                       spotlights, and special events.
                     </p>
-                  </CardHeader>
+                </div>
+                <Card className="border-2 border-palette-medium-blue/20">
                   <CardContent>
                     <form
                       onSubmit={handleNewsletterSubmit}
@@ -207,9 +207,9 @@ const Contact = () => {
                   </div>
 
                   {/* Contact Cards Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto items-stretch">
                     {/* Contact Information Card */}
-                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100 w-full">
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100 w-full h-full flex flex-col">
                       <div className="flex items-center mb-6">
                         <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
                           <Mail className="w-6 h-6 text-white" />
@@ -230,34 +230,34 @@ const Contact = () => {
                                 href={`mailto:${contactInfo.email}`}
                                 className="text-foreground hover:text-palette-medium-blue transition-colors font-medium break-all"
                               >
-                                {contactInfo.email}
+                          {contactInfo.email}
                               </a>
                             </div>
-                          </div>
-                        )}
+                      </div>
+                    )}
 
-                        {contactInfo?.phone && (
+                    {contactInfo?.phone && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
                               <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors flex-shrink-0">
                                 <Phone className="w-5 h-5 text-palette-medium-blue" />
-                              </div>
+                        </div>
                               <a
                                 href={`tel:${contactInfo.phone}`}
                                 className="text-foreground hover:text-palette-medium-blue transition-colors font-medium break-all"
                               >
-                                {contactInfo.phone}
+                          {contactInfo.phone}
                               </a>
                             </div>
-                          </div>
-                        )}
+                      </div>
+                    )}
 
-                        {contactInfo?.instagram && (
+                    {contactInfo?.instagram && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
                               <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors flex-shrink-0">
                                 <Instagram className="w-5 h-5 text-palette-medium-blue" />
-                              </div>
+                        </div>
                               <a
                                 href={`https://instagram.com/${contactInfo.instagram.replace(
                                   "@",
@@ -267,13 +267,13 @@ const Contact = () => {
                                 rel="noopener noreferrer"
                                 className="text-foreground hover:text-palette-medium-blue transition-colors font-medium break-all"
                               >
-                                {contactInfo.instagram}
+                          {contactInfo.instagram}
                               </a>
                             </div>
-                          </div>
-                        )}
+                      </div>
+                    )}
 
-                        {contactInfo?.address && (
+                    {contactInfo?.address && (
                           <div className="group">
                             <div className="flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200">
                               <div className="w-10 h-10 bg-palette-medium-blue/10 rounded-lg flex items-center justify-center group-hover:bg-palette-medium-blue/20 transition-colors flex-shrink-0">
@@ -295,7 +295,7 @@ const Contact = () => {
 
                     {/* Working Hours Card */}
                     {workingHours && workingHours.length > 0 && (
-                      <div className="bg-white rounded-2xl p-6 lg:p-8 shadow-lg border border-gray-100 w-full">
+                      <div className="bg-white rounded-2xl p-6 lg:p-8 shadow-lg border border-gray-100 w-full h-full flex flex-col">
                         <h3 className="text-xl font-bold text-center text-gray-900 mb-6">
                           Gallery Hours
                         </h3>
@@ -342,24 +342,24 @@ const Contact = () => {
                               return (
                                 <div
                                   key={hour.id}
-                                  className={`p-4 ${
+                                  className={`flex justify-between items-center p-4 ${
                                     isFirst ? 'rounded-t-xl' : ''
                                   } ${isLast ? 'rounded-b-xl' : ''} ${
                                     isClosed ? 'bg-gray-50' : 'bg-gray-50'
                                   }`}
                                 >
-                                  <div className="mb-2">
+                                  <div className="flex items-center space-x-3">
                                     <span className="font-semibold text-gray-900">
                                       {hour.day}
                                     </span>
                                   </div>
-                                  <div className="ml-5">
+                                  <div className="text-right">
                                     {isClosed ? (
-                                      <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium inline-block">
+                                      <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
                                         Closed
                                       </span>
                                     ) : (
-                                      <div className="text-sm font-medium text-gray-900">
+                                      <div className="text-sm font-medium text-gray-900 whitespace-pre-line">
                                         {(() => {
                                           if (!hour.time_frame) return '';
                                           
@@ -372,26 +372,15 @@ const Contact = () => {
                                           // Clean up multiple spaces
                                           formattedTime = formattedTime.replace(/\s+/g, ' ');
                                           
-                                          // Split by comma and create proper line breaks
+                                          // Split by comma and join with newlines
                                           if (formattedTime.includes(',')) {
-                                            const timeChunks = formattedTime
+                                            formattedTime = formattedTime
                                               .split(',')
                                               .map(part => part.trim())
-                                              .filter(part => part.length > 0);
-                                            
-                                            return (
-                                              <div className="space-y-1">
-                                                {timeChunks.map((chunk, index) => (
-                                                  <div key={index} className="block">
-                                                    {chunk}
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            );
+                                              .join('\n');
                                           }
                                           
-                                          // Single time chunk
-                                          return <div className="block">{formattedTime}</div>;
+                                          return formattedTime;
                                         })()}
                                       </div>
                                     )}
