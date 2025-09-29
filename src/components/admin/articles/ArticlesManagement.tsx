@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -284,16 +284,13 @@ const ArticlesManagement = () => {
 
             <div>
               <Label htmlFor="content">Article Content *</Label>
-              <Textarea
-                id="content"
-                value={formData.content}
-                onChange={(e) => handleInputChange("content", e.target.value)}
-                placeholder="Write your article content here... You can use HTML tags for formatting, images, and videos. Example: &lt;p&gt;Your text here&lt;/p&gt; &lt;img src='image-url' /&gt; &lt;video src='video-url' controls&gt;&lt;/video&gt;"
-                rows={12}
-                className="font-mono text-sm"
+              <RichTextEditor
+                content={formData.content}
+                onChange={(content) => handleInputChange("content", content)}
+                placeholder="Write your article content here... Use the toolbar above to format text, add images, videos, and links."
               />
               <p className="text-sm text-gray-600 mt-2">
-                💡 <strong>Tips:</strong> Use HTML tags for formatting. For images: &lt;img src="url" /&gt; For videos: &lt;video src="url" controls&gt;&lt;/video&gt;
+                💡 <strong>Tips:</strong> Use the toolbar to format your text. Click the image icon to add pictures, the video icon for videos, and the link icon for hyperlinks.
               </p>
             </div>
 
