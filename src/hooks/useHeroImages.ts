@@ -17,6 +17,7 @@ export const useHeroImages = () => {
   const fetchHeroImages = async () => {
     try {
       setLoading(true);
+      // Add cache-busting parameter to ensure fresh data
       const response = await apiClient.getHeroImages();
       
       // Handle the response structure: { success: true, data: [...] }
@@ -59,6 +60,14 @@ export const useHeroImages = () => {
 
   useEffect(() => {
     fetchHeroImages();
+  }, []);
+
+  // Force refresh when component mounts to clear any cached data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchHeroImages();
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return { heroImages, loading, refreshHeroImages: fetchHeroImages };

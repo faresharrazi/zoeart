@@ -35,6 +35,9 @@ const HomePageEditor = ({
   const { toast } = useToast();
   const { heroImages, refreshHeroImages } = useHeroImages();
 
+  // Debug: Log hero images data
+  console.log("HomePageEditor - heroImages:", heroImages);
+
   return (
     <Card>
       <CardHeader>
