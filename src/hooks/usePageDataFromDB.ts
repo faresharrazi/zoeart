@@ -39,6 +39,8 @@ export const usePageDataFromDB = () => {
         setHomeSettings({
           title: data.pages.home.title,
           description: data.pages.home.description,
+          heroImages: data.pages.home.content?.heroImages || [],
+          heroImageIds: data.pages.home.content?.heroImageIds || [],
           ...data.pages.home.content,
         });
       }

@@ -7,7 +7,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit (Vercel max is 50MB)
+    fileSize: 4 * 1024 * 1024, // 4MB limit (Vercel default limit)
   },
   fileFilter: (req, file, cb) => {
     console.log(
@@ -67,7 +67,7 @@ const handleUploadError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({ 
-        error: "File too large. Maximum size is 50MB." 
+        error: "File too large. Maximum size is 4MB." 
       });
     }
     if (error.code === "LIMIT_UNEXPECTED_FILE") {

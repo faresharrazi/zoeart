@@ -13,7 +13,8 @@
       "src": "server/index.cjs",
       "use": "@vercel/node",
       "config": {
-        "maxDuration": 30
+        "maxDuration": 30,
+        "maxRequestBodySize": "50mb"
       }
     }
   ],

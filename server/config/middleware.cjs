@@ -63,11 +63,11 @@ const corsOptions = {
 
 // JSON parsing with size limits
 const jsonParser = express.json({
-  limit: "50mb",
+  limit: "4mb",
   verify: (req, res, buf) => {
     // Log large payloads for debugging
-    if (buf.length > 10 * 1024 * 1024) {
-      // 10MB
+    if (buf.length > 2 * 1024 * 1024) {
+      // 2MB
       console.log(`Large payload received: ${buf.length} bytes`);
     }
   },
@@ -75,7 +75,7 @@ const jsonParser = express.json({
 
 // URL encoded parsing with size limits
 const urlEncodedParser = express.urlencoded({
-  limit: "50mb",
+  limit: "4mb",
   extended: true,
 });
 

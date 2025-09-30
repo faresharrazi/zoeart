@@ -30,6 +30,24 @@ const HeroImageSlider = ({ images, interval = 2000 }: HeroImageSliderProps) => {
         />
       ))}
       <div className="absolute inset-0 bg-gradient-hero opacity-75"></div>
+
+      {/* Image indicators - only show if more than 1 image */}
+      {images.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentImageIndex
+                  ? "bg-white scale-125"
+                  : "bg-white/50 hover:bg-white/75"
+              }`}
+              onClick={() => setCurrentImageIndex(index)}
+              aria-label={`Go to image ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

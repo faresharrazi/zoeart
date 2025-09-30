@@ -35,75 +35,6 @@ const HomePageEditor = ({
   const { toast } = useToast();
   const { heroImages, refreshHeroImages } = useHeroImages();
 
-  const handleHeroImageUpload = async (file: File) => {
-    try {
-      const response = await apiClient.uploadFile(file, "hero");
-      const newImageUrl = `/api/file/${response.file.id}`;
-
-      const updatedFormData = {
-        ...formData,
-        heroImages: [...(formData.heroImages || []), newImageUrl],
-        heroImageIds: [...(formData.heroImageIds || []), response.file.id],
-      };
-
-      setFormData(updatedFormData);
-
-      // Auto-save the hero images to the home page
-      await apiClient.updatePageContent("home", updatedFormData);
-      
-      await refreshHeroImages();
-      if (refreshPageData) {
-        await refreshPageData();
-      }
-      toast({
-        title: "Success",
-        description: "Hero image uploaded and saved successfully",
-      });
-    } catch (error) {
-      console.error("Error uploading hero image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload hero image",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const removeHeroImage = async (index: number) => {
-    const newImages = [...(formData.heroImages || [])];
-    const newImageIds = [...(formData.heroImageIds || [])];
-
-    newImages.splice(index, 1);
-    newImageIds.splice(index, 1);
-
-    const updatedFormData = {
-      ...formData,
-      heroImages: newImages,
-      heroImageIds: newImageIds,
-    };
-
-    setFormData(updatedFormData);
-
-    // Auto-save the updated hero images to the home page
-    try {
-      await apiClient.updatePageContent("home", updatedFormData);
-      if (refreshPageData) {
-        await refreshPageData();
-      }
-      toast({
-        title: "Success",
-        description: "Hero image removed and saved successfully",
-      });
-    } catch (error) {
-      console.error("Error removing hero image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to remove hero image",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -148,12 +79,12 @@ const HomePageEditor = ({
               />
             </div>
 
-
             <div>
               <Label>Hero Images</Label>
               <div className="space-y-4">
                 <FileUpload
                   category="hero"
+                  existingFiles={heroImages}
                   onFilesChange={async (files) => {
                     // Update form data with new hero images
                     const newImageUrls = files.map((file) => file.url);
@@ -163,18 +94,24 @@ const HomePageEditor = ({
                       heroImages: newImageUrls,
                       heroImageIds: newImageIds,
                     };
-                    
+
                     setFormData(updatedFormData);
 
                     // Auto-save the hero images to the home page
                     try {
-                      await apiClient.updatePageContent("home", updatedFormData);
+                      await apiClient.updatePageContent("home", {
+                        content: {
+                          heroImages: newImageUrls,
+                          heroImageIds: newImageIds,
+                        },
+                      });
                       if (refreshPageData) {
                         await refreshPageData();
                       }
                       toast({
                         title: "Success",
-                        description: "Hero images updated and saved successfully",
+                        description:
+                          "Hero images updated and saved successfully",
                       });
                     } catch (error) {
                       console.error("Error updating hero images:", error);
@@ -186,29 +123,8 @@ const HomePageEditor = ({
                     }
                   }}
                   accept="image/*"
+                  onRefresh={refreshHeroImages}
                 />
-
-                {formData.heroImages && formData.heroImages.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {formData.heroImages.map((image: string, index: number) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={image}
-                          alt={`Hero ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => removeHeroImage(index)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
 

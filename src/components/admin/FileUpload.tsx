@@ -60,6 +60,21 @@ const FileUpload = ({
       return;
     }
 
+    // Check file sizes (4MB limit to match server/Vercel)
+    const maxFileSize = 4 * 1024 * 1024; // 4MB
+    const oversizedFiles = Array.from(selectedFiles).filter(
+      (file) => file.size > maxFileSize
+    );
+
+    if (oversizedFiles.length > 0) {
+      toast({
+        title: "File too large",
+        description: `Some files exceed the 4MB limit. Please compress or resize them.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploading(true);
 
     try {
@@ -143,8 +158,28 @@ const FileUpload = ({
                 Drag and drop images here, or click to select files
               </p>
               <p className="text-xs text-gray-400">
-                Max {maxFiles} files, up to 10MB each
+                Max {maxFiles} files, up to 4MB each
               </p>
+              <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded border">
+                <p className="font-medium mb-1">💡 Image Tips:</p>
+                <p>
+                  • For best performance, use JPG format (smaller file size)
+                </p>
+                <p>
+                  • Need to convert PNG to JPG? Use our free tool:
+                  <a
+                    href="https://png2jpg.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline ml-1"
+                  >
+                    png2jpg.com
+                  </a>
+                </p>
+                <p>
+                  • Compress large images before uploading for faster uploads
+                </p>
+              </div>
             </div>
             <Button
               onClick={() => fileInputRef.current?.click()}
