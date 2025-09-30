@@ -34,7 +34,7 @@ export const useHeroImages = () => {
         id: image.id,
         originalName: image.original_name,
         filename: image.filename,
-        url: `/api/file/${image.id}`, // Use API endpoint to serve files from database
+        url: `/api/files/${image.id}`, // Use API endpoint to serve files from database
         fileSize: image.file_size,
         mimeType: image.mime_type,
       }));

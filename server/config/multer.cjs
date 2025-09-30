@@ -34,11 +34,11 @@ const generateUniqueFilename = (originalname) => {
 const validateFileType = (mimetype) => {
   const allowedTypes = [
     "image/jpeg",
-    "image/jpg", 
+    "image/jpg",
     "image/png",
     "image/gif",
     "image/webp",
-    "image/svg+xml"
+    "image/svg+xml",
   ];
   return allowedTypes.includes(mimetype);
 };
@@ -46,19 +46,19 @@ const validateFileType = (mimetype) => {
 // Get file category from request
 const getFileCategory = (req) => {
   const category = req.body.category || "general";
-  
+
   // Map common category names to database enum values
   const categoryMapping = {
-    "hero": "hero_image",
-    "hero_image": "hero_image", 
-    "artwork": "artwork",
-    "artist": "artist_profile",
-    "artist_profile": "artist_profile",
-    "exhibition": "exhibition",
-    "gallery": "gallery",
-    "general": "gallery" // fallback to gallery for general files
+    hero: "hero_image",
+    hero_image: "hero_image",
+    artwork: "artwork",
+    artist: "artist_profile",
+    artist_profile: "artist_profile",
+    exhibition: "exhibition",
+    gallery: "gallery",
+    general: "gallery", // fallback to gallery for general files
   };
-  
+
   return categoryMapping[category] || "gallery";
 };
 
@@ -66,23 +66,23 @@ const getFileCategory = (req) => {
 const handleUploadError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({ 
-        error: "File too large. Maximum size is 4MB." 
+      return res.status(400).json({
+        error: "File too large. Maximum size is 4MB.",
       });
     }
     if (error.code === "LIMIT_UNEXPECTED_FILE") {
-      return res.status(400).json({ 
-        error: "Unexpected field name for file upload." 
+      return res.status(400).json({
+        error: "Unexpected field name for file upload.",
       });
     }
   }
-  
+
   if (error.message === "Only image files are allowed") {
-    return res.status(400).json({ 
-      error: "Only image files are allowed." 
+    return res.status(400).json({
+      error: "Only image files are allowed.",
     });
   }
-  
+
   next(error);
 };
 

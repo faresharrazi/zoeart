@@ -80,7 +80,10 @@ const FileUpload = ({
     try {
       const uploadPromises = Array.from(selectedFiles).map(async (file) => {
         const response = await apiClient.uploadFile(file, category);
-        return response.file;
+        return {
+          ...response.file,
+          url: `/api/files/${response.file.id}`, // Add URL for the uploaded file
+        };
       });
 
       const uploadedFiles = await Promise.all(uploadPromises);
