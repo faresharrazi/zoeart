@@ -123,25 +123,16 @@ const Contact = () => {
           contactInfo?.instagram ||
           contactInfo?.address ? (
             /* Two-column layout when contact info exists */
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
               {/* Newsletter Subscription */}
               <div className="lg:col-span-1">
-                <div className="text-center mb-6">
-                  <h2 className="text-3xl font-bold text-foreground mb-4">
-                      Newsletter Subscription
-                  </h2>
-                  <p className="text-muted-foreground text-lg">
-                      Get exclusive updates about new exhibitions, artist
-                      spotlights, and special events.
-                    </p>
-                </div>
                 <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100 w-full h-full flex flex-col">
                   <div className="flex items-center mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
                       <Mail className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="text-xl font-bold text-foreground">
-                      Subscribe
+                      Subscribe to our newsletter
                     </h3>
                   </div>
                   <form
@@ -201,19 +192,9 @@ const Contact = () => {
                 contactInfo?.phone ||
                 contactInfo?.instagram ||
                 contactInfo?.address) && (
-                <div className="space-y-8 lg:col-span-2">
-                  <div className="text-center">
-                    <h2 className="text-3xl font-bold text-foreground mb-4">
-                      Get In Touch
-                    </h2>
-                    <p className="text-muted-foreground text-lg">
-                      Visit our gallery or reach out for exhibition details,
-                      collaborations, and artist inquiries.
-                    </p>
-                  </div>
-
+                <div className="lg:col-span-2">
                   {/* Contact Cards Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl md:max-w-3xl lg:max-w-6xl mx-auto items-stretch">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
                     {/* Contact Information Card */}
                     <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100 w-full h-full flex flex-col">
                       <div className="flex items-center mb-6">
