@@ -10,6 +10,7 @@ import {
   Mail,
   UserCog,
   BookOpen,
+  Link,
   // Settings, // Removed theme management
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ const menuItems = [
   { id: "newsletter", label: "Newsletter", icon: Mail },
   { id: "pages", label: "Page Content", icon: FileText },
   { id: "users", label: "User Management", icon: UserCog },
+  { id: "links", label: "Useful Links", icon: Link },
 ];
 
 const AdminSidebar = ({

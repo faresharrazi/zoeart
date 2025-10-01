@@ -9,6 +9,7 @@ import ArticlesManagement from "./articles/ArticlesManagement";
 import NewsletterManagement from "./newsletter/NewsletterManagement";
 import PageContentManagement from "./page-content/PageContentManagement";
 import UserManagement from "./UserManagement";
+import UsefulLinks from "./UsefulLinks";
 // import ThemeControl from "./ThemeControl"; // Removed theme management
 
 interface AdminDashboardProps {
@@ -44,6 +45,8 @@ const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
         return <PageContentManagement />;
       case "users":
         return <UserManagement />;
+      case "links":
+        return <UsefulLinks />;
       // case "theme":
       //   return <ThemeControl />; // Removed theme management
       default:
