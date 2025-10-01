@@ -464,6 +464,10 @@ const ExhibitionDetail = () => {
                     .prose p {
                       margin: 0.5rem 0 !important;
                     }
+                    .prose p:empty {
+                      margin: 1rem 0 !important;
+                      min-height: 1rem;
+                    }
                     .prose strong {
                       font-weight: bold !important;
                     }
