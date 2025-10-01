@@ -360,6 +360,45 @@ const ExhibitionDetail = () => {
                 </div>
               )}
 
+            {/* Featured Image (Poster) Section */}
+            {exhibition.featured_image && (
+              <div className="mb-12">
+                <div className="text-center mb-6">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                    Exhibition Poster
+                  </h2>
+                </div>
+                <div className="relative group cursor-pointer" onClick={() => {
+                  // Create a modal-like overlay for full-size viewing
+                  const modal = document.createElement('div');
+                  modal.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4';
+                  modal.onclick = () => document.body.removeChild(modal);
+                  
+                  const img = document.createElement('img');
+                  img.src = exhibition.featured_image;
+                  img.className = 'max-w-full max-h-full object-contain rounded-lg';
+                  img.onclick = (e) => e.stopPropagation();
+                  
+                  modal.appendChild(img);
+                  document.body.appendChild(modal);
+                }}>
+                  <img
+                    src={exhibition.featured_image}
+                    alt={`${exhibition.title} - Exhibition Poster`}
+                    className="w-full h-auto rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-lg flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white bg-opacity-90 rounded-full p-3">
+                      <ImageIcon className="w-6 h-6 text-gray-700" />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-center text-gray-600 text-sm mt-2">
+                  Click to view full size
+                </p>
+              </div>
+            )}
+
             {/* Article Section */}
             {article && (
               <div className="mb-12">
