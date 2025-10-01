@@ -447,34 +447,36 @@ const ExhibitionGallery = ({
                 </Button>
               </div>
 
-              {/* Navigation Buttons */}
+              {/* Navigation Buttons - More Prominent */}
               <Button
                 variant="outline"
-                size="sm"
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                size="lg"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm shadow-lg"
                 onClick={(e) => {
                   e.stopPropagation();
                   navigateImage("prev");
                 }}
+                title="Previous image (or click left side of image)"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-6 h-6" />
               </Button>
 
               <Button
                 variant="outline"
-                size="sm"
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                size="lg"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm shadow-lg"
                 onClick={(e) => {
                   e.stopPropagation();
                   navigateImage("next");
                 }}
+                title="Next image (or click right side of image)"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-6 h-6" />
               </Button>
 
-              {/* Image Container */}
+              {/* Image Container with Click Navigation */}
               <div
-                className="flex items-center justify-center w-full h-full overflow-hidden"
+                className="flex items-center justify-center w-full h-full overflow-hidden relative"
                 onWheel={handleWheel}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -482,6 +484,26 @@ const ExhibitionGallery = ({
                 onMouseLeave={handleMouseUp}
                 style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
               >
+                {/* Left Click Area for Previous Image */}
+                <div 
+                  className="absolute left-0 top-0 w-1/3 h-full z-20 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateImage("prev");
+                  }}
+                  title="Click to go to previous image"
+                />
+                
+                {/* Right Click Area for Next Image */}
+                <div 
+                  className="absolute right-0 top-0 w-1/3 h-full z-20 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateImage("next");
+                  }}
+                  title="Click to go to next image"
+                />
+
                 <img
                   src={images[selectedImageIndex]}
                   alt={`Gallery image ${selectedImageIndex + 1}`}
@@ -517,12 +539,15 @@ const ExhibitionGallery = ({
                 />
               </div>
 
-              {/* Image Counter */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <span className="text-white text-sm">
+              {/* Image Counter and Instructions */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-center">
+                <div className="text-white text-sm">
                   {selectedImageIndex + 1} of {images.length}
                   <span className="hidden md:inline"> • Zoom: {Math.round(zoom * 100)}%</span>
-                </span>
+                </div>
+                <div className="text-white/70 text-xs mt-1 hidden md:block">
+                  Click left/right sides of image or use arrow keys to navigate
+                </div>
               </div>
             </div>
           </div>
