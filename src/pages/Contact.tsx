@@ -135,12 +135,19 @@ const Contact = () => {
                       spotlights, and special events.
                     </p>
                 </div>
-                <Card className="border-2 border-palette-medium-blue/20">
-                  <CardContent className="pt-8">
-                    <form
-                      onSubmit={handleNewsletterSubmit}
-                      className="space-y-6"
-                    >
+                <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100 w-full h-full flex flex-col">
+                  <div className="flex items-center mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-palette-medium-blue to-palette-medium-blue/80 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+                      <Mail className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground">
+                      Subscribe
+                    </h3>
+                  </div>
+                  <form
+                    onSubmit={handleNewsletterSubmit}
+                    className="space-y-6"
+                  >
                       <div>
                         <label
                           htmlFor="name"
@@ -186,8 +193,7 @@ const Contact = () => {
                         Subscribe to Newsletter
                       </Button>
                     </form>
-                  </CardContent>
-                </Card>
+                </div>
               </div>
 
               {/* Contact Information - Only show if there's contact data */}

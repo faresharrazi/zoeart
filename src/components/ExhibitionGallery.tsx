@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+} from "lucide-react";
 
 // Fallback gallery images - placeholder URLs for when no real exhibition images are provided
 const sampleImages = [
@@ -71,11 +78,11 @@ const ExhibitionGallery = ({
   };
 
   const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 0.5, 3));
+    setZoom((prev) => Math.min(prev + 0.5, 3));
   };
 
   const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 0.5, 0.5));
+    setZoom((prev) => Math.max(prev - 0.5, 0.5));
   };
 
   const handleResetZoom = () => {
@@ -119,9 +126,7 @@ const ExhibitionGallery = ({
     <section className="py-16 bg-theme-background">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl  text-theme-text-primary mb-4">
-            {title}
-          </h2>
+          <h2 className="text-3xl  text-theme-text-primary mb-4">{title}</h2>
         </div>
 
         {/* Album View */}
@@ -447,32 +452,6 @@ const ExhibitionGallery = ({
                 </Button>
               </div>
 
-              {/* Navigation Buttons - More Prominent */}
-              <Button
-                variant="outline"
-                size="lg"
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm shadow-lg"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateImage("prev");
-                }}
-                title="Previous image (or click left side of image)"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="lg"
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm shadow-lg"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateImage("next");
-                }}
-                title="Next image (or click right side of image)"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </Button>
 
               {/* Image Container with Click Navigation */}
               <div
@@ -482,10 +461,13 @@ const ExhibitionGallery = ({
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
-                style={{ cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+                style={{
+                  cursor:
+                    zoom > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+                }}
               >
                 {/* Left Click Area for Previous Image */}
-                <div 
+                <div
                   className="absolute left-0 top-0 w-1/3 h-full z-20 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -493,9 +475,9 @@ const ExhibitionGallery = ({
                   }}
                   title="Click to go to previous image"
                 />
-                
+
                 {/* Right Click Area for Next Image */}
-                <div 
+                <div
                   className="absolute right-0 top-0 w-1/3 h-full z-20 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -509,12 +491,14 @@ const ExhibitionGallery = ({
                   alt={`Gallery image ${selectedImageIndex + 1}`}
                   className="object-contain"
                   style={{
-                    maxWidth: '100vw',
-                    maxHeight: '100vh',
-                    width: 'auto',
-                    height: 'auto',
-                    transform: `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-                    transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+                    maxWidth: "100vw",
+                    maxHeight: "100vh",
+                    width: "auto",
+                    height: "auto",
+                    transform: `scale(${zoom}) translate(${
+                      position.x / zoom
+                    }px, ${position.y / zoom}px)`,
+                    transition: isDragging ? "none" : "transform 0.2s ease-out",
                   }}
                   onClick={(e) => e.stopPropagation()}
                   onError={(e) => {
@@ -543,10 +527,13 @@ const ExhibitionGallery = ({
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-center">
                 <div className="text-white text-sm">
                   {selectedImageIndex + 1} of {images.length}
-                  <span className="hidden md:inline"> • Zoom: {Math.round(zoom * 100)}%</span>
+                  <span className="hidden md:inline">
+                    {" "}
+                    • Zoom: {Math.round(zoom * 100)}%
+                  </span>
                 </div>
                 <div className="text-white/70 text-xs mt-1 hidden md:block">
-                  Click left/right sides of image or use arrow keys to navigate
+                  Click left/right sides of image to navigate
                 </div>
               </div>
             </div>

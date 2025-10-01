@@ -360,7 +360,6 @@ const ExhibitionDetail = () => {
                 </div>
               )}
 
-
             {/* Article Section */}
             {article && (
               <div className="mb-12">
@@ -405,10 +404,12 @@ const ExhibitionDetail = () => {
                         // Convert YouTube markers to actual embeds
                         const html = el.innerHTML;
                         const youtubeRegex = /\[YOUTUBE:([^:]+):([^\]]+)\]/g;
-                        
+
                         if (youtubeRegex.test(html)) {
-                          const newHtml = html.replace(youtubeRegex, (match, videoId, youtubeUrl) => {
-                            return `
+                          const newHtml = html.replace(
+                            youtubeRegex,
+                            (match, videoId, youtubeUrl) => {
+                              return `
                               <div class="youtube-embed" data-youtube-url="${youtubeUrl}" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 8px; margin: 1rem 0;">
                                 <iframe 
                                   style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
@@ -419,7 +420,8 @@ const ExhibitionDetail = () => {
                                 </iframe>
                               </div>
                             `;
-                          });
+                            }
+                          );
                           el.innerHTML = newHtml;
                         }
                       }
