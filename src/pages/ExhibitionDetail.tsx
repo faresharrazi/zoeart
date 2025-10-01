@@ -363,11 +363,6 @@ const ExhibitionDetail = () => {
             {/* Featured Image (Poster) Section */}
             {exhibition.featured_image && (
               <div className="mb-12">
-                <div className="text-center mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                    Exhibition Poster
-                  </h2>
-                </div>
                 <div className="relative group cursor-pointer" onClick={() => {
                   // Create a modal-like overlay for full-size viewing
                   const modal = document.createElement('div');
@@ -393,9 +388,6 @@ const ExhibitionDetail = () => {
                     </div>
                   </div>
                 </div>
-                <p className="text-center text-gray-600 text-sm mt-2">
-                  Click to view full size
-                </p>
               </div>
             )}
 
