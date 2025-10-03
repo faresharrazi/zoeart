@@ -64,28 +64,45 @@ const uploadOptions = {
 
 // Helper function to upload image to Cloudinary
 const uploadToCloudinary = async (file, options = {}) => {
-  try {
-    const uploadOptions_merged = { ...uploadOptions.default, ...options };
-    
-    const result = await cloudinary.uploader.upload(file, uploadOptions_merged);
-    
-    return {
-      success: true,
-      url: result.secure_url,
-      public_id: result.public_id,
-      width: result.width,
-      height: result.height,
-      format: result.format,
-      bytes: result.bytes,
-      created_at: result.created_at
-    };
-  } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
+  return new Promise((resolve, reject) => {
+    try {
+      const uploadOptions_merged = { ...uploadOptions.default, ...options };
+      
+      // Handle file object - extract buffer for Cloudinary
+      const fileBuffer = file.buffer || file;
+      
+      const uploadStream = cloudinary.uploader.upload_stream(
+        uploadOptions_merged,
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            resolve({ success: false, error: error.message });
+          } else {
+            resolve({
+              success: true,
+              url: result.secure_url,
+              public_id: result.public_id,
+              width: result.width,
+              height: result.height,
+              format: result.format,
+              bytes: result.bytes,
+              created_at: result.created_at
+            });
+          }
+        }
+      );
+      
+      // Pipe the file buffer to Cloudinary
+      uploadStream.end(fileBuffer);
+      
+    } catch (error) {
+      console.error('Cloudinary upload error:', error);
+      resolve({
+        success: false,
+        error: error.message
+      });
+    }
+  });
 };
 
 // Helper function to delete image from Cloudinary
