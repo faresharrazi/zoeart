@@ -29,8 +29,21 @@ const ArtistDetail = () => {
         if (foundArtist) {
           setArtist(foundArtist);
           
+          // Enrich artworks with artist names first
+          const enrichedArtworks = artworksData.map((artwork: any) => {
+            if (artwork.artist_id) {
+              const artist = artistsData.find(
+                (artist: any) => artist.id.toString() === artwork.artist_id.toString()
+              );
+              if (artist && artist.name) {
+                artwork.artist_name = artist.name;
+              }
+            }
+            return artwork;
+          });
+
           // Filter artworks by this artist - try multiple matching strategies
-          const artistArtworks = artworksData.filter((artwork: any) => {
+          const artistArtworks = enrichedArtworks.filter((artwork: any) => {
             // Check if artwork is visible
             if (artwork.is_visible === false) return false;
             
