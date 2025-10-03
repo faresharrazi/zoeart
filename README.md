@@ -1,17 +1,47 @@
-# Install the necessary dependencies.
+# Zoeart - Art Gallery Website
 
+A modern art gallery website built with React, TypeScript, and Tailwind CSS.
+
+## Quick Start
+
+```bash
+# Install dependencies
 npm i
 
-# Start the development server with auto-reloading and an instant preview.
-
+# Start development server
 npm run dev
+```
 
-# What technologies are used for this project?
+## Project Structure
 
-This project is built with:
+```
+├── src/                    # Frontend React application
+│   ├── components/         # Reusable UI components
+│   ├── pages/             # Page components
+│   ├── hooks/             # Custom React hooks
+│   └── lib/               # Utility libraries
+├── server/                # Backend Express server
+│   ├── routes/           # API routes
+│   ├── config/           # Server configuration
+│   ├── middleware/        # Express middleware
+│   └── services/         # Business logic services
+├── database/             # Database files
+│   ├── migrations/       # SQL migration files
+│   └── setup/           # Database setup files
+├── scripts/              # Utility scripts
+└── docs/                 # Documentation
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Technologies
+
+- **Frontend**: Vite, TypeScript, React, shadcn-ui, Tailwind CSS
+- **Backend**: Node.js, Express, PostgreSQL
+- **Image Hosting**: Cloudinary
+- **Deployment**: Vercel
+
+## Documentation
+
+- [Environment Variables](docs/ENVIRONMENT_VARIABLES.md)
+- [Cloudinary Setup](docs/CLOUDINARY_SETUP.md)
+- [Database Migrations](database/README.md)
+- [Scripts](scripts/README.md)
