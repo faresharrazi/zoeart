@@ -130,11 +130,7 @@ const ArtistDetail = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-20 bg-gradient-to-br from-gray-900 via-black to-gray-800 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
-        </div>
+      <section className="pt-24 pb-20 bg-white relative overflow-hidden">
 
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-5xl mx-auto py-20">
@@ -147,17 +143,16 @@ const ArtistDetail = () => {
                   <img
                     src={artist.profile_image}
                     alt={artist.name}
-                    className="w-40 h-40 rounded-full mx-auto object-cover shadow-2xl border-4 border-white/30"
+                    className="w-40 h-40 rounded-full mx-auto object-cover shadow-2xl border-4 border-gray-200"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                       e.currentTarget.nextElementSibling.style.display = "flex";
                     }}
                   />
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
               ) : (
-                <div className="w-40 h-40 rounded-full mx-auto bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center shadow-2xl border-4 border-white/30">
-                  <span className="text-5xl text-white/80 font-semibold">
+                <div className="w-40 h-40 rounded-full mx-auto bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-2xl border-4 border-gray-200">
+                  <span className="text-5xl text-gray-600 font-semibold">
                     {artist.name.charAt(0)}
                   </span>
                 </div>
@@ -165,14 +160,14 @@ const ArtistDetail = () => {
             </div>
 
             {/* Artist Name */}
-            <h1 className="text-6xl md:text-8xl text-white mb-6 drop-shadow-2xl">
+            <h1 className="text-6xl md:text-8xl text-gray-900 mb-6">
               {artist.name}
             </h1>
 
             {/* Specialty */}
             {artist.specialty && (
               <div className="mb-8">
-                <span className="inline-block px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-lg border border-white/20">
+                <span className="inline-block px-6 py-3 bg-gray-100 rounded-full text-gray-700 text-lg border border-gray-200">
                   {artist.specialty}
                 </span>
               </div>
@@ -181,7 +176,7 @@ const ArtistDetail = () => {
             {/* Bio */}
             {artist.bio && (
               <div className="max-w-3xl mx-auto mb-12">
-                <p className="text-xl text-white/90 leading-relaxed drop-shadow-lg">
+                <p className="text-xl text-gray-700 leading-relaxed">
                   {artist.bio}
                 </p>
               </div>
@@ -209,10 +204,10 @@ const ArtistDetail = () => {
                               ? ""
                               : "noopener noreferrer"
                           }
-                          className="p-4 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 border border-white/20 hover:scale-110"
+                          className="p-4 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-300 border border-gray-200 hover:scale-110"
                           title={`Visit ${platform} profile`}
                         >
-                          <div className="text-white">
+                          <div className="text-gray-700">
                             {getSocialMediaIcon(platform, "lg")}
                           </div>
                         </a>
