@@ -84,14 +84,14 @@ const Exhibitions = () => {
       {(upcomingExhibitions.length > 0 || currentExhibitions.length > 0 || pastExhibitions.length > 0) && (
         <div className="bg-theme-background py-20">
           <div className="container mx-auto px-6 space-y-16">
-            {/* Upcoming Exhibitions */}
-            {upcomingExhibitions.length > 0 && (
+            {/* Current Exhibitions */}
+            {currentExhibitions.length > 0 && (
               <section>
                 <h2 className="text-3xl  mb-8 text-theme-text-primary">
-                  Upcoming Exhibitions
+                  Current Exhibitions
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {upcomingExhibitions.map((exhibition) => (
+                  {currentExhibitions.map((exhibition) => (
                     <ExhibitionCard
                       key={exhibition.id}
                       exhibition={exhibition}
@@ -102,14 +102,14 @@ const Exhibitions = () => {
               </section>
             )}
 
-            {/* Current Exhibitions */}
-            {currentExhibitions.length > 0 && (
+            {/* Upcoming Exhibitions */}
+            {upcomingExhibitions.length > 0 && (
               <section>
                 <h2 className="text-3xl  mb-8 text-theme-text-primary">
-                  Current Exhibitions
+                  Upcoming Exhibitions
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {currentExhibitions.map((exhibition) => (
+                  {upcomingExhibitions.map((exhibition) => (
                     <ExhibitionCard
                       key={exhibition.id}
                       exhibition={exhibition}
