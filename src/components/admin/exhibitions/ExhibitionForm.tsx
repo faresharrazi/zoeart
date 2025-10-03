@@ -160,9 +160,12 @@ const ExhibitionForm = ({
   const handleImageUpload = async (file: File) => {
     try {
       console.log("Uploading featured image:", file.name);
-      const response = await apiClient.uploadFile(file, "exhibition");
+      // Use new Cloudinary-enabled upload method
+      const response = await apiClient.uploadImage(file, "exhibition");
       console.log("Featured image upload response:", response);
-      const imageUrl = `http://localhost:3001/api/files/${response.file.id}`;
+      
+      // The response now contains the Cloudinary URL directly
+      const imageUrl = response.file.url;
 
       setFormData({
         ...formData,
@@ -171,7 +174,7 @@ const ExhibitionForm = ({
 
       toast({
         title: "Success",
-        description: "Featured image uploaded successfully",
+        description: "Featured image uploaded to Cloudinary successfully",
       });
     } catch (error) {
       console.error("Error uploading featured image:", error);
@@ -194,9 +197,12 @@ const ExhibitionForm = ({
   const handleGalleryImageUpload = async (file: File) => {
     try {
       console.log("Uploading gallery image:", file.name);
-      const response = await apiClient.uploadFile(file, "exhibition");
+      // Use new Cloudinary-enabled upload method
+      const response = await apiClient.uploadImage(file, "exhibition");
       console.log("Upload response:", response);
-      const imageUrl = `http://localhost:3001/api/files/${response.file.id}`;
+      
+      // The response now contains the Cloudinary URL directly
+      const imageUrl = response.file.url;
 
       setFormData({
         ...formData,
@@ -205,7 +211,7 @@ const ExhibitionForm = ({
 
       toast({
         title: "Success",
-        description: "Gallery image uploaded successfully",
+        description: "Gallery image uploaded to Cloudinary successfully",
       });
     } catch (error) {
       console.error("Error uploading gallery image:", error);
