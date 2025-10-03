@@ -31,7 +31,7 @@ const About = () => {
       {/* Hero Section */}
       <section className="bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto py-8">
             <h1 className="text-4xl md:text-6xl text-white mb-6 drop-shadow-lg">
               {pageData.about?.title || "About Us"}
             </h1>

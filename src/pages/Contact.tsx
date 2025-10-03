@@ -101,7 +101,7 @@ const Contact = () => {
       {/* Hero Section */}
       <section className="bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto py-8">
             <h1 className="text-4xl md:text-6xl  mb-6 text-white drop-shadow-lg">
               {pageData.contact?.title || "Contact Us"}
             </h1>
