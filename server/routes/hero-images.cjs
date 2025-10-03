@@ -14,20 +14,39 @@ const router = express.Router();
 router.get(
   "/",
   asyncHandler(async (req, res) => {
+    console.log("=== HERO IMAGES API CALL ===");
+    console.log("Request headers:", req.headers);
+    console.log("Request IP:", req.ip);
+    console.log("Request user-agent:", req.get('User-Agent'));
     console.log("Fetching hero images...");
     
-    const heroImages = await query(
-      `SELECT * FROM hero_images 
-       WHERE is_active = true 
-       ORDER BY display_order ASC, created_at DESC`
-    );
+    try {
+      const heroImages = await query(
+        `SELECT * FROM hero_images 
+         WHERE is_active = true 
+         ORDER BY display_order ASC, created_at DESC`
+      );
 
-    console.log(`Found ${heroImages.rows.length} hero images`);
+      console.log(`Found ${heroImages.rows.length} hero images`);
+      console.log("Hero images data:", heroImages.rows.map(img => ({
+        id: img.id,
+        cloudinary_url: img.cloudinary_url,
+        is_active: img.is_active,
+        display_order: img.display_order
+      })));
 
-    res.json({
-      success: true,
-      data: heroImages.rows,
-    });
+      res.json({
+        success: true,
+        data: heroImages.rows,
+      });
+    } catch (error) {
+      console.error("Error in hero images query:", error);
+      res.status(500).json({
+        success: false,
+        error: "Database error",
+        details: error.message
+      });
+    }
   })
 );
 
