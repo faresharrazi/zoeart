@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, X, Image as ImageIcon, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Trash2 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 
 interface HeroImage {
@@ -146,37 +146,7 @@ const HeroImageUpload: React.FC<HeroImageUploadProps> = ({ onImagesChange }) => 
     }
   };
 
-  const handleMoveImage = async (id: number, direction: 'up' | 'down') => {
-    const currentIndex = heroImages.findIndex(img => img.id === id);
-    if (currentIndex === -1) return;
-
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    if (newIndex < 0 || newIndex >= heroImages.length) return;
-
-    try {
-      // Swap display orders
-      const currentOrder = heroImages[currentIndex].display_order;
-      const newOrder = heroImages[newIndex].display_order;
-
-      await Promise.all([
-        apiClient.updateHeroImage(id, { display_order: newOrder }),
-        apiClient.updateHeroImage(heroImages[newIndex].id, { display_order: currentOrder }),
-      ]);
-
-      await fetchHeroImages(); // Refresh the list
-      toast({
-        title: "Success",
-        description: "Image order updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating image order:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update image order",
-        variant: "destructive",
-      });
-    }
-  };
+  // handleMoveImage function removed - no longer needed
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -277,26 +247,6 @@ const HeroImageUpload: React.FC<HeroImageUploadProps> = ({ onImagesChange }) => 
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    {/* Move Up */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleMoveImage(image.id, 'up')}
-                      disabled={index === 0}
-                    >
-                      <ArrowUp className="w-4 h-4" />
-                    </Button>
-
-                    {/* Move Down */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleMoveImage(image.id, 'down')}
-                      disabled={index === heroImages.length - 1}
-                    >
-                      <ArrowDown className="w-4 h-4" />
-                    </Button>
-
                     {/* Delete */}
                     <Button
                       variant="outline"
