@@ -15,7 +15,6 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
-  ZoomIn,
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 
@@ -48,6 +47,12 @@ const ArtworkDetail = () => {
               artist.id.toString() === foundArtwork.artist_id.toString()
           );
           setArtist(foundArtist);
+          
+          // Update the artwork's artist_name with the found artist's name
+          if (foundArtist && foundArtist.name) {
+            foundArtwork.artist_name = foundArtist.name;
+            setArtwork(foundArtwork);
+          }
         }
       } catch (error) {
         console.error("Error fetching artwork:", error);
@@ -177,17 +182,6 @@ const ArtworkDetail = () => {
                       className="w-full h-auto rounded-lg shadow-elegant cursor-pointer"
                       onClick={() => handleImageClick(selectedImageIndex)}
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        onClick={() => handleImageClick(selectedImageIndex)}
-                        className="bg-white/90 hover:bg-white"
-                      >
-                        <ZoomIn className="w-5 h-5 mr-2" />
-                        Click to Zoom
-                      </Button>
-                    </div>
 
                     {/* Navigation arrows for multiple images */}
                     {artwork.images.length > 1 && (
