@@ -505,11 +505,7 @@ class ApiClient {
     return this.request(url);
   }
 
-  async getHeroImages() {
-    // Add cache-busting parameter to ensure fresh data
-    const timestamp = Date.now();
-    return this.request(`/files/hero-images?t=${timestamp}`);
-  }
+  // getHeroImages method moved to new implementation below (line ~365)
 
   async deleteFile(id: number) {
     return this.request(`/files/${id}`, {
