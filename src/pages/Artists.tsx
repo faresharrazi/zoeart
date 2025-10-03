@@ -92,7 +92,7 @@ const Artists = () => {
       {artists.length > 0 && (
         <section className="py-20 bg-theme-background">
           <div className="container mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {artists.map((artist, index) => (
                 <Card
                   key={index}
@@ -100,9 +100,9 @@ const Artists = () => {
                   onClick={() => handleArtistClick(artist.slug)}
                 >
                   {/* Artist Profile Section */}
-                  <div className="relative p-8 text-center">
+                  <div className="relative p-6 text-center">
                     {/* Artist Name */}
-                    <h3 className="text-2xl font-bold text-gray-900 mb-6 group-hover:text-theme-primary transition-colors duration-300">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-theme-primary transition-colors duration-300">
                       {artist.name}
                     </h3>
 
@@ -128,7 +128,7 @@ const Artists = () => {
                                       ? ""
                                       : "noopener noreferrer"
                                   }
-                                  className="w-10 h-10 rounded-full bg-gray-100 hover:bg-theme-primary hover:text-white flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+                                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-theme-primary hover:text-white flex items-center justify-center transition-all duration-300 group-hover:scale-110"
                                   onClick={(e) => e.stopPropagation()}
                                   title={`Visit ${platform} profile`}
                                 >
