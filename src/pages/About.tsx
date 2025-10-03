@@ -29,7 +29,7 @@ const About = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-24 bg-[#0f0f0f] relative">
+      <section className="bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-6xl text-white mb-6 drop-shadow-lg">
