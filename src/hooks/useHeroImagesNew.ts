@@ -27,8 +27,13 @@ export const useHeroImagesNew = () => {
       setError(null);
       
       console.log("useHeroImagesNew: Fetching hero images...");
+      console.log("useHeroImagesNew: About to call apiClient.getHeroImages()");
+      
       const response = await apiClient.getHeroImages();
       console.log("useHeroImagesNew: API response:", response);
+      console.log("useHeroImagesNew: Response success:", response.success);
+      console.log("useHeroImagesNew: Response data:", response.data);
+      console.log("useHeroImagesNew: Response data length:", response.data?.length);
       
       if (response.success) {
         // Sort by display_order, then by created_at
@@ -40,12 +45,19 @@ export const useHeroImagesNew = () => {
         });
         
         console.log("useHeroImagesNew: Sorted images:", sortedImages);
+        console.log("useHeroImagesNew: Setting hero images to:", sortedImages);
         setHeroImages(sortedImages);
       } else {
+        console.error("useHeroImagesNew: API response not successful:", response);
         setError("Failed to fetch hero images");
       }
     } catch (err) {
-      console.error("Error fetching hero images:", err);
+      console.error("useHeroImagesNew: Error fetching hero images:", err);
+      console.error("useHeroImagesNew: Error details:", {
+        message: err instanceof Error ? err.message : "Unknown error",
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined
+      });
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
