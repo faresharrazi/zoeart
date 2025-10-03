@@ -363,11 +363,17 @@ class ApiClient {
 
   // Hero Images API (new separate table)
   async getHeroImages() {
+    console.log("apiClient.getHeroImages: Fetching from", `${API_BASE_URL}/hero-images`);
     const response = await fetch(`${API_BASE_URL}/hero-images`);
+    console.log("apiClient.getHeroImages: Response status", response.status);
     if (!response.ok) {
-      throw new Error("Failed to fetch hero images");
+      const errorText = await response.text();
+      console.error("apiClient.getHeroImages: Error response", errorText);
+      throw new Error(`Failed to fetch hero images: ${response.status} ${errorText}`);
     }
-    return response.json();
+    const data = await response.json();
+    console.log("apiClient.getHeroImages: Response data", data);
+    return data;
   }
 
   async uploadHeroImage(imageData: {

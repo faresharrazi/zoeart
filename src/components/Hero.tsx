@@ -26,16 +26,12 @@ const Hero = () => {
   }
 
   // Check if we have real images (not just placeholders)
-  const hasRealImages =
-    heroImages.length > 0 ||
-    (homeSettings?.heroImages && homeSettings.heroImages.length > 0);
+  const hasRealImages = heroImages.length > 0;
 
-  // Use uploaded hero images, fallback to page settings, then placeholder
+  // Use uploaded hero images from new table, fallback to placeholder
   const displayImages =
     heroImages.length > 0
       ? heroImages.map((img) => img.cloudinary_url)
-      : homeSettings?.heroImages && homeSettings.heroImages.length > 0
-      ? homeSettings.heroImages
       : [
           "https://via.placeholder.com/1920x1080/393E46/FFFFFF?text=Aether+Art+Space",
         ];
