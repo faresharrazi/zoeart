@@ -79,12 +79,20 @@ router.post(
     try {
       result = await imageService.uploadImage(req.file, selectedUploadOptions);
       console.log("Image upload result:", result);
+      console.log("Result success:", result.success);
+      console.log("Result error:", result.error);
 
       if (!result.success) {
+        console.log("Upload failed, throwing ValidationError");
         throw new ValidationError(result.error || "Image upload failed");
       }
     } catch (error) {
       console.error("ImageService upload error:", error);
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       throw new ValidationError(`Image upload failed: ${error.message}`);
     }
 

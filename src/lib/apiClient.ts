@@ -107,9 +107,15 @@ class ApiClient {
         ? exhibition.featured_image.startsWith("http")
           ? exhibition.featured_image
           : exhibition.featured_image.startsWith("/api/file/")
-          ? `${API_BASE_URL}${exhibition.featured_image.replace("/api/file/", "/files/")}`
+          ? `${API_BASE_URL}${exhibition.featured_image.replace(
+              "/api/file/",
+              "/files/"
+            )}`
           : exhibition.featured_image.startsWith("/api/files/")
-          ? `${API_BASE_URL}${exhibition.featured_image.replace("/api/files/", "/files/")}`
+          ? `${API_BASE_URL}${exhibition.featured_image.replace(
+              "/api/files/",
+              "/files/"
+            )}`
           : `${API_BASE_URL}/files/${exhibition.featured_image}`
         : null,
       gallery_images: Array.isArray(exhibition.gallery_images)
@@ -139,9 +145,15 @@ class ApiClient {
         ? artist.profile_image.startsWith("http")
           ? artist.profile_image
           : artist.profile_image.startsWith("/api/file/")
-          ? `${API_BASE_URL}${artist.profile_image.replace("/api/file/", "/files/")}`
+          ? `${API_BASE_URL}${artist.profile_image.replace(
+              "/api/file/",
+              "/files/"
+            )}`
           : artist.profile_image.startsWith("/api/files/")
-          ? `${API_BASE_URL}${artist.profile_image.replace("/api/files/", "/files/")}`
+          ? `${API_BASE_URL}${artist.profile_image.replace(
+              "/api/files/",
+              "/files/"
+            )}`
           : `${API_BASE_URL}/files/${artist.profile_image}`
         : null,
     }));
@@ -184,9 +196,15 @@ class ApiClient {
         ? exhibition.featured_image.startsWith("http")
           ? exhibition.featured_image
           : exhibition.featured_image.startsWith("/api/file/")
-          ? `${API_BASE_URL}${exhibition.featured_image.replace("/api/file/", "/files/")}`
+          ? `${API_BASE_URL}${exhibition.featured_image.replace(
+              "/api/file/",
+              "/files/"
+            )}`
           : exhibition.featured_image.startsWith("/api/files/")
-          ? `${API_BASE_URL}${exhibition.featured_image.replace("/api/files/", "/files/")}`
+          ? `${API_BASE_URL}${exhibition.featured_image.replace(
+              "/api/files/",
+              "/files/"
+            )}`
           : `${API_BASE_URL}/files/${exhibition.featured_image}`
         : null,
       gallery_images: Array.isArray(exhibition.gallery_images)
@@ -338,6 +356,123 @@ class ApiClient {
 
     if (!response.ok) {
       throw new Error("Image upload failed");
+    }
+
+    return response.json();
+  }
+
+  // Hero Images API (new separate table)
+  async getHeroImages() {
+    const response = await fetch(`${API_BASE_URL}/hero-images`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch hero images");
+    }
+    return response.json();
+  }
+
+  async uploadHeroImage(imageData: {
+    cloudinary_url: string;
+    cloudinary_public_id: string;
+    original_name: string;
+    file_size?: number;
+    mime_type?: string;
+    width?: number;
+    height?: number;
+    format?: string;
+    display_order?: number;
+  }) {
+    const token = localStorage.getItem("adminToken");
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/hero-images/upload`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(imageData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Hero image upload failed");
+    }
+
+    return response.json();
+  }
+
+  async updateHeroImage(id: number, data: { display_order?: number; is_active?: boolean }) {
+    const token = localStorage.getItem("adminToken");
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/hero-images/${id}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Hero image update failed");
+    }
+
+    return response.json();
+  }
+
+  async deleteHeroImage(id: number) {
+    const token = localStorage.getItem("adminToken");
+    const headers: Record<string, string> = {};
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/hero-images/${id}`, {
+      method: "DELETE",
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error("Hero image deletion failed");
+    }
+
+    return response.json();
+  }
+
+  async bulkUploadHeroImages(images: Array<{
+    cloudinary_url: string;
+    cloudinary_public_id: string;
+    original_name: string;
+    file_size?: number;
+    mime_type?: string;
+    width?: number;
+    height?: number;
+    format?: string;
+  }>) {
+    const token = localStorage.getItem("adminToken");
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/hero-images/bulk-upload`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ images }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Bulk hero image upload failed");
     }
 
     return response.json();
@@ -521,14 +656,17 @@ class ApiClient {
     });
   }
 
-  async updateArticle(id: number, articleData: {
-    title?: string;
-    content?: string;
-    featured_image?: string;
-    media_files?: string[];
-    author?: string;
-    is_published?: boolean;
-  }) {
+  async updateArticle(
+    id: number,
+    articleData: {
+      title?: string;
+      content?: string;
+      featured_image?: string;
+      media_files?: string[];
+      author?: string;
+      is_published?: boolean;
+    }
+  ) {
     return this.request(`/admin/articles/${id}`, {
       method: "PUT",
       body: JSON.stringify(articleData),

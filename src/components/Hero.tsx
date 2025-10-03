@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import HeroImageSlider from "@/components/HeroImageSlider";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
-import { useHeroImages } from "@/hooks/useHeroImages";
+import { useHeroImagesNew } from "@/hooks/useHeroImagesNew";
 
 const Hero = () => {
   const { homeSettings, loading: pageLoading } = usePageDataFromDB();
-  const { heroImages, loading: imagesLoading } = useHeroImages();
+  const { heroImages, loading: imagesLoading } = useHeroImagesNew();
 
   // Show loading state while data is being fetched
   if (pageLoading || imagesLoading) {
@@ -29,7 +29,7 @@ const Hero = () => {
   // Use uploaded hero images, fallback to page settings, then placeholder
   const displayImages =
     heroImages.length > 0
-      ? heroImages.map((img) => img.url)
+      ? heroImages.map((img) => img.cloudinary_url)
       : homeSettings?.heroImages && homeSettings.heroImages.length > 0
       ? homeSettings.heroImages
       : [

@@ -5,19 +5,23 @@ This document describes the required environment variables for the zoeart applic
 ## Required Variables
 
 ### Database Configuration
+
 - `DATABASE_URL` - Primary database connection string
 - `POSTGRES_URL` - Alternative database connection string (fallback)
 
 ### Authentication
+
 - `JWT_SECRET` - Secret key for JWT token signing
 
 ### Image Hosting (Cloudinary)
+
 - `CLOUDINARY_CLOUD_NAME` - Your Cloudinary cloud name
 - `CLOUDINARY_API_KEY` - Your Cloudinary API key
 - `CLOUDINARY_API_SECRET` - Your Cloudinary API secret
 - `CLOUDINARY_UPLOAD_PRESET` - Upload preset for unsigned uploads (optional)
 
 ### Environment
+
 - `NODE_ENV` - Environment mode (development, production)
 
 ## Vercel Configuration

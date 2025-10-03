@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useHeroImages } from "@/hooks/useHeroImages";
 import FileUpload from "../FileUpload";
+import HeroImageUpload from "../HeroImageUpload";
 import { apiClient } from "@/lib/apiClient";
 import { Edit, Save, X } from "lucide-react";
 
@@ -85,48 +86,12 @@ const HomePageEditor = ({
             <div>
               <Label>Hero Images</Label>
               <div className="space-y-4">
-                <FileUpload
-                  category="hero"
-                  existingFiles={heroImages}
-                  onFilesChange={async (files) => {
-                    // Update form data with new hero images
-                    const newImageUrls = files.map((file) => file.url);
-                    const newImageIds = files.map((file) => file.id);
-                    const updatedFormData = {
-                      ...formData,
-                      heroImages: newImageUrls,
-                      heroImageIds: newImageIds,
-                    };
-
-                    setFormData(updatedFormData);
-
-                    // Auto-save the hero images to the home page
-                    try {
-                      await apiClient.updatePageContent("home", {
-                        content: {
-                          heroImages: newImageUrls,
-                          heroImageIds: newImageIds,
-                        },
-                      });
-                      if (refreshPageData) {
-                        await refreshPageData();
-                      }
-                      toast({
-                        title: "Success",
-                        description:
-                          "Hero images updated and saved successfully",
-                      });
-                    } catch (error) {
-                      console.error("Error updating hero images:", error);
-                      toast({
-                        title: "Error",
-                        description: "Failed to update hero images",
-                        variant: "destructive",
-                      });
-                    }
+                <HeroImageUpload
+                  onImagesChange={(images) => {
+                    console.log("Hero images changed:", images);
+                    // Hero images are now managed by the HeroImageUpload component
+                    // No need to save to page_content table anymore
                   }}
-                  accept="image/*"
-                  onRefresh={refreshHeroImages}
                 />
               </div>
             </div>

@@ -115,7 +115,7 @@ const ArtistForm = ({
     try {
       // Use new Cloudinary-enabled upload method
       const response = await apiClient.uploadImage(file, "artist");
-      
+
       // The response now contains the Cloudinary URL directly
       const imageUrl = response.file.url;
 

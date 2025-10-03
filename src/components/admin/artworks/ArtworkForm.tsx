@@ -135,7 +135,7 @@ const ArtworkForm = ({
     try {
       // Use new Cloudinary-enabled upload method
       const response = await apiClient.uploadImage(file, "artwork");
-      
+
       // The response now contains the Cloudinary URL directly
       const imageUrl = response.file.url;
 
@@ -163,9 +163,11 @@ const ArtworkForm = ({
 
   const handleMultipleImageUpload = async (files: FileList) => {
     try {
-      const uploadPromises = Array.from(files).map(file => handleImageUpload(file));
+      const uploadPromises = Array.from(files).map((file) =>
+        handleImageUpload(file)
+      );
       await Promise.all(uploadPromises);
-      
+
       toast({
         title: "Success",
         description: `${files.length} images uploaded successfully`,
@@ -184,10 +186,11 @@ const ArtworkForm = ({
     const newImages = [...(formData.images || [])];
     const removedImage = newImages[index];
     newImages.splice(index, 1);
-    
+
     // If the removed image was the featured image, clear it
-    const newFeaturedImage = formData.featured_image === removedImage ? "" : formData.featured_image;
-    
+    const newFeaturedImage =
+      formData.featured_image === removedImage ? "" : formData.featured_image;
+
     setFormData({
       ...formData,
       images: newImages,
