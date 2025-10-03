@@ -99,9 +99,9 @@ const Contact = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-24 pb-8 bg-[#0f0f0f] relative">
+      <section className="pt-24 pb-4 bg-[#0f0f0f] relative">
         <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="max-w-4xl mx-auto py-8">
+          <div className="max-w-4xl mx-auto py-2">
             <h1 className="text-4xl md:text-6xl  mb-6 text-white drop-shadow-lg">
               {pageData.contact?.title || "Contact Us"}
             </h1>

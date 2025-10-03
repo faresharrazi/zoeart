@@ -145,7 +145,7 @@ const ArtworkDetail = () => {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative py-16 bg-black">
+      <section className="relative py-4 bg-black">
         <div className="absolute inset-0 bg-black"></div>
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
