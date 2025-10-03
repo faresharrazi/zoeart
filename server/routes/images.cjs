@@ -24,6 +24,11 @@ router.post(
     console.log("=== IMAGE UPLOAD (Cloudinary-enabled) ===");
     console.log("Request body:", req.body);
     console.log("Request file:", req.file ? "File present" : "No file");
+    console.log("Environment check:", {
+      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? "Set" : "Not set",
+      CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? "Set" : "Not set",
+      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? "Set" : "Not set"
+    });
 
     if (!req.file) {
       console.log("No file uploaded");
@@ -62,11 +67,19 @@ router.post(
     uploadOptions.category = category;
     uploadOptions.uploadedBy = uploadedBy;
 
-    const result = await imageService.uploadImage(req.file, uploadOptions);
-    console.log("Image upload result:", result);
+    console.log("Upload options:", uploadOptions);
 
-    if (!result.success) {
-      throw new ValidationError(result.error || "Image upload failed");
+    let result;
+    try {
+      result = await imageService.uploadImage(req.file, uploadOptions);
+      console.log("Image upload result:", result);
+
+      if (!result.success) {
+        throw new ValidationError(result.error || "Image upload failed");
+      }
+    } catch (error) {
+      console.error("ImageService upload error:", error);
+      throw new ValidationError(`Image upload failed: ${error.message}`);
     }
 
     res.json({
