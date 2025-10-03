@@ -28,10 +28,35 @@ const ArtistDetail = () => {
         const foundArtist = artistsData.find((art: any) => art.slug === slug);
         if (foundArtist) {
           setArtist(foundArtist);
-          // Filter artworks by this artist
-          const artistArtworks = artworksData.filter(
-            (artwork: any) => artwork.artist_name === foundArtist.name
-          );
+          
+          // Filter artworks by this artist - try multiple matching strategies
+          const artistArtworks = artworksData.filter((artwork: any) => {
+            // Check if artwork is visible
+            if (artwork.is_visible === false) return false;
+            
+            // Try multiple matching strategies
+            const matchesByName = artwork.artist_name && 
+              artwork.artist_name.toLowerCase().trim() === foundArtist.name.toLowerCase().trim();
+            
+            const matchesById = artwork.artist_id && 
+              artwork.artist_id === foundArtist.id;
+            
+            const matchesBySlug = artwork.artist_slug && 
+              artwork.artist_slug === foundArtist.slug;
+            
+            return matchesByName || matchesById || matchesBySlug;
+          });
+          
+          console.log("Artist:", foundArtist.name, "ID:", foundArtist.id);
+          console.log("All artworks:", artworksData.length);
+          console.log("Filtered artworks:", artistArtworks.length);
+          console.log("Artwork details:", artistArtworks.map(a => ({
+            title: a.title,
+            artist_name: a.artist_name,
+            artist_id: a.artist_id,
+            is_visible: a.is_visible
+          })));
+          
           setArtworks(artistArtworks);
         }
       } catch (error) {
@@ -201,20 +226,26 @@ const ArtistDetail = () => {
       </section>
 
       {/* Artworks Section */}
-      {artworks.length > 0 && (
-        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-          <div className="container mx-auto px-6">
-            <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl text-gray-900 mb-4">
-                  Featured Works
-                </h2>
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl text-gray-900 mb-4">
+                Featured Works
+              </h2>
+              {artworks.length > 0 ? (
                 <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                   Explore {artist.name}'s collection of {artworks.length}{" "}
                   {artworks.length === 1 ? "artwork" : "artworks"}
                 </p>
-              </div>
+              ) : (
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                  No artworks available for {artist.name} at the moment.
+                </p>
+              )}
+            </div>
 
+            {artworks.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                 {artworks.map((artwork) => (
                   <ArtworkCard
@@ -224,10 +255,24 @@ const ArtistDetail = () => {
                   />
                 ))}
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="bg-gray-100 rounded-2xl p-12 max-w-md mx-auto">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+                    <span className="text-2xl text-gray-400">🎨</span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                    No Artworks Yet
+                  </h3>
+                  <p className="text-gray-500">
+                    Check back later to see {artist.name}'s latest creations.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <Footer />
     </div>
