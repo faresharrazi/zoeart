@@ -4,18 +4,22 @@ import { apiClient } from "@/lib/apiClient";
 import { Loader2 } from "lucide-react";
 
 const RecentExhibitions = () => {
-  const [exhibitions, setExhibitions] = useState<any[]>([]);
+  const [currentExhibitions, setCurrentExhibitions] = useState<any[]>([]);
+  const [upcomingExhibitions, setUpcomingExhibitions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchExhibitions = async () => {
       try {
         const data = await apiClient.getExhibitions();
-        // Get current and upcoming exhibitions, limit to 3
-        const currentAndUpcoming = data
-          .filter((e: any) => e.status === "upcoming" || e.status === "current")
-          .slice(0, 3);
-        setExhibitions(currentAndUpcoming);
+        
+        // Separate current and upcoming exhibitions
+        const current = data.filter((e: any) => e.status === "current");
+        const upcoming = data.filter((e: any) => e.status === "upcoming");
+        
+        // Limit to 3 each for home page
+        setCurrentExhibitions(current.slice(0, 3));
+        setUpcomingExhibitions(upcoming.slice(0, 3));
       } catch (error) {
         console.error("Error fetching exhibitions:", error);
       } finally {
@@ -52,8 +56,8 @@ const RecentExhibitions = () => {
     );
   }
 
-  // Don't render the section if there are no exhibitions
-  if (exhibitions.length === 0) {
+  // Don't render the section if there are no exhibitions at all
+  if (currentExhibitions.length === 0 && upcomingExhibitions.length === 0) {
     return null;
   }
 
@@ -62,24 +66,61 @@ const RecentExhibitions = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl  mb-6 text-theme-text-primary">
-            Current & Upcoming{" "}
             <span className="text-theme-text-primary">Exhibitions</span>
           </h2>
           <p className="text-xl text-theme-text-muted max-w-3xl mx-auto leading-relaxed">
-            Discover our current and upcoming exhibitions featuring contemporary artists and
+            Discover our exhibitions featuring contemporary artists and
             innovative artistic expressions. Join us for these exciting
             showcases of creativity and vision.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {exhibitions.map((exhibition) => (
-            <ExhibitionCard
-              key={exhibition.id}
-              exhibition={exhibition}
-              onExhibitionClick={handleExhibitionClick}
-            />
-          ))}
+        <div className="space-y-20">
+          {/* On View Section */}
+          {currentExhibitions.length > 0 && (
+            <div>
+              <div className="text-center mb-12">
+                <h3 className="text-3xl md:text-4xl font-bold text-theme-text-primary mb-4">
+                  On View
+                </h3>
+                <p className="text-lg text-theme-text-muted max-w-2xl mx-auto">
+                  Currently showing at our gallery
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {currentExhibitions.map((exhibition) => (
+                  <ExhibitionCard
+                    key={exhibition.id}
+                    exhibition={exhibition}
+                    onExhibitionClick={handleExhibitionClick}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Upcoming Section */}
+          {upcomingExhibitions.length > 0 && (
+            <div>
+              <div className="text-center mb-12">
+                <h3 className="text-3xl md:text-4xl font-bold text-theme-text-primary mb-4">
+                  Upcoming
+                </h3>
+                <p className="text-lg text-theme-text-muted max-w-2xl mx-auto">
+                  Coming soon to our gallery
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {upcomingExhibitions.map((exhibition) => (
+                  <ExhibitionCard
+                    key={exhibition.id}
+                    exhibition={exhibition}
+                    onExhibitionClick={handleExhibitionClick}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="text-center mt-16">
