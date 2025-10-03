@@ -363,17 +363,29 @@ class ApiClient {
 
   // Hero Images API (new separate table)
   async getHeroImages() {
-    console.log("apiClient.getHeroImages: Fetching from", `${API_BASE_URL}/hero-images`);
-    const response = await fetch(`${API_BASE_URL}/hero-images`);
-    console.log("apiClient.getHeroImages: Response status", response.status);
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("apiClient.getHeroImages: Error response", errorText);
-      throw new Error(`Failed to fetch hero images: ${response.status} ${errorText}`);
+    const url = `${API_BASE_URL}/hero-images`;
+    console.log("apiClient.getHeroImages: Fetching from", url);
+    console.log("apiClient.getHeroImages: API_BASE_URL is", API_BASE_URL);
+    
+    try {
+      const response = await fetch(url);
+      console.log("apiClient.getHeroImages: Response status", response.status);
+      console.log("apiClient.getHeroImages: Response headers", Object.fromEntries(response.headers.entries()));
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("apiClient.getHeroImages: Error response", errorText);
+        throw new Error(`Failed to fetch hero images: ${response.status} ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log("apiClient.getHeroImages: Response data", data);
+      console.log("apiClient.getHeroImages: Data length", data.data?.length);
+      return data;
+    } catch (error) {
+      console.error("apiClient.getHeroImages: Fetch error", error);
+      throw error;
     }
-    const data = await response.json();
-    console.log("apiClient.getHeroImages: Response data", data);
-    return data;
   }
 
   async uploadHeroImage(imageData: {
