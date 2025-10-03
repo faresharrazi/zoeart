@@ -94,9 +94,9 @@ const Artists = () => {
           <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {artists.map((artist, index) => (
-                <Card
+                <div
                   key={index}
-                  className="group cursor-pointer hover:shadow-2xl transition-all duration-500 hover:scale-105 overflow-hidden border-0 shadow-lg bg-white"
+                  className="group cursor-pointer transition-all duration-300 hover:opacity-80"
                   onClick={() => handleArtistClick(artist.slug)}
                 >
                   {/* Artist Profile Section */}
@@ -140,7 +140,7 @@ const Artists = () => {
                         </div>
                       )}
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           </div>
