@@ -22,9 +22,24 @@ router.get(
     
     try {
       const heroImages = await query(
-        `SELECT * FROM hero_images 
-         WHERE is_active = true 
-         ORDER BY display_order ASC, created_at DESC`
+        `SELECT 
+           id,
+           cloudinary_url,
+           cloudinary_public_id,
+           original_name,
+           file_size,
+           mime_type,
+           width,
+           height,
+           format,
+           COALESCE(display_order, id) as display_order,
+           COALESCE(is_active, true) as is_active,
+           uploaded_by,
+           COALESCE(created_at, CURRENT_TIMESTAMP) as created_at,
+           COALESCE(updated_at, CURRENT_TIMESTAMP) as updated_at
+         FROM hero_images 
+         WHERE COALESCE(is_active, true) = true 
+         ORDER BY COALESCE(display_order, id) ASC, COALESCE(created_at, CURRENT_TIMESTAMP) DESC`
       );
 
       console.log(`Found ${heroImages.rows.length} hero images`);
