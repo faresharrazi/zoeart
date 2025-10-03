@@ -79,10 +79,10 @@ const FileUpload = ({
 
     try {
       const uploadPromises = Array.from(selectedFiles).map(async (file) => {
-        const response = await apiClient.uploadFile(file, category);
+        const response = await apiClient.uploadImage(file, category);
         return {
           ...response.file,
-          url: `/api/files/${response.file.id}`, // Add URL for the uploaded file
+          url: response.file.url, // Use Cloudinary URL directly
         };
       });
 
@@ -94,7 +94,7 @@ const FileUpload = ({
 
       toast({
         title: "Upload successful",
-        description: `${uploadedFiles.length} file(s) uploaded successfully.`,
+        description: `${uploadedFiles.length} file(s) uploaded to Cloudinary successfully.`,
       });
     } catch (error) {
       console.error("Upload error:", error);
