@@ -1,5 +1,5 @@
 const { uploadToCloudinary, deleteFromCloudinary, getOptimizedUrl } = require('../config/cloudinary.cjs');
-const db = require('./database.cjs');
+const { query } = require('../config/database.cjs');
 
 class ImageService {
   constructor() {
@@ -75,7 +75,7 @@ class ImageService {
       const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}-${originalname}`;
       
       // Insert into database
-      const result = await db.query(
+      const result = await query(
         `INSERT INTO uploaded_files (original_name, filename, file_data, file_size, mime_type, category, uploaded_by)
          VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
         [
@@ -177,7 +177,7 @@ class ImageService {
   async deleteFromDatabase(imageData) {
     try {
       if (imageData && imageData.id) {
-        await db.query('DELETE FROM uploaded_files WHERE id = $1', [imageData.id]);
+        await query('DELETE FROM uploaded_files WHERE id = $1', [imageData.id]);
         return {
           success: true,
           source: 'database'
@@ -199,7 +199,7 @@ class ImageService {
     try {
       if (imageData && imageData.id) {
         // Get image data from database
-        const result = await db.query(
+        const result = await query(
           'SELECT file_data, mime_type, original_name FROM uploaded_files WHERE id = $1',
           [imageData.id]
         );
@@ -223,7 +223,7 @@ class ImageService {
         
         if (cloudinaryResult.success) {
           // Update database record with Cloudinary URL
-          await db.query(
+          await query(
             'UPDATE uploaded_files SET url = $1, cloudinary_public_id = $2 WHERE id = $3',
             [cloudinaryResult.url, cloudinaryResult.public_id, imageData.id]
           );
