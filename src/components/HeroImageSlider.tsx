@@ -6,6 +6,7 @@ interface HeroImageSliderProps {
 }
 
 const HeroImageSlider = ({ images, interval = 2000 }: HeroImageSliderProps) => {
+  console.log("HeroImageSlider: Received images:", images);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {

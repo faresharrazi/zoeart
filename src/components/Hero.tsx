@@ -4,12 +4,14 @@ import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { useHeroImagesNew } from "@/hooks/useHeroImagesNew";
 
 const Hero = () => {
+  console.log("Hero component: Component rendered");
   const { homeSettings, loading: pageLoading } = usePageDataFromDB();
   const { heroImages, loading: imagesLoading } = useHeroImagesNew();
 
   // Debug logging
   console.log("Hero component - heroImages:", heroImages);
   console.log("Hero component - imagesLoading:", imagesLoading);
+  console.log("Hero component - homeSettings:", homeSettings);
 
   // Show loading state while data is being fetched
   if (pageLoading || imagesLoading) {

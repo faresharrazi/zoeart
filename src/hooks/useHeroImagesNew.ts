@@ -53,6 +53,7 @@ export const useHeroImagesNew = () => {
   };
 
   useEffect(() => {
+    console.log("useHeroImagesNew: useEffect triggered");
     fetchHeroImages();
   }, []);
 
