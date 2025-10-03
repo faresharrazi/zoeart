@@ -317,6 +317,32 @@ class ApiClient {
     return response.json();
   }
 
+  // Image upload operations (Cloudinary-enabled)
+  async uploadImage(file: File, category: string) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("category", category);
+
+    const token = localStorage.getItem("adminToken");
+    const headers: Record<string, string> = {};
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/images/upload`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Image upload failed");
+    }
+
+    return response.json();
+  }
+
   async getFiles(category?: string) {
     const url = category ? `/files?category=${category}` : "/files";
     return this.request(url);

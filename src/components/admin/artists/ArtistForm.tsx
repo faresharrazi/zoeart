@@ -113,8 +113,11 @@ const ArtistForm = ({
 
   const handleProfileImageUpload = async (file: File) => {
     try {
-      const response = await apiClient.uploadFile(file, "artist_profile");
-      const imageUrl = `/api/file/${response.file.id}`;
+      // Use new Cloudinary-enabled upload method
+      const response = await apiClient.uploadImage(file, "artist");
+      
+      // The response now contains the Cloudinary URL directly
+      const imageUrl = response.file.url;
 
       setFormData({
         ...formData,
@@ -123,7 +126,7 @@ const ArtistForm = ({
 
       toast({
         title: "Success",
-        description: "Profile image uploaded successfully",
+        description: "Profile image uploaded to Cloudinary successfully",
       });
     } catch (error) {
       console.error("Error uploading image:", error);
