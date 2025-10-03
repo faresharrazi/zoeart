@@ -26,7 +26,9 @@ export const useHeroImagesNew = () => {
       setLoading(true);
       setError(null);
       
+      console.log("useHeroImagesNew: Fetching hero images...");
       const response = await apiClient.getHeroImages();
+      console.log("useHeroImagesNew: API response:", response);
       
       if (response.success) {
         // Sort by display_order, then by created_at
@@ -37,6 +39,7 @@ export const useHeroImagesNew = () => {
           return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
         });
         
+        console.log("useHeroImagesNew: Sorted images:", sortedImages);
         setHeroImages(sortedImages);
       } else {
         setError("Failed to fetch hero images");

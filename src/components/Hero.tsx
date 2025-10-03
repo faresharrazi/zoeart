@@ -7,6 +7,10 @@ const Hero = () => {
   const { homeSettings, loading: pageLoading } = usePageDataFromDB();
   const { heroImages, loading: imagesLoading } = useHeroImagesNew();
 
+  // Debug logging
+  console.log("Hero component - heroImages:", heroImages);
+  console.log("Hero component - imagesLoading:", imagesLoading);
+
   // Show loading state while data is being fetched
   if (pageLoading || imagesLoading) {
     return (

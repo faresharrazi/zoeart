@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useHeroImages } from "@/hooks/useHeroImages";
+// Removed old useHeroImages import - now using HeroImageUpload component
 import FileUpload from "../FileUpload";
 import HeroImageUpload from "../HeroImageUpload";
 import { apiClient } from "@/lib/apiClient";
@@ -34,10 +34,6 @@ const HomePageEditor = ({
   refreshPageData,
 }: HomePageEditorProps) => {
   const { toast } = useToast();
-  const { heroImages, refreshHeroImages } = useHeroImages();
-
-  // Debug: Log hero images data
-  console.log("HomePageEditor - heroImages:", heroImages);
 
   return (
     <Card>

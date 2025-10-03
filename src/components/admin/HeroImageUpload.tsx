@@ -40,10 +40,13 @@ const HeroImageUpload: React.FC<HeroImageUploadProps> = ({ onImagesChange }) => 
   const fetchHeroImages = async () => {
     try {
       setLoading(true);
+      console.log("HeroImageUpload: Fetching hero images...");
       const response = await apiClient.getHeroImages();
+      console.log("HeroImageUpload: API response:", response);
       if (response.success) {
         setHeroImages(response.data);
         onImagesChange?.(response.data);
+        console.log("HeroImageUpload: Set hero images:", response.data);
       }
     } catch (error) {
       console.error("Error fetching hero images:", error);
