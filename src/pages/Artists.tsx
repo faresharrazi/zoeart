@@ -101,56 +101,15 @@ const Artists = () => {
                 >
                   {/* Artist Profile Section */}
                   <div className="relative p-8 text-center">
-                    {/* Circular Profile Image */}
-                    <div className="relative mb-6">
-                      {artist.profile_image &&
-                      artist.profile_image !== "null" &&
-                      artist.profile_image !== "undefined" ? (
-                        <div className="relative inline-block">
-                          <img
-                            src={artist.profile_image}
-                            alt={artist.name}
-                            className="w-32 h-32 rounded-full mx-auto object-cover shadow-lg border-4 border-white group-hover:scale-110 transition-transform duration-500"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                              e.currentTarget.nextElementSibling.style.display =
-                                "flex";
-                            }}
-                          />
-                          <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/10 to-transparent"></div>
-                        </div>
-                      ) : (
-                        <div className="w-32 h-32 rounded-full mx-auto bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center shadow-lg border-4 border-white">
-                          <span className="text-4xl text-slate-600 font-semibold">
-                            {artist.name?.charAt(0) || "A"}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Artist Info */}
-                    <div className="space-y-3">
-                      <h3 className="text-2xl font-bold text-gray-900 group-hover:text-theme-primary transition-colors duration-300">
-                        {artist.name}
-                      </h3>
-
-                      {artist.specialty && (
-                        <p className="text-lg text-gray-600 font-medium">
-                          {artist.specialty}
-                        </p>
-                      )}
-
-                      {artist.bio && (
-                        <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">
-                          {artist.bio}
-                        </p>
-                      )}
-                    </div>
+                    {/* Artist Name */}
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6 group-hover:text-theme-primary transition-colors duration-300">
+                      {artist.name}
+                    </h3>
 
                     {/* Social Media Icons */}
                     {artist.social_media &&
                       Object.keys(artist.social_media).length > 0 && (
-                        <div className="flex justify-center space-x-3 mt-6">
+                        <div className="flex justify-center space-x-3">
                           {Object.entries(artist.social_media).map(
                             ([platform, handle]) => {
                               if (!handle || handle.trim() === "") return null;
