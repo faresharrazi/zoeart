@@ -163,7 +163,7 @@ const ExhibitionForm = ({
       // Use new Cloudinary-enabled upload method
       const response = await apiClient.uploadImage(file, "exhibition");
       console.log("Featured image upload response:", response);
-      
+
       // The response now contains the Cloudinary URL directly
       const imageUrl = response.file.url;
 
@@ -200,7 +200,7 @@ const ExhibitionForm = ({
       // Use new Cloudinary-enabled upload method
       const response = await apiClient.uploadImage(file, "exhibition");
       console.log("Upload response:", response);
-      
+
       // The response now contains the Cloudinary URL directly
       const imageUrl = response.file.url;
 
@@ -235,15 +235,14 @@ const ExhibitionForm = ({
     try {
       console.log("Bulk uploading gallery images:", files.length, "files");
       const uploadPromises = Array.from(files).map((file) =>
-        apiClient.uploadFile(file, "exhibition")
+        apiClient.uploadImage(file, "exhibition")
       );
 
       const responses = await Promise.all(uploadPromises);
       console.log("Bulk upload responses:", responses);
 
-      const imageUrls = responses.map(
-        (response) => `http://localhost:3001/api/files/${response.file.id}`
-      );
+      // Extract Cloudinary URLs from responses
+      const imageUrls = responses.map((response) => response.file.url);
 
       setFormData({
         ...formData,
@@ -252,7 +251,7 @@ const ExhibitionForm = ({
 
       toast({
         title: "Success",
-        description: `${files.length} gallery images uploaded successfully`,
+        description: `${files.length} gallery images uploaded to Cloudinary successfully`,
       });
     } catch (error) {
       console.error("Error bulk uploading gallery images:", error);
