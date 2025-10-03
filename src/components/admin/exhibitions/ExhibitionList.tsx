@@ -23,7 +23,7 @@ interface Exhibition {
   endDate: string;
   location: string;
   curator: string;
-  status: "upcoming" | "past";
+  status: "upcoming" | "current" | "past";
   featuredImage?: string;
   galleryImages: string[];
   assignedArtists: string[];
@@ -112,6 +112,7 @@ const ExhibitionList = ({
   const upcomingCount = exhibitions.filter(
     (e) => e.status === "upcoming"
   ).length;
+  const currentCount = exhibitions.filter((e) => e.status === "current").length;
   const pastCount = exhibitions.filter((e) => e.status === "past").length;
   const visibleCount = exhibitions.filter((e) => e.isVisible).length;
   const hiddenCount = exhibitions.filter((e) => !e.isVisible).length;
@@ -133,12 +134,18 @@ const ExhibitionList = ({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="bg-blue-50 p-4 rounded-lg">
           <div className="text-2xl font-bold text-blue-600">
             {upcomingCount}
           </div>
           <div className="text-sm text-blue-600">Upcoming</div>
+        </div>
+        <div className="bg-orange-50 p-4 rounded-lg">
+          <div className="text-2xl font-bold text-orange-600">
+            {currentCount}
+          </div>
+          <div className="text-sm text-orange-600">Current</div>
         </div>
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="text-2xl font-bold text-gray-600">{pastCount}</div>
@@ -177,6 +184,7 @@ const ExhibitionList = ({
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="upcoming">Upcoming</SelectItem>
+              <SelectItem value="current">Current</SelectItem>
               <SelectItem value="past">Past</SelectItem>
             </SelectContent>
           </Select>

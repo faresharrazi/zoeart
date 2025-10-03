@@ -11,11 +11,11 @@ const RecentExhibitions = () => {
     const fetchExhibitions = async () => {
       try {
         const data = await apiClient.getExhibitions();
-        // Get only upcoming exhibitions, limit to 3
-        const upcoming = data
-          .filter((e: any) => e.status === "upcoming")
+        // Get current and upcoming exhibitions, limit to 3
+        const currentAndUpcoming = data
+          .filter((e: any) => e.status === "upcoming" || e.status === "current")
           .slice(0, 3);
-        setExhibitions(upcoming);
+        setExhibitions(currentAndUpcoming);
       } catch (error) {
         console.error("Error fetching exhibitions:", error);
       } finally {
@@ -62,11 +62,11 @@ const RecentExhibitions = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl  mb-6 text-theme-text-primary">
-            Upcoming{" "}
+            Current & Upcoming{" "}
             <span className="text-theme-text-primary">Exhibitions</span>
           </h2>
           <p className="text-xl text-theme-text-muted max-w-3xl mx-auto leading-relaxed">
-            Discover our upcoming exhibitions featuring contemporary artists and
+            Discover our current and upcoming exhibitions featuring contemporary artists and
             innovative artistic expressions. Join us for these exciting
             showcases of creativity and vision.
           </p>

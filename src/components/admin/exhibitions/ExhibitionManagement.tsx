@@ -13,7 +13,7 @@ interface Exhibition {
   endDate: string;
   location: string;
   curator: string;
-  status: "upcoming" | "past";
+  status: "upcoming" | "current" | "past";
   featuredImage?: string;
   galleryImages: string[];
   assignedArtists: string[];

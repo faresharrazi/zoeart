@@ -27,7 +27,7 @@ interface Exhibition {
   endDate: string;
   location: string;
   curator: string;
-  status: "upcoming" | "past";
+  status: "upcoming" | "current" | "past";
   featuredImage?: string;
   galleryImages: string[];
   assignedArtists: string[];
@@ -397,7 +397,7 @@ const ExhibitionForm = ({
           <Label htmlFor="status">Status</Label>
           <Select
             value={formData.status || "upcoming"}
-            onValueChange={(value: "upcoming" | "past") =>
+            onValueChange={(value: "upcoming" | "current" | "past") =>
               setFormData({ ...formData, status: value })
             }
           >
@@ -406,6 +406,7 @@ const ExhibitionForm = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="upcoming">Upcoming</SelectItem>
+              <SelectItem value="current">Current</SelectItem>
               <SelectItem value="past">Past</SelectItem>
             </SelectContent>
           </Select>

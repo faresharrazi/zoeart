@@ -34,7 +34,7 @@ interface Exhibition {
   endDate: string;
   location: string;
   curator: string;
-  status: "upcoming" | "past";
+  status: "upcoming" | "current" | "past";
   featuredImage?: string;
   galleryImages: string[];
   assignedArtists: string[];
@@ -123,7 +123,11 @@ const ExhibitionCard = ({
             <div className="flex items-center gap-2 mt-2">
               <Badge
                 variant={
-                  exhibition.status === "upcoming" ? "default" : "secondary"
+                  exhibition.status === "upcoming" 
+                    ? "default" 
+                    : exhibition.status === "current"
+                    ? "destructive"
+                    : "secondary"
                 }
               >
                 {exhibition.status}
