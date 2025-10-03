@@ -1,5 +1,6 @@
 const express = require("express");
 const imageService = require("../services/imageService.cjs");
+const { uploadOptions } = require("../config/cloudinary.cjs");
 const {
   upload,
   handleUploadError,
@@ -25,9 +26,13 @@ router.post(
     console.log("Request body:", req.body);
     console.log("Request file:", req.file ? "File present" : "No file");
     console.log("Environment check:", {
-      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? "Set" : "Not set",
+      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME
+        ? "Set"
+        : "Not set",
       CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? "Set" : "Not set",
-      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? "Set" : "Not set"
+      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET
+        ? "Set"
+        : "Not set",
     });
 
     if (!req.file) {
@@ -46,32 +51,33 @@ router.post(
     });
 
     // Determine upload options based on category
-    let uploadOptions = {};
+    let selectedUploadOptions = {};
     switch (category) {
-      case 'exhibition':
-        uploadOptions = imageService.uploadOptions.exhibition;
+      case "exhibition":
+        selectedUploadOptions = uploadOptions.exhibition;
         break;
-      case 'artwork':
-        uploadOptions = imageService.uploadOptions.artwork;
+      case "artwork":
+        selectedUploadOptions = uploadOptions.artwork;
         break;
-      case 'artist':
-        uploadOptions = imageService.uploadOptions.artist;
+      case "artist":
+      case "artist_profile":
+        selectedUploadOptions = uploadOptions.artist;
         break;
-      case 'hero':
-        uploadOptions = imageService.uploadOptions.hero;
+      case "hero":
+        selectedUploadOptions = uploadOptions.hero;
         break;
       default:
-        uploadOptions = imageService.uploadOptions.default;
+        selectedUploadOptions = uploadOptions.default;
     }
 
-    uploadOptions.category = category;
-    uploadOptions.uploadedBy = uploadedBy;
+    selectedUploadOptions.category = category;
+    selectedUploadOptions.uploadedBy = uploadedBy;
 
-    console.log("Upload options:", uploadOptions);
+    console.log("Upload options:", selectedUploadOptions);
 
     let result;
     try {
-      result = await imageService.uploadImage(req.file, uploadOptions);
+      result = await imageService.uploadImage(req.file, selectedUploadOptions);
       console.log("Image upload result:", result);
 
       if (!result.success) {
@@ -95,8 +101,8 @@ router.post(
         publicId: result.public_id,
         width: result.width,
         height: result.height,
-        format: result.format
-      }
+        format: result.format,
+      },
     });
   })
 );
@@ -119,26 +125,27 @@ router.post(
     const uploadedBy = req.user?.id || null;
 
     // Determine upload options based on category
-    let uploadOptions = {};
+    let selectedUploadOptions = {};
     switch (category) {
-      case 'exhibition':
-        uploadOptions = imageService.uploadOptions.exhibition;
+      case "exhibition":
+        selectedUploadOptions = uploadOptions.exhibition;
         break;
-      case 'artwork':
-        uploadOptions = imageService.uploadOptions.artwork;
+      case "artwork":
+        selectedUploadOptions = uploadOptions.artwork;
         break;
-      case 'artist':
-        uploadOptions = imageService.uploadOptions.artist;
+      case "artist":
+      case "artist_profile":
+        selectedUploadOptions = uploadOptions.artist;
         break;
-      case 'hero':
-        uploadOptions = imageService.uploadOptions.hero;
+      case "hero":
+        selectedUploadOptions = uploadOptions.hero;
         break;
       default:
-        uploadOptions = imageService.uploadOptions.default;
+        selectedUploadOptions = uploadOptions.default;
     }
 
-    uploadOptions.category = category;
-    uploadOptions.uploadedBy = uploadedBy;
+    selectedUploadOptions.category = category;
+    selectedUploadOptions.uploadedBy = uploadedBy;
 
     const results = [];
     const errors = [];
@@ -158,18 +165,18 @@ router.post(
             publicId: result.public_id,
             width: result.width,
             height: result.height,
-            format: result.format
+            format: result.format,
           });
         } else {
           errors.push({
             filename: file.originalname,
-            error: result.error
+            error: result.error,
           });
         }
       } catch (error) {
         errors.push({
           filename: file.originalname,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -179,7 +186,7 @@ router.post(
       files: results,
       errors: errors,
       totalUploaded: results.length,
-      totalErrors: errors.length
+      totalErrors: errors.length,
     });
   })
 );
@@ -195,7 +202,7 @@ router.get(
     // For now, return the original URL
     res.json({
       url: `/api/images/${imageId}`,
-      optimized: false
+      optimized: false,
     });
   })
 );
@@ -206,12 +213,12 @@ router.delete(
   authenticateToken,
   asyncHandler(async (req, res) => {
     const { imageId } = req.params;
-    
+
     // This would need to be implemented based on how you store image references
     // For now, return success
     res.json({
       success: true,
-      message: "Image deletion not yet implemented"
+      message: "Image deletion not yet implemented",
     });
   })
 );
@@ -227,19 +234,22 @@ router.post(
     const imageData = { id: imageId };
     const uploadOptions = category ? imageService.uploadOptions[category] : {};
 
-    const result = await imageService.migrateToCloudinary(imageData, uploadOptions);
+    const result = await imageService.migrateToCloudinary(
+      imageData,
+      uploadOptions
+    );
 
     if (result.success) {
       res.json({
         success: true,
         message: "Image migrated successfully",
         cloudinaryUrl: result.cloudinaryUrl,
-        publicId: result.publicId
+        publicId: result.publicId,
       });
     } else {
       res.status(400).json({
         success: false,
-        error: result.error
+        error: result.error,
       });
     }
   })
