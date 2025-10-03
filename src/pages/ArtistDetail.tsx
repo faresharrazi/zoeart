@@ -160,7 +160,7 @@ const ArtistDetail = () => {
             </div>
 
             {/* Artist Name */}
-            <h1 className="text-6xl md:text-8xl text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl text-gray-900 mb-6">
               {artist.name}
             </h1>
 
