@@ -63,17 +63,17 @@ router.get(
   })
 );
 
-// Get hero images (public)
-router.get(
-  "/hero-images",
-  asyncHandler(async (req, res) => {
-    const heroImages = await FileService.getFilesByCategory("hero");
-    res.json({
-      success: true,
-      data: heroImages,
-    });
-  })
-);
+// Get hero images (public) - REMOVED: Now handled by /api/hero-images route
+// router.get(
+//   "/hero-images",
+//   asyncHandler(async (req, res) => {
+//     const heroImages = await FileService.getFilesByCategory("hero");
+//     res.json({
+//       success: true,
+//       data: heroImages,
+//     });
+//   })
+// );
 
 // Get file by ID (public)
 router.get(
