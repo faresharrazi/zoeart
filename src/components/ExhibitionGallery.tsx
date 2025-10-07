@@ -32,7 +32,7 @@ interface ExhibitionGalleryProps {
 
 const ExhibitionGallery = ({
   images = sampleImages,
-  title = "Exhibition Gallery",
+  title = "Gallery",
 }: ExhibitionGalleryProps) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null
