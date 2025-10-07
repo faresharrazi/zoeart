@@ -34,6 +34,8 @@ interface Exhibition {
   assignedArtworks: string[];
   callForArtists?: boolean;
   ctaLink?: string;
+  pressMediaName?: string;
+  pressMediaLink?: string;
   isVisible?: boolean;
 }
 
@@ -70,6 +72,8 @@ const ExhibitionForm = ({
       assignedArtworks: [],
       callForArtists: false,
       ctaLink: "",
+      pressMediaName: "",
+      pressMediaLink: "",
       isVisible: true,
     }
   );
@@ -119,6 +123,8 @@ const ExhibitionForm = ({
         assigned_artworks: JSON.stringify(formData.assignedArtworks || []),
         call_for_artists: formData.callForArtists || false,
         cta_link: formData.ctaLink || "",
+        press_media_name: formData.pressMediaName || "",
+        press_media_link: formData.pressMediaLink || "",
         is_visible: formData.isVisible !== false,
       };
 
@@ -689,6 +695,35 @@ const ExhibitionForm = ({
               />
             </div>
           )}
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="pressMediaName">Press Release Name</Label>
+              <Input
+                id="pressMediaName"
+                value={formData.pressMediaName || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, pressMediaName: e.target.value })
+                }
+                placeholder="e.g., Press Release - Exhibition Name"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="pressMediaLink">Press Release Download Link</Label>
+              <Input
+                id="pressMediaLink"
+                value={formData.pressMediaLink || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, pressMediaLink: e.target.value })
+                }
+                placeholder="https://example.com/press-release.pdf"
+              />
+              <p className="text-sm text-gray-600 mt-1">
+                Provide a direct link to the press release PDF file
+              </p>
+            </div>
+          </div>
 
           <div className="flex items-center space-x-2">
             <Switch

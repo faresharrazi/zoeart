@@ -20,6 +20,8 @@ interface Exhibition {
   assignedArtworks: string[];
   callForArtists?: boolean;
   ctaLink?: string;
+  pressMediaName?: string;
+  pressMediaLink?: string;
   isVisible?: boolean;
 }
 
@@ -69,6 +71,8 @@ const ExhibitionManagement = () => {
           : [],
         callForArtists: exhibition.call_for_artists || false,
         ctaLink: exhibition.cta_link || "",
+        pressMediaName: exhibition.press_media_name || "",
+        pressMediaLink: exhibition.press_media_link || "",
         isVisible: exhibition.is_visible !== false,
       }));
 

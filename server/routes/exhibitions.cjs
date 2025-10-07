@@ -40,6 +40,8 @@ router.get(
       assigned_artworks: exhibition.assigned_artworks || [],
       call_for_artists: exhibition.call_for_artists || false,
       cta_link: exhibition.cta_link || "",
+      press_media_name: exhibition.press_media_name || "",
+      press_media_link: exhibition.press_media_link || "",
       is_visible: exhibition.is_visible !== false,
       created_at: exhibition.created_at,
       updated_at: exhibition.updated_at,
@@ -77,6 +79,8 @@ router.get(
       assigned_artworks: exhibition.assigned_artworks || [],
       call_for_artists: exhibition.call_for_artists || false,
       cta_link: exhibition.cta_link || "",
+      press_media_name: exhibition.press_media_name || "",
+      press_media_link: exhibition.press_media_link || "",
       is_visible: exhibition.is_visible !== false,
       created_at: exhibition.created_at,
       updated_at: exhibition.updated_at,
@@ -106,6 +110,8 @@ router.post(
       assigned_artworks,
       call_for_artists,
       cta_link,
+      press_media_name,
+      press_media_link,
       is_visible,
     } = req.body;
 
@@ -133,6 +139,8 @@ router.post(
       assigned_artworks: assigned_artworks || [],
       call_for_artists: call_for_artists || false,
       cta_link: cta_link || "",
+      press_media_name: press_media_name || "",
+      press_media_link: press_media_link || "",
       is_visible: is_visible !== false,
     };
 
