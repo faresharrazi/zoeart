@@ -158,15 +158,27 @@ const ExhibitionDetail = () => {
       {exhibition.featured_image &&
       exhibition.featured_image !== "null" &&
       exhibition.featured_image !== "undefined" ? (
-        <section className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden">
-          <img
-            src={exhibition.featured_image}
-            alt={exhibition.title}
-            className="w-full h-full object-cover"
+        <section className="relative w-full min-h-[60vh] md:min-h-[70vh] overflow-hidden flex items-center justify-center bg-gray-100">
+          {/* Blurred Background */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-sm scale-110"
+            style={{
+              backgroundImage: `url(${exhibition.featured_image})`
+            }}
           />
-          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-black/10"></div>
+          
+          {/* Main Poster Image */}
+          <div className="relative z-10 max-w-full max-h-full p-4">
+            <img
+              src={exhibition.featured_image}
+              alt={exhibition.title}
+              className="max-w-full max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-2xl"
+            />
+          </div>
+          
           {/* Back Button Overlay */}
-          <div className="absolute top-6 left-6 z-10">
+          <div className="absolute top-6 left-6 z-20">
             <Button
               onClick={() => navigate("/exhibitions")}
               variant="secondary"
