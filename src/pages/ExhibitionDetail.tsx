@@ -178,14 +178,16 @@ const ExhibitionDetail = () => {
           </div>
           
           {/* Back Button Overlay */}
-          <div className="absolute top-6 left-6 z-20">
+          <div className="absolute top-2 left-2 md:top-6 md:left-6 z-20">
             <Button
               onClick={() => navigate("/exhibitions")}
               variant="secondary"
-              className="bg-white/90 hover:bg-white text-gray-900 backdrop-blur-sm"
+              size="sm"
+              className="bg-white/90 hover:bg-white text-gray-900 backdrop-blur-sm text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Exhibitions
+              <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+              <span className="hidden sm:inline">Back to Exhibitions</span>
+              <span className="sm:hidden">Back</span>
             </Button>
           </div>
         </section>
