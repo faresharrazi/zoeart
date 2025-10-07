@@ -1,6 +1,7 @@
 import { ExternalLink, Image, FileImage } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import GoogleDriveConverter from "./GoogleDriveConverter";
 
 const UsefulLinks = () => {
   const links = [
@@ -66,6 +67,11 @@ const UsefulLinks = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Google Drive Converter */}
+      <div className="mt-8">
+        <GoogleDriveConverter />
       </div>
 
       <div className="mt-8 p-4 bg-theme-surface rounded-lg border border-theme-border">

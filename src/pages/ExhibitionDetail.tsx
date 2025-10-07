@@ -246,7 +246,7 @@ const ExhibitionDetail = () => {
             )}
 
             {/* Exhibition Details */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
               {/* Date */}
               <Card className="p-6">
                 <CardContent className="text-center">
@@ -294,6 +294,29 @@ const ExhibitionDetail = () => {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Press Media */}
+              {exhibition.press_media_name && exhibition.press_media_link && (
+                <Card className="p-6">
+                  <CardContent className="text-center">
+                    <FileText className="w-8 h-8 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-600 text-sm font-medium mb-2">
+                      Press Media
+                    </p>
+                    <p className="text-gray-900 font-semibold text-lg mb-4">
+                      {exhibition.press_media_name}
+                    </p>
+                    <Button
+                      className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+                      onClick={() => {
+                        window.open(exhibition.press_media_link, "_blank");
+                      }}
+                    >
+                      Download PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Call for Artists Button */}
@@ -310,36 +333,6 @@ const ExhibitionDetail = () => {
                 >
                   Join as Artist
                 </Button>
-              </div>
-            )}
-
-            {/* Press Media Download Section */}
-            {exhibition.press_media_name && exhibition.press_media_link && (
-              <div className="mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                  Press Media
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <Card className="p-6">
-                    <CardContent className="text-center">
-                      <FileText className="w-8 h-8 text-gray-600 mx-auto mb-3" />
-                      <p className="text-gray-600 text-sm font-medium mb-2">
-                        Press Release
-                      </p>
-                      <p className="text-gray-900 font-semibold text-lg mb-4">
-                        {exhibition.press_media_name}
-                      </p>
-                      <Button
-                        className="w-full bg-gray-900 hover:bg-gray-800 text-white"
-                        onClick={() => {
-                          window.open(exhibition.press_media_link, "_blank");
-                        }}
-                      >
-                        Download PDF
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
               </div>
             )}
 
