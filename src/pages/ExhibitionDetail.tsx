@@ -313,28 +313,32 @@ const ExhibitionDetail = () => {
               </div>
             )}
 
-            {/* Press Release Download Section */}
+            {/* Press Media Download Section */}
             {exhibition.press_media_name && exhibition.press_media_link && (
-              <div className="text-center mb-12">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-200">
-                  <div className="flex items-center justify-center mb-4">
-                    <FileText className="w-8 h-8 text-blue-600 mr-3" />
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      Press Release
-                    </h3>
-                  </div>
-                  <p className="text-gray-700 mb-6 text-lg">
-                    {exhibition.press_media_name}
-                  </p>
-                  <Button
-                    size="lg"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold"
-                    onClick={() => {
-                      window.open(exhibition.press_media_link, "_blank");
-                    }}
-                  >
-                    Download Press Release
-                  </Button>
+              <div className="mb-12">
+                <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+                  Press Media
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <Card className="p-6">
+                    <CardContent className="text-center">
+                      <FileText className="w-8 h-8 text-gray-600 mx-auto mb-3" />
+                      <p className="text-gray-600 text-sm font-medium mb-2">
+                        Press Release
+                      </p>
+                      <p className="text-gray-900 font-semibold text-lg mb-4">
+                        {exhibition.press_media_name}
+                      </p>
+                      <Button
+                        className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+                        onClick={() => {
+                          window.open(exhibition.press_media_link, "_blank");
+                        }}
+                      >
+                        Download PDF
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             )}
