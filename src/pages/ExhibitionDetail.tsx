@@ -296,7 +296,7 @@ const ExhibitionDetail = () => {
               )}
 
               {/* Press Media */}
-              {exhibition.press_media_name && exhibition.press_media_link && (
+              {exhibition.press_media_name && (
                 <Card className="p-6">
                   <CardContent className="text-center">
                     <FileText className="w-8 h-8 text-gray-600 mx-auto mb-3" />
@@ -306,14 +306,16 @@ const ExhibitionDetail = () => {
                     <p className="text-gray-900 font-semibold text-lg mb-4">
                       {exhibition.press_media_name}
                     </p>
-                    <Button
-                      className="w-full bg-gray-900 hover:bg-gray-800 text-white"
-                      onClick={() => {
-                        window.open(exhibition.press_media_link, "_blank");
-                      }}
-                    >
-                      Download PDF
-                    </Button>
+                    {exhibition.press_media_link && (
+                      <Button
+                        className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+                        onClick={() => {
+                          window.open(exhibition.press_media_link, "_blank");
+                        }}
+                      >
+                        Download PDF
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               )}
