@@ -23,9 +23,7 @@ const uploadOptions = {
     resource_type: "auto",
     quality: "auto",
     fetch_format: "auto",
-    transformation: [
-      { width: 1200, height: 800, crop: "fill", gravity: "auto" },
-    ],
+    // No transformations - keep original dimensions and format
   },
 
   // Options for artwork images
@@ -34,9 +32,7 @@ const uploadOptions = {
     resource_type: "auto",
     quality: "auto",
     fetch_format: "auto",
-    transformation: [
-      { width: 1000, height: 1000, crop: "fill", gravity: "auto" },
-    ],
+    // No transformations - keep original dimensions and format
   },
 
   // Options for artist profile images
@@ -45,9 +41,7 @@ const uploadOptions = {
     resource_type: "auto",
     quality: "auto",
     fetch_format: "auto",
-    transformation: [
-      { width: 400, height: 400, crop: "fill", gravity: "face" },
-    ],
+    // No transformations - keep original dimensions and format
   },
 
   // Options for hero images
@@ -56,9 +50,7 @@ const uploadOptions = {
     resource_type: "auto",
     quality: "auto",
     fetch_format: "auto",
-    transformation: [
-      { width: 1920, height: 1080, crop: "fill", gravity: "auto" },
-    ],
+    // No transformations - keep original dimensions and format
   },
 };
 
