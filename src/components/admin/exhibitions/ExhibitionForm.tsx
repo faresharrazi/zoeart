@@ -748,8 +748,7 @@ const ExhibitionForm = ({
           </Button>
           <Button
             variant="outline"
-            onClick={async () => {
-              await cleanupUploadedFiles();
+            onClick={() => {
               onCancel();
             }}
           >
