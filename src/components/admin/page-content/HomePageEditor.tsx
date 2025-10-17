@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,26 @@ const HomePageEditor = ({
   refreshPageData,
 }: HomePageEditorProps) => {
   const { toast } = useToast();
+  const [heroImages, setHeroImages] = useState<any[]>([]);
+  const [heroImagesLoading, setHeroImagesLoading] = useState(true);
+
+  // Fetch hero images from the new hero_images table
+  useEffect(() => {
+    const fetchHeroImages = async () => {
+      try {
+        setHeroImagesLoading(true);
+        const response = await apiClient.getHeroImages();
+        setHeroImages(response || []);
+      } catch (error) {
+        console.error("Error fetching hero images:", error);
+        setHeroImages([]);
+      } finally {
+        setHeroImagesLoading(false);
+      }
+    };
+
+    fetchHeroImages();
+  }, []);
 
   return (
     <Card>
@@ -118,7 +138,7 @@ const HomePageEditor = ({
             <div>
               <h3 className="font-semibold text-lg">Hero Images</h3>
               <p className="text-gray-600">
-                {pageData?.heroImages?.length || 0} image(s) uploaded
+                {heroImagesLoading ? "Loading..." : `${heroImages.length} image(s) uploaded`}
               </p>
             </div>
           </div>
