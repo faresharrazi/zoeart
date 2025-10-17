@@ -277,11 +277,6 @@ const ExhibitionForm = ({
     }
   };
 
-  const cleanupUploadedFiles = async () => {
-    // No cleanup needed for Cloudinary files
-    // Files are stored externally and don't need database cleanup
-    console.log("Skipping cleanup - using Cloudinary files");
-  };
 
   return (
     <Card>
@@ -727,9 +722,7 @@ const ExhibitionForm = ({
           </Button>
           <Button
             variant="outline"
-            onClick={() => {
-              onCancel();
-            }}
+            onClick={onCancel}
           >
             <X className="w-4 h-4 mr-2" />
             Cancel
