@@ -171,11 +171,11 @@ const ExhibitionDetail = () => {
           <div className="absolute inset-0 bg-black/10"></div>
           
           {/* Main Poster Image */}
-          <div className="relative z-10 max-w-full max-h-full p-4">
+          <div className="relative z-10 max-w-full max-h-full p-4 flex items-center justify-center">
             <img
               src={exhibition.featured_image}
               alt={exhibition.title}
-              className="max-w-full max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-2xl"
+              className="max-w-[300px] md:max-w-[400px] max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-2xl"
             />
           </div>
           
