@@ -278,30 +278,9 @@ const ExhibitionForm = ({
   };
 
   const cleanupUploadedFiles = async () => {
-    try {
-      // Clean up featured image
-      if (formData.featuredImage) {
-        const fileId = formData.featuredImage.split("/").pop();
-        if (fileId) {
-          await apiClient.deleteFile(parseInt(fileId));
-          console.log("Cleaned up featured image:", fileId);
-        }
-      }
-
-      // Clean up gallery images
-      if (formData.galleryImages && formData.galleryImages.length > 0) {
-        const cleanupPromises = formData.galleryImages.map(async (imageUrl) => {
-          const fileId = imageUrl.split("/").pop();
-          if (fileId) {
-            await apiClient.deleteFile(parseInt(fileId));
-            console.log("Cleaned up gallery image:", fileId);
-          }
-        });
-        await Promise.all(cleanupPromises);
-      }
-    } catch (error) {
-      console.error("Error cleaning up uploaded files:", error);
-    }
+    // No cleanup needed for Cloudinary files
+    // Files are stored externally and don't need database cleanup
+    console.log("Skipping cleanup - using Cloudinary files");
   };
 
   return (
