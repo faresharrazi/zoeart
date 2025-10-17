@@ -175,7 +175,7 @@ const ExhibitionDetail = () => {
             <img
               src={exhibition.featured_image}
               alt={exhibition.title}
-              className="max-w-[300px] md:max-w-[400px] max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-2xl"
+              className="max-w-[500px] md:max-w-[600px] lg:max-w-[700px] max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-2xl"
             />
           </div>
           
