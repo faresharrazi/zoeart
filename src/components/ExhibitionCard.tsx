@@ -47,15 +47,18 @@ const ExhibitionCard = ({
   };
 
   const formatDateRange = () => {
-    if (!exhibition.start_date || !exhibition.end_date) return "";
-    const startDate = formatDate(exhibition.start_date);
-    const endDate = formatDate(exhibition.end_date);
+    const startDate = exhibition.start_date && exhibition.start_date !== "null" && exhibition.start_date !== "undefined" 
+      ? formatDate(exhibition.start_date) 
+      : null;
+    const endDate = exhibition.end_date && exhibition.end_date !== "null" && exhibition.end_date !== "undefined" 
+      ? formatDate(exhibition.end_date) 
+      : null;
 
-    // If same date, show only once
-    if (startDate === endDate) {
-      return startDate;
-    }
-
+    if (!startDate && !endDate) return null;
+    if (startDate && !endDate) return startDate;
+    if (!startDate && endDate) return endDate;
+    if (startDate === endDate) return startDate;
+    
     return `${startDate} - ${endDate}`;
   };
 
@@ -132,7 +135,7 @@ const ExhibitionCard = ({
           </div>
 
           <div className="space-y-2">
-            {(exhibition.start_date || exhibition.end_date) && (
+            {formatDateRange() && (
               <div className="flex items-center text-sm text-theme-text-muted">
                 <Calendar className="w-4 h-4 mr-2" />
                 {formatDateRange()}
