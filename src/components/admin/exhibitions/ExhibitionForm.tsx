@@ -472,11 +472,11 @@ const ExhibitionForm = ({
                 <p className="text-sm font-medium text-gray-700">
                   Current Featured Image:
                 </p>
-                <div className="aspect-video w-full max-w-lg overflow-hidden rounded-lg border-2 border-blue-200">
+                <div className="w-full max-w-lg overflow-hidden rounded-lg border-2 border-blue-200 bg-gray-50 flex items-center justify-center">
                   <img
                     src={formData.featuredImage}
                     alt="Featured"
-                    className="h-full w-full object-cover"
+                    className="max-w-full max-h-[400px] object-contain"
                   />
                 </div>
               </div>
@@ -540,11 +540,11 @@ const ExhibitionForm = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {formData.galleryImages.map((image, index) => (
                     <div key={index} className="relative group">
-                      <div className="aspect-square overflow-hidden rounded-lg border-2 border-gray-200">
+                      <div className="aspect-square overflow-hidden rounded-lg border-2 border-gray-200 bg-gray-50 flex items-center justify-center">
                         <img
                           src={image}
                           alt={`Gallery ${index + 1}`}
-                          className="h-full w-full object-cover"
+                          className="max-w-full max-h-full object-contain"
                           onError={(e) => {
                             console.error("Image failed to load:", image);
                             e.currentTarget.src = "/placeholder-image.png";
