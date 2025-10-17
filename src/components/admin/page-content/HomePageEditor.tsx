@@ -43,7 +43,9 @@ const HomePageEditor = ({
       try {
         setHeroImagesLoading(true);
         const response = await apiClient.getHeroImages();
-        setHeroImages(response || []);
+        // Extract the data array from the response
+        const images = response?.data || response || [];
+        setHeroImages(images);
       } catch (error) {
         console.error("Error fetching hero images:", error);
         setHeroImages([]);
