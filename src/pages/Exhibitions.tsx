@@ -30,19 +30,19 @@ const Exhibitions = () => {
     .filter((ex) => ex.status === "upcoming")
     .sort(
       (a, b) =>
-        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+        new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
     );
   const currentExhibitions = exhibitions
     .filter((ex) => ex.status === "current")
     .sort(
       (a, b) =>
-        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+        new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
     );
   const pastExhibitions = exhibitions
     .filter((ex) => ex.status === "past")
     .sort(
       (a, b) =>
-        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+        new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
     );
 
   const handleExhibitionClick = (exhibitionSlug: string) => {
