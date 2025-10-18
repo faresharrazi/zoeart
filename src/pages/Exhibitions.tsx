@@ -26,13 +26,24 @@ const Exhibitions = () => {
     fetchExhibitions();
   }, []);
 
-  const upcomingExhibitions = exhibitions.filter(
-    (ex) => ex.status === "upcoming"
-  );
-  const currentExhibitions = exhibitions.filter(
-    (ex) => ex.status === "current"
-  );
-  const pastExhibitions = exhibitions.filter((ex) => ex.status === "past");
+  const upcomingExhibitions = exhibitions
+    .filter((ex) => ex.status === "upcoming")
+    .sort(
+      (a, b) =>
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+    );
+  const currentExhibitions = exhibitions
+    .filter((ex) => ex.status === "current")
+    .sort(
+      (a, b) =>
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+    );
+  const pastExhibitions = exhibitions
+    .filter((ex) => ex.status === "past")
+    .sort(
+      (a, b) =>
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+    );
 
   const handleExhibitionClick = (exhibitionSlug: string) => {
     window.location.href = `/exhibition/${exhibitionSlug}`;
@@ -81,7 +92,9 @@ const Exhibitions = () => {
       </section>
 
       {/* Only show content sections if there are exhibitions */}
-      {(upcomingExhibitions.length > 0 || currentExhibitions.length > 0 || pastExhibitions.length > 0) && (
+      {(upcomingExhibitions.length > 0 ||
+        currentExhibitions.length > 0 ||
+        pastExhibitions.length > 0) && (
         <div className="bg-theme-background py-20">
           <div className="container mx-auto px-6 space-y-16">
             {/* Current Exhibitions */}
