@@ -122,7 +122,7 @@ export const defaultContactInfo: ContactInfo = {
 };
 
 export const defaultHomeSettings: HomeSettings = {
-  title: "Explore the Art of Tomorrow",
+  title: "Aether Art Space",
   description:
     "Discover extraordinary works from emerging and established artists. Experience art that challenges, inspires, and transforms.",
   heroImages: [
