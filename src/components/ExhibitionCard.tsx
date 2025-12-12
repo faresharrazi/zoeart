@@ -30,11 +30,26 @@ const ExhibitionCard = ({
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "upcoming":
-        return "!bg-theme-primary !text-white";
+        return "bg-blue-100 text-blue-800";
+      case "current":
+        return "bg-green-100 text-green-800";
       case "past":
-        return "!bg-theme-text-muted !text-white";
+        return "bg-gray-100 text-gray-800";
       default:
-        return "!bg-theme-primary !text-white";
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "upcoming":
+        return "Upcoming Exhibition";
+      case "current":
+        return "Current Exhibition";
+      case "past":
+        return "Past Exhibition";
+      default:
+        return "Past Exhibition";
     }
   };
 
@@ -47,18 +62,24 @@ const ExhibitionCard = ({
   };
 
   const formatDateRange = () => {
-    const startDate = exhibition.start_date && exhibition.start_date !== "null" && exhibition.start_date !== "undefined" 
-      ? formatDate(exhibition.start_date) 
-      : null;
-    const endDate = exhibition.end_date && exhibition.end_date !== "null" && exhibition.end_date !== "undefined" 
-      ? formatDate(exhibition.end_date) 
-      : null;
+    const startDate =
+      exhibition.start_date &&
+      exhibition.start_date !== "null" &&
+      exhibition.start_date !== "undefined"
+        ? formatDate(exhibition.start_date)
+        : null;
+    const endDate =
+      exhibition.end_date &&
+      exhibition.end_date !== "null" &&
+      exhibition.end_date !== "undefined"
+        ? formatDate(exhibition.end_date)
+        : null;
 
     if (!startDate && !endDate) return null;
     if (startDate && !endDate) return startDate;
     if (!startDate && endDate) return endDate;
     if (startDate === endDate) return startDate;
-    
+
     return `${startDate} - ${endDate}`;
   };
 
@@ -123,8 +144,13 @@ const ExhibitionCard = ({
               <h3 className="text-xl text-theme-text-primary">
                 {exhibition.title}
               </h3>
-              <Badge className={`${getStatusColor(exhibition.status)} text-xs`}>
-                {exhibition.status}
+              <Badge
+                variant="outline"
+                className={`text-xs font-semibold ${getStatusColor(
+                  exhibition.status
+                )}`}
+              >
+                {getStatusText(exhibition.status)}
               </Badge>
             </div>
             {exhibition.curator && (

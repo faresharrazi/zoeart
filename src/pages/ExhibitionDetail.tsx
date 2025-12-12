@@ -137,10 +137,12 @@ const ExhibitionDetail = () => {
     switch (status.toLowerCase()) {
       case "upcoming":
         return "bg-blue-100 text-blue-800";
+      case "current":
+        return "bg-green-100 text-green-800";
       case "past":
         return "bg-gray-100 text-gray-800";
       default:
-        return "bg-green-100 text-green-800";
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -162,14 +164,14 @@ const ExhibitionDetail = () => {
       exhibition.featured_image !== "undefined" ? (
         <section className="relative w-full min-h-[60vh] md:min-h-[70vh] overflow-hidden flex items-center justify-center bg-gray-100">
           {/* Blurred Background */}
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-sm scale-110"
             style={{
-              backgroundImage: `url(${exhibition.featured_image})`
+              backgroundImage: `url(${exhibition.featured_image})`,
             }}
           />
           <div className="absolute inset-0 bg-black/10"></div>
-          
+
           {/* Main Poster Image */}
           <div className="relative z-10 max-w-full max-h-full p-4 flex items-center justify-center">
             <img
@@ -178,7 +180,7 @@ const ExhibitionDetail = () => {
               className="max-w-[500px] md:max-w-[600px] lg:max-w-[700px] max-h-[50vh] md:max-h-[60vh] object-contain drop-shadow-2xl"
             />
           </div>
-          
+
           {/* Back Button Overlay */}
           <div className="absolute top-2 left-2 md:top-6 md:left-6 z-20">
             <Button
@@ -220,13 +222,15 @@ const ExhibitionDetail = () => {
             {/* Status Badge */}
             <div className="mb-6">
               <Badge
-                variant={
-                  exhibition.status === "upcoming" ? "default" : "secondary"
-                }
-                className="px-4 py-2 text-base font-semibold"
+                variant="outline"
+                className={`px-4 py-2 text-base font-semibold ${getStatusColor(
+                  exhibition.status
+                )}`}
               >
                 {exhibition.status === "upcoming"
                   ? "Upcoming Exhibition"
+                  : exhibition.status === "current"
+                  ? "Current Exhibition"
                   : "Past Exhibition"}
               </Badge>
             </div>
