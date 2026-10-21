@@ -25,7 +25,7 @@ const buttonClass =
   "inline-flex h-12 items-center px-6 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2";
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="font-display text-3xl md:text-4xl mb-10">{children}</h2>
+  <h2 className="font-medium text-3xl md:text-4xl mb-10">{children}</h2>
 );
 
 const ArticleSection = ({ article }: { article: Article }) => (
@@ -34,7 +34,7 @@ const ArticleSection = ({ article }: { article: Article }) => (
       {article.author && (
         <p className="eyebrow text-mist mb-5">By {article.author}</p>
       )}
-      <h2 className="font-display text-4xl md:text-5xl leading-[1.1] mb-10">
+      <h2 className="font-medium text-4xl md:text-5xl leading-[1.1] mb-10">
         {article.title}
       </h2>
       {article.featured_image && (
@@ -167,7 +167,7 @@ const ExhibitionDetail = () => {
             <p className="eyebrow text-mist">
               {STATUS_LABELS[exhibition.status]}
             </p>
-            <h1 className="font-display text-5xl md:text-6xl leading-[1.02]">
+            <h1 className="font-medium text-5xl md:text-6xl leading-[1.02]">
               {title}
             </h1>
           </div>
@@ -238,12 +238,12 @@ const ExhibitionDetail = () => {
                       loading="lazy"
                       className="h-16 w-16 rounded-full object-cover bg-sand"
                       fallback={
-                        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sand font-display text-2xl text-mist">
+                        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sand text-2xl text-mist">
                           {artist.name.trim().charAt(0)}
                         </span>
                       }
                     />
-                    <span className="font-display text-2xl group-hover:underline underline-offset-4 decoration-1">
+                    <span className="font-medium text-2xl group-hover:underline underline-offset-4 decoration-1">
                       {artist.name.trim()}
                     </span>
                   </Link>

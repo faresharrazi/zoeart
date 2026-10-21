@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, errorMessage } from "@/lib/apiClient";
+import { statusFromDates } from "@/lib/exhibitions";
 import { imageUrl } from "@/lib/images";
 import { cn } from "@/lib/utils";
 import type { Artist, Artwork } from "@/types/api";
@@ -196,6 +197,8 @@ const ExhibitionForm = ({
 
   const update = (change: Partial<Exhibition>) =>
     setFormData((data) => ({ ...data, ...change }));
+  // With an opening date the status follows the dates (as on the server)
+  const autoStatus = statusFromDates(formData.startDate, formData.endDate);
 
   const handleSave = async () => {
     if (!formData.title?.trim()) {
@@ -218,7 +221,7 @@ const ExhibitionForm = ({
         end_date: formData.endDate,
         location: formData.location || "",
         curator: formData.curator || "",
-        status: formData.status || "upcoming",
+        status: autoStatus ?? formData.status ?? "upcoming",
         featured_image: formData.featuredImage || "",
         gallery_images: formData.galleryImages || [],
         assigned_artists: formData.assignedArtists || [],
@@ -334,7 +337,7 @@ const ExhibitionForm = ({
       <div className="space-y-10 pt-2">
         <FormSection
           title="Basics"
-          description="The status and dates decide where the exhibition appears: upcoming and on-view exhibitions are also shown on the home page."
+          description="The dates set the status: upcoming before the opening, on view until the closing date, then past. Upcoming and on-view exhibitions are also shown on the home page."
         >
           <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
             <Field
@@ -378,12 +381,21 @@ const ExhibitionForm = ({
               </div>
             </Field>
 
-            <Field id="status" label="Status">
+            <Field
+              id="status"
+              label="Status"
+              hint={
+                autoStatus
+                  ? "Set from the dates and updated automatically."
+                  : "No opening date yet, so choose it here."
+              }
+            >
               <Select
-                value={formData.status || "upcoming"}
+                value={autoStatus ?? formData.status ?? "upcoming"}
                 onValueChange={(value: "upcoming" | "current" | "past") =>
                   update({ status: value })
                 }
+                disabled={autoStatus !== null}
               >
                 <SelectTrigger id="status">
                   <SelectValue placeholder="Select status" />
@@ -416,7 +428,11 @@ const ExhibitionForm = ({
               />
             </Field>
 
-            <Field id="endDate" label="Closes">
+            <Field
+              id="endDate"
+              label="Closes"
+              hint="Without a closing date it counts as a one-day event."
+            >
               <Input
                 id="endDate"
                 type="date"

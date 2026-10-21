@@ -56,10 +56,7 @@ const ExhibitionCard = ({
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
           fallback={
             <div className="h-full w-full flex items-center justify-center">
-              <span
-                className="font-display text-6xl text-mist"
-                aria-hidden="true"
-              >
+              <span className="text-6xl text-mist" aria-hidden="true">
                 {exhibition.title.trim().charAt(0)}
               </span>
             </div>
@@ -70,7 +67,7 @@ const ExhibitionCard = ({
         {exhibition.status === "current" && (
           <p className="eyebrow text-ink">On view now</p>
         )}
-        <Heading className="font-display text-[22px] leading-snug">
+        <Heading className="font-medium text-[22px] leading-snug">
           {/* The link covers the whole card */}
           <Link
             to={`/exhibition/${exhibition.slug}`}

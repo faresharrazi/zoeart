@@ -3,6 +3,7 @@ const { DatabaseService } = require("../services/database.cjs");
 const { query } = require("../config/database.cjs");
 const imageService = require("../services/imageService.cjs");
 const { uniqueSlug } = require("../services/slug.cjs");
+const { statusFromDates } = require("../services/exhibitionStatus.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
 const {
   asyncHandler,
@@ -23,7 +24,7 @@ const toExhibition = (exhibition) => ({
   end_date: exhibition.end_date,
   location: exhibition.location || "",
   curator: exhibition.curator || "",
-  status: exhibition.status,
+  status: statusFromDates(exhibition),
   featured_image: exhibition.featured_image || "",
   gallery_images: exhibition.gallery_images || [],
   assigned_artists: exhibition.assigned_artists || [],

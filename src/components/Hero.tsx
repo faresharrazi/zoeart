@@ -32,7 +32,7 @@ const Hero = ({ next }: { next?: ExhibitionSummary }) => {
       <div className="absolute inset-x-0 bottom-0">
         <Container className="pb-14 md:pb-16 flex flex-wrap items-end justify-between gap-10">
           <div className="max-w-5xl">
-            <h1 className="font-display uppercase tracking-[0.04em] leading-[0.92] text-[clamp(3rem,8.4vw,8.5rem)]">
+            <h1 className="font-medium uppercase leading-[0.92] text-[clamp(3rem,8.4vw,8.5rem)]">
               {homeSettings?.title || "Aether Art Space"}
             </h1>
             {tagline && (
@@ -53,7 +53,7 @@ const Hero = ({ next }: { next?: ExhibitionSummary }) => {
                   ? ` · ${formatDate(next.start_date)}`
                   : ""}
               </span>
-              <span className="font-display italic text-[28px] leading-tight group-hover:underline underline-offset-4 decoration-1">
+              <span className="font-medium text-[28px] leading-tight group-hover:underline underline-offset-4 decoration-1">
                 {next.title.trim()}
               </span>
               {next.location && (

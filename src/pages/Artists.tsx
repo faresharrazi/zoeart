@@ -48,11 +48,11 @@ const Artists = () => {
                   className="group relative flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b border-line py-7"
                 >
                   <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
-                    <h2 className="font-display text-3xl md:text-4xl">
+                    <h2 className="font-medium text-3xl md:text-4xl">
                       {/* The link covers the whole row; social links sit above it */}
                       <Link
                         to={`/artist/${artist.slug}`}
-                        className="after:absolute after:inset-0 group-hover:italic focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-ink"
+                        className="after:absolute after:inset-0 group-hover:underline underline-offset-[6px] decoration-1 focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-ink"
                       >
                         {artist.name.trim()}
                       </Link>

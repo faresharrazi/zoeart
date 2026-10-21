@@ -50,7 +50,7 @@ const ExhibitionStrip = ({
   return (
     <section className="py-20 md:py-28" aria-labelledby="strip-title">
       <Container className="flex flex-wrap items-end justify-between gap-6 mb-10">
-        <h2 id="strip-title" className="font-display text-4xl md:text-5xl">
+        <h2 id="strip-title" className="font-medium text-4xl md:text-5xl">
           {title}
         </h2>
         <div className="flex items-center gap-6">

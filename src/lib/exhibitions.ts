@@ -28,7 +28,10 @@ type Searchable = Pick<
 
 // Case- and accent-insensitive text ("Ψυχή" ~ "ψυχη", "café" ~ "cafe")
 const fold = (text: string | null | undefined) =>
-  (text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  (text || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 
 /** Years exhibitions opened in, newest first. */
 export const exhibitionYears = (exhibitions: Searchable[]) =>
@@ -54,4 +57,33 @@ export const filterExhibitions = <T extends Searchable>(
     );
     return words.every((word) => haystack.includes(word));
   });
+};
+
+/** Today's date in Athens (the gallery's time zone) as YYYY-MM-DD. */
+export const todayInAthens = (now = new Date()) =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Athens",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+
+/**
+ * Status from the dates, as the server works it out
+ * (server/services/exhibitionStatus.cjs): upcoming before the opening, on view
+ * until the closing date (or for the opening day when there is none), then
+ * past. Null when there is no opening date, so the chosen status applies.
+ */
+export const statusFromDates = (
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+  today = todayInAthens()
+): ExhibitionStatus | null => {
+  const opens = startDate?.slice(0, 10);
+  if (!opens) return null;
+  const end = endDate?.slice(0, 10);
+  const closes = end && end >= opens ? end : opens;
+  if (today < opens) return "upcoming";
+  if (today <= closes) return "current";
+  return "past";
 };
