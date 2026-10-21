@@ -96,6 +96,13 @@ router.get(
   })
 );
 
+// Settings a page can store in its `content`, each with the values it accepts
+const PAGE_SETTINGS = {
+  // Seconds before the home page photos change
+  slideSeconds: (value) =>
+    typeof value === "number" && value >= 2 && value <= 30,
+};
+
 // Update page content (admin only)
 router.put(
   "/:pageName",
@@ -108,8 +115,15 @@ router.put(
     // not wipe the page's content or visibility.
     const updateData = {};
     if (content !== undefined) {
-      updateData.content =
-        typeof content === "object" ? JSON.stringify(content) : content;
+      if (!content || typeof content !== "object" || Array.isArray(content)) {
+        throw new ValidationError("Page settings must be an object");
+      }
+      for (const [key, value] of Object.entries(content)) {
+        if (!PAGE_SETTINGS[key]?.(value)) {
+          throw new ValidationError(`Invalid page setting: ${key}`);
+        }
+      }
+      updateData.content = JSON.stringify(content);
     }
     if (is_visible !== undefined) updateData.is_visible = is_visible !== false;
     if (title !== undefined) updateData.title = title;
@@ -122,7 +136,12 @@ router.put(
     const result = await query(
       `UPDATE page_content 
      SET ${Object.keys(updateData)
-       .map((key, index) => `${key} = $${index + 1}`)
+       .map((key, index) =>
+         // Settings are merged into the existing ones, not replaced
+         key === "content"
+           ? `content = COALESCE(content, '{}'::jsonb) || $${index + 1}::jsonb`
+           : `${key} = $${index + 1}`
+       )
        .join(", ")}
      WHERE page_name = $${Object.keys(updateData).length + 1}
      RETURNING *`,

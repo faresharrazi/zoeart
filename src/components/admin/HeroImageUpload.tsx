@@ -6,6 +6,7 @@ import { imageUrl } from "@/lib/images";
 import { cn } from "@/lib/utils";
 import type { HeroImage } from "@/types/api";
 import { ConfirmDelete, IconAction } from "./AdminUI";
+import SlideshowSpeed from "./SlideshowSpeed";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
@@ -261,6 +262,12 @@ const HeroImageUpload = () => {
           No photos yet: the home page shows a plain dark background.
         </p>
       )}
+      {heroImages.length === 1 && (
+        <p className="text-sm text-mist">
+          Add another photo to have them change automatically.
+        </p>
+      )}
+      {heroImages.length > 1 && <SlideshowSpeed />}
     </div>
   );
 };

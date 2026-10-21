@@ -4,6 +4,7 @@ import { Container } from "@/components/PageLayout";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { useHeroImages } from "@/hooks/useHeroImages";
 import { formatDate } from "@/lib/dates";
+import { slideSeconds } from "@/lib/slideshow";
 import type { ExhibitionSummary } from "@/components/ExhibitionCard";
 
 /**
@@ -20,7 +21,7 @@ const Hero = ({ next }: { next?: ExhibitionSummary }) => {
       {heroImages.length > 0 && (
         <HeroImageSlider
           images={heroImages.map((img) => img.cloudinary_url)}
-          interval={5000}
+          interval={slideSeconds(homeSettings?.slideSeconds) * 1000}
         />
       )}
       {/* Keeps the menu and the title readable over any photo */}
