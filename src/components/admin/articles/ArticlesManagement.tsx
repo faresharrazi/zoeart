@@ -31,11 +31,12 @@ import {
   User,
   FileText,
 } from "lucide-react";
+import type { Exhibition } from "@/types/api";
 
 const ArticlesManagement = () => {
   const { toast } = useToast();
   const { articles, loading, error } = useAdminArticles();
-  const [exhibitions, setExhibitions] = useState<any[]>([]);
+  const [exhibitions, setExhibitions] = useState<Exhibition[]>([]);
   const [exhibitionsLoading, setExhibitionsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [articlesList, setArticlesList] = useState<Article[]>([]);

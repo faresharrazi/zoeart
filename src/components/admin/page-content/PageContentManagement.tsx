@@ -13,11 +13,12 @@ import { Edit, Eye, EyeOff, Save, X } from "lucide-react";
 import HomePageEditor from "./HomePageEditor";
 import AboutPageEditor from "./AboutPageEditor";
 import ContactPageEditor from "./ContactPageEditor";
+import type { PageFormData } from "@/types/api";
 
 const PageContentManagement = () => {
   const [activeTab, setActiveTab] = useState<string>("home");
   const [editingPage, setEditingPage] = useState<string | null>(null);
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<PageFormData>({});
   const { toast } = useToast();
   const {
     pageData,

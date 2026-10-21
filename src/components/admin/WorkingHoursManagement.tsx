@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,13 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import { Edit, Save, X, Clock } from "lucide-react";
+import type { WorkingHour } from "@/types/api";
 
-interface WorkingHour {
-  id: number;
-  day: string;
-  time_frame: string;
-  is_active: boolean;
-}
 
 const WorkingHoursManagement = () => {
   const { toast } = useToast();
@@ -31,11 +26,8 @@ const WorkingHoursManagement = () => {
     "Sunday"
   ];
 
-  useEffect(() => {
-    fetchWorkingHours();
-  }, []);
 
-  const fetchWorkingHours = async () => {
+  const fetchWorkingHours = useCallback(async () => {
     try {
       setLoading(true);
       const data = await apiClient.getAdminWorkingHours();
@@ -50,7 +42,11 @@ const WorkingHoursManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchWorkingHours();
+  }, [fetchWorkingHours]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -79,7 +75,11 @@ const WorkingHoursManagement = () => {
     }
   };
 
-  const updateWorkingHour = (id: number, field: keyof WorkingHour, value: any) => {
+  const updateWorkingHour = <K extends keyof WorkingHour>(
+    id: WorkingHour["id"],
+    field: K,
+    value: WorkingHour[K]
+  ) => {
     setWorkingHours(prev => 
       prev.map(hour => 
         hour.id === id ? { ...hour, [field]: value } : hour
@@ -87,7 +87,7 @@ const WorkingHoursManagement = () => {
     );
   };
 
-  const toggleActive = (id: number) => {
+  const toggleActive = (id: WorkingHour["id"]) => {
     updateWorkingHour(id, 'is_active', !workingHours.find(h => h.id === id)?.is_active);
   };
 
@@ -138,6 +138,7 @@ const WorkingHoursManagement = () => {
                   <Input
                     value={hour.time_frame}
                     onChange={(e) => updateWorkingHour(hour.id, 'time_frame', e.target.value)}
+                    aria-label={`${hour.day} opening hours`}
                     placeholder="e.g., 10:00 AM - 6:00 PM or Closed"
                     className="w-full"
                   />
@@ -146,6 +147,7 @@ const WorkingHoursManagement = () => {
                   <Switch
                     checked={hour.is_active}
                     onCheckedChange={() => toggleActive(hour.id)}
+                    aria-label={`Show ${hour.day} on the website`}
                   />
                   <Label className="text-sm">Active</Label>
                 </div>

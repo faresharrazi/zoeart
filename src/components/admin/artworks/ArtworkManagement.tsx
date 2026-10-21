@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import { Loader2 } from "lucide-react";
 import ArtworkList from "./ArtworkList";
 import ArtworkForm from "./ArtworkForm";
+import type { Artist } from "@/types/api";
 
 interface Artwork {
   id: string;
@@ -22,17 +23,14 @@ interface Artwork {
 
 const ArtworkManagement = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
-  const [artists, setArtists] = useState<any[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArtwork, setEditingArtwork] = useState<Artwork | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [artworksData, artistsData] = await Promise.all([
@@ -40,11 +38,9 @@ const ArtworkManagement = () => {
         apiClient.getAdminArtists(),
       ]);
 
-      console.log("Raw artworks data:", artworksData);
-      console.log("Raw artists data:", artistsData);
 
       // Transform artworks data to match our interface
-      const transformedArtworks = artworksData.map((artwork: any) => ({
+      const transformedArtworks = artworksData.map((artwork) => ({
         id: artwork.id.toString(),
         title: artwork.title,
         slug: artwork.slug,
@@ -59,7 +55,6 @@ const ArtworkManagement = () => {
         isVisible: artwork.is_visible !== false,
       }));
 
-      console.log("Transformed artworks:", transformedArtworks);
       setArtworks(transformedArtworks);
       setArtists(artistsData);
     } catch (error) {
@@ -72,7 +67,11 @@ const ArtworkManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleAdd = () => {
     setEditingArtwork(undefined);

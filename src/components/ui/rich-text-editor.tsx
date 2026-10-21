@@ -78,7 +78,8 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4',
+        // Same styles as the published article (see .rich-text in index.css)
+        class: 'rich-text mx-auto focus:outline-none min-h-[200px] p-4',
         placeholder: placeholder || 'Start writing...',
       },
     },
@@ -126,7 +127,6 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       editor.chain().focus().setImage({ 
         src: response.file.url,
         alt: file.name.replace(/\.[^.]+$/, ''),
-        class: 'max-w-full h-auto rounded-lg'
       }).run();
       
       // Ensure onChange is called immediately after image insertion
@@ -179,8 +179,7 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
 
   const addVideo = () => {
     if (videoUrl && editor) {
-      console.log('Adding video:', videoUrl);
-      let videoId = null;
+      const videoId = null;
       
       // Check if it's a YouTube URL
       if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
@@ -205,13 +204,11 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
           videoId = embedMatch[1];
         }
         
-        console.log('Extracted video ID:', videoId);
         
         if (videoId) {
           // Try inserting as a blockquote with special content
           const videoContent = `[YOUTUBE:${videoId}:${videoUrl}]`;
           
-          console.log('Inserting video content:', videoContent);
           
           // Insert as text first, then we'll convert it on the frontend
           editor.chain().focus().insertContent(videoContent).run();
@@ -219,7 +216,6 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
           // Ensure onChange is called immediately after video insertion
           setTimeout(() => {
             const html = editor.getHTML();
-            console.log('Editor HTML after video insertion:', html);
             onChange(html);
           }, 100);
           
@@ -241,7 +237,6 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       } else {
         // Regular video URL
         const videoHtml = `<video src="${videoUrl}" controls class="max-w-full h-auto rounded-lg"></video>`;
-        console.log('Inserting regular video:', videoHtml);
         editor.chain().focus().insertContent(videoHtml).run();
         
         setTimeout(() => {
@@ -260,64 +255,6 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
 
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden">
-      {/* Editor Styles */}
-      <style jsx>{`
-        .ProseMirror {
-          padding: 1rem;
-          min-height: 200px;
-          outline: none;
-        }
-        .ProseMirror h1 {
-          font-size: 2rem;
-          font-weight: bold;
-          margin: 1rem 0 0.5rem 0;
-          line-height: 1.2;
-        }
-        .ProseMirror h2 {
-          font-size: 1.5rem;
-          font-weight: bold;
-          margin: 0.8rem 0 0.4rem 0;
-          line-height: 1.3;
-        }
-        .ProseMirror h3 {
-          font-size: 1.25rem;
-          font-weight: bold;
-          margin: 0.6rem 0 0.3rem 0;
-          line-height: 1.4;
-        }
-        .ProseMirror ul {
-          list-style-type: disc;
-          margin: 0.5rem 0;
-          padding-left: 1.5rem;
-        }
-        .ProseMirror ol {
-          list-style-type: decimal;
-          margin: 0.5rem 0;
-          padding-left: 1.5rem;
-        }
-        .ProseMirror li {
-          margin: 0.25rem 0;
-        }
-        .ProseMirror p {
-          margin: 0.5rem 0;
-        }
-        .ProseMirror strong {
-          font-weight: bold;
-        }
-        .ProseMirror em {
-          font-style: italic;
-        }
-        .ProseMirror u {
-          text-decoration: underline;
-        }
-        .ProseMirror blockquote {
-          border-left: 4px solid #e5e7eb;
-          padding-left: 1rem;
-          margin: 1rem 0;
-          font-style: italic;
-          color: #6b7280;
-        }
-      `}</style>
       
       {/* Toolbar */}
       <div className="border-b border-gray-300 p-2 bg-gray-50 flex flex-wrap gap-1">

@@ -1,3 +1,23 @@
+import type {
+  AboutBlock,
+  AdminUser,
+  Article,
+  Artist,
+  ArtistInput,
+  ArtistSummary,
+  Artwork,
+  ArtworkInput,
+  ContactInfo,
+  Exhibition,
+  ExhibitionInput,
+  HeroImage,
+  NewsletterSubscriber,
+  PageContentResponse,
+  SessionUser,
+  UploadedImage,
+  WorkingHour,
+} from "@/types/api";
+
 // In development Vite proxies /api to the Express server (see vite.config.ts).
 const API_BASE_URL = "/api";
 
@@ -13,12 +33,14 @@ export const normalizeImageUrl = (value: unknown): string => {
   return `${API_BASE_URL}/files/${value}`;
 };
 
-const normalizeArtist = (artist: any) => ({
+const normalizeArtist = <T extends Pick<ArtistSummary, "profile_image">>(
+  artist: T
+): T => ({
   ...artist,
   profile_image: normalizeImageUrl(artist.profile_image) || null,
 });
 
-const normalizeExhibition = (exhibition: any) => ({
+const normalizeExhibition = (exhibition: Exhibition): Exhibition => ({
   ...exhibition,
   featured_image: normalizeImageUrl(exhibition.featured_image) || null,
   gallery_images: Array.isArray(exhibition.gallery_images)
@@ -29,13 +51,17 @@ const normalizeExhibition = (exhibition: any) => ({
     : undefined,
 });
 
-const normalizeArtwork = (artwork: any) => ({
+const normalizeArtwork = (artwork: Artwork): Artwork => ({
   ...artwork,
   images: Array.isArray(artwork.images)
     ? artwork.images.map(normalizeImageUrl).filter(Boolean)
     : [],
   featured_image: normalizeImageUrl(artwork.featured_image) || null,
 });
+
+/** The message of a thrown error, or `fallback` for anything else. */
+export const errorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error && error.message ? error.message : fallback;
 
 export class ApiError extends Error {
   constructor(
@@ -151,7 +177,7 @@ class ApiClient {
     throw new Error("Max retries exceeded");
   }
 
-  private send<T = any>(endpoint: string, method: string, body?: unknown) {
+  private send<T = unknown>(endpoint: string, method: string, body?: unknown) {
     return this.request<T>(endpoint, {
       method,
       body:
@@ -163,27 +189,27 @@ class ApiClient {
 
   // Exhibitions
   async getExhibitions() {
-    const data = await this.request<any[]>("/exhibitions");
+    const data = await this.request<Exhibition[]>("/exhibitions");
     return data.map(normalizeExhibition);
   }
 
   async getExhibition(idOrSlug: number | string) {
-    const data = await this.request<any>(
+    const data = await this.request<Exhibition>(
       `/exhibitions/${encodeURIComponent(idOrSlug)}`
     );
     return normalizeExhibition(data);
   }
 
   async getAdminExhibitions() {
-    const data = await this.request<any[]>("/admin/exhibitions");
+    const data = await this.request<Exhibition[]>("/admin/exhibitions");
     return data.map(normalizeExhibition);
   }
 
-  createExhibition(data: any) {
+  createExhibition(data: ExhibitionInput) {
     return this.send("/admin/exhibitions", "POST", data);
   }
 
-  updateExhibition(id: number, data: any) {
+  updateExhibition(id: number, data: ExhibitionInput) {
     return this.send(`/admin/exhibitions/${id}`, "PUT", data);
   }
 
@@ -199,27 +225,27 @@ class ApiClient {
 
   // Artists
   async getArtists() {
-    const data = await this.request<any[]>("/artists");
+    const data = await this.request<Artist[]>("/artists");
     return data.map(normalizeArtist);
   }
 
   async getArtist(idOrSlug: number | string) {
-    const data = await this.request<any>(
+    const data = await this.request<Artist>(
       `/artists/${encodeURIComponent(idOrSlug)}`
     );
     return normalizeArtist(data);
   }
 
   async getAdminArtists() {
-    const data = await this.request<any[]>("/admin/artists");
+    const data = await this.request<Artist[]>("/admin/artists");
     return data.map(normalizeArtist);
   }
 
-  createArtist(data: any) {
+  createArtist(data: ArtistInput) {
     return this.send("/admin/artists", "POST", data);
   }
 
-  updateArtist(id: number, data: any) {
+  updateArtist(id: number, data: ArtistInput) {
     return this.send(`/admin/artists/${id}`, "PUT", data);
   }
 
@@ -232,12 +258,12 @@ class ApiClient {
     const query = filter.artist
       ? `?artist=${encodeURIComponent(filter.artist)}`
       : "";
-    const data = await this.request<any[]>(`/artworks${query}`);
+    const data = await this.request<Artwork[]>(`/artworks${query}`);
     return data.map(normalizeArtwork);
   }
 
   async getArtwork(idOrSlug: number | string) {
-    const data = await this.request<any>(
+    const data = await this.request<Artwork>(
       `/artworks/${encodeURIComponent(idOrSlug)}`
     );
     return {
@@ -247,15 +273,15 @@ class ApiClient {
   }
 
   async getAdminArtworks() {
-    const data = await this.request<any[]>("/admin/artworks");
+    const data = await this.request<Artwork[]>("/admin/artworks");
     return data.map(normalizeArtwork);
   }
 
-  createArtwork(data: any) {
+  createArtwork(data: ArtworkInput) {
     return this.send("/admin/artworks", "POST", data);
   }
 
-  updateArtwork(id: number, data: any) {
+  updateArtwork(id: number, data: ArtworkInput) {
     return this.send(`/admin/artworks/${id}`, "PUT", data);
   }
 
@@ -269,7 +295,7 @@ class ApiClient {
   }
 
   getNewsletterSubscribers() {
-    return this.request<any[]>("/admin/newsletter");
+    return this.request<NewsletterSubscriber[]>("/admin/newsletter");
   }
 
   deleteNewsletterSubscriber(id: number) {
@@ -281,7 +307,11 @@ class ApiClient {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("category", category);
-    return this.send<any>("/admin/images/upload", "POST", formData);
+    return this.send<{ success: boolean; file: UploadedImage }>(
+      "/admin/images/upload",
+      "POST",
+      formData
+    );
   }
 
   // Used by the rich text editor
@@ -289,12 +319,18 @@ class ApiClient {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("category", category);
-    return this.send<any>("/admin/files/upload", "POST", formData);
+    return this.send<{ success: boolean; file: UploadedImage }>(
+      "/admin/files/upload",
+      "POST",
+      formData
+    );
   }
 
   // Hero images (home page slider)
   getHeroImages() {
-    return this.request<{ success: boolean; data: any[] }>("/hero-images");
+    return this.request<{ success: boolean; data: HeroImage[] }>(
+      "/hero-images"
+    );
   }
 
   uploadHeroImage(imageData: {
@@ -308,7 +344,11 @@ class ApiClient {
     format?: string;
     display_order?: number;
   }) {
-    return this.send("/admin/hero-images/upload", "POST", imageData);
+    return this.send<{ success: boolean; data: HeroImage }>(
+      "/admin/hero-images/upload",
+      "POST",
+      imageData
+    );
   }
 
   updateHeroImage(
@@ -324,12 +364,20 @@ class ApiClient {
 
   // Page content
   getPageContent() {
-    return this.request<any>("/page-content");
+    return this.request<PageContentResponse>("/page-content");
   }
 
-  updatePageContent(pageName: string, data: any) {
+  updatePageContent(
+    pageName: string,
+    data: {
+      title?: string;
+      description?: string;
+      content?: Record<string, unknown>;
+      isVisible?: boolean;
+    }
+  ) {
     // The API expects is_visible
-    const backendData = { ...data };
+    const backendData: Record<string, unknown> = { ...data };
     if (data.isVisible !== undefined) {
       backendData.is_visible = data.isVisible;
       delete backendData.isVisible;
@@ -337,26 +385,30 @@ class ApiClient {
     return this.send(`/admin/pages/${pageName}`, "PUT", backendData);
   }
 
-  updateContactInfo(data: any) {
+  updateContactInfo(data: Partial<Omit<ContactInfo, "id" | "updated_at">>) {
     return this.send("/admin/pages/contact/info", "PUT", data);
   }
 
   // About blocks
   getAboutBlocks() {
-    return this.request<{ success: boolean; data: any[] }>("/about-blocks");
+    return this.request<{ success: boolean; data: AboutBlock[] }>(
+      "/about-blocks"
+    );
   }
 
   getAdminAboutBlocks() {
-    return this.request<{ success: boolean; data: any[] }>(
+    return this.request<{ success: boolean; data: AboutBlock[] }>(
       "/admin/about-blocks"
     );
   }
 
-  createAboutBlock(data: any) {
+  createAboutBlock(
+    data: Pick<AboutBlock, "title" | "content"> & Partial<AboutBlock>
+  ) {
     return this.send("/admin/about-blocks", "POST", data);
   }
 
-  updateAboutBlock(id: number, data: any) {
+  updateAboutBlock(id: number, data: Partial<AboutBlock>) {
     return this.send(`/admin/about-blocks/${id}`, "PUT", data);
   }
 
@@ -376,46 +428,63 @@ class ApiClient {
 
   // Opening hours
   getWorkingHours() {
-    return this.request<any[]>("/working-hours");
+    return this.request<WorkingHour[]>("/working-hours");
   }
 
   getAdminWorkingHours() {
-    return this.request<any[]>("/admin/working-hours");
+    return this.request<WorkingHour[]>("/admin/working-hours");
   }
 
-  updateWorkingHours(workingHours: any[]) {
+  updateWorkingHours(workingHours: Omit<WorkingHour, "id">[]) {
     return this.send("/admin/working-hours", "PUT", { workingHours });
   }
 
   // Admin users
   getUsers() {
-    return this.request<any[]>("/admin/user");
+    return this.request<AdminUser[]>("/admin/user");
   }
 
-  updateUser(id: number, userData: any) {
+  updateUser(
+    id: number,
+    userData: {
+      username: string;
+      email: string;
+      password?: string;
+      currentPassword?: string;
+    }
+  ) {
     return this.send(`/admin/user/${id}`, "PUT", userData);
   }
 
   // Authentication
   verifySession() {
-    return this.request<{ success: boolean; user: unknown }>("/auth/verify", {
-      cache: "no-store",
-    });
+    return this.request<{ success: boolean; user: SessionUser }>(
+      "/auth/verify",
+      {
+        cache: "no-store",
+      }
+    );
   }
 
   login(username: string, password: string) {
-    return this.send<any>("/auth/login", "POST", { username, password });
+    return this.send<{ success: boolean; token: string; user: SessionUser }>(
+      "/auth/login",
+      "POST",
+      { username, password }
+    );
   }
 
   // Articles
   getArticleByExhibition(exhibitionId: number) {
-    return this.request<{ success: boolean; data: any }>(
+    return this.request<{ success: boolean; data: Article }>(
       `/articles/exhibition/${exhibitionId}`
     );
   }
 
   getAdminArticles() {
-    return this.request<{ success: boolean; data: any[] }>("/admin/articles");
+    return this.request<{ success: boolean; data: Article[] }>(
+      "/admin/articles"
+    );
   }
 
   createArticle(articleData: {
@@ -427,7 +496,11 @@ class ApiClient {
     author?: string;
     is_published?: boolean;
   }) {
-    return this.send("/admin/articles", "POST", articleData);
+    return this.send<{ success: boolean; data: Article; message: string }>(
+      "/admin/articles",
+      "POST",
+      articleData
+    );
   }
 
   updateArticle(
@@ -441,11 +514,18 @@ class ApiClient {
       is_published?: boolean;
     }
   ) {
-    return this.send(`/admin/articles/${id}`, "PUT", articleData);
+    return this.send<{ success: boolean; data: Article; message: string }>(
+      `/admin/articles/${id}`,
+      "PUT",
+      articleData
+    );
   }
 
   deleteArticle(id: number) {
-    return this.send(`/admin/articles/${id}`, "DELETE");
+    return this.send<{ success: boolean; message: string }>(
+      `/admin/articles/${id}`,
+      "DELETE"
+    );
   }
 
   clearCache() {

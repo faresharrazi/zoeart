@@ -10,15 +10,16 @@ import { useToast } from "@/hooks/use-toast";
 import HeroImageUpload from "../HeroImageUpload";
 import { apiClient } from "@/lib/apiClient";
 import { Edit, Save, X } from "lucide-react";
+import type { HeroImage, PageEntry, PageFormData } from "@/types/api";
 
 interface HomePageEditorProps {
-  pageData: any;
+  pageData: PageEntry | undefined;
   isEditing: boolean;
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: PageFormData;
+  setFormData: (data: PageFormData) => void;
   refreshPageData?: () => void;
 }
 
@@ -33,7 +34,7 @@ const HomePageEditor = ({
   refreshPageData,
 }: HomePageEditorProps) => {
   const { toast } = useToast();
-  const [heroImages, setHeroImages] = useState<any[]>([]);
+  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [heroImagesLoading, setHeroImagesLoading] = useState(true);
 
   // Fetch hero images from the new hero_images table
@@ -103,7 +104,6 @@ const HomePageEditor = ({
               <div className="space-y-4">
                 <HeroImageUpload
                   onImagesChange={(images) => {
-                    console.log("Hero images changed:", images);
                     // Hero images are now managed by the HeroImageUpload component
                     // No need to save to page_content table anymore
                   }}

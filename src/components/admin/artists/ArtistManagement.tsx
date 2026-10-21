@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import { useArtistData } from "@/hooks/useArtistData";
@@ -25,15 +25,12 @@ const ArtistManagement = () => {
   const { toast } = useToast();
   const { transformArtistsData } = useArtistData();
 
-  useEffect(() => {
-    fetchArtists();
-  }, [transformArtistsData]);
 
-  const fetchArtists = async () => {
+  const fetchArtists = useCallback(async () => {
     try {
       setLoading(true);
       const data = await apiClient.getAdminArtists();
-      const transformedArtists = transformArtistsData(data as any[]);
+      const transformedArtists = transformArtistsData(data);
       setArtists(transformedArtists);
     } catch (error) {
       console.error("Error fetching artists:", error);
@@ -45,7 +42,11 @@ const ArtistManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, transformArtistsData]);
+
+  useEffect(() => {
+    fetchArtists();
+  }, [fetchArtists]);
 
   const handleAdd = () => {
     setEditingArtist(undefined);

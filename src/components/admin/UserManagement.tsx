@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, User, Mail, Shield, Calendar, Save } from "lucide-react";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, errorMessage } from "@/lib/apiClient";
 
 interface User {
   id: number;
@@ -32,9 +32,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        console.log("UserManagement: Fetching users...");
         const data = await apiClient.getUsers();
-        console.log("UserManagement: Received users data:", data);
         setUsers(data);
       } catch (error) {
         console.error("UserManagement: Error fetching users:", error);
@@ -76,7 +74,7 @@ const UserManagement = () => {
 
     setSaving(true);
     try {
-      const updateData: any = {
+      const updateData: Parameters<typeof apiClient.updateUser>[1] = {
         username: formData.username,
         email: formData.email,
       };
@@ -87,7 +85,6 @@ const UserManagement = () => {
         updateData.currentPassword = formData.currentPassword;
       }
 
-      console.log("UserManagement: Updating user with data:", updateData);
       await apiClient.updateUser(editingUser.id, updateData);
 
       // Update local state
@@ -105,11 +102,11 @@ const UserManagement = () => {
       });
 
       handleCancel();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating user:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to update user",
+        description: errorMessage(error, "Failed to update user"),
         variant: "destructive",
       });
     } finally {

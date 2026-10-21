@@ -1,34 +1,8 @@
-import { createContext, useMemo } from "react";
+import { useMemo } from "react";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/lib/apiClient";
-
-export interface PageEntry {
-  title: string;
-  description: string;
-  // Free-form settings saved by the page editors
-  content: Record<string, unknown> & { description?: string };
-  isVisible: boolean;
-}
-
-export interface ContactInfo {
-  id: number;
-  email: string;
-  phone: string;
-  instagram: string;
-  address: string;
-  updated_at: string;
-}
-
-export interface PageDataValue {
-  pageData: Record<string, PageEntry | undefined>;
-  contactInfo: ContactInfo | null;
-  homeSettings: { title?: string; description?: string } | null;
-  loading: boolean;
-  error: string | null;
-  refreshPageData: () => Promise<void>;
-}
-
-export const PageDataContext = createContext<PageDataValue | null>(null);
+import { PageDataContext, type PageDataValue } from "./pageDataContextValue";
+import type { ContactInfo } from "@/types/api";
 
 // The API returns {} when no contact info has been saved yet
 const isContactInfo = (value: unknown): value is ContactInfo =>
@@ -41,11 +15,7 @@ export const PageDataProvider = ({
   children: React.ReactNode;
 }) => {
   const { data, loading, error, refetch } = useApi(
-    () =>
-      apiClient.getPageContent() as Promise<{
-        pages: Record<string, PageEntry>;
-        contactInfo: ContactInfo | Record<string, never>;
-      }>,
+    () => apiClient.getPageContent(),
     []
   );
 

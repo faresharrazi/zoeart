@@ -8,10 +8,11 @@ import NewsletterManagement from "./newsletter/NewsletterManagement";
 import PageContentManagement from "./page-content/PageContentManagement";
 import UserManagement from "./UserManagement";
 import UsefulLinks from "./UsefulLinks";
+import type { SessionUser } from "@/types/api";
 
 interface AdminDashboardProps {
   onLogout: () => void;
-  user: any;
+  user: SessionUser | null;
 }
 
 const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {

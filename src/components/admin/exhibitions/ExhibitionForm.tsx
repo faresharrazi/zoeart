@@ -14,9 +14,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, errorMessage } from "@/lib/apiClient";
 import { Save, X, Image, Upload } from "lucide-react";
 import FeaturedImageSelector from "../FeaturedImageSelector";
+import type { Artist, Artwork } from "@/types/api";
 
 interface Exhibition {
   id: string;
@@ -41,8 +42,8 @@ interface Exhibition {
 
 interface ExhibitionFormProps {
   exhibition?: Exhibition;
-  artists: any[];
-  artworks: any[];
+  artists: Artist[];
+  artworks: Artwork[];
   onSave: (exhibition: Exhibition) => void;
   onCancel: () => void;
   isEditing: boolean;
@@ -92,35 +93,21 @@ const ExhibitionForm = ({
     try {
       setSaving(true);
 
-      // Convert full URLs back to relative URLs for database storage
-      const convertToRelativeUrl = (url: string) => {
-        if (!url) return "";
-        if (url.startsWith("http://localhost:3001/api/files/")) {
-          return url.replace("http://localhost:3001/api/files/", "/api/file/");
-        }
-        return url;
-      };
 
       const exhibitionData = {
         title: formData.title,
-        slug:
-          formData.slug ||
-          formData.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, ""),
+        // Empty: the server builds a unique slug from the title/name
+        slug: formData.slug || "",
         description: formData.description || "",
         start_date: formData.startDate,
         end_date: formData.endDate,
         location: formData.location || "",
         curator: formData.curator || "",
         status: formData.status || "upcoming",
-        featured_image: convertToRelativeUrl(formData.featuredImage || ""),
-        gallery_images: JSON.stringify(
-          (formData.galleryImages || []).map(convertToRelativeUrl)
-        ),
-        assigned_artists: JSON.stringify(formData.assignedArtists || []),
-        assigned_artworks: JSON.stringify(formData.assignedArtworks || []),
+        featured_image: formData.featuredImage || "",
+        gallery_images: formData.galleryImages || [],
+        assigned_artists: formData.assignedArtists || [],
+        assigned_artworks: formData.assignedArtworks || [],
         call_for_artists: formData.callForArtists || false,
         cta_link: formData.ctaLink || "",
         press_media_name: formData.pressMediaName || "",
@@ -128,11 +115,6 @@ const ExhibitionForm = ({
         is_visible: formData.isVisible !== false,
       };
 
-      console.log("=== EXHIBITION SAVE DEBUG ===");
-      console.log("Form data:", formData);
-      console.log("Exhibition data to send:", exhibitionData);
-      console.log("Is editing:", isEditing);
-      console.log("Exhibition ID:", exhibition?.id);
 
       if (isEditing && exhibition?.id) {
         await apiClient.updateExhibition(
@@ -150,12 +132,12 @@ const ExhibitionForm = ({
           isEditing ? "updated" : "created"
         } successfully`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving exhibition:", error);
-      const errorMessage = error.message || "Failed to save exhibition";
+      const message = errorMessage(error, "Failed to save exhibition");
       toast({
         title: "Error",
-        description: errorMessage,
+        description: message,
         variant: "destructive",
       });
     } finally {
@@ -165,10 +147,8 @@ const ExhibitionForm = ({
 
   const handleImageUpload = async (file: File) => {
     try {
-      console.log("Uploading featured image:", file.name);
       // Use new Cloudinary-enabled upload method
       const response = await apiClient.uploadImage(file, "exhibition");
-      console.log("Featured image upload response:", response);
 
       // The response now contains the Cloudinary URL directly
       const imageUrl = response.file.url;
@@ -202,10 +182,8 @@ const ExhibitionForm = ({
 
   const handleGalleryImageUpload = async (file: File) => {
     try {
-      console.log("Uploading gallery image:", file.name);
       // Use new Cloudinary-enabled upload method
       const response = await apiClient.uploadImage(file, "exhibition");
-      console.log("Upload response:", response);
 
       // The response now contains the Cloudinary URL directly
       const imageUrl = response.file.url;
@@ -239,13 +217,11 @@ const ExhibitionForm = ({
 
   const handleBulkGalleryUpload = async (files: FileList) => {
     try {
-      console.log("Bulk uploading gallery images:", files.length, "files");
       const uploadPromises = Array.from(files).map((file) =>
         apiClient.uploadImage(file, "exhibition")
       );
 
       const responses = await Promise.all(uploadPromises);
-      console.log("Bulk upload responses:", responses);
 
       // Extract Cloudinary URLs from responses
       const imageUrls = responses.map((response) => response.file.url);
@@ -331,8 +307,8 @@ const ExhibitionForm = ({
             <Label htmlFor="startDate">Start Date</Label>
             <Input
               id="startDate"
-              type="datetime-local"
-              value={formData.startDate || ""}
+              type="date"
+              value={(formData.startDate || "").slice(0, 10)}
               onChange={(e) =>
                 setFormData({ ...formData, startDate: e.target.value })
               }
@@ -343,8 +319,8 @@ const ExhibitionForm = ({
             <Label htmlFor="endDate">End Date</Label>
             <Input
               id="endDate"
-              type="datetime-local"
-              value={formData.endDate || ""}
+              type="date"
+              value={(formData.endDate || "").slice(0, 10)}
               onChange={(e) =>
                 setFormData({ ...formData, endDate: e.target.value })
               }

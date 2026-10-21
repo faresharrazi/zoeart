@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { PageDataContext } from "@/contexts/PageDataContext";
+import { PageDataContext } from "@/contexts/pageDataContextValue";
 
 /** Page settings and contact info, loaded once by PageDataProvider. */
 export const usePageDataFromDB = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,22 +31,18 @@ const HeroImageUpload: React.FC<HeroImageUploadProps> = ({ onImagesChange }) => 
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  // Latest callback without refetching whenever the parent re-renders
+  const onImagesChangeRef = useRef(onImagesChange);
+  onImagesChangeRef.current = onImagesChange;
 
   // Fetch existing hero images
-  useEffect(() => {
-    fetchHeroImages();
-  }, []);
-
-  const fetchHeroImages = async () => {
+  const fetchHeroImages = useCallback(async () => {
     try {
       setLoading(true);
-      console.log("HeroImageUpload: Fetching hero images...");
       const response = await apiClient.getHeroImages();
-      console.log("HeroImageUpload: API response:", response);
       if (response.success) {
         setHeroImages(response.data);
-        onImagesChange?.(response.data);
-        console.log("HeroImageUpload: Set hero images:", response.data);
+        onImagesChangeRef.current?.(response.data);
       }
     } catch (error) {
       console.error("Error fetching hero images:", error);
@@ -58,7 +54,11 @@ const HeroImageUpload: React.FC<HeroImageUploadProps> = ({ onImagesChange }) => 
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchHeroImages();
+  }, [fetchHeroImages]);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -80,7 +80,9 @@ const HeroImageUpload: React.FC<HeroImageUploadProps> = ({ onImagesChange }) => 
         // Then save to hero_images table
         const heroImageData = {
           cloudinary_url: uploadResponse.file.url,
-          cloudinary_public_id: uploadResponse.file.publicId || uploadResponse.file.id,
+          cloudinary_public_id: String(
+            uploadResponse.file.publicId || uploadResponse.file.id
+          ),
           original_name: file.name,
           file_size: file.size,
           mime_type: file.type,

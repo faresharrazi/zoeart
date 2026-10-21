@@ -45,12 +45,7 @@ const NewsletterManagement = () => {
         apiClient.clearCache();
       }
 
-      console.log(
-        "Fetching newsletter subscribers with token:",
-        token.substring(0, 20) + "..."
-      );
       const data = await apiClient.getNewsletterSubscribers();
-      console.log("Newsletter data received:", data);
       setSubscribers(data);
     } catch (error) {
       console.error("Error fetching subscribers:", error);

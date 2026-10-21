@@ -3,10 +3,11 @@ import AdminLogin from "@/components/admin/AdminLogin";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { apiClient } from "@/lib/apiClient";
 import { useSeo } from "@/hooks/useSeo";
+import type { SessionUser } from "@/types/api";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   useSeo({ title: "Admin", noIndex: true });
 
@@ -32,7 +33,7 @@ const Admin = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleLogin = (token: string, userData: any) => {
+  const handleLogin = (token: string, userData: SessionUser) => {
     setUser(userData);
     setIsAuthenticated(true);
   };

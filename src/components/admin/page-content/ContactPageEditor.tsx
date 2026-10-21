@@ -9,16 +9,17 @@ import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import WorkingHoursManagement from "../WorkingHoursManagement";
 import { Edit, Save, X, Mail, Phone, MapPin, Instagram } from "lucide-react";
+import type { ContactInfo, PageEntry, PageFormData } from "@/types/api";
 
 interface ContactPageEditorProps {
-  pageData: any;
-  contactInfo: any;
+  pageData: PageEntry | undefined;
+  contactInfo: ContactInfo | null;
   isEditing: boolean;
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: PageFormData;
+  setFormData: (data: PageFormData) => void;
   onRefresh: () => void;
 }
 

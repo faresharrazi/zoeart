@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import ExhibitionList from "./ExhibitionList";
 import ExhibitionForm from "./ExhibitionForm";
+import type { Artist, Artwork } from "@/types/api";
 
 interface Exhibition {
   id: string;
@@ -27,8 +28,8 @@ interface Exhibition {
 
 const ExhibitionManagement = () => {
   const [exhibitions, setExhibitions] = useState<Exhibition[]>([]);
-  const [artists, setArtists] = useState<any[]>([]);
-  const [artworks, setArtworks] = useState<any[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingExhibition, setEditingExhibition] = useState<Exhibition | null>(
@@ -36,11 +37,8 @@ const ExhibitionManagement = () => {
   );
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [exhibitionsData, artistsData, artworksData] = await Promise.all([
@@ -50,9 +48,10 @@ const ExhibitionManagement = () => {
       ]);
 
       // Transform exhibitions data to match interface
-      const transformedExhibitions = exhibitionsData.map((exhibition: any) => ({
+      const transformedExhibitions = exhibitionsData.map((exhibition) => ({
         id: exhibition.id.toString(),
         title: exhibition.title,
+        slug: exhibition.slug,
         description: exhibition.description || "",
         startDate: exhibition.start_date,
         endDate: exhibition.end_date,
@@ -89,7 +88,11 @@ const ExhibitionManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleAdd = () => {
     setEditingExhibition(undefined);

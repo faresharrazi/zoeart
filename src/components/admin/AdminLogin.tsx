@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, ApiError } from "@/lib/apiClient";
+import type { SessionUser } from "@/types/api";
 
 interface AdminLoginProps {
-  onLogin: (token: string, user: any) => void;
+  onLogin: (token: string, user: SessionUser) => void;
 }
 
 const AdminLogin = ({ onLogin }: AdminLoginProps) => {
@@ -23,37 +24,20 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     try {
       const data = await apiClient.login(username, password);
 
-      if (data.success) {
-        // Store token in localStorage
-        localStorage.setItem("adminToken", data.token);
-        localStorage.setItem("adminUser", JSON.stringify(data.user));
+      localStorage.setItem("adminToken", data.token);
+      localStorage.setItem("adminUser", JSON.stringify(data.user));
 
-        onLogin(data.token, data.user);
-        toast({
-          title: "Login Successful",
-          description: `Welcome back, ${data.user.username}!`,
-        });
-      } else {
-        toast({
-          title: "Login Failed",
-          description: data.error || "Invalid credentials",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      console.error("Login error:", error);
-
-      let errorMessage = "Unable to connect to server";
-
-      if (error.message) {
-        if (error.message.includes("500")) {
-          errorMessage = "Server error. Please try again in a moment.";
-        } else if (error.message.includes("Internal server error")) {
-          errorMessage = "Server is temporarily unavailable. Please try again.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
+      onLogin(data.token, data.user);
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${data.user.username}!`,
+      });
+    } catch (error) {
+      // 401 bad credentials, 429 too many attempts, 400 missing fields
+      const errorMessage =
+        error instanceof ApiError && error.status < 500
+          ? error.message
+          : "Server is temporarily unavailable. Please try again.";
 
       toast({
         title: "Login Failed",

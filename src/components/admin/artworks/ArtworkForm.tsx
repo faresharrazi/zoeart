@@ -13,9 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, errorMessage } from "@/lib/apiClient";
 import { Save, X, Upload, Image, Trash2 } from "lucide-react";
 import FeaturedImageSelector from "../FeaturedImageSelector";
+import type { Artist } from "@/types/api";
 
 interface Artwork {
   id: string;
@@ -34,7 +35,7 @@ interface Artwork {
 
 interface ArtworkFormProps {
   artwork?: Artwork;
-  artists: any[];
+  artists: Artist[];
   onSave: (artwork: Artwork) => void;
   onCancel: () => void;
   isEditing: boolean;
@@ -89,12 +90,8 @@ const ArtworkForm = ({
 
       const artworkData = {
         title: formData.title,
-        slug:
-          formData.slug ||
-          formData.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, ""),
+        // Empty: the server builds a unique slug from the title/name
+        slug: formData.slug || "",
         artist_id: formData.artist_id,
         year: formData.year || new Date().getFullYear(),
         medium: formData.medium || "",
@@ -118,12 +115,12 @@ const ArtworkForm = ({
           isEditing ? "updated" : "created"
         } successfully`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving artwork:", error);
-      const errorMessage = error.message || "Failed to save artwork";
+      const message = errorMessage(error, "Failed to save artwork");
       toast({
         title: "Error",
-        description: errorMessage,
+        description: message,
         variant: "destructive",
       });
     } finally {

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAboutBlocks } from "@/hooks/useAboutBlocks";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, errorMessage } from "@/lib/apiClient";
 import {
   DndContext,
   closestCenter,
@@ -39,6 +39,32 @@ import {
   ArrowDown,
   GripVertical,
 } from "lucide-react";
+import type { AboutBlock } from "@/types/api";
+
+interface BlockFormData {
+  title: string;
+  content: string;
+  is_visible: boolean;
+  sort_order: number;
+}
+
+interface SortableBlockProps {
+  block: AboutBlock;
+  index: number;
+  blocks: AboutBlock[];
+  editingBlockId: number | null;
+  blockFormData: BlockFormData;
+  setBlockFormData: (data: BlockFormData) => void;
+  handleSaveBlock: () => void;
+  handleCancelBlock: () => void;
+  handleEditBlock: (block: AboutBlock) => void;
+  handleDeleteBlock: (id: number) => void;
+  handleToggleBlockVisibility: (id: number, isVisible: boolean) => void;
+  handleMoveBlockUp: (block: AboutBlock) => void;
+  handleMoveBlockDown: (block: AboutBlock) => void;
+  saving: boolean;
+  deleting: number | null;
+}
 
 // Sortable Block Component
 const SortableBlock = ({
@@ -57,7 +83,7 @@ const SortableBlock = ({
   handleMoveBlockDown,
   saving,
   deleting,
-}: any) => {
+}: SortableBlockProps) => {
   const {
     attributes,
     listeners,
@@ -272,7 +298,7 @@ const AboutPageEditor = () => {
 
   // Block editing state
   const [editingBlockId, setEditingBlockId] = useState<number | null>(null);
-  const [blockFormData, setBlockFormData] = useState({
+  const [blockFormData, setBlockFormData] = useState<BlockFormData>({
     title: "",
     content: "",
     is_visible: true,
@@ -311,7 +337,7 @@ const AboutPageEditor = () => {
           title: "Success",
           description: "Blocks reordered successfully",
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error reordering blocks:", error);
         toast({
           title: "Error",
@@ -370,11 +396,11 @@ const AboutPageEditor = () => {
         title: "Success",
         description: "About page updated successfully",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving page:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save page",
+        description: errorMessage(error, "Failed to save page"),
         variant: "destructive",
       });
     } finally {
@@ -402,7 +428,7 @@ const AboutPageEditor = () => {
     });
   };
 
-  const handleEditBlock = (block: any) => {
+  const handleEditBlock = (block: AboutBlock) => {
     setEditingBlockId(block.id);
     setBlockFormData({
       title: block.title,
@@ -455,11 +481,11 @@ const AboutPageEditor = () => {
       }
 
       handleCancelBlock();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving block:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save block",
+        description: errorMessage(error, "Failed to save block"),
         variant: "destructive",
       });
     } finally {
@@ -477,11 +503,11 @@ const AboutPageEditor = () => {
         title: "Success",
         description: "Block deleted successfully",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error deleting block:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to delete block",
+        description: errorMessage(error, "Failed to delete block"),
         variant: "destructive",
       });
     } finally {
@@ -501,17 +527,17 @@ const AboutPageEditor = () => {
         title: "Success",
         description: `Block ${isVisible ? "shown" : "hidden"} successfully`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error toggling visibility:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to toggle visibility",
+        description: errorMessage(error, "Failed to toggle visibility"),
         variant: "destructive",
       });
     }
   };
 
-  const handleMoveBlockUp = async (block: any) => {
+  const handleMoveBlockUp = async (block: AboutBlock) => {
     const currentIndex = blocks.findIndex((b) => b.id === block.id);
     if (currentIndex <= 0) return;
 
@@ -532,7 +558,7 @@ const AboutPageEditor = () => {
         title: "Success",
         description: "Block moved up successfully",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error moving block:", error);
       toast({
         title: "Error",
@@ -542,7 +568,7 @@ const AboutPageEditor = () => {
     }
   };
 
-  const handleMoveBlockDown = async (block: any) => {
+  const handleMoveBlockDown = async (block: AboutBlock) => {
     const currentIndex = blocks.findIndex((b) => b.id === block.id);
     if (currentIndex >= blocks.length - 1) return;
 
@@ -563,7 +589,7 @@ const AboutPageEditor = () => {
         title: "Success",
         description: "Block moved down successfully",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error moving block:", error);
       toast({
         title: "Error",

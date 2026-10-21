@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, errorMessage } from "@/lib/apiClient";
 import { Save, X, Image, Upload, Plus, Globe, ChevronDown } from "lucide-react";
 import { getSocialMediaIcon } from "@/lib/socialMediaIcons";
 import {
@@ -73,12 +73,8 @@ const ArtistForm = ({
 
       const artistData = {
         name: formData.name,
-        slug:
-          formData.slug ||
-          formData.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, ""),
+        // Empty: the server builds a unique slug from the title/name
+        slug: formData.slug || "",
         specialty: formData.specialty || "",
         bio: formData.bio || "",
         profile_image: formData.profileImage || "",
@@ -98,12 +94,12 @@ const ArtistForm = ({
         title: "Success",
         description: `Artist ${isEditing ? "updated" : "created"} successfully`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving artist:", error);
-      const errorMessage = error.message || "Failed to save artist";
+      const message = errorMessage(error, "Failed to save artist");
       toast({
         title: "Error",
-        description: errorMessage,
+        description: message,
         variant: "destructive",
       });
     } finally {
