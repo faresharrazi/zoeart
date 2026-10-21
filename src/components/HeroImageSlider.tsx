@@ -9,7 +9,8 @@ interface HeroImageSliderProps {
 const prefersReducedMotion = () =>
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
-const HeroImageSlider = ({ images, interval = 2000 }: HeroImageSliderProps) => {
+/** Cross-fading full-bleed photos; pauses on hover, focus and reduced motion. */
+const HeroImageSlider = ({ images, interval = 5000 }: HeroImageSliderProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [paused, setPaused] = useState(prefersReducedMotion);
 
@@ -24,7 +25,7 @@ const HeroImageSlider = ({ images, interval = 2000 }: HeroImageSliderProps) => {
 
   return (
     <div
-      className="absolute inset-0 overflow-hidden"
+      className="absolute inset-0"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(prefersReducedMotion())}
       onFocus={() => setPaused(true)}
@@ -39,25 +40,25 @@ const HeroImageSlider = ({ images, interval = 2000 }: HeroImageSliderProps) => {
           alt=""
           {...fetchPriority(index === 0 ? "high" : "low")}
           decoding="async"
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+          className={`absolute inset-0 h-full w-full object-cover object-[center_35%] transition-opacity duration-1000 ${
             index === currentIndex ? "opacity-100" : "opacity-0"
           }`}
         />
       ))}
 
       {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+        <div className="absolute top-24 right-6 md:right-10 z-10 flex gap-2">
           {images.map((_, index) => (
             <button
               key={index}
               type="button"
-              className={`w-2 h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+              className={`h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
                 index === currentIndex
-                  ? "bg-white scale-125"
-                  : "bg-white/50 hover:bg-white/75"
+                  ? "w-6 bg-white"
+                  : "w-1.5 bg-white/50 hover:bg-white/80"
               }`}
               onClick={() => setCurrentIndex(index)}
-              aria-label={`Show slide ${index + 1} of ${images.length}`}
+              aria-label={`Show photo ${index + 1} of ${images.length}`}
               aria-current={index === currentIndex ? "true" : undefined}
             />
           ))}

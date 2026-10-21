@@ -1,125 +1,131 @@
-import { PageHeader, PageLayout } from "@/components/PageLayout";
 import NewsletterForm from "@/components/NewsletterForm";
-import { Mail, Phone, Instagram } from "lucide-react";
+import { Container, PageHeader, PageLayout } from "@/components/PageLayout";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
-import { instagramUrl } from "@/lib/contact";
 import { useSeo } from "@/hooks/useSeo";
+import { instagramUrl, mapsUrl } from "@/lib/contact";
 
-const cardClass =
-  "bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100 w-full h-full flex flex-col";
-
-const CardHeading = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center mb-6">
-    <div className="w-12 h-12 bg-theme-primary rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
-      <Mail className="w-6 h-6 text-white" aria-hidden="true" />
-    </div>
-    <h2 className="text-xl font-bold text-foreground">{children}</h2>
-  </div>
+const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <h2 className="eyebrow text-mist mb-6">{children}</h2>
 );
 
-const ContactLink = ({
-  icon: Icon,
-  href,
-  external = false,
-  children,
-}: {
-  icon: typeof Mail;
-  href: string;
-  external?: boolean;
-  children: React.ReactNode;
-}) => (
-  <li>
-    <a
-      href={href}
-      {...(external && { target: "_blank", rel: "noopener noreferrer" })}
-      className="group flex items-center space-x-3 p-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-200"
-    >
-      <span className="w-10 h-10 bg-theme-primary/10 rounded-lg flex items-center justify-center group-hover:bg-theme-primary/20 transition-colors flex-shrink-0">
-        <Icon className="w-5 h-5 text-theme-primary" aria-hidden="true" />
-      </span>
-      <span className="text-foreground group-hover:text-theme-primary transition-colors font-medium break-words whitespace-pre-line">
-        {children}
-      </span>
-    </a>
-  </li>
-);
+const bigLink = "font-display text-2xl md:text-3xl hover:italic break-words";
 
 const Contact = () => {
-  const { pageData, contactInfo } = usePageDataFromDB();
-  useSeo({
-    title: "Contact",
-    description: pageData.contact?.description,
-  });
+  const { pageData, contactInfo, openingHours } = usePageDataFromDB();
+  useSeo({ title: "Contact", description: pageData.contact?.description });
 
-  const hasContactInfo = Boolean(
-    contactInfo?.email || contactInfo?.phone || contactInfo?.instagram
-  );
+  const details = [
+    contactInfo?.email && {
+      label: "Email",
+      node: (
+        <a href={`mailto:${contactInfo.email}`} className={bigLink}>
+          {contactInfo.email}
+        </a>
+      ),
+    },
+    contactInfo?.phone && {
+      label: "Phone",
+      node: (
+        <a
+          href={`tel:${contactInfo.phone.replace(/\s+/g, "")}`}
+          className={bigLink}
+        >
+          {contactInfo.phone}
+        </a>
+      ),
+    },
+    contactInfo?.instagram && {
+      label: "Instagram",
+      node: (
+        <a
+          href={instagramUrl(contactInfo.instagram)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={bigLink}
+        >
+          @{contactInfo.instagram.replace(/^@/, "")}
+        </a>
+      ),
+    },
+    contactInfo?.address && {
+      label: "Address",
+      node: (
+        <a
+          href={mapsUrl(contactInfo.address)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${bigLink} whitespace-pre-line`}
+        >
+          {contactInfo.address}
+        </a>
+      ),
+    },
+  ].filter(Boolean) as { label: string; node: React.ReactNode }[];
 
   return (
     <PageLayout>
       <PageHeader
-        title={pageData.contact?.title || "Contact Us"}
+        title={pageData.contact?.title?.trim() || "Contact"}
         description={
-          <p>
-            {pageData.contact?.description ||
-              pageData.contact?.content?.description ||
-              "Get in touch with us"}
-          </p>
+          pageData.contact?.description && (
+            <p className="whitespace-pre-line">
+              {pageData.contact.description}
+            </p>
+          )
         }
       />
 
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-6">
-          <div
-            className={
-              hasContactInfo
-                ? "grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch"
-                : "max-w-md mx-auto"
-            }
-          >
-            <div className={cardClass}>
-              <CardHeading>Subscribe to our newsletter</CardHeading>
-              {!hasContactInfo && (
-                <p className="text-muted-foreground mb-6">
-                  Get exclusive updates about new exhibitions, artist
-                  spotlights, and special events.
-                </p>
-              )}
-              <NewsletterForm />
-            </div>
+      <Container className="pb-16 md:pb-20">
+        <div className="grid gap-16 border-t border-line pt-14 md:grid-cols-2 md:gap-20">
+          <div className="space-y-14">
+            {details.length > 0 && (
+              <section>
+                <SectionLabel>Get in touch</SectionLabel>
+                <dl className="space-y-6">
+                  {details.map((item) => (
+                    <div key={item.label}>
+                      <dt className="text-sm text-mist mb-1">{item.label}</dt>
+                      <dd>{item.node}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
 
-            {hasContactInfo && contactInfo && (
-              <div className={cardClass}>
-                <CardHeading>Contact Us</CardHeading>
-                <ul className="space-y-4">
-                  {contactInfo.email && (
-                    <ContactLink
-                      icon={Mail}
-                      href={`mailto:${contactInfo.email}`}
+            {openingHours.length > 0 && (
+              <section>
+                <SectionLabel>Opening hours</SectionLabel>
+                <dl className="border-t border-line max-w-md">
+                  {openingHours.map((row) => (
+                    <div
+                      key={row.id ?? row.day}
+                      className="flex justify-between gap-6 border-b border-line py-3"
                     >
-                      {contactInfo.email}
-                    </ContactLink>
-                  )}
-                  {contactInfo.phone && (
-                    <ContactLink icon={Phone} href={`tel:${contactInfo.phone}`}>
-                      {contactInfo.phone}
-                    </ContactLink>
-                  )}
-                  {contactInfo.instagram && (
-                    <ContactLink
-                      icon={Instagram}
-                      href={instagramUrl(contactInfo.instagram)}
-                      external
-                    >
-                      {contactInfo.instagram}
-                    </ContactLink>
-                  )}
-                </ul>
-              </div>
+                      <dt>{row.day}</dt>
+                      <dd className="text-right text-stone whitespace-pre-line">
+                        {row.time_frame}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
             )}
           </div>
+
+          <section aria-labelledby="newsletter-title">
+            <h2
+              id="newsletter-title"
+              className="font-display text-3xl md:text-4xl leading-tight mb-4"
+            >
+              Newsletter
+            </h2>
+            <p className="text-stone mb-10 max-w-md">
+              New exhibitions, openings and artist news, a few times a year.
+            </p>
+            <NewsletterForm withName />
+          </section>
         </div>
-      </section>
+      </Container>
     </PageLayout>
   );
 };

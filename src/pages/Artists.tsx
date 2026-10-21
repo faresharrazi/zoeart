@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import {
+  Container,
   LoadingState,
   PageHeader,
   PageLayout,
@@ -8,8 +9,8 @@ import {
 import SocialLinks from "@/components/SocialLinks";
 import { useApi } from "@/hooks/useApi";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
-import { apiClient } from "@/lib/apiClient";
 import { useSeo } from "@/hooks/useSeo";
+import { apiClient } from "@/lib/apiClient";
 
 const Artists = () => {
   const { pageData } = usePageDataFromDB();
@@ -17,55 +18,58 @@ const Artists = () => {
     () => apiClient.getArtists(),
     []
   );
-  useSeo({
-    title: pageData.artists?.title || "Artists",
-    description: pageData.artists?.description,
-  });
+  const title = pageData.artists?.title?.trim() || "Artists";
+  useSeo({ title, description: pageData.artists?.description });
 
   return (
     <RequireVisiblePage page="artists">
       <PageLayout>
         <PageHeader
-          title={pageData.artists?.title || "Artists"}
+          title={title}
           description={
-            <p>
-              {pageData.artists?.description || "Meet our talented artists"}
-            </p>
+            pageData.artists?.description && (
+              <p>{pageData.artists.description}</p>
+            )
           }
         />
 
-        <section className="py-20 bg-theme-background">
-          <div className="container mx-auto px-6">
-            {loading ? (
-              <LoadingState label="Loading artists…" />
-            ) : (
-              <ul className="grid grid-cols-1 gap-6 max-w-2xl mx-auto">
-                {artists.map((artist) => (
-                  <li
-                    key={artist.id}
-                    className="group relative p-6 text-center"
-                  >
-                    <h2 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-theme-primary transition-colors duration-300">
-                      {/* The link covers the whole entry; social links sit above it */}
+        <Container className="pb-16 md:pb-20">
+          {loading ? (
+            <LoadingState label="Loading artists…" />
+          ) : artists.length === 0 ? (
+            <p className="border-t border-line py-20 text-mist">
+              No artists to show yet.
+            </p>
+          ) : (
+            <ul className="border-t border-line">
+              {artists.map((artist) => (
+                <li
+                  key={artist.id}
+                  className="group relative flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b border-line py-7"
+                >
+                  <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
+                    <h2 className="font-display text-3xl md:text-4xl">
+                      {/* The link covers the whole row; social links sit above it */}
                       <Link
                         to={`/artist/${artist.slug}`}
-                        className="after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-theme-primary focus-visible:after:rounded-lg"
+                        className="after:absolute after:inset-0 group-hover:italic focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-ink"
                       >
-                        {artist.name}
+                        {artist.name.trim()}
                       </Link>
                     </h2>
-                    <SocialLinks
-                      links={artist.social_media}
-                      ownerName={artist.name}
-                      className="relative z-10 flex justify-center space-x-3"
-                      linkClassName="w-8 h-8 rounded-full bg-gray-100 hover:bg-theme-primary hover:text-white flex items-center justify-center transition-all duration-300 group-hover:scale-110"
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
+                    {artist.specialty && (
+                      <p className="text-sm text-mist">{artist.specialty}</p>
+                    )}
+                  </div>
+                  <SocialLinks
+                    links={artist.social_media}
+                    ownerName={artist.name.trim()}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </Container>
       </PageLayout>
     </RequireVisiblePage>
   );

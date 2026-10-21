@@ -9,10 +9,10 @@ const {
 
 const router = express.Router();
 
-// Contact details shown on the site. The address column is kept in the
-// database but no longer published (removed at the client's request).
-const CONTACT_FIELDS = ["email", "phone", "instagram"];
-const PUBLIC_CONTACT_COLUMNS = "id, email, phone, instagram, updated_at";
+// Contact details shown on the site; an empty field isn't shown
+const CONTACT_FIELDS = ["email", "phone", "instagram", "address"];
+const PUBLIC_CONTACT_COLUMNS =
+  "id, email, phone, instagram, address, updated_at";
 
 // Get all page content (public)
 router.get(
@@ -44,6 +44,12 @@ router.get(
       return acc;
     }, {});
 
+    // Visible opening hours and partners travel with the page settings, so
+    // the footer and contact page need no extra requests
+    const openingHours = await query(
+      `SELECT id, day, time_frame FROM working_hours
+       WHERE is_active = TRUE ORDER BY sort_order, id`
+    );
     const partners = await query(
       `SELECT id, name, logo_url, website_url FROM partners
        WHERE is_visible = TRUE ORDER BY sort_order, id`
@@ -51,6 +57,7 @@ router.get(
 
     const response = {
       partners: partners.rows,
+      openingHours: openingHours.rows,
       pages: pageData,
       contactInfo: contactInfo.rows.length > 0 ? contactInfo.rows[0] : {},
     };
@@ -134,8 +141,7 @@ router.put(
   "/contact/info",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    // Only the fields sent are changed (the address is no longer edited
-    // from the admin, but is kept in the database)
+    // Only the fields sent are changed
     const updateData = {};
     for (const field of CONTACT_FIELDS) {
       if (req.body[field] !== undefined) {

@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 
 export const SITE_NAME = "Aether Art Space";
 const DEFAULT_DESCRIPTION =
-  "Contemporary art gallery in Glyfada, Athens: exhibitions, artists and a collection of works from emerging and established artists.";
+  "Contemporary art gallery in Athens bridging Greek and Asian influences: exhibitions of painting, abstraction and cross-cultural work by emerging and established artists.";
 const DEFAULT_IMAGE = "/og-image.jpg";
 
 interface SeoOptions {

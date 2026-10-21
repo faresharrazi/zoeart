@@ -1,14 +1,14 @@
 import {
+  Container,
   LoadingState,
   PageHeader,
   PageLayout,
   RequireVisiblePage,
 } from "@/components/PageLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { useAboutBlocks } from "@/hooks/useAboutBlocks";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
-import { renderRichText } from "@/lib/richText";
 import { useSeo } from "@/hooks/useSeo";
+import { renderRichText } from "@/lib/richText";
 
 // Admin text keeps its line breaks
 const withLineBreaks = (text: string) =>
@@ -17,50 +17,47 @@ const withLineBreaks = (text: string) =>
 const About = () => {
   const { pageData } = usePageDataFromDB();
   const { visibleBlocks, loading } = useAboutBlocks();
-  useSeo({
-    title: pageData.about?.title || "About",
-    description: pageData.about?.description,
-  });
+  const title = pageData.about?.title?.trim() || "About";
+  useSeo({ title, description: pageData.about?.description });
 
   return (
     <RequireVisiblePage page="about">
       <PageLayout>
         <PageHeader
-          title={pageData.about?.title || "About Us"}
+          title={title}
           description={
-            <div
-              dangerouslySetInnerHTML={{
-                __html: withLineBreaks(pageData.about?.description || ""),
-              }}
-            />
+            pageData.about?.description && (
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: withLineBreaks(pageData.about.description),
+                }}
+              />
+            )
           }
         />
 
-        <div className="bg-gallery-light-grey py-20">
-          <div className="container mx-auto px-6">
-            {loading ? (
-              <LoadingState label="Loading…" />
-            ) : (
-              visibleBlocks.map((block) => (
-                <section key={block.id} className="mb-16">
-                  <Card className="shadow-elegant">
-                    <CardContent className="p-12 text-center">
-                      <h2 className="text-3xl font-semibold mb-4 text-foreground">
-                        {block.title}
-                      </h2>
-                      <div
-                        className="rich-text text-lg text-muted-foreground max-w-4xl mx-auto"
-                        dangerouslySetInnerHTML={{
-                          __html: withLineBreaks(block.content),
-                        }}
-                      />
-                    </CardContent>
-                  </Card>
-                </section>
-              ))
-            )}
-          </div>
-        </div>
+        <Container>
+          {loading ? (
+            <LoadingState label="Loading…" />
+          ) : (
+            visibleBlocks.map((block) => (
+              <section
+                key={block.id}
+                className="grid gap-8 border-t border-line py-14 md:grid-cols-12 md:gap-16 md:py-20"
+              >
+                <h2 className="font-display text-3xl md:text-4xl leading-tight md:col-span-4">
+                  {block.title}
+                </h2>
+                <div
+                  className="rich-text text-lg md:col-span-8 max-w-3xl"
+                  dangerouslySetInnerHTML={{
+                    __html: withLineBreaks(block.content),
+                  }}
+                />
+              </section>
+            ))
+          )}
+        </Container>
       </PageLayout>
     </RequireVisiblePage>
   );

@@ -25,6 +25,7 @@ export const PageDataProvider = ({
     return {
       pageData: pages,
       contactInfo: isContactInfo(contact) ? contact : null,
+      openingHours: data?.openingHours ?? [],
       partners: (data?.partners ?? []).map((partner) => ({
         ...partner,
         logo_url: normalizeImageUrl(partner.logo_url),

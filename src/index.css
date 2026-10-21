@@ -2,192 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/*
+ * Design tokens. All colors are HSL channels so Tailwind can add opacity.
+ *
+ * Public site (light "night gallery"): ink on paper, Bodoni Moda for display
+ * type and Inter for text, hairlines instead of boxes and shadows.
+ * Admin panel: the shadcn/ui variables below, in neutral greys.
+ */
 @layer base {
   :root {
+    /* Public site */
+    --ink: 40 6% 7%; /* #131211 text and dark band */
+    --paper: 0 0% 100%; /* page background */
+    --sand: 45 18% 95%; /* alternate section background */
+    --stone: 40 4% 32%; /* secondary text, 8.4:1 on paper */
+    --mist: 40 3% 42%; /* muted text, 5.7:1 on paper, 5.1:1 on sand */
+    --line: 45 10% 89%; /* hairlines */
+
+    /* shadcn/ui (admin panel and shared controls) */
     --background: 0 0% 100%;
-    --foreground: 0 0% 5%;
-
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 10%;
-
+    --foreground: 240 10% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
-
-    --primary: 0 0% 5%;
+    --popover-foreground: 240 10% 4%;
+    --primary: 240 6% 10%;
     --primary-foreground: 0 0% 98%;
-
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 15%;
-
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-
-    --accent: 45 100% 51%;
-    --accent-foreground: 0 0% 5%;
-
-    --destructive: 0 84% 60%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 40%;
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 6% 10%;
+    --destructive: 0 72% 46%;
     --destructive-foreground: 0 0% 98%;
+    --border: 240 6% 90%;
+    --input: 240 6% 88%;
+    --ring: 240 6% 10%;
+    --radius: 0.5rem;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 95%;
-    --ring: 0 0% 20%;
+    /* Older admin screens use these names */
+    --theme-primary: 240 6% 10%;
+    --theme-primary-text: 0 0% 98%;
+    --theme-primary-hover: 240 5% 26%;
+    --theme-background: 240 5% 97%;
+    --theme-surface: 240 5% 96%;
+    --theme-overlay: 240 6% 10%;
+    --theme-text-primary: 240 6% 10%;
+    --theme-text-secondary: 240 4% 26%;
+    --theme-text-on-dark: 0 0% 98%;
+    --theme-text-muted: 240 4% 40%; /* 6.9:1 on white */
+    --theme-border: 240 6% 90%;
+    --theme-border-hover: 240 5% 65%;
+    --theme-focus: 240 6% 10%;
+    --theme-success: 142 72% 29%;
+    --theme-warning: 38 92% 50%;
+    --theme-error: 0 72% 46%;
 
-    /* Aether Art Space Theme System - Consistent Palette */
-    --theme-primary: 220 15% 25%; /* #393E46 - Main brand color (dark gray) */
-    --theme-primary-text: 0 0% 97%; /* #F7F7F7 - Text on primary */
-    --theme-primary-hover: 220 15% 35%; /* Darker gray for hover */
-    --theme-background: 0 0% 97%; /* #F7F7F7 - Main background (light gray) */
-    --theme-surface: 0 0% 93%; /* #EEEEEE - Card/surface backgrounds */
-    --theme-overlay: 220 15% 25%; /* #393E46 - Dark overlay */
-    --theme-text-primary: 220 15% 25%; /* #393E46 - Main text (dark gray) */
-    --theme-text-secondary: 220 15% 25%; /* #393E46 - Secondary text */
-    --theme-text-on-dark: 0 0% 97%; /* #F7F7F7 - Text on dark backgrounds */
-    --theme-text-muted: 220 8% 45%; /* #6A707C - Muted text (4.5:1 contrast on light backgrounds) */
-    --theme-border: 0 0% 85%; /* Light gray border */
-    --theme-border-hover: 220 15% 25%; /* #393E46 - Border hover */
-    --theme-focus: 220 15% 25%; /* #393E46 - Focus ring */
-    --theme-success: 142 76% 36%; /* #10B981 - Success */
-    --theme-warning: 38 92% 50%; /* #F59E0B - Warning */
-    --theme-error: 0 84% 60%; /* #EF4444 - Error */
-
-    /* Legacy gallery colors */
-    --gallery-gold: 45 100% 51%;
-    --gallery-charcoal: 0 0% 15%;
-    --gallery-light-grey: 0 0% 96%;
-    --gallery-medium-grey: 0 0% 75%;
-
-    --gradient-hero: linear-gradient(
-      135deg,
-      hsl(0 0% 6%),
-      hsl(var(--theme-primary))
-    );
-    --gradient-card: linear-gradient(
-      145deg,
-      hsl(0 0% 100%),
-      hsl(var(--theme-surface))
-    );
-
-    --shadow-elegant: 0 10px 40px -10px hsl(0 0% 0% / 0.1);
-    --shadow-artwork: 0 20px 60px -10px hsl(0 0% 0% / 0.15);
-
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(var(--sand)));
+    --shadow-elegant: 0 1px 2px hsl(240 6% 10% / 0.06);
+    --shadow-artwork: 0 8px 24px -8px hsl(240 6% 10% / 0.12);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --radius: 0.25rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  /* Theme utility classes - automatically use theme variables */
-  .theme-primary {
-    color: hsl(var(--theme-primary));
-  }
-  .theme-primary-bg {
-    background-color: hsl(var(--theme-primary));
-  }
-  .theme-primary-text {
-    color: hsl(var(--theme-primary-text));
-  }
-  .theme-primary-hover:hover {
-    background-color: hsl(var(--theme-primary-hover));
-  }
-
-  .theme-background {
-    background-color: hsl(var(--theme-background));
-  }
-  .theme-surface {
-    background-color: hsl(var(--theme-surface));
-  }
-  .theme-overlay {
-    background-color: hsl(var(--theme-overlay));
-  }
-
-  .theme-text-primary {
-    color: hsl(var(--theme-text-primary));
-  }
-  .theme-text-secondary {
-    color: hsl(var(--theme-text-secondary));
-  }
-  .theme-text-on-dark {
-    color: hsl(var(--theme-text-on-dark));
-  }
-  .theme-text-muted {
-    color: hsl(var(--theme-text-muted));
-  }
-
-  .theme-border {
-    border-color: hsl(var(--theme-border));
-  }
-  .theme-border-hover:hover {
-    border-color: hsl(var(--theme-border-hover));
-  }
-  .theme-focus:focus {
-    ring-color: hsl(var(--theme-focus));
-  }
-
-  .theme-success {
-    color: hsl(var(--theme-success));
-  }
-  .theme-warning {
-    color: hsl(var(--theme-warning));
-  }
-  .theme-error {
-    color: hsl(var(--theme-error));
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -196,76 +71,77 @@ All colors MUST be HSL.
     border-color: hsl(var(--border));
   }
 
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Never let a stray wide element drag the whole page sideways on phones */
+  html,
   body {
-    @apply bg-background text-foreground font-sans; /* Apply DM Serif Display globally */
+    overflow-x: clip;
   }
 
-  /* Ensure all headings use DM Serif Display */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: "DM Serif Display", serif;
-  }
-
-  /* Ensure all text elements use DM Serif Display */
-  p,
-  span,
-  div,
-  a,
-  button,
-  input,
-  textarea,
-  select {
-    font-family: "DM Serif Display", serif;
-  }
-
-  /* Override any conflicting font classes */
-  .font-sans,
-  .font-serif,
-  .font-display {
-    font-family: "DM Serif Display", serif !important;
+  body {
+    @apply bg-background text-foreground font-sans;
   }
 }
 
-/* HTML written in the admin rich text editor (articles, About blocks) */
 @layer components {
+  /* Small uppercase label above titles ("Upcoming", "Curated by"...) */
+  .eyebrow {
+    @apply text-xs font-medium uppercase tracking-[0.18em];
+  }
+
+  /* HTML written in the admin rich text editor (articles, About blocks) */
   .rich-text {
-    @apply text-gray-700 leading-relaxed;
+    @apply text-stone leading-[1.75];
   }
   .rich-text h1 {
-    @apply text-[2rem] font-bold leading-tight text-gray-800 mt-4 mb-2;
+    @apply font-display text-[2rem] leading-tight text-ink mt-8 mb-3;
   }
   .rich-text h2 {
-    @apply text-2xl font-bold leading-snug text-gray-800 mt-3 mb-1.5;
+    @apply font-display text-2xl leading-snug text-ink mt-7 mb-3;
   }
   .rich-text h3 {
-    @apply text-xl font-bold text-gray-800 mt-2.5 mb-1;
+    @apply text-lg font-semibold text-ink mt-6 mb-2;
   }
   .rich-text p {
-    @apply my-2;
+    @apply my-4;
   }
   .rich-text p:empty {
     @apply my-4 min-h-4;
   }
   .rich-text ul {
-    @apply list-disc my-2 pl-6;
+    @apply list-disc my-4 pl-6;
   }
   .rich-text ol {
-    @apply list-decimal my-2 pl-6;
+    @apply list-decimal my-4 pl-6;
   }
   .rich-text li {
     @apply my-1;
   }
   .rich-text a {
-    @apply underline underline-offset-2 text-gray-900 hover:text-theme-primary;
+    @apply underline underline-offset-4 decoration-1 text-ink hover:text-stone;
   }
   .rich-text blockquote {
-    @apply border-l-4 border-gray-200 pl-4 my-4 italic text-gray-500;
+    @apply border-l border-ink pl-5 my-6 font-display text-xl italic text-ink;
   }
   .rich-text img {
-    @apply max-w-full h-auto rounded-lg my-4;
+    @apply max-w-full h-auto my-6;
+  }
+  .rich-text > :first-child {
+    @apply mt-0;
+  }
+}
+
+@layer utilities {
+  /* Horizontal scroll strips: hide the bar, keep scrolling and snapping */
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 }

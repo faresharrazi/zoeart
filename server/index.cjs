@@ -31,6 +31,7 @@ const heroImageRoutes = require("./routes/hero-images.cjs");
 const aboutBlocksRoutes = require("./routes/about-blocks.cjs");
 const userRoutes = require("./routes/users.cjs");
 const articlesRoutes = require("./routes/articles.cjs");
+const workingHoursRoutes = require("./routes/working-hours.cjs");
 const seoRoutes = require("./routes/seo.cjs");
 const partnerRoutes = require("./routes/partners.cjs");
 const analyticsRoutes = require("./routes/analytics.cjs");
@@ -64,6 +65,7 @@ app.use("/api/hero-images", heroImageRoutes);
 app.use("/api/about-blocks", aboutBlocksRoutes);
 app.use("/api/articles", articlesRoutes);
 app.use("/api/partners", partnerRoutes);
+app.use("/api/working-hours", workingHoursRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
 // Admin API Routes. Everything under /api/admin requires a valid login;
@@ -84,6 +86,7 @@ app.use("/api/admin/hero-images", heroImageRoutes);
 app.use("/api/admin/about-blocks", aboutBlocksRoutes);
 app.use("/api/admin/articles", articlesRoutes);
 app.use("/api/admin/partners", partnerRoutes);
+app.use("/api/admin/working-hours", workingHoursRoutes);
 app.use("/api/admin/analytics", analyticsRoutes);
 
 // Sitemap and link-preview pages for social networks (see routes/seo.cjs)

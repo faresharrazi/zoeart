@@ -133,7 +133,19 @@ export interface ContactInfo {
   email: string;
   phone: string;
   instagram: string;
+  /** Empty when no address should be shown */
+  address: string;
   updated_at: string;
+}
+
+/** A row of opening hours, e.g. "Monday – Friday" / "10:00 – 18:00" */
+export interface OpeningHour {
+  id?: number;
+  day: string;
+  time_frame: string;
+  /** Shown on the website */
+  is_active?: boolean;
+  sort_order?: number;
 }
 
 /** A logo in the footer's "Collaboration" section */
@@ -149,6 +161,8 @@ export interface Partner {
 export interface PageContentResponse {
   /** Visible partners, in display order */
   partners: Partner[];
+  /** Opening hours shown on the site, in display order */
+  openingHours: OpeningHour[];
   pages: Record<string, PageEntry>;
   /** {} when no contact info has been saved yet */
   contactInfo: ContactInfo | Record<string, never>;
@@ -220,6 +234,7 @@ export interface PageFormData {
   email?: string;
   phone?: string;
   instagram?: string;
+  address?: string;
 }
 
 export type AnalyticsRange = "7d" | "30d" | "90d" | "12m";

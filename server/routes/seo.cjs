@@ -11,7 +11,7 @@ const router = express.Router();
 
 const SITE_NAME = "Aether Art Space";
 const DEFAULT_DESCRIPTION =
-  "Contemporary art gallery in Glyfada, Athens: exhibitions, artists and a collection of works from emerging and established artists.";
+  "Contemporary art gallery in Athens bridging Greek and Asian influences: exhibitions of painting, abstraction and cross-cultural work by emerging and established artists.";
 
 const siteUrl = (req) =>
   (process.env.SITE_URL || `https://${req.headers.host}`).replace(/\/$/, "");

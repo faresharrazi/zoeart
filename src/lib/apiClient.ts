@@ -14,6 +14,7 @@ import type {
   ExhibitionInput,
   HeroImage,
   NewsletterSubscriber,
+  OpeningHour,
   PageContentResponse,
   Partner,
   SessionUser,
@@ -428,6 +429,17 @@ class ApiClient {
 
   reorderAboutBlocks(blocks: Array<{ id: number; sort_order: number }>) {
     return this.send("/admin/about-blocks/reorder", "PATCH", { blocks });
+  }
+
+  // Opening hours
+  getAdminOpeningHours() {
+    return this.request<OpeningHour[]>("/admin/working-hours");
+  }
+
+  saveOpeningHours(rows: OpeningHour[]) {
+    return this.send<OpeningHour[]>("/admin/working-hours", "PUT", {
+      workingHours: rows,
+    });
   }
 
   // Partners (footer logos)

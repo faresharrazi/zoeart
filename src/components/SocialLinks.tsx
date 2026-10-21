@@ -1,4 +1,5 @@
-import { getSocialMediaIcon, getSocialMediaUrl } from "@/lib/socialMediaIcons";
+import { getSocialMediaUrl } from "@/lib/socialMediaIcons";
+import { cn } from "@/lib/utils";
 
 interface SocialLinksProps {
   /** Platform name to handle or URL, as stored on the artist */
@@ -6,15 +7,15 @@ interface SocialLinksProps {
   /** Used in link labels, e.g. "Eleni Markou on Instagram" */
   ownerName: string;
   className?: string;
-  linkClassName: string;
 }
 
-const SocialLinks = ({
-  links,
-  ownerName,
-  className,
-  linkClassName,
-}: SocialLinksProps) => {
+const platformName = (platform: string) =>
+  ({ x: "X", linkedin: "LinkedIn", youtube: "YouTube" })[
+    platform.toLowerCase()
+  ] ?? platform.charAt(0).toUpperCase() + platform.slice(1);
+
+/** An artist's web and social links, as plain text links. */
+const SocialLinks = ({ links, ownerName, className }: SocialLinksProps) => {
   const entries = Object.entries(links || {}).filter(
     (entry): entry is [string, string] =>
       typeof entry[1] === "string" && entry[1].trim() !== ""
@@ -22,10 +23,10 @@ const SocialLinks = ({
   if (entries.length === 0) return null;
 
   return (
-    <ul className={className}>
+    <ul className={cn("flex flex-wrap gap-x-6 gap-y-2 text-sm", className)}>
       {entries.map(([platform, handle]) => {
         const isEmail = platform.toLowerCase() === "email";
-        const name = platform.charAt(0).toUpperCase() + platform.slice(1);
+        const name = platformName(platform);
         return (
           <li key={platform}>
             <a
@@ -34,13 +35,12 @@ const SocialLinks = ({
                 target: "_blank",
                 rel: "noopener noreferrer",
               })}
-              className={linkClassName}
+              className="relative z-10 border-b border-ink/30 pb-0.5 hover:border-ink transition-colors"
               aria-label={
                 isEmail ? `Email ${ownerName}` : `${ownerName} on ${name}`
               }
-              title={isEmail ? `Email ${ownerName}` : `${ownerName} on ${name}`}
             >
-              {getSocialMediaIcon(platform, "lg")}
+              {name}
             </a>
           </li>
         );

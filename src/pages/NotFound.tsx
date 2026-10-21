@@ -7,7 +7,7 @@ const NotFound = () => {
   return (
     <PageLayout>
       <NotFoundState
-        title="Page Not Found"
+        title="Page not found"
         message="The page you're looking for doesn't exist or has moved."
         backTo="/"
         backLabel="Return to Home"

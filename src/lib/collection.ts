@@ -28,7 +28,7 @@ export type SortOrder = keyof typeof SORT_ORDERS;
 const fold = (text: string | number | null | undefined) =>
   String(text ?? "")
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 
 const uniqueSorted = (values: (string | undefined)[]) =>

@@ -1,49 +1,69 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import HeroImageSlider from "@/components/HeroImageSlider";
+import { Container } from "@/components/PageLayout";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { useHeroImages } from "@/hooks/useHeroImages";
+import { formatDate } from "@/lib/dates";
+import type { ExhibitionSummary } from "@/components/ExhibitionCard";
 
-const Hero = () => {
+/**
+ * Full-screen photo (the admin's hero images) with the gallery name and a
+ * link to the next exhibition.
+ */
+const Hero = ({ next }: { next?: ExhibitionSummary }) => {
   const { homeSettings } = usePageDataFromDB();
   const { heroImages } = useHeroImages();
+  const tagline = homeSettings?.description?.split("\n")[0];
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+    <section className="relative h-[92svh] min-h-[560px] max-h-[980px] overflow-hidden bg-ink text-white">
       {heroImages.length > 0 && (
         <HeroImageSlider
           images={heroImages.map((img) => img.cloudinary_url)}
-          interval={2000}
+          interval={5000}
         />
       )}
+      {/* Keeps the menu and the title readable over any photo */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.5)_0%,rgba(0,0,0,0)_22%,rgba(0,0,0,0)_45%,rgba(0,0,0,0.72)_100%)]"
+      />
 
-      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
-          <h1 className="text-4xl md:text-6xl mb-6 text-white drop-shadow-lg min-h-[1.2em]">
-            {homeSettings?.title}
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed drop-shadow-md min-h-[1.5em]">
-            {homeSettings?.description}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              asChild
-              size="lg"
-              variant="default"
-              className="px-8 py-3 text-lg shadow-lg"
-            >
-              <Link to="/exhibitions">Exhibitions</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-white text-white bg-transparent hover:bg-white hover:text-theme-primary backdrop-blur-sm px-8 py-3 text-lg shadow-lg"
-            >
-              <Link to="/contact">Contact</Link>
-            </Button>
+      <div className="absolute inset-x-0 bottom-0">
+        <Container className="pb-14 md:pb-16 flex flex-wrap items-end justify-between gap-10">
+          <div className="max-w-5xl">
+            <h1 className="font-display uppercase tracking-[0.04em] leading-[0.92] text-[clamp(3rem,8.4vw,8.5rem)]">
+              {homeSettings?.title || "Aether Art Space"}
+            </h1>
+            {tagline && (
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/90">
+                {tagline}
+              </p>
+            )}
           </div>
-        </div>
+
+          {next && (
+            <Link
+              to={`/exhibition/${next.slug}`}
+              className="group flex max-w-[300px] flex-col gap-1.5 border-l border-white pl-5"
+            >
+              <span className="eyebrow text-white/80">
+                {next.status === "current" ? "On view now" : "Next"}
+                {next.start_date && next.status !== "current"
+                  ? ` · ${formatDate(next.start_date)}`
+                  : ""}
+              </span>
+              <span className="font-display italic text-[28px] leading-tight group-hover:underline underline-offset-4 decoration-1">
+                {next.title.trim()}
+              </span>
+              {next.location && (
+                <span className="text-sm text-white/80">
+                  {next.location.trim()}
+                </span>
+              )}
+            </Link>
+          )}
+        </Container>
       </div>
     </section>
   );

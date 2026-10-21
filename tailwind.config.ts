@@ -20,11 +20,24 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["DM Serif Display", "serif"], // Make DM Serif Display the default
-        serif: ["DM Serif Display", "serif"],
-        display: ["DM Serif Display", "serif"], // Add display variant
+        sans: [
+          "Inter",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+        display: ['"Bodoni Moda"', "Didot", "Georgia", "serif"],
       },
       colors: {
+        /* Public site palette (see index.css) */
+        ink: "hsl(var(--ink) / <alpha-value>)",
+        paper: "hsl(var(--paper) / <alpha-value>)",
+        sand: "hsl(var(--sand) / <alpha-value>)",
+        stone: "hsl(var(--stone) / <alpha-value>)",
+        mist: "hsl(var(--mist) / <alpha-value>)",
+        line: "hsl(var(--line) / <alpha-value>)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -58,16 +71,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
         /* Aether Art Space Theme System - Automatic Color Application */
         theme: {
           primary: "hsl(var(--theme-primary))",
@@ -87,16 +90,8 @@ export default {
           warning: "hsl(var(--theme-warning))",
           error: "hsl(var(--theme-error))",
         },
-        /* Legacy gallery colors (for backward compatibility) */
-        gallery: {
-          gold: "hsl(var(--gallery-gold))",
-          charcoal: "hsl(var(--gallery-charcoal))",
-          "light-grey": "hsl(var(--gallery-light-grey))",
-          "medium-grey": "hsl(var(--gallery-medium-grey))",
-        },
       },
       backgroundImage: {
-        "gradient-hero": "var(--gradient-hero)",
         "gradient-card": "var(--gradient-card)",
       },
       boxShadow: {
