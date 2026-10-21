@@ -24,10 +24,6 @@
       "destination": "server/index.cjs"
     },
     {
-      "source": "/admin/(.*)",
-      "destination": "server/index.cjs"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

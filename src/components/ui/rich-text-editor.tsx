@@ -124,8 +124,8 @@ const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps)
       if (response.success && response.file) {
       // Insert the uploaded image into the editor
       editor.chain().focus().setImage({ 
-        src: `/api/files/${response.file.id}`,
-        alt: response.file.originalName || 'Image',
+        src: response.file.url,
+        alt: file.name.replace(/\.[^.]+$/, ''),
         class: 'max-w-full h-auto rounded-lg'
       }).run();
       

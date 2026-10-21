@@ -1,22 +1,9 @@
-# Database Files
+# Database
 
-This folder contains all database-related files organized by purpose.
-
-## Structure
-
-- `migrations/` - SQL migration files for database schema changes
-- `setup/` - Initial database setup files (currently empty)
-
-## Migration Files
-
-The migration files are organized chronologically and should be applied in order:
-
-1. `database-schema-postgres.sql` - Main database schema
-2. `add-current-status-to-exhibitions.sql` - Add 'current' status to exhibitions
-3. `create-hero-images-table.sql` - Create hero images table for Cloudinary
-4. `add-missing-columns.sql` - Add missing columns to various tables
-5. Other migration files as needed
-
-## Usage
-
-These files are typically run against your PostgreSQL database to update the schema. Always backup your database before running migrations.
+- `schema.sql` is the current schema. It is idempotent: run it on a new
+  database, or again on an existing one, with `npm run db:setup`.
+- `seed-dev.sql` is sample content for local development (`npm run db:seed`).
+  Never run it in production: it empties the content tables first.
+- `migrations/` holds the historical steps that produced the current schema,
+  plus any new changes (named `YYYY-MM-DD-description.sql`). Apply new
+  migrations to production by hand, in order, after taking a backup.

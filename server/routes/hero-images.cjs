@@ -176,7 +176,7 @@ router.delete(
 
     // Get the hero image first to delete from Cloudinary
     const heroImage = await query(
-      "SELECT cloudinary_public_id FROM hero_images WHERE id = $1",
+      "SELECT cloudinary_url FROM hero_images WHERE id = $1",
       [id]
     );
 
@@ -184,18 +184,8 @@ router.delete(
       throw new NotFoundError("Hero image not found");
     }
 
-    // Delete from Cloudinary
-    if (heroImage.rows[0].cloudinary_public_id) {
-      try {
-        await imageService.deleteImage({
-          id: heroImage.rows[0].cloudinary_public_id,
-          url: `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${heroImage.rows[0].cloudinary_public_id}`
-        });
-      } catch (error) {
-        console.error("Error deleting from Cloudinary:", error);
-        // Continue with database deletion even if Cloudinary deletion fails
-      }
-    }
+    // Remove the image file too (failures are logged, not fatal)
+    await imageService.deleteImages([heroImage.rows[0].cloudinary_url]);
 
     // Delete from database
     const result = await query(

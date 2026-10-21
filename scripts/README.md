@@ -1,23 +1,11 @@
 # Scripts
 
-This folder contains utility scripts for database management and migrations.
-
-## Files
-
-- `setup-database.cjs` - Initial database setup script
-- `migrate-about-blocks.cjs` - Migration script for about blocks
-- `migrate-working-hours.cjs` - Migration script for working hours
-
-## Usage
-
-Run these scripts with Node.js:
+`setup-database.cjs` prepares a database:
 
 ```bash
-node scripts/setup-database.cjs
-node scripts/migrate-about-blocks.cjs
-node scripts/migrate-working-hours.cjs
+npm run db:setup   # apply database/schema.sql, create the first admin if none exists
+npm run db:seed    # same, plus sample content (local development only)
 ```
 
-## Note
-
-These scripts are typically run once during initial setup or when migrating data between different database structures.
+It reads `DATABASE_URL` and the `ADMIN_*` variables from `.env.local` / `.env`
+(see [docs/ENVIRONMENT_VARIABLES.md](../docs/ENVIRONMENT_VARIABLES.md)).

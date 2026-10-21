@@ -113,21 +113,9 @@ const deleteFromCloudinary = async (publicId) => {
   }
 };
 
-// Helper function to generate optimized URL
-const getOptimizedUrl = (publicId, options = {}) => {
-  const defaultOptions = {
-    quality: "auto",
-    fetch_format: "auto",
-    ...options,
-  };
-
-  return cloudinary.url(publicId, defaultOptions);
-};
-
 module.exports = {
   cloudinary,
   uploadToCloudinary,
   deleteFromCloudinary,
-  getOptimizedUrl,
   uploadOptions,
 };

@@ -1,7 +1,6 @@
 require("dotenv").config({ path: [".env.local", ".env"], quiet: true });
 
 const express = require("express");
-const path = require("path");
 
 // Import configuration
 const {
@@ -49,12 +48,6 @@ app.use(cors);
 app.use(jsonParser);
 app.use(urlEncodedParser);
 
-// Serve uploaded files statically
-app.use("/uploads", express.static("uploads"));
-
-// Serve static files from public directory
-app.use(express.static(path.join(__dirname, "../public")));
-
 // API Routes
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
@@ -93,11 +86,6 @@ app.use("/api/admin/articles", articlesRoutes);
 // Error handling middleware
 app.use(errorHandler);
 app.use(notFoundHandler);
-
-// Serve React app for all other routes (SPA) - must be last
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "../dist/index.html"));
-});
 
 // Start a standalone server when run directly (local dev). On Vercel the
 // exported app is used as the serverless handler instead.

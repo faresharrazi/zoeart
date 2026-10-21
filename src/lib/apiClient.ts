@@ -498,13 +498,6 @@ class ApiClient {
     return response.json();
   }
 
-  async getFiles(category?: string) {
-    const url = category ? `/files?category=${category}` : "/files";
-    return this.request(url);
-  }
-
-  // getHeroImages method moved to new implementation below (line ~365)
-
   async deleteFile(id: number) {
     return this.request(`/files/${id}`, {
       method: "DELETE",

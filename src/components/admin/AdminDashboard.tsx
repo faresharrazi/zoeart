@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
-// import { usePageHero } from "@/contexts/PageHeroContext";
-// import AdminOverview from "./AdminOverview"; // Removed overview tab
 import ArtworkManagement from "./artworks/ArtworkManagement";
 import ArtistManagement from "./artists/ArtistManagement";
 import ExhibitionManagement from "./exhibitions/ExhibitionManagement";
@@ -10,7 +8,6 @@ import NewsletterManagement from "./newsletter/NewsletterManagement";
 import PageContentManagement from "./page-content/PageContentManagement";
 import UserManagement from "./UserManagement";
 import UsefulLinks from "./UsefulLinks";
-// import ThemeControl from "./ThemeControl"; // Removed theme management
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -19,7 +16,6 @@ interface AdminDashboardProps {
 
 const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
   const [activeSection, setActiveSection] = useState("exhibitions");
-  // const { heroBackgrounds, setHeroBackground } = usePageHero();
 
   // Check if user is authenticated on component mount
   useEffect(() => {
@@ -47,8 +43,6 @@ const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
         return <UserManagement />;
       case "links":
         return <UsefulLinks />;
-      // case "theme":
-      //   return <ThemeControl />; // Removed theme management
       default:
         return <ExhibitionManagement />;
     }

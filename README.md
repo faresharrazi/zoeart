@@ -35,9 +35,7 @@ fresh production database.
 │   ├── config/           # Server configuration
 │   ├── middleware/        # Express middleware
 │   └── services/         # Business logic services
-├── database/             # Database files
-│   ├── migrations/       # SQL migration files
-│   └── setup/           # Database setup files
+├── database/             # schema.sql, dev seed, historical migrations
 ├── scripts/              # Utility scripts
 └── docs/                 # Documentation
 ```
