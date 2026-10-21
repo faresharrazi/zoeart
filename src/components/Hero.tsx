@@ -30,9 +30,9 @@ const Hero = ({ next }: { next?: ExhibitionSummary }) => {
       />
 
       <div className="absolute inset-x-0 bottom-0">
-        <Container className="pb-14 md:pb-16 flex flex-wrap items-end justify-between gap-10">
+        <Container className="pb-14 md:pb-16 flex flex-col items-start gap-10">
           <div className="max-w-5xl">
-            <h1 className="font-medium uppercase leading-[0.92] text-[clamp(3rem,8.4vw,8.5rem)]">
+            <h1 className="font-medium uppercase leading-none tracking-[0.03em] text-[clamp(2.25rem,5.2vw,5rem)]">
               {homeSettings?.title || "Aether Art Space"}
             </h1>
             {tagline && (
