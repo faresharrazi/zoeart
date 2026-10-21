@@ -116,7 +116,7 @@ const Contact = () => {
           <section aria-labelledby="newsletter-title">
             <h2
               id="newsletter-title"
-              className="font-display text-3xl md:text-4xl leading-tight mb-4"
+              className="font-medium text-3xl md:text-4xl leading-tight mb-4"
             >
               Newsletter
             </h2>

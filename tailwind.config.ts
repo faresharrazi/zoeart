@@ -28,7 +28,7 @@ export default {
           "Roboto",
           "sans-serif",
         ],
-        display: ['"Bodoni Moda"', "Didot", "Georgia", "serif"],
+        serif: ['"EB Garamond"', "Garamond", "Georgia", "serif"],
       },
       colors: {
         /* Public site palette (see index.css) */

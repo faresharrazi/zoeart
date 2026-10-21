@@ -60,7 +60,7 @@ export const PageHeader = ({
 }) => (
   <Container as="header" className="pt-14 pb-12 md:pt-24 md:pb-16">
     {eyebrow && <p className="eyebrow text-mist mb-5">{eyebrow}</p>}
-    <h1 className="font-display text-5xl md:text-7xl leading-[1.02] tracking-[-0.01em] max-w-5xl">
+    <h1 className="font-medium text-5xl md:text-7xl leading-[1.02] max-w-5xl">
       {title}
     </h1>
     {description && (

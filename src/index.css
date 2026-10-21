@@ -5,8 +5,9 @@
 /*
  * Design tokens. All colors are HSL channels so Tailwind can add opacity.
  *
- * Public site (light "night gallery"): ink on paper, Bodoni Moda for display
- * type and Inter for text, hairlines instead of boxes and shadows.
+ * Public site (light "night gallery"): ink on paper, EB Garamond for
+ * everything, hairlines instead of boxes and shadows. The admin panel uses
+ * Inter (body.admin-ui).
  * Admin panel and shared controls: the shadcn/ui variables below, in the
  * same warm neutrals.
  */
@@ -16,8 +17,8 @@
     --ink: 40 6% 7%; /* #131211 text and dark band */
     --paper: 0 0% 100%; /* page background */
     --sand: 45 18% 95%; /* alternate section background */
-    --stone: 40 4% 32%; /* secondary text, 8.4:1 on paper */
-    --mist: 40 3% 42%; /* muted text, 5.7:1 on paper, 5.1:1 on sand */
+    --stone: 40 4% 24%; /* secondary text, 10.7:1 on paper */
+    --mist: 40 3% 36%; /* muted text, 6.6:1 on paper, 6.0:1 on sand */
     --line: 45 10% 89%; /* hairlines */
 
     /* shadcn/ui (admin panel and shared controls) */
@@ -65,7 +66,15 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-serif;
+    /* Garamond has a small x-height: render it as large as a sans at the same
+       font size, so text stays comfortable to read */
+    font-size-adjust: 0.48;
+  }
+
+  body.admin-ui {
+    @apply font-sans;
+    font-size-adjust: none;
   }
 }
 
@@ -80,10 +89,10 @@
     @apply text-stone leading-[1.75];
   }
   .rich-text h1 {
-    @apply font-display text-[2rem] leading-tight text-ink mt-8 mb-3;
+    @apply text-[2rem] font-medium leading-tight text-ink mt-8 mb-3;
   }
   .rich-text h2 {
-    @apply font-display text-2xl leading-snug text-ink mt-7 mb-3;
+    @apply text-2xl font-medium leading-snug text-ink mt-7 mb-3;
   }
   .rich-text h3 {
     @apply text-lg font-semibold text-ink mt-6 mb-2;
@@ -107,7 +116,7 @@
     @apply underline underline-offset-4 decoration-1 text-ink hover:text-stone;
   }
   .rich-text blockquote {
-    @apply border-l border-ink pl-5 my-6 font-display text-xl italic text-ink;
+    @apply border-l border-ink pl-5 my-6 text-xl font-medium leading-snug text-ink;
   }
   .rich-text img {
     @apply max-w-full h-auto my-6;

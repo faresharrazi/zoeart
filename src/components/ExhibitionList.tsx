@@ -32,7 +32,7 @@ const Poster = ({
     className={`${className} object-cover bg-sand`}
     fallback={
       <div className={`${className} bg-sand flex items-center justify-center`}>
-        <span className="font-display text-4xl text-mist" aria-hidden="true">
+        <span className="text-4xl text-mist" aria-hidden="true">
           {exhibition.title.trim().charAt(0)}
         </span>
       </div>
@@ -54,7 +54,7 @@ const WideCard = ({ exhibition }: { exhibition: ExhibitionSummary }) => {
       </div>
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-mist">{STATUS_LABELS[exhibition.status]}</p>
-        <h3 className="font-display text-2xl md:text-3xl leading-tight">
+        <h3 className="font-medium text-2xl md:text-3xl leading-tight">
           <Link to={`/exhibition/${exhibition.slug}`} className={linkCover}>
             {exhibition.title.trim()}
           </Link>
@@ -94,7 +94,7 @@ const Row = ({ exhibition }: { exhibition: ExhibitionSummary }) => {
         width={128}
         className="row-span-2 md:row-span-1 aspect-[3/4] w-full"
       />
-      <h3 className="font-display text-xl md:text-2xl leading-snug">
+      <h3 className="font-medium text-xl md:text-2xl leading-snug">
         <Link
           to={`/exhibition/${exhibition.slug}`}
           className={`${linkCover} group-hover:underline underline-offset-4 decoration-1`}

@@ -45,7 +45,7 @@ const About = () => {
                 key={block.id}
                 className="grid gap-8 border-t border-line py-14 md:grid-cols-12 md:gap-16 md:py-20"
               >
-                <h2 className="font-display text-3xl md:text-4xl leading-tight md:col-span-4">
+                <h2 className="font-medium text-3xl md:text-4xl leading-tight md:col-span-4">
                   {block.title}
                 </h2>
                 <div

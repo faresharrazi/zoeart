@@ -90,7 +90,7 @@ const Section = ({
   children: React.ReactNode;
 }) => (
   <section className="pt-8 pb-12 md:pt-10 md:pb-16">
-    <h2 className="font-display text-3xl md:text-4xl mb-10">{title}</h2>
+    <h2 className="font-medium text-3xl md:text-4xl mb-10">{title}</h2>
     {children}
   </section>
 );

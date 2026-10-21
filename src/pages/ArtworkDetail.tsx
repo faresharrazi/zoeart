@@ -114,10 +114,7 @@ const ArtworkDetail = () => {
                 className="w-full max-h-[80vh] object-contain"
                 fallback={
                   <div className="aspect-[4/5] flex items-center justify-center">
-                    <span
-                      className="font-display text-7xl text-mist"
-                      aria-hidden="true"
-                    >
+                    <span className="text-7xl text-mist" aria-hidden="true">
                       {title.charAt(0)}
                     </span>
                   </div>
@@ -181,7 +178,7 @@ const ArtworkDetail = () => {
         <div className="lg:col-span-5 lg:sticky lg:top-28 lg:self-start space-y-8">
           <BackLink to="/collection">Collection</BackLink>
           <div className="space-y-4">
-            <h1 className="font-display text-5xl md:text-6xl leading-[1.02]">
+            <h1 className="font-medium text-5xl md:text-6xl leading-[1.02]">
               {title}
             </h1>
             {artist ? (

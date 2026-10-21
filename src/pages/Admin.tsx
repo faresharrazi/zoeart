@@ -12,6 +12,13 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
   useSeo({ title: "Admin", noIndex: true });
 
+  // The admin uses Inter rather than the site's serif, including the dialogs
+  // and menus rendered at the end of <body>
+  useEffect(() => {
+    document.body.classList.add("admin-ui");
+    return () => document.body.classList.remove("admin-ui");
+  }, []);
+
   useEffect(() => {
     // Restore a previous login only if the server still accepts the token
     const token = localStorage.getItem("adminToken");

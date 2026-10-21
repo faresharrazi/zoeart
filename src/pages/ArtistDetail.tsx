@@ -83,10 +83,7 @@ const ArtistDetail = () => {
             className="w-full aspect-[4/5] object-cover bg-sand"
             fallback={
               <div className="w-full aspect-[4/5] bg-sand flex items-center justify-center">
-                <span
-                  className="font-display text-8xl text-mist"
-                  aria-hidden="true"
-                >
+                <span className="text-8xl text-mist" aria-hidden="true">
                   {name.charAt(0)}
                 </span>
               </div>
@@ -100,7 +97,7 @@ const ArtistDetail = () => {
             {artist.specialty && (
               <p className="eyebrow text-mist">{artist.specialty}</p>
             )}
-            <h1 className="font-display text-5xl md:text-7xl leading-[1.02]">
+            <h1 className="font-medium text-5xl md:text-7xl leading-[1.02]">
               {name}
             </h1>
           </div>
@@ -116,7 +113,7 @@ const ArtistDetail = () => {
       {artworks.length > 0 && (
         <Container as="section" className="pb-16 md:pb-20">
           <div className="border-t border-line pt-10">
-            <h2 className="font-display text-3xl md:text-4xl mb-10">Works</h2>
+            <h2 className="font-medium text-3xl md:text-4xl mb-10">Works</h2>
             <div className="grid grid-cols-1 gap-x-7 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
               {artworks.map((artwork) => (
                 <ArtworkCard key={artwork.id} artwork={artwork} />
