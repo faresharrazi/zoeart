@@ -46,7 +46,7 @@ All colors MUST be HSL.
     --theme-text-primary: 220 15% 25%; /* #393E46 - Main text (dark gray) */
     --theme-text-secondary: 220 15% 25%; /* #393E46 - Secondary text */
     --theme-text-on-dark: 0 0% 97%; /* #F7F7F7 - Text on dark backgrounds */
-    --theme-text-muted: 220 8% 60%; /* #929AAB - Muted text (medium gray) */
+    --theme-text-muted: 220 8% 45%; /* #6A707C - Muted text (4.5:1 contrast on light backgrounds) */
     --theme-border: 0 0% 85%; /* Light gray border */
     --theme-border-hover: 220 15% 25%; /* #393E46 - Border hover */
     --theme-focus: 220 15% 25%; /* #393E46 - Focus ring */

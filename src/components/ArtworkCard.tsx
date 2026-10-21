@@ -15,9 +15,14 @@ interface ArtworkCardProps {
     featured_image?: string | null;
     description?: string;
   };
+  /** Heading level of the title, to fit the page's outline */
+  headingLevel?: "h2" | "h3";
 }
 
-const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
+const ArtworkCard = ({
+  artwork,
+  headingLevel: Heading = "h3",
+}: ArtworkCardProps) => {
   const title = artwork.title || "Untitled";
   const artistName = artwork.artist_name || "Unknown Artist";
   const image = artwork.featured_image || artwork.images?.[0];
@@ -57,7 +62,7 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
       </div>
 
       <div className="p-6 space-y-3">
-        <h3 className="text-xl font-semibold text-foreground group-hover:text-theme-primary transition-smooth">
+        <Heading className="text-xl font-semibold text-foreground group-hover:text-theme-primary transition-smooth">
           {/* The link covers the whole card */}
           <Link
             to={`/artwork/${artwork.slug}`}
@@ -65,7 +70,7 @@ const ArtworkCard = ({ artwork }: ArtworkCardProps) => {
           >
             {title}
           </Link>
-        </h3>
+        </Heading>
         <div className="space-y-1">
           <p className="text-theme-text-primary font-medium">{artistName}</p>
           {meta.length > 0 && (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
@@ -66,12 +66,12 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-theme-background">
+    <main className="min-h-screen flex items-center justify-center bg-theme-background">
       <Card className="w-full max-w-md shadow-elegant">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl  text-theme-text-primary">
+          <h1 className="text-2xl font-semibold leading-none tracking-tight text-theme-text-primary">
             Admin Login
-          </CardTitle>
+          </h1>
           <p className="text-theme-text-muted">
             Sign in to access the admin panel
           </p>
@@ -88,6 +88,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
               <Input
                 id="username"
                 type="text"
+                autoComplete="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter username"
@@ -105,6 +106,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
               <Input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
@@ -125,7 +127,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 };
 

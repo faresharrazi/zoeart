@@ -38,7 +38,11 @@ const Collection = () => {
             ) : artworks.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {artworks.map((artwork) => (
-                  <ArtworkCard key={artwork.id} artwork={artwork} />
+                  <ArtworkCard
+                    key={artwork.id}
+                    artwork={artwork}
+                    headingLevel="h2"
+                  />
                 ))}
               </div>
             ) : (
