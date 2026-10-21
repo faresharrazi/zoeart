@@ -30,6 +30,10 @@ export interface PageDataValue {
 
 export const PageDataContext = createContext<PageDataValue | null>(null);
 
+// The API returns {} when no contact info has been saved yet
+const isContactInfo = (value: unknown): value is ContactInfo =>
+  typeof value === "object" && value !== null && "id" in value;
+
 /** Loads page settings and contact info once for the whole app. */
 export const PageDataProvider = ({
   children,
@@ -50,7 +54,7 @@ export const PageDataProvider = ({
     const contact = data?.contactInfo;
     return {
       pageData: pages,
-      contactInfo: contact && "id" in contact ? contact : null,
+      contactInfo: isContactInfo(contact) ? contact : null,
       homeSettings: pages.home
         ? {
             title: pages.home.title,
