@@ -24,6 +24,7 @@ import {
   MapPin,
   User,
 } from "lucide-react";
+import { formatDateRange } from "@/lib/dates";
 
 interface Exhibition {
   id: string;
@@ -104,29 +105,6 @@ const ExhibitionCard = ({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString || dateString === "null" || dateString === "undefined") {
-      return null;
-    }
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const formatDateRange = () => {
-    const startDate = formatDate(exhibition.startDate);
-    const endDate = formatDate(exhibition.endDate);
-
-    if (!startDate && !endDate) return null;
-    if (startDate && !endDate) return startDate;
-    if (!startDate && endDate) return endDate;
-    if (startDate === endDate) return startDate;
-    
-    return `${startDate} - ${endDate}`;
-  };
-
   return (
     <Card className="h-fit">
       <CardHeader>
@@ -166,10 +144,10 @@ const ExhibitionCard = ({
         )}
 
         <div className="space-y-2">
-          {formatDateRange() && (
+          {formatDateRange(exhibition.startDate, exhibition.endDate) && (
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Calendar className="w-4 h-4" />
-              <span>{formatDateRange()}</span>
+              <span>{formatDateRange(exhibition.startDate, exhibition.endDate)}</span>
             </div>
           )}
 

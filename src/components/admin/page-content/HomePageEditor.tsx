@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 // Removed old useHeroImages import - now using HeroImageUpload component
-import FileUpload from "../FileUpload";
 import HeroImageUpload from "../HeroImageUpload";
 import { apiClient } from "@/lib/apiClient";
 import { Edit, Save, X } from "lucide-react";
@@ -43,9 +42,7 @@ const HomePageEditor = ({
       try {
         setHeroImagesLoading(true);
         const response = await apiClient.getHeroImages();
-        // Extract the data array from the response
-        const images = response?.data || response || [];
-        setHeroImages(images);
+        setHeroImages(response.data || []);
       } catch (error) {
         console.error("Error fetching hero images:", error);
         setHeroImages([]);

@@ -260,7 +260,7 @@ const AboutPageEditor = () => {
     deleteBlock,
     reorderBlocks,
     refreshBlocks: fetchBlocks,
-  } = useAboutBlocks();
+  } = useAboutBlocks({ includeHidden: true });
 
   // Page-level editing state
   const [isEditingPage, setIsEditingPage] = useState(false);

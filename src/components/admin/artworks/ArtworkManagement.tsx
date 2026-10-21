@@ -36,8 +36,8 @@ const ArtworkManagement = () => {
     try {
       setLoading(true);
       const [artworksData, artistsData] = await Promise.all([
-        apiClient.getArtworks(),
-        apiClient.getArtists(),
+        apiClient.getAdminArtworks(),
+        apiClient.getAdminArtists(),
       ]);
 
       console.log("Raw artworks data:", artworksData);

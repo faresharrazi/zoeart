@@ -1,194 +1,190 @@
 const express = require("express");
-const { ArtworkService } = require("../services/database.cjs");
-const { FileService } = require("../services/fileService.cjs");
+const { DatabaseService } = require("../services/database.cjs");
+const { query, transaction } = require("../config/database.cjs");
+const imageService = require("../services/imageService.cjs");
+const { uniqueSlug } = require("../services/slug.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
-const { asyncHandler, ValidationError, NotFoundError } = require("../middleware/errorHandler.cjs");
+const {
+  asyncHandler,
+  ValidationError,
+  NotFoundError,
+} = require("../middleware/errorHandler.cjs");
 
 const router = express.Router();
 
-// Get all artworks (public)
-router.get("/", asyncHandler(async (req, res) => {
-  const artworks = await ArtworkService.getAll();
-  
-  // Transform data for frontend
-  const transformedArtworks = artworks.map(artwork => ({
-    id: artwork.id,
-    title: artwork.title,
-    slug: artwork.slug,
-    artist_id: artwork.artist_id,
-    artist_name: artwork.artist_name || "Unknown Artist",
-    year: artwork.year || new Date().getFullYear(),
-    medium: artwork.medium || "",
-    size: artwork.size || "",
-    description: artwork.description || "",
-    images: artwork.images || [],
-    is_visible: artwork.is_visible !== false,
-    created_at: artwork.created_at,
-    updated_at: artwork.updated_at,
-  }));
+const toArtwork = (artwork, isAdminRequest) => ({
+  id: artwork.id,
+  title: artwork.title,
+  slug: artwork.slug,
+  artist_id: artwork.artist_id,
+  artist_name: artwork.artist_name || "",
+  // Only link to artists the visitor can actually see
+  artist_slug:
+    artwork.artist_visible || isAdminRequest ? artwork.artist_slug || "" : "",
+  year: artwork.year,
+  medium: artwork.medium || "",
+  size: artwork.size || "",
+  description: artwork.description || "",
+  images: artwork.images || [],
+  featured_image: artwork.featured_image || (artwork.images || [])[0] || "",
+  is_visible: artwork.is_visible !== false,
+  created_at: artwork.created_at,
+  updated_at: artwork.updated_at,
+});
 
-  res.json(transformedArtworks);
-}));
+const SELECT_WITH_ARTIST = `
+  SELECT w.*, a.name AS artist_name, a.slug AS artist_slug, a.is_visible AS artist_visible
+  FROM artworks w
+  LEFT JOIN artists a ON a.id = w.artist_id`;
 
-// Get single artwork (public)
-router.get("/:id", asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const artwork = await ArtworkService.getById(id);
-  
-  if (!artwork) {
-    throw new NotFoundError("Artwork not found");
-  }
+// List artworks, optionally for one artist (?artist=<id or slug>).
+// Hidden artworks are only included for admin requests.
+router.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const conditions = [];
+    const params = [];
+    if (!req.isAdminRequest) {
+      conditions.push("w.is_visible = TRUE");
+    }
+    if (req.query.artist) {
+      params.push(String(req.query.artist));
+      conditions.push(
+        /^\d+$/.test(req.query.artist)
+          ? `w.artist_id = $${params.length}`
+          : `a.slug = $${params.length}`
+      );
+    }
 
-  // Transform data for frontend
-  const transformedArtwork = {
-    id: artwork.id,
-    title: artwork.title,
-    slug: artwork.slug,
-    artist_id: artwork.artist_id,
-    artist_name: artwork.artist_name || "Unknown Artist",
-    year: artwork.year || new Date().getFullYear(),
-    medium: artwork.medium || "",
-    size: artwork.size || "",
-    description: artwork.description || "",
-    images: artwork.images || [],
-    is_visible: artwork.is_visible !== false,
-    created_at: artwork.created_at,
-    updated_at: artwork.updated_at,
-  };
+    const { rows } = await query(
+      `${SELECT_WITH_ARTIST}
+       ${conditions.length ? `WHERE ${conditions.join(" AND ")}` : ""}
+       ORDER BY w.year DESC NULLS LAST, w.created_at DESC`,
+      params
+    );
+    res.json(rows.map((row) => toArtwork(row, req.isAdminRequest)));
+  })
+);
 
-  res.json(transformedArtwork);
-}));
+// Single artwork by id or slug
+router.get(
+  "/:key",
+  asyncHandler(async (req, res) => {
+    const { key } = req.params;
+    const { rows } = await query(
+      `${SELECT_WITH_ARTIST} WHERE w.${/^\d+$/.test(key) ? "id" : "slug"} = $1`,
+      [key]
+    );
+    const artwork = rows[0];
+
+    if (!artwork || (!artwork.is_visible && !req.isAdminRequest)) {
+      throw new NotFoundError("Artwork not found");
+    }
+
+    // Summary of the artist for the artwork page (visible artists only)
+    let artist = null;
+    if (artwork.artist_id && (artwork.artist_visible || req.isAdminRequest)) {
+      const result = await query(
+        "SELECT id, name, slug, specialty, profile_image FROM artists WHERE id = $1",
+        [artwork.artist_id]
+      );
+      artist = result.rows[0] || null;
+    }
+
+    res.json({ ...toArtwork(artwork, req.isAdminRequest), artist });
+  })
+);
 
 // Create artwork (admin only)
-router.post("/", authenticateToken, asyncHandler(async (req, res) => {
-  const {
-    title,
-    slug,
-    artist_id,
-    year,
-    medium,
-    size,
-    description,
-    images,
-    is_visible,
-  } = req.body;
+router.post(
+  "/",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const data = { ...req.body };
 
-  if (!title) {
-    throw new ValidationError("Title is required");
-  }
+    if (!data.title) {
+      throw new ValidationError("Title is required");
+    }
+    if (!data.artist_id) {
+      throw new ValidationError("Artist ID is required");
+    }
 
-  if (!artist_id) {
-    throw new ValidationError("Artist ID is required");
-  }
-
-  const artworkData = {
-    title,
-    slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
-    artist_id: parseInt(artist_id),
-    year: year || new Date().getFullYear(),
-    medium: medium || "",
-    size: size || "",
-    description: description || "",
-    images: images || [],
-    is_visible: is_visible !== false,
-  };
-
-  const artwork = await ArtworkService.create(artworkData);
-  res.status(201).json(artwork);
-}));
+    const artwork = await DatabaseService.create("artworks", {
+      ...data,
+      slug: await uniqueSlug("artworks", data.slug || data.title),
+      artist_id: parseInt(data.artist_id, 10),
+      year: data.year || new Date().getFullYear(),
+      images: data.images || [],
+      is_visible: data.is_visible !== false,
+    });
+    res.status(201).json(toArtwork(artwork, true));
+  })
+);
 
 // Update artwork (admin only)
-router.put("/:id", authenticateToken, asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const updateData = req.body;
-
-  const artwork = await ArtworkService.update(id, updateData);
-  
-  if (!artwork) {
-    throw new NotFoundError("Artwork not found");
-  }
-
-  res.json(artwork);
-}));
-
-// Delete artwork (admin only)
-router.delete("/:id", authenticateToken, asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  // Get artwork data before deleting to extract file references
-  const artwork = await ArtworkService.getById(id);
-
-  if (!artwork) {
-    throw new NotFoundError("Artwork not found");
-  }
-
-  // Extract file IDs from images array
-  const fileIdsToDelete = [];
-
-
-  // Extract file IDs from images (array of /api/file/ID strings)
-  if (artwork.images && Array.isArray(artwork.images)) {
-    artwork.images.forEach((imagePath) => {
-      if (imagePath && imagePath.startsWith("/api/file/")) {
-        const fileId = imagePath.replace("/api/file/", "");
-        if (fileId && !isNaN(fileId)) {
-          fileIdsToDelete.push(parseInt(fileId));
-        }
-      }
-    });
-  }
-
-  // Delete the artwork
-  await ArtworkService.delete(id);
-
-
-  // Delete associated files
-  const deletedFiles = [];
-  for (const fileId of fileIdsToDelete) {
-    try {
-
-      // First check if file exists
-      const existingFile = await FileService.getFileById(fileId);
-      if (!existingFile) {
-        continue;
-      }
-
-      const deletedFile = await FileService.deleteFile(fileId);
-      if (deletedFile) {
-        deletedFiles.push(deletedFile);
-      }
-    } catch (error) {
+router.put(
+  "/:id",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const before = await DatabaseService.findById("artworks", id);
+    if (!before) {
+      throw new NotFoundError("Artwork not found");
     }
-  }
 
+    const data = { ...req.body };
+    if (data.slug !== undefined) {
+      data.slug = await uniqueSlug(
+        "artworks",
+        data.slug || data.title || before.title,
+        before.id
+      );
+    }
 
-  res.json({
-    message: "Artwork deleted successfully",
-    deletedFiles: deletedFiles.length,
-    fileIds: fileIdsToDelete,
-  });
-}));
+    const artwork = await DatabaseService.update("artworks", id, data);
+    await imageService.deleteUnusedImages(
+      imageService.removedImageUrls(before, artwork)
+    );
+    res.json(toArtwork(artwork, true));
+  })
+);
 
-// Get visible artworks only
-router.get("/visible/only", asyncHandler(async (req, res) => {
-  const artworks = await ArtworkService.findAll("artworks", { is_visible: true }, "created_at DESC");
-  res.json(artworks);
-}));
+// Delete artwork (admin only), removing it from exhibitions and artists
+router.delete(
+  "/:id",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
 
-// Get artworks by artist
-router.get("/artist/:artistId", asyncHandler(async (req, res) => {
-  const { artistId } = req.params;
-  
-  const artworks = await ArtworkService.findAll("artworks", { artist_id: artistId }, "created_at DESC");
-  res.json(artworks);
-}));
+    const artwork = await transaction(async (client) => {
+      const { rows } = await client.query(
+        "DELETE FROM artworks WHERE id = $1 RETURNING *",
+        [id]
+      );
+      if (rows[0]) {
+        await DatabaseService.removeIdFromLists(
+          "exhibitions",
+          "assigned_artworks",
+          id,
+          client
+        );
+        await DatabaseService.removeIdFromLists(
+          "artists",
+          "assigned_artworks",
+          id,
+          client
+        );
+      }
+      return rows[0];
+    });
 
-// Get artworks by year
-router.get("/year/:year", asyncHandler(async (req, res) => {
-  const { year } = req.params;
-  
-  const artworks = await ArtworkService.findAll("artworks", { year: parseInt(year) }, "created_at DESC");
-  res.json(artworks);
-}));
+    if (!artwork) {
+      throw new NotFoundError("Artwork not found");
+    }
+
+    await imageService.deleteUnusedImages(imageService.imageUrlsOf(artwork));
+    res.json({ message: "Artwork deleted successfully" });
+  })
+);
 
 module.exports = router;

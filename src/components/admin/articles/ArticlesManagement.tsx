@@ -60,7 +60,7 @@ const ArticlesManagement = () => {
   useEffect(() => {
     const fetchExhibitions = async () => {
       try {
-        const exhibitions = await apiClient.getExhibitions();
+        const exhibitions = await apiClient.getAdminExhibitions();
         setExhibitions(exhibitions);
       } catch (error) {
         console.error("Error fetching exhibitions:", error);

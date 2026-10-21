@@ -17,6 +17,14 @@ const errorHandler = (err, req, res, next) => {
     // PostgreSQL not null violation
     statusCode = 400;
     message = "Required field is missing";
+  } else if (err.code === "22P02") {
+    // PostgreSQL invalid input syntax (e.g. "abc" where an id is expected)
+    statusCode = 400;
+    message = "Invalid value";
+  } else if (err.code === "22001") {
+    // PostgreSQL value too long for column
+    statusCode = 400;
+    message = "A value is too long";
   } else if (err.type === "entity.too.large") {
     statusCode = 413;
     message = "Request is too large";

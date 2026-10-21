@@ -75,7 +75,6 @@ app.use("/api/admin/exhibitions", exhibitionRoutes);
 app.use("/api/admin/artists", artistRoutes);
 app.use("/api/admin/artworks", artworkRoutes);
 app.use("/api/admin/pages", pageRoutes);
-app.use("/api/admin/contact-info", pageRoutes);
 app.use("/api/admin/files", fileRoutes);
 app.use("/api/admin/images", imageRoutes);
 app.use("/api/admin/hero-images", heroImageRoutes);

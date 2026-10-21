@@ -1,4 +1,8 @@
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
+
+// Return DATE columns as "YYYY-MM-DD" strings instead of JS Dates at
+// midnight server time, which shift by a day in other time zones.
+types.setTypeParser(1082, (value) => value);
 
 // Database configuration
 const dbConfig = {
@@ -35,6 +39,22 @@ const query = async (sql, params = []) => {
   }
 };
 
+// Run fn(client) inside a transaction; rolls back if it throws.
+const transaction = async (fn) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await fn(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
 // Close all connections
 const closeConnections = async () => {
   try {
@@ -47,6 +67,7 @@ const closeConnections = async () => {
 module.exports = {
   pool,
   query,
+  transaction,
   testConnection,
   closeConnections,
 };

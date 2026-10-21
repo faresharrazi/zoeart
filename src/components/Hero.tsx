@@ -1,76 +1,46 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import HeroImageSlider from "@/components/HeroImageSlider";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
-import { useHeroImagesNew } from "@/hooks/useHeroImagesNew";
+import { useHeroImages } from "@/hooks/useHeroImages";
 
 const Hero = () => {
-  console.log("Hero component: Component rendered");
-  const { homeSettings, loading: pageLoading } = usePageDataFromDB();
-  const { heroImages, loading: imagesLoading } = useHeroImagesNew();
-
-  // Debug logging
-  console.log("Hero component - heroImages:", heroImages);
-  console.log("Hero component - imagesLoading:", imagesLoading);
-  console.log("Hero component - homeSettings:", homeSettings);
-
-  // Show loading state while data is being fetched
-  if (pageLoading || imagesLoading) {
-    return (
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="bg-gray-200 w-full h-full flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Check if we have real images (not just placeholders)
-  const hasRealImages = heroImages.length > 0;
-
-  // Use uploaded hero images from new table, fallback to placeholder
-  const displayImages =
-    heroImages.length > 0
-      ? heroImages.map((img) => img.cloudinary_url)
-      : [
-          "https://via.placeholder.com/1920x1080/393E46/FFFFFF?text=Aether+Art+Space",
-        ];
+  const { homeSettings } = usePageDataFromDB();
+  const { heroImages } = useHeroImages();
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
-      {hasRealImages ? (
-        <HeroImageSlider images={displayImages} interval={2000} />
-      ) : (
-        <div className="absolute inset-0 bg-black"></div>
+      {heroImages.length > 0 && (
+        <HeroImageSlider
+          images={heroImages.map((img) => img.cloudinary_url)}
+          interval={2000}
+        />
       )}
 
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        {/* Consistent text overlay background for all cases */}
         <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
-          <h1 className="text-4xl md:text-6xl mb-6 text-white drop-shadow-lg">
-            {homeSettings.title}
+          <h1 className="text-4xl md:text-6xl mb-6 text-white drop-shadow-lg min-h-[1.2em]">
+            {homeSettings?.title}
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-            {homeSettings.description}
+          <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed drop-shadow-md min-h-[1.5em]">
+            {homeSettings?.description}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
+              asChild
               size="lg"
               variant="default"
               className="px-8 py-3 text-lg shadow-lg"
-              onClick={() => (window.location.href = "/exhibitions")}
             >
-              Exhibitions
+              <Link to="/exhibitions">Exhibitions</Link>
             </Button>
             <Button
+              asChild
               size="lg"
               variant="outline"
               className="border-white text-white bg-transparent hover:bg-white hover:text-theme-primary backdrop-blur-sm px-8 py-3 text-lg shadow-lg"
-              onClick={() => (window.location.href = "/contact")}
             >
-              Contact
+              <Link to="/contact">Contact</Link>
             </Button>
           </div>
         </div>

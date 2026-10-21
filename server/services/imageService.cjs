@@ -4,6 +4,7 @@ const {
   uploadOptions,
 } = require("../config/cloudinary.cjs");
 const FileService = require("./fileService.cjs");
+const { query } = require("../config/database.cjs");
 
 // Cloudinary folder options for each upload category (see multer getFileCategory)
 const CLOUDINARY_OPTIONS_BY_CATEGORY = {
@@ -21,8 +22,8 @@ class ImageService {
   get useCloudinary() {
     return Boolean(
       process.env.CLOUDINARY_CLOUD_NAME &&
-        process.env.CLOUDINARY_API_KEY &&
-        process.env.CLOUDINARY_API_SECRET
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
     );
   }
 
@@ -84,25 +85,71 @@ class ImageService {
       return Boolean(await FileService.deleteFile(Number(fileMatch[1])));
     }
 
+    // Cloudinary assets are only deleted by the production API: a local copy
+    // of the site can point at the same Cloudinary account with a different
+    // database, where "unused" would be wrong.
     const publicId = this.extractPublicId(url);
-    if (publicId && this.useCloudinary) {
+    if (
+      publicId &&
+      this.useCloudinary &&
+      process.env.NODE_ENV === "production"
+    ) {
       const result = await deleteFromCloudinary(publicId);
       return result.success;
     }
     return false;
   }
 
-  // Deletes every image in `urls`, logging (not throwing) failures so a
-  // record deletion never fails because of image cleanup.
-  async deleteImages(urls) {
+  // True if any record still uses this image URL.
+  async isReferenced(url) {
+    const { rows } = await query(
+      `SELECT EXISTS (
+         SELECT 1 FROM exhibitions WHERE featured_image = $1 OR gallery_images @> jsonb_build_array($1::text)
+         UNION ALL SELECT 1 FROM artworks WHERE featured_image = $1 OR images @> jsonb_build_array($1::text)
+         UNION ALL SELECT 1 FROM artists WHERE profile_image = $1
+         UNION ALL SELECT 1 FROM hero_images WHERE cloudinary_url = $1
+         UNION ALL SELECT 1 FROM articles WHERE featured_image = $1 OR position($1 in content) > 0
+         UNION ALL SELECT 1 FROM about_blocks WHERE position($1 in content) > 0
+       ) AS used`,
+      [url]
+    );
+    return rows[0].used;
+  }
+
+  // Deletes the images in `urls` that no record uses any more. Call it after
+  // the record itself was deleted or updated. Failures are logged, not thrown,
+  // so saving a record never fails because of image cleanup.
+  async deleteUnusedImages(urls) {
     const unique = [...new Set((urls || []).filter(Boolean))];
     await Promise.all(
-      unique.map((url) =>
-        this.deleteImage(url).catch((error) =>
-          console.error(`Failed to delete image ${url}:`, error.message)
-        )
-      )
+      unique.map(async (url) => {
+        try {
+          if (!(await this.isReferenced(url))) {
+            await this.deleteImage(url);
+          }
+        } catch (error) {
+          console.error(`Failed to delete image ${url}:`, error.message);
+        }
+      })
     );
+  }
+
+  // Image URLs used by a record of any content type.
+  imageUrlsOf(record) {
+    if (!record) return [];
+    const list = (value) => (Array.isArray(value) ? value : []);
+    return [
+      record.featured_image,
+      record.profile_image,
+      ...list(record.gallery_images),
+      ...list(record.images),
+    ].filter((url) => typeof url === "string" && url);
+  }
+
+  // Images a record used before an update that it no longer uses.
+  removedImageUrls(before, after) {
+    const kept = new Set(this.imageUrlsOf(after));
+    return this.imageUrlsOf(before).filter((url) => !kept.has(url));
   }
 }
 

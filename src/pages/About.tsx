@@ -1,86 +1,63 @@
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import {
+  LoadingState,
+  PageHeader,
+  PageLayout,
+  RequireVisiblePage,
+} from "@/components/PageLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { useAboutBlocks } from "@/hooks/useAboutBlocks";
-import { useEffect } from "react";
+import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { renderRichText } from "@/lib/richText";
+
+// Admin text keeps its line breaks
+const withLineBreaks = (text: string) =>
+  renderRichText(text.replace(/\n/g, "<br>"));
 
 const About = () => {
   const { pageData } = usePageDataFromDB();
-  const { visibleBlocks, loading: blocksLoading } = useAboutBlocks();
-
-  // Check if page is visible
-  const isPageVisible = pageData.about?.isVisible;
-
-  // If page is not visible, redirect to home
-  useEffect(() => {
-    if (pageData && isPageVisible === false) {
-      window.location.href = "/";
-    }
-  }, [pageData, isPageVisible]);
-
-  // Don't render anything if page is not visible
-  if (pageData && isPageVisible === false) {
-    return null;
-  }
+  const { visibleBlocks, loading } = useAboutBlocks();
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
-
-      {/* Hero Section */}
-      <section className="bg-[#0f0f0f] relative">
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="max-w-4xl mx-auto py-8">
-            <h1 className="text-4xl md:text-6xl text-white mb-6 drop-shadow-lg">
-              {pageData.about?.title || "About Us"}
-            </h1>
+    <RequireVisiblePage page="about">
+      <PageLayout>
+        <PageHeader
+          title={pageData.about?.title || "About Us"}
+          description={
             <div
-              className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md whitespace-pre-line"
               dangerouslySetInnerHTML={{
-                __html: renderRichText(
-                  (pageData.about?.description || "").replace(/\n/g, "<br>")
-                ),
+                __html: withLineBreaks(pageData.about?.description || ""),
               }}
             />
+          }
+        />
+
+        <div className="bg-gallery-light-grey py-20">
+          <div className="container mx-auto px-6">
+            {loading ? (
+              <LoadingState label="Loading…" />
+            ) : (
+              visibleBlocks.map((block) => (
+                <section key={block.id} className="mb-16">
+                  <Card className="shadow-elegant">
+                    <CardContent className="p-12 text-center">
+                      <h2 className="text-3xl font-semibold mb-4 text-foreground">
+                        {block.title}
+                      </h2>
+                      <div
+                        className="rich-text text-lg text-muted-foreground max-w-4xl mx-auto"
+                        dangerouslySetInnerHTML={{
+                          __html: withLineBreaks(block.content),
+                        }}
+                      />
+                    </CardContent>
+                  </Card>
+                </section>
+              ))
+            )}
           </div>
         </div>
-      </section>
-
-      <div className="bg-gallery-light-grey py-20">
-        <div className="container mx-auto px-6">
-          {/* Dynamic Content Blocks */}
-          {blocksLoading ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">Loading content blocks...</p>
-            </div>
-          ) : (
-            visibleBlocks.map((block) => (
-              <section key={block.id} className="mb-16">
-                <Card className="shadow-elegant">
-                  <CardContent className="p-12 text-center">
-                    <h2 className="text-3xl font-semibold mb-4 text-foreground">
-                      {block.title}
-                    </h2>
-                    <div
-                      className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto whitespace-pre-line"
-                      dangerouslySetInnerHTML={{
-                        __html: renderRichText(
-                          block.content.replace(/\n/g, "<br>")
-                        ),
-                      }}
-                    />
-                  </CardContent>
-                </Card>
-              </section>
-            ))
-          )}
-        </div>
-      </div>
-
-      <Footer />
-    </div>
+      </PageLayout>
+    </RequireVisiblePage>
   );
 };
 

@@ -86,13 +86,6 @@ export default {
           warning: "hsl(var(--theme-warning))",
           error: "hsl(var(--theme-error))",
         },
-        /* Aether Art Space Palette - Admin Configurable */
-        palette: {
-          white: "hsl(var(--palette-white))",
-          "light-blue": "hsl(var(--palette-light-blue))",
-          "medium-blue": "hsl(var(--palette-medium-blue))",
-          "dark-navy": "hsl(var(--palette-dark-navy))",
-        },
         /* Legacy gallery colors (for backward compatibility) */
         gallery: {
           gold: "hsl(var(--gallery-gold))",

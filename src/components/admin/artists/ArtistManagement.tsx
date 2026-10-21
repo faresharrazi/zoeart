@@ -32,7 +32,7 @@ const ArtistManagement = () => {
   const fetchArtists = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.getArtists();
+      const data = await apiClient.getAdminArtists();
       const transformedArtists = transformArtistsData(data as any[]);
       setArtists(transformedArtists);
     } catch (error) {

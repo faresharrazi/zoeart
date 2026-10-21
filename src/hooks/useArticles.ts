@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, ApiError } from "@/lib/apiClient";
+import { useApi } from "./useApi";
 
 export interface Article {
   id: number;
@@ -21,122 +21,33 @@ export interface Article {
   curator?: string;
 }
 
-export const useArticles = () => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await apiClient.getArticles();
-        if (response.success) {
-          setArticles(response.data);
-        } else {
-          setError("Failed to fetch articles");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, []);
-
-  return { articles, loading, error };
-};
-
-export const useArticle = (id: number) => {
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchArticle = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await apiClient.getArticle(id);
-        if (response.success) {
-          setArticle(response.data);
-        } else {
-          setError("Failed to fetch article");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticle();
-  }, [id]);
-
-  return { article, loading, error };
-};
-
-export const useArticleByExhibition = (exhibitionId: number) => {
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!exhibitionId) return;
-
-    const fetchArticle = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await apiClient.getArticleByExhibition(exhibitionId);
-        if (response.success) {
-          setArticle(response.data);
-        } else {
-          setError("Failed to fetch article");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticle();
+/** The published article of an exhibition, or null if it has none. */
+export const useArticleByExhibition = (exhibitionId: number | undefined) => {
+  const { data, loading, error } = useApi<Article | null>(async () => {
+    if (!exhibitionId) return null;
+    try {
+      const response = await apiClient.getArticleByExhibition(exhibitionId);
+      return response.data;
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) return null;
+      throw err;
+    }
   }, [exhibitionId]);
 
-  return { article, loading, error };
+  return { article: data ?? null, loading, error };
 };
 
+/** All articles, published or not (admin). */
 export const useAdminArticles = () => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error, refetch } = useApi(
+    async () => (await apiClient.getAdminArticles()).data as Article[],
+    []
+  );
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await apiClient.getAdminArticles();
-        if (response.success) {
-          setArticles(response.data);
-        } else {
-          setError("Failed to fetch articles");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, []);
-
-  return { articles, loading, error };
+  return {
+    articles: data ?? [],
+    loading,
+    error: error?.message ?? null,
+    refetch,
+  };
 };

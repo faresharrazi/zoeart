@@ -1,5 +1,5 @@
 const express = require("express");
-const { query } = require("../config/database.cjs");
+const { query, transaction } = require("../config/database.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
 const {
   asyncHandler,
@@ -9,42 +9,21 @@ const {
 
 const router = express.Router();
 
-// Get all working hours (public)
+// Opening hours. The public site gets active rows only; admin requests get
+// all rows so inactive days can be edited and re-enabled.
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-
-    try {
-      const result = await query(
-        "SELECT * FROM working_hours WHERE is_active = true ORDER BY id"
-      );
-
-      res.json(result.rows);
-    } catch (error) {
-      console.error("Error fetching working hours:", error);
-      throw error;
-    }
+    const result = await query(
+      `SELECT * FROM working_hours
+       ${req.isAdminRequest ? "" : "WHERE is_active = TRUE"}
+       ORDER BY id`
+    );
+    res.json(result.rows);
   })
 );
 
-// Get all working hours (admin only)
-router.get(
-  "/admin",
-  authenticateToken,
-  asyncHandler(async (req, res) => {
-
-    try {
-      const result = await query("SELECT * FROM working_hours ORDER BY id");
-
-      res.json(result.rows);
-    } catch (error) {
-      console.error("Error fetching admin working hours:", error);
-      throw error;
-    }
-  })
-);
-
-// Update working hours (admin only)
+// Replace all opening hours (admin only)
 router.put(
   "/",
   authenticateToken,
@@ -54,38 +33,34 @@ router.put(
     if (!Array.isArray(workingHours)) {
       throw new ValidationError("Working hours must be an array");
     }
+    for (const hour of workingHours) {
+      if (!hour.day || !hour.time_frame) {
+        throw new ValidationError(
+          "Each working hour must have day and time_frame"
+        );
+      }
+    }
 
-
-    try {
-      // Clear existing working hours
-      await query("DELETE FROM working_hours");
-
-      // Insert new working hours
+    // All-or-nothing, so a failure can't leave the hours half-deleted
+    const rows = await transaction(async (client) => {
+      await client.query("DELETE FROM working_hours");
       for (const hour of workingHours) {
-        if (!hour.day || !hour.time_frame) {
-          throw new ValidationError(
-            "Each working hour must have day and time_frame"
-          );
-        }
-
-        await query(
+        await client.query(
           "INSERT INTO working_hours (day, time_frame, is_active) VALUES ($1, $2, $3)",
           [hour.day, hour.time_frame, hour.is_active !== false]
         );
       }
+      const result = await client.query(
+        "SELECT * FROM working_hours ORDER BY id"
+      );
+      return result.rows;
+    });
 
-      // Return updated working hours
-      const result = await query("SELECT * FROM working_hours ORDER BY id");
-
-      res.json(result.rows);
-    } catch (error) {
-      console.error("Error updating working hours:", error);
-      throw error;
-    }
+    res.json(rows);
   })
 );
 
-// Update single working hour (admin only)
+// Update a single working hour (admin only)
 router.put(
   "/:id",
   authenticateToken,
@@ -96,7 +71,6 @@ router.put(
     if (!day || !time_frame) {
       throw new ValidationError("Day and time_frame are required");
     }
-
 
     const result = await query(
       "UPDATE working_hours SET day = $1, time_frame = $2, is_active = $3 WHERE id = $4 RETURNING *",

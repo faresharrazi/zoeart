@@ -13,10 +13,8 @@ const router = express.Router();
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-
     const pages = await query("SELECT * FROM page_content");
     const contactInfo = await query("SELECT * FROM contact_info");
-
 
     const pageData = pages.rows.reduce((acc, page) => {
       try {
@@ -43,7 +41,6 @@ router.get(
       pages: pageData,
       contactInfo: contactInfo.rows.length > 0 ? contactInfo.rows[0] : {},
     };
-
 
     res.json(response);
   })
@@ -86,14 +83,20 @@ router.put(
     const { pageName } = req.params;
     const { content, is_visible, title, description } = req.body;
 
-    const updateData = {
-      content: typeof content === "object" ? JSON.stringify(content) : content,
-      is_visible: is_visible !== false,
-      updated_at: new Date().toISOString(),
-    };
-
+    // Only change what was sent: an editor that saves the title alone must
+    // not wipe the page's content or visibility.
+    const updateData = {};
+    if (content !== undefined) {
+      updateData.content =
+        typeof content === "object" ? JSON.stringify(content) : content;
+    }
+    if (is_visible !== undefined) updateData.is_visible = is_visible !== false;
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
+
+    if (Object.keys(updateData).length === 0) {
+      throw new ValidationError("Nothing to update");
+    }
 
     const result = await query(
       `UPDATE page_content 
@@ -170,53 +173,6 @@ router.get(
     }
 
     res.json(contactInfo.rows[0]);
-  })
-);
-
-// Admin contact info routes
-// Update contact info (admin only) - alternative endpoint
-router.put(
-  "/contact-info",
-  authenticateToken,
-  asyncHandler(async (req, res) => {
-    const { email, phone, instagram, address } = req.body;
-
-    const updateData = {
-      email: email || "",
-      phone: phone || "",
-      instagram: instagram || "",
-      address: address || "",
-      updated_at: new Date().toISOString(),
-    };
-
-    // Check if contact info exists
-    const existing = await query("SELECT id FROM contact_info LIMIT 1");
-
-    let result;
-    if (existing.rows.length > 0) {
-      // Update existing
-      result = await query(
-        `UPDATE contact_info 
-       SET ${Object.keys(updateData)
-         .map((key, index) => `${key} = $${index + 1}`)
-         .join(", ")}
-       WHERE id = $${Object.keys(updateData).length + 1}
-       RETURNING *`,
-        [...Object.values(updateData), existing.rows[0].id]
-      );
-    } else {
-      // Create new
-      result = await query(
-        `INSERT INTO contact_info (${Object.keys(updateData).join(", ")})
-       VALUES (${Object.keys(updateData)
-         .map((_, index) => `$${index + 1}`)
-         .join(", ")})
-       RETURNING *`,
-        Object.values(updateData)
-      );
-    }
-
-    res.json(result.rows[0]);
   })
 );
 

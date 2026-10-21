@@ -1,9 +1,8 @@
 const express = require("express");
-const {
-  ExhibitionService,
-  DatabaseService,
-} = require("../services/database.cjs");
-const FileService = require("../services/fileService.cjs");
+const { DatabaseService } = require("../services/database.cjs");
+const { query } = require("../config/database.cjs");
+const imageService = require("../services/imageService.cjs");
+const { uniqueSlug } = require("../services/slug.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
 const {
   asyncHandler,
@@ -13,80 +12,85 @@ const {
 
 const router = express.Router();
 
-// Get visible exhibitions only (public)
+const STATUSES = ["upcoming", "current", "past"];
+
+const toExhibition = (exhibition) => ({
+  id: exhibition.id,
+  title: exhibition.title,
+  slug: exhibition.slug,
+  description: exhibition.description || "",
+  start_date: exhibition.start_date,
+  end_date: exhibition.end_date,
+  location: exhibition.location || "",
+  curator: exhibition.curator || "",
+  status: exhibition.status,
+  featured_image: exhibition.featured_image || "",
+  gallery_images: exhibition.gallery_images || [],
+  assigned_artists: exhibition.assigned_artists || [],
+  assigned_artworks: exhibition.assigned_artworks || [],
+  call_for_artists: exhibition.call_for_artists || false,
+  cta_link: exhibition.cta_link || "",
+  press_media_name: exhibition.press_media_name || "",
+  press_media_link: exhibition.press_media_link || "",
+  is_visible: exhibition.is_visible !== false,
+  created_at: exhibition.created_at,
+  updated_at: exhibition.updated_at,
+});
+
+// Empty date inputs arrive as "" and must be stored as NULL.
+const normalizeDates = (data) => {
+  for (const field of ["start_date", "end_date"]) {
+    if (data[field] === "") data[field] = null;
+  }
+  if (data.status !== undefined && !STATUSES.includes(data.status)) {
+    throw new ValidationError(`Status must be one of: ${STATUSES.join(", ")}`);
+  }
+  return data;
+};
+
+// List exhibitions. Hidden ones are only included for admin requests.
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const exhibitions = await DatabaseService.findAll(
-      "exhibitions",
-      { is_visible: true },
-      "created_at DESC"
+    const { rows } = await query(
+      `SELECT * FROM exhibitions
+       ${req.isAdminRequest ? "" : "WHERE is_visible = TRUE"}
+       ORDER BY start_date DESC NULLS LAST, created_at DESC`
     );
-
-    // Transform data for frontend
-    const transformedExhibitions = exhibitions.map((exhibition) => ({
-      id: exhibition.id,
-      title: exhibition.title,
-      slug: exhibition.slug,
-      description: exhibition.description || "",
-      start_date: exhibition.start_date,
-      end_date: exhibition.end_date,
-      location: exhibition.location || "",
-      curator: exhibition.curator || "",
-      status: exhibition.status,
-      featured_image: exhibition.featured_image || "",
-      gallery_images: exhibition.gallery_images || [],
-      assigned_artists: exhibition.assigned_artists || [],
-      assigned_artworks: exhibition.assigned_artworks || [],
-      call_for_artists: exhibition.call_for_artists || false,
-      cta_link: exhibition.cta_link || "",
-      press_media_name: exhibition.press_media_name || "",
-      press_media_link: exhibition.press_media_link || "",
-      is_visible: exhibition.is_visible !== false,
-      created_at: exhibition.created_at,
-      updated_at: exhibition.updated_at,
-    }));
-
-    res.json(transformedExhibitions);
+    res.json(rows.map(toExhibition));
   })
 );
 
-// Get single exhibition (public)
+// Single exhibition by id or slug, with its visible artists.
 router.get(
-  "/:id",
+  "/:key",
   asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const exhibition = await ExhibitionService.getById(id);
+    const { key } = req.params;
+    const { rows } = await query(
+      `SELECT * FROM exhibitions WHERE ${/^\d+$/.test(key) ? "id" : "slug"} = $1`,
+      [key]
+    );
+    const exhibition = rows[0];
 
-    if (!exhibition) {
+    if (!exhibition || (!exhibition.is_visible && !req.isAdminRequest)) {
       throw new NotFoundError("Exhibition not found");
     }
 
-    // Transform data for frontend
-    const transformedExhibition = {
-      id: exhibition.id,
-      title: exhibition.title,
-      slug: exhibition.slug,
-      description: exhibition.description || "",
-      start_date: exhibition.start_date,
-      end_date: exhibition.end_date,
-      location: exhibition.location || "",
-      curator: exhibition.curator || "",
-      status: exhibition.status,
-      featured_image: exhibition.featured_image || "",
-      gallery_images: exhibition.gallery_images || [],
-      assigned_artists: exhibition.assigned_artists || [],
-      assigned_artworks: exhibition.assigned_artworks || [],
-      call_for_artists: exhibition.call_for_artists || false,
-      cta_link: exhibition.cta_link || "",
-      press_media_name: exhibition.press_media_name || "",
-      press_media_link: exhibition.press_media_link || "",
-      is_visible: exhibition.is_visible !== false,
-      created_at: exhibition.created_at,
-      updated_at: exhibition.updated_at,
-    };
+    const artistIds = (exhibition.assigned_artists || []).map(String);
+    const artists = artistIds.length
+      ? (
+          await query(
+            `SELECT id, name, slug, specialty, profile_image FROM artists
+             WHERE id::text = ANY($1) AND is_visible = TRUE`,
+            [artistIds]
+          )
+        ).rows.sort(
+          (a, b) =>
+            artistIds.indexOf(String(a.id)) - artistIds.indexOf(String(b.id))
+        )
+      : [];
 
-    res.json(transformedExhibition);
+    res.json({ ...toExhibition(exhibition), artists });
   })
 );
 
@@ -95,57 +99,23 @@ router.post(
   "/",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const {
-      title,
-      slug,
-      description,
-      start_date,
-      end_date,
-      location,
-      curator,
-      status,
-      featured_image,
-      gallery_images,
-      assigned_artists,
-      assigned_artworks,
-      call_for_artists,
-      cta_link,
-      press_media_name,
-      press_media_link,
-      is_visible,
-    } = req.body;
+    const data = normalizeDates({ ...req.body });
 
-    if (!title) {
+    if (!data.title) {
       throw new ValidationError("Title is required");
     }
 
-    const exhibitionData = {
-      title,
-      slug:
-        slug ||
-        title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, ""),
-      description: description || "",
-      start_date: start_date || null,
-      end_date: end_date || null,
-      location: location || "",
-      curator: curator || "",
-      status: status || "upcoming",
-      featured_image: featured_image || "",
-      gallery_images: gallery_images || [],
-      assigned_artists: assigned_artists || [],
-      assigned_artworks: assigned_artworks || [],
-      call_for_artists: call_for_artists || false,
-      cta_link: cta_link || "",
-      press_media_name: press_media_name || "",
-      press_media_link: press_media_link || "",
-      is_visible: is_visible !== false,
-    };
-
-    const exhibition = await ExhibitionService.create(exhibitionData);
-    res.status(201).json(exhibition);
+    const exhibition = await DatabaseService.create("exhibitions", {
+      ...data,
+      slug: await uniqueSlug("exhibitions", data.slug || data.title),
+      status: data.status || "upcoming",
+      gallery_images: data.gallery_images || [],
+      assigned_artists: data.assigned_artists || [],
+      assigned_artworks: data.assigned_artworks || [],
+      call_for_artists: data.call_for_artists || false,
+      is_visible: data.is_visible !== false,
+    });
+    res.status(201).json(toExhibition(exhibition));
   })
 );
 
@@ -155,94 +125,44 @@ router.put(
   authenticateToken,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const updateData = req.body;
-
-
-    try {
-      const exhibition = await ExhibitionService.update(id, updateData);
-
-      if (!exhibition) {
-        throw new NotFoundError("Exhibition not found");
-      }
-
-      res.json(exhibition);
-    } catch (error) {
-      console.error("Error updating exhibition:", error);
-      throw error;
+    const before = await DatabaseService.findById("exhibitions", id);
+    if (!before) {
+      throw new NotFoundError("Exhibition not found");
     }
+
+    const data = normalizeDates({ ...req.body });
+    if (data.slug !== undefined) {
+      data.slug = await uniqueSlug(
+        "exhibitions",
+        data.slug || data.title || before.title,
+        before.id
+      );
+    }
+
+    const exhibition = await DatabaseService.update("exhibitions", id, data);
+    await imageService.deleteUnusedImages(
+      imageService.removedImageUrls(before, exhibition)
+    );
+    res.json(toExhibition(exhibition));
   })
 );
 
-// Delete exhibition (admin only)
+// Delete exhibition (admin only). Its article is deleted by the database
+// (ON DELETE CASCADE); images no other record uses are removed.
 router.delete(
   "/:id",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const { id } = req.params;
-
-    // Get exhibition data before deleting to extract file references
-    const exhibition = await ExhibitionService.getById(id);
-
+    const exhibition = await DatabaseService.delete(
+      "exhibitions",
+      req.params.id
+    );
     if (!exhibition) {
       throw new NotFoundError("Exhibition not found");
     }
 
-    // Extract file IDs from featured_image and gallery_images
-    const fileIdsToDelete = [];
-
-
-    // Extract file ID from featured_image (format: /api/file/ID)
-    if (
-      exhibition.featured_image &&
-      exhibition.featured_image.startsWith("/api/file/")
-    ) {
-      const fileId = exhibition.featured_image.replace("/api/file/", "");
-      if (fileId && !isNaN(fileId)) {
-        fileIdsToDelete.push(parseInt(fileId));
-      }
-    }
-
-    // Extract file IDs from gallery_images (array of /api/file/ID strings)
-    if (exhibition.gallery_images && Array.isArray(exhibition.gallery_images)) {
-      exhibition.gallery_images.forEach((imagePath) => {
-        if (imagePath && imagePath.startsWith("/api/file/")) {
-          const fileId = imagePath.replace("/api/file/", "");
-          if (fileId && !isNaN(fileId)) {
-            fileIdsToDelete.push(parseInt(fileId));
-          }
-        }
-      });
-    }
-
-    // Delete the exhibition
-    await ExhibitionService.delete(id);
-
-
-    // Delete associated files
-    const deletedFiles = [];
-    for (const fileId of fileIdsToDelete) {
-      try {
-
-        // First check if file exists
-        const existingFile = await FileService.getFileById(fileId);
-        if (!existingFile) {
-          continue;
-        }
-
-        const deletedFile = await FileService.deleteFile(fileId);
-        if (deletedFile) {
-          deletedFiles.push(deletedFile);
-        }
-      } catch (error) {
-      }
-    }
-
-
-    res.json({
-      message: "Exhibition deleted successfully",
-      deletedFiles: deletedFiles.length,
-      fileIds: fileIdsToDelete,
-    });
+    await imageService.deleteUnusedImages(imageService.imageUrlsOf(exhibition));
+    res.json({ message: "Exhibition deleted successfully" });
   })
 );
 
@@ -251,52 +171,19 @@ router.patch(
   "/:id/visibility",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { is_visible } = req.body;
-
-
-    const exhibition = await ExhibitionService.toggleVisibility(id, is_visible);
-
+    const exhibition = await DatabaseService.update(
+      "exhibitions",
+      req.params.id,
+      { is_visible: req.body.is_visible !== false }
+    );
     if (!exhibition) {
       throw new NotFoundError("Exhibition not found");
     }
 
     res.json({
       message: "Exhibition visibility updated successfully",
-      exhibition,
+      exhibition: toExhibition(exhibition),
     });
-  })
-);
-
-// Get exhibitions by status
-router.get(
-  "/status/:status",
-  asyncHandler(async (req, res) => {
-    const { status } = req.params;
-
-    if (!["upcoming", "past"].includes(status)) {
-      throw new ValidationError("Invalid status. Must be 'upcoming' or 'past'");
-    }
-
-    const exhibitions = await ExhibitionService.findAll(
-      "exhibitions",
-      { status },
-      "created_at DESC"
-    );
-    res.json(exhibitions);
-  })
-);
-
-// Get visible exhibitions only
-router.get(
-  "/visible/only",
-  asyncHandler(async (req, res) => {
-    const exhibitions = await ExhibitionService.findAll(
-      "exhibitions",
-      { is_visible: true },
-      "created_at DESC"
-    );
-    res.json(exhibitions);
   })
 );
 

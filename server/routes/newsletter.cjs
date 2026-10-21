@@ -1,5 +1,8 @@
 const express = require("express");
-const { NewsletterService } = require("../services/database.cjs");
+const {
+  NewsletterService,
+  DatabaseService,
+} = require("../services/database.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
 const { asyncHandler, ValidationError, NotFoundError } = require("../middleware/errorHandler.cjs");
 
@@ -33,30 +36,41 @@ router.post("/subscribe", asyncHandler(async (req, res) => {
 
   // Validate email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
+  if (typeof email !== "string" || email.length > 100 || !emailRegex.test(email)) {
     throw new ValidationError("Invalid email format");
   }
+  if (name && (typeof name !== "string" || name.length > 100)) {
+    throw new ValidationError("Name must be at most 100 characters");
+  }
 
-  // Check if email already exists
-  const existing = await NewsletterService.findOne("newsletter_subscribers", { email });
-  
-  if (existing) {
-    return res.status(409).json({ 
+  const normalizedEmail = email.toLowerCase().trim();
+  const existing = await NewsletterService.findOne("newsletter_subscribers", {
+    email: normalizedEmail,
+  });
+
+  if (existing && existing.status === "active") {
+    return res.status(409).json({
       error: "Email already subscribed",
       message: "This email is already subscribed to our newsletter"
     });
   }
 
-  const subscriberData = {
-    email: email.toLowerCase().trim(),
-    name: name || null,
-    source: source,
-    subscribed_at: new Date().toISOString(),
-    status: "active",
-  };
+  // New subscriber, or someone who unsubscribed and is coming back
+  const subscriber = existing
+    ? await NewsletterService.update(existing.id, {
+        status: "active",
+        name: name || existing.name,
+        subscribed_at: new Date().toISOString(),
+        unsubscribed_at: null,
+      })
+    : await NewsletterService.create({
+        email: normalizedEmail,
+        name: name || null,
+        source: String(source).slice(0, 50),
+        subscribed_at: new Date().toISOString(),
+        status: "active",
+      });
 
-  const subscriber = await NewsletterService.create(subscriberData);
-  
   res.status(201).json({
     success: true,
     message: "Successfully subscribed to newsletter",
@@ -77,8 +91,10 @@ router.post("/unsubscribe", asyncHandler(async (req, res) => {
     throw new ValidationError("Email is required");
   }
 
-  const subscriber = await NewsletterService.findOne("newsletter_subscribers", { email });
-  
+  const subscriber = await NewsletterService.findOne("newsletter_subscribers", {
+    email: String(email).toLowerCase().trim(),
+  });
+
   if (!subscriber) {
     return res.status(404).json({ 
       error: "Email not found",
@@ -86,7 +102,7 @@ router.post("/unsubscribe", asyncHandler(async (req, res) => {
     });
   }
 
-  await NewsletterService.update("newsletter_subscribers", subscriber.id, { 
+  await NewsletterService.update(subscriber.id, { 
     status: "unsubscribed",
     unsubscribed_at: new Date().toISOString()
   });
@@ -112,7 +128,7 @@ router.delete("/:id", authenticateToken, asyncHandler(async (req, res) => {
 
 // Get subscriber statistics (admin only)
 router.get("/stats/summary", authenticateToken, asyncHandler(async (req, res) => {
-  const stats = await NewsletterService.execute(`
+  const stats = await DatabaseService.execute(`
     SELECT 
       COUNT(*) as total,
       COUNT(CASE WHEN status = 'active' THEN 1 END) as active,

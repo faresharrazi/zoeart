@@ -185,7 +185,7 @@ router.delete(
     }
 
     // Remove the image file too (failures are logged, not fatal)
-    await imageService.deleteImages([heroImage.rows[0].cloudinary_url]);
+    await imageService.deleteUnusedImages([heroImage.rows[0].cloudinary_url]);
 
     // Delete from database
     const result = await query(

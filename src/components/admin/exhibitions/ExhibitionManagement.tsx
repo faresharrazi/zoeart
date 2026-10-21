@@ -45,8 +45,8 @@ const ExhibitionManagement = () => {
       setLoading(true);
       const [exhibitionsData, artistsData, artworksData] = await Promise.all([
         apiClient.getAdminExhibitions(),
-        apiClient.getArtists(),
-        apiClient.getArtworks(),
+        apiClient.getAdminArtists(),
+        apiClient.getAdminArtworks(),
       ]);
 
       // Transform exhibitions data to match interface

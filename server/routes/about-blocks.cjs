@@ -1,98 +1,48 @@
 const express = require("express");
-const { query, executeQuery } = require("../config/database.cjs");
+const { query, transaction } = require("../config/database.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
-
-// Simple async handler wrapper
-const asyncHandler = (fn) => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
+const {
+  asyncHandler,
+  ValidationError,
+  NotFoundError,
+} = require("../middleware/errorHandler.cjs");
 
 const router = express.Router();
 
-// Get all about blocks (public)
+// About page blocks in display order. Hidden blocks are only included for
+// admin requests.
 router.get(
   "/",
   asyncHandler(async (req, res) => {
     const result = await query(
-      "SELECT * FROM about_blocks ORDER BY sort_order ASC, id ASC"
+      `SELECT * FROM about_blocks
+       ${req.isAdminRequest ? "" : "WHERE is_visible = TRUE"}
+       ORDER BY sort_order ASC, id ASC`
     );
 
-    res.json({
-      success: true,
-      data: result.rows,
-    });
+    res.json({ success: true, data: result.rows });
   })
 );
 
-// Get visible about blocks only (public)
-router.get(
-  "/visible",
-  asyncHandler(async (req, res) => {
-    const result = await query(
-      "SELECT * FROM about_blocks WHERE is_visible = true ORDER BY sort_order ASC, id ASC"
-    );
-
-    res.json({
-      success: true,
-      data: result.rows,
-    });
-  })
-);
-
-// Get single about block by ID (public)
-router.get(
-  "/:id",
-  asyncHandler(async (req, res) => {
-    const { id } = req.params;
-
-    const result = await query("SELECT * FROM about_blocks WHERE id = $1", [
-      id,
-    ]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "About block not found",
-      });
-    }
-
-    res.json({
-      success: true,
-      data: result.rows[0],
-    });
-  })
-);
-
-// Create new about block (admin only)
+// Create new about block (admin only), added at the end
 router.post(
   "/",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const { title, content, is_visible = true, sort_order = 0 } = req.body;
+    const { title, content, is_visible = true } = req.body;
 
     if (!title || !content) {
-      return res.status(400).json({
-        success: false,
-        message: "title and content are required",
-      });
-    }
-
-    // Generate block_id automatically
-    const existingBlocks = await query(
-      "SELECT block_id FROM about_blocks ORDER BY id"
-    );
-    let blockId = "block1";
-    let counter = 1;
-    while (existingBlocks.rows.some((row) => row.block_id === blockId)) {
-      counter++;
-      blockId = `block${counter}`;
+      throw new ValidationError("title and content are required");
     }
 
     const result = await query(
-      `INSERT INTO about_blocks (block_id, title, content, is_visible, sort_order) 
-      VALUES ($1, $2, $3, $4, $5) 
-      RETURNING *`,
-      [blockId, title, content, is_visible, sort_order]
+      `INSERT INTO about_blocks (block_id, title, content, is_visible, sort_order)
+       VALUES (
+         'block-' || substr(md5(random()::text), 1, 12), $1, $2, $3,
+         (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM about_blocks)
+       )
+       RETURNING *`,
+      [title, content, is_visible !== false]
     );
 
     res.status(201).json({
@@ -100,6 +50,30 @@ router.post(
       data: result.rows[0],
       message: "About block created successfully",
     });
+  })
+);
+
+// Reorder blocks (admin only). Declared before /:id routes.
+router.patch(
+  "/reorder",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const { blocks } = req.body; // Array of {id, sort_order}
+
+    if (!Array.isArray(blocks)) {
+      throw new ValidationError("blocks array is required");
+    }
+
+    await transaction(async (client) => {
+      for (const block of blocks) {
+        await client.query(
+          "UPDATE about_blocks SET sort_order = $2 WHERE id = $1",
+          [block.id, block.sort_order]
+        );
+      }
+    });
+
+    res.json({ success: true, message: "Blocks reordered successfully" });
   })
 );
 
@@ -112,22 +86,18 @@ router.put(
     const { title, content, is_visible, sort_order } = req.body;
 
     const result = await query(
-      `UPDATE about_blocks 
-      SET title = COALESCE($2, title),
-          content = COALESCE($3, content),
-          is_visible = COALESCE($4, is_visible),
-          sort_order = COALESCE($5, sort_order),
-          updated_at = CURRENT_TIMESTAMP
-      WHERE id = $1 
-      RETURNING *`,
+      `UPDATE about_blocks
+       SET title = COALESCE($2, title),
+           content = COALESCE($3, content),
+           is_visible = COALESCE($4, is_visible),
+           sort_order = COALESCE($5, sort_order)
+       WHERE id = $1
+       RETURNING *`,
       [id, title, content, is_visible, sort_order]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "About block not found",
-      });
+      throw new NotFoundError("About block not found");
     }
 
     res.json({
@@ -144,95 +114,50 @@ router.patch(
   authenticateToken,
   asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { is_visible } = req.body;
+    const isVisible = req.body.is_visible !== false;
 
     const result = await query(
-      `UPDATE about_blocks 
-     SET is_visible = $2, updated_at = CURRENT_TIMESTAMP
-     WHERE id = $1 
-     RETURNING *`,
-      [id, is_visible]
+      "UPDATE about_blocks SET is_visible = $2 WHERE id = $1 RETURNING *",
+      [id, isVisible]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "About block not found",
-      });
+      throw new NotFoundError("About block not found");
     }
 
     res.json({
       success: true,
       data: result.rows[0],
-      message: `About block ${is_visible ? "shown" : "hidden"} successfully`,
+      message: `About block ${isVisible ? "shown" : "hidden"} successfully`,
     });
   })
 );
 
-// Delete about block (admin only)
+// Delete about block (admin only) and renumber the rest
 router.delete(
   "/:id",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const { id } = req.params;
-
-    const result = await query(
-      "DELETE FROM about_blocks WHERE id = $1 RETURNING *",
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "About block not found",
-      });
-    }
-
-    // Renumber remaining blocks to maintain sequential order
-    const remainingBlocks = await query(
-      "SELECT id FROM about_blocks ORDER BY sort_order ASC, id ASC"
-    );
-
-    for (let i = 0; i < remainingBlocks.rows.length; i++) {
-      await query(
-        "UPDATE about_blocks SET sort_order = $1 WHERE id = $2",
-        [i + 1, remainingBlocks.rows[i].id]
+    const deleted = await transaction(async (client) => {
+      const result = await client.query(
+        "DELETE FROM about_blocks WHERE id = $1 RETURNING id",
+        [req.params.id]
       );
-    }
-
-    res.json({
-      success: true,
-      message: "About block deleted successfully",
+      if (result.rows.length > 0) {
+        await client.query(
+          `UPDATE about_blocks b SET sort_order = r.n
+           FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY sort_order, id) AS n FROM about_blocks) r
+           WHERE b.id = r.id`
+        );
+      }
+      return result.rows[0];
     });
-  })
-);
 
-// Reorder blocks (admin only)
-router.patch(
-  "/reorder",
-  authenticateToken,
-  asyncHandler(async (req, res) => {
-    const { blocks } = req.body; // Array of {id, sort_order}
-
-    if (!Array.isArray(blocks)) {
-      return res.status(400).json({
-        success: false,
-        message: "blocks array is required",
-      });
+    if (!deleted) {
+      throw new NotFoundError("About block not found");
     }
 
-    // Update sort order for each block
-    for (const block of blocks) {
-      await query(
-        "UPDATE about_blocks SET sort_order = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
-        [block.id, block.sort_order]
-      );
-    }
-
-    res.json({
-      success: true,
-      message: "Blocks reordered successfully",
-    });
+    res.json({ success: true, message: "About block deleted successfully" });
   })
 );
 

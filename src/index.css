@@ -54,7 +54,7 @@ All colors MUST be HSL.
     --theme-warning: 38 92% 50%; /* #F59E0B - Warning */
     --theme-error: 0 84% 60%; /* #EF4444 - Error */
 
-    /* Legacy gallery colors (will be replaced by palette) */
+    /* Legacy gallery colors */
     --gallery-gold: 45 100% 51%;
     --gallery-charcoal: 0 0% 15%;
     --gallery-light-grey: 0 0% 96%;
@@ -62,13 +62,13 @@ All colors MUST be HSL.
 
     --gradient-hero: linear-gradient(
       135deg,
-      hsl(var(--palette-dark-navy)),
-      hsl(var(--palette-medium-blue))
+      hsl(0 0% 6%),
+      hsl(var(--theme-primary))
     );
     --gradient-card: linear-gradient(
       145deg,
-      hsl(var(--palette-white)),
-      hsl(var(--palette-light-blue))
+      hsl(0 0% 100%),
+      hsl(var(--theme-surface))
     );
 
     --shadow-elegant: 0 10px 40px -10px hsl(0 0% 0% / 0.1);
@@ -227,5 +227,45 @@ All colors MUST be HSL.
   .font-serif,
   .font-display {
     font-family: "DM Serif Display", serif !important;
+  }
+}
+
+/* HTML written in the admin rich text editor (articles, About blocks) */
+@layer components {
+  .rich-text {
+    @apply text-gray-700 leading-relaxed;
+  }
+  .rich-text h1 {
+    @apply text-[2rem] font-bold leading-tight text-gray-800 mt-4 mb-2;
+  }
+  .rich-text h2 {
+    @apply text-2xl font-bold leading-snug text-gray-800 mt-3 mb-1.5;
+  }
+  .rich-text h3 {
+    @apply text-xl font-bold text-gray-800 mt-2.5 mb-1;
+  }
+  .rich-text p {
+    @apply my-2;
+  }
+  .rich-text p:empty {
+    @apply my-4 min-h-4;
+  }
+  .rich-text ul {
+    @apply list-disc my-2 pl-6;
+  }
+  .rich-text ol {
+    @apply list-decimal my-2 pl-6;
+  }
+  .rich-text li {
+    @apply my-1;
+  }
+  .rich-text a {
+    @apply underline underline-offset-2 text-gray-900 hover:text-theme-primary;
+  }
+  .rich-text blockquote {
+    @apply border-l-4 border-gray-200 pl-4 my-4 italic text-gray-500;
+  }
+  .rich-text img {
+    @apply max-w-full h-auto rounded-lg my-4;
   }
 }

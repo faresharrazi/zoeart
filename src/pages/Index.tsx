@@ -1,17 +1,12 @@
-import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
+import { PageLayout } from "@/components/PageLayout";
 import RecentExhibitions from "@/components/RecentExhibitions";
-import Footer from "@/components/Footer";
 
-const Index = () => {
-  return (
-    <div className="min-h-screen">
-      <Navigation />
-      <Hero />
-      <RecentExhibitions />
-      <Footer />
-    </div>
-  );
-};
+const Index = () => (
+  <PageLayout>
+    <Hero />
+    <RecentExhibitions />
+  </PageLayout>
+);
 
 export default Index;

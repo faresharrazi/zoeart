@@ -196,85 +196,27 @@ class DatabaseService {
     return parseInt(result.rows[0].count);
   }
 
+  // Remove an id from a JSONB array column on every row that contains it
+  // (ids may be stored as numbers or strings). Used to keep assigned_artists
+  // and assigned_artworks lists consistent when something is deleted.
+  static async removeIdFromLists(tableName, column, id, client = { query }) {
+    await client.query(
+      `UPDATE ${tableName}
+       SET ${column} = (
+         SELECT COALESCE(jsonb_agg(e), '[]'::jsonb)
+         FROM jsonb_array_elements(${column}) e
+         WHERE e #>> '{}' <> $1
+       )
+       WHERE jsonb_typeof(${column}) = 'array'
+         AND EXISTS (SELECT 1 FROM jsonb_array_elements(${column}) e WHERE e #>> '{}' = $1)`,
+      [String(id)]
+    );
+  }
+
   // Execute raw SQL
   static async execute(sql, params = []) {
     const result = await query(sql, params);
     return result.rows;
-  }
-}
-
-// Specific service methods for common operations
-class ExhibitionService {
-  static async getAll() {
-    return DatabaseService.findAll("exhibitions", {}, "created_at DESC");
-  }
-
-  static async getById(id) {
-    return DatabaseService.findById("exhibitions", id);
-  }
-
-  static async create(data) {
-    return DatabaseService.create("exhibitions", data);
-  }
-
-  static async update(id, data) {
-    return DatabaseService.update("exhibitions", id, data);
-  }
-
-  static async delete(id) {
-    return DatabaseService.delete("exhibitions", id);
-  }
-
-  static async toggleVisibility(id, isVisible) {
-    return DatabaseService.update("exhibitions", id, { is_visible: isVisible });
-  }
-}
-
-class ArtistService {
-  static async getAll() {
-    return DatabaseService.findAll("artists", {}, "name ASC");
-  }
-
-  static async findVisible() {
-    return DatabaseService.findAll("artists", { is_visible: true }, "name ASC");
-  }
-
-  static async getById(id) {
-    return DatabaseService.findById("artists", id);
-  }
-
-  static async create(data) {
-    return DatabaseService.create("artists", data);
-  }
-
-  static async update(id, data) {
-    return DatabaseService.update("artists", id, data);
-  }
-
-  static async delete(id) {
-    return DatabaseService.delete("artists", id);
-  }
-}
-
-class ArtworkService {
-  static async getAll() {
-    return DatabaseService.findAll("artworks", {}, "created_at DESC");
-  }
-
-  static async getById(id) {
-    return DatabaseService.findById("artworks", id);
-  }
-
-  static async create(data) {
-    return DatabaseService.create("artworks", data);
-  }
-
-  static async update(id, data) {
-    return DatabaseService.update("artworks", id, data);
-  }
-
-  static async delete(id) {
-    return DatabaseService.delete("artworks", id);
   }
 }
 
@@ -299,6 +241,10 @@ class NewsletterService {
     return DatabaseService.create("newsletter_subscribers", data);
   }
 
+  static async update(id, data) {
+    return DatabaseService.update("newsletter_subscribers", id, data);
+  }
+
   static async delete(id) {
     return DatabaseService.delete("newsletter_subscribers", id);
   }
@@ -306,8 +252,5 @@ class NewsletterService {
 
 module.exports = {
   DatabaseService,
-  ExhibitionService,
-  ArtistService,
-  ArtworkService,
   NewsletterService,
 };
