@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ExhibitionCard, {
   type ExhibitionSummary,
 } from "@/components/ExhibitionCard";
 import { Container } from "@/components/PageLayout";
+import { cn } from "@/lib/utils";
 
 const arrowClass =
   "inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/25 transition hover:border-ink disabled:opacity-30 disabled:hover:border-ink/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink";
@@ -13,10 +14,16 @@ const arrowClass =
 const ExhibitionStrip = ({
   title,
   exhibitions,
+  showStatus = true,
+  className,
 }: {
   title: string;
   exhibitions: ExhibitionSummary[];
+  /** Status label on each card, off when the title already says it */
+  showStatus?: boolean;
+  className?: string;
 }) => {
+  const titleId = useId();
   const listRef = useRef<HTMLUListElement>(null);
   const [canScroll, setCanScroll] = useState({ back: false, forward: false });
 
@@ -48,9 +55,12 @@ const ExhibitionStrip = ({
     });
 
   return (
-    <section className="py-20 md:py-28" aria-labelledby="strip-title">
+    <section
+      className={cn("py-20 md:py-28", className)}
+      aria-labelledby={titleId}
+    >
       <Container className="flex flex-wrap items-end justify-between gap-6 mb-10">
-        <h2 id="strip-title" className="font-medium text-4xl md:text-5xl">
+        <h2 id={titleId} className="font-medium text-4xl md:text-5xl">
           {title}
         </h2>
         <div className="flex items-center gap-6">
@@ -95,7 +105,11 @@ const ExhibitionStrip = ({
               key={exhibition.id}
               className="snap-start shrink-0 w-[78%] sm:w-[340px]"
             >
-              <ExhibitionCard exhibition={exhibition} sizes="340px" />
+              <ExhibitionCard
+                exhibition={exhibition}
+                sizes="340px"
+                showStatus={showStatus}
+              />
             </li>
           ))}
         </ul>

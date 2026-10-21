@@ -8,7 +8,7 @@ import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { useSeo } from "@/hooks/useSeo";
 import { apiClient } from "@/lib/apiClient";
 
-// Soonest first; exhibitions on view now come before upcoming ones
+// Soonest first
 const byStartDate = (
   a: { start_date: string | null },
   b: { start_date: string | null }
@@ -22,18 +22,33 @@ const Index = () => {
     () => apiClient.getExhibitions(),
     []
   );
-  const upcoming = [
-    ...exhibitions.filter((e) => e.status === "current").sort(byStartDate),
-    ...exhibitions.filter((e) => e.status === "upcoming").sort(byStartDate),
-  ];
+  const onView = exhibitions
+    .filter((e) => e.status === "current")
+    .sort(byStartDate);
+  const upcoming = exhibitions
+    .filter((e) => e.status === "upcoming")
+    .sort(byStartDate);
   const about = pageData.about;
 
   return (
     <PageLayout overlayNav>
-      <Hero next={upcoming[0]} />
+      <Hero next={onView[0] ?? upcoming[0]} />
 
+      {/* Each section only appears when it has exhibitions */}
+      {onView.length > 0 && (
+        <ExhibitionStrip
+          title="On view now"
+          exhibitions={onView}
+          showStatus={false}
+        />
+      )}
       {upcoming.length > 0 && (
-        <ExhibitionStrip title="Upcoming" exhibitions={upcoming} />
+        <ExhibitionStrip
+          title="Upcoming"
+          exhibitions={upcoming}
+          // Closer to "On view now" when both are shown
+          className={onView.length > 0 ? "pt-0 md:pt-0" : undefined}
+        />
       )}
 
       {about?.isVisible !== false && about?.description && (

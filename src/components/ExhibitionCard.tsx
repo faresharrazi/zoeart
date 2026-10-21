@@ -23,10 +23,13 @@ const ExhibitionCard = ({
   exhibition,
   headingLevel: Heading = "h3",
   sizes = "(min-width: 1024px) 25vw, (min-width: 640px) 45vw, 80vw",
+  showStatus = true,
 }: {
   exhibition: ExhibitionSummary;
   headingLevel?: "h2" | "h3";
   sizes?: string;
+  /** Off where a heading already says it ("On view now") */
+  showStatus?: boolean;
 }) => {
   const dates = formatDateRange(exhibition.start_date, exhibition.end_date);
   const meta = [dates, exhibition.location?.trim()].filter(Boolean).join(" · ");
@@ -64,7 +67,7 @@ const ExhibitionCard = ({
         />
       </div>
       <div className="space-y-1.5">
-        {exhibition.status === "current" && (
+        {showStatus && exhibition.status === "current" && (
           <p className="eyebrow text-ink">On view now</p>
         )}
         <Heading className="font-medium text-[22px] leading-snug">
