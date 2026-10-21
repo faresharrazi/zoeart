@@ -8,7 +8,8 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <h2 className="eyebrow text-mist mb-6">{children}</h2>
 );
 
-const bigLink = "font-display text-2xl md:text-3xl hover:italic break-words";
+const detailLink =
+  "text-lg md:text-xl text-ink border-b border-ink/20 pb-0.5 transition-colors hover:border-ink break-words";
 
 const Contact = () => {
   const { pageData, contactInfo, openingHours } = usePageDataFromDB();
@@ -18,7 +19,7 @@ const Contact = () => {
     contactInfo?.email && {
       label: "Email",
       node: (
-        <a href={`mailto:${contactInfo.email}`} className={bigLink}>
+        <a href={`mailto:${contactInfo.email}`} className={detailLink}>
           {contactInfo.email}
         </a>
       ),
@@ -28,7 +29,7 @@ const Contact = () => {
       node: (
         <a
           href={`tel:${contactInfo.phone.replace(/\s+/g, "")}`}
-          className={bigLink}
+          className={detailLink}
         >
           {contactInfo.phone}
         </a>
@@ -41,7 +42,7 @@ const Contact = () => {
           href={instagramUrl(contactInfo.instagram)}
           target="_blank"
           rel="noopener noreferrer"
-          className={bigLink}
+          className={detailLink}
         >
           @{contactInfo.instagram.replace(/^@/, "")}
         </a>
@@ -54,7 +55,7 @@ const Contact = () => {
           href={mapsUrl(contactInfo.address)}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${bigLink} whitespace-pre-line`}
+          className={`${detailLink} whitespace-pre-line`}
         >
           {contactInfo.address}
         </a>
