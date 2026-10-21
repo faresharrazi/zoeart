@@ -32,9 +32,9 @@ export const PageDataProvider = ({
       })),
       homeSettings: pages.home
         ? {
+            ...pages.home.content,
             title: pages.home.title,
             description: pages.home.description,
-            ...pages.home.content,
           }
         : null,
       loading,
