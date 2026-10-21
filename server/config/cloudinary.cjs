@@ -44,6 +44,14 @@ const uploadOptions = {
     // No transformations - keep original dimensions and format
   },
 
+  // Options for partner logos
+  partner: {
+    folder: "zoeart/partners",
+    resource_type: "auto",
+    quality: "auto",
+    fetch_format: "auto",
+  },
+
   // Options for hero images
   hero: {
     folder: "zoeart/hero",

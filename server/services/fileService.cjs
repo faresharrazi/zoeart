@@ -3,8 +3,14 @@ const { generateUniqueFilename } = require("../config/multer.cjs");
 
 // Images stored directly in Postgres (used when Cloudinary isn't configured,
 // and by records created before the move to Cloudinary).
+// Categories allowed by the uploaded_files.category check constraint
+const DB_CATEGORIES = ["hero_image", "artwork", "artist_profile", "exhibition", "gallery"];
+
 class FileService {
-  static async uploadFile(file, category, uploadedBy = null) {
+  static async uploadFile(file, uploadCategory, uploadedBy = null) {
+    const category = DB_CATEGORIES.includes(uploadCategory)
+      ? uploadCategory
+      : "gallery";
     const uniqueFilename = generateUniqueFilename(file.originalname);
 
     const result = await query(

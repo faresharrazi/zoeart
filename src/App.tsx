@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LoadingState } from "@/components/PageLayout";
 import { PageDataProvider } from "@/contexts/PageDataContext";
+import PageViewTracker from "@/components/PageViewTracker";
 import Index from "./pages/Index";
 import Artists from "./pages/Artists";
 import Exhibitions from "./pages/Exhibitions";
@@ -26,6 +27,7 @@ const App = () => (
     <Sonner />
     <BrowserRouter>
       <PageDataProvider>
+        <PageViewTracker />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/artists" element={<Artists />} />

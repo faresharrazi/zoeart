@@ -45,6 +45,7 @@ const getFileCategory = (req) => {
     artist_profile: "artist_profile",
     exhibition: "exhibition",
     gallery: "gallery",
+    partner: "partner",
     general: "gallery", // fallback to gallery for general files
   };
 

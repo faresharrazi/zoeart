@@ -1,32 +1,26 @@
-import { Instagram, MapPin, Phone, Mail } from "lucide-react";
+import { Instagram, Phone, Mail } from "lucide-react";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
-import { instagramUrl, mapsUrl } from "@/lib/contact";
+import { instagramUrl } from "@/lib/contact";
+import { imageUrl } from "@/lib/images";
+import type { Partner } from "@/types/api";
 
 const logoFooter = "/logo/logo-footer.png";
 
-// Logos in public/collaborators
-const COLLABORATORS = [
-  { src: "/collaborators/1.webp", name: "Collaborating organisation" },
-  { src: "/collaborators/2.webp", name: "Vermillion Neo" },
-  { src: "/collaborators/3.webp", name: "Aegean Times International Media" },
-  {
-    src: "/collaborators/4.webp",
-    name: "Sino-Hellenic Performing Arts Alliance",
-  },
-  {
-    src: "/collaborators/5.webp",
-    name: "Sino-Hellenic International Theatre Festival",
-  },
-];
-
-const Collaborators = ({ large = false }: { large?: boolean }) => (
+// Partner logos are managed in the admin panel (Partners)
+const Collaborators = ({
+  partners,
+  large = false,
+}: {
+  partners: Partner[];
+  large?: boolean;
+}) => (
   <ul className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 max-w-md lg:max-w-none mx-auto">
-    {COLLABORATORS.map(({ src, name }) => (
-      <li key={src}>
+    {partners.map((partner) => {
+      const logo = (
         <img
-          src={src}
-          alt={name}
-          title={name}
+          src={imageUrl(partner.logo_url, { width: 240, height: 240 })}
+          alt={partner.name}
+          title={partner.name}
           loading="lazy"
           width={240}
           height={240}
@@ -34,8 +28,23 @@ const Collaborators = ({ large = false }: { large?: boolean }) => (
             large ? "h-28" : "h-24"
           } w-auto object-contain grayscale opacity-70 transition-all duration-300 hover:grayscale-0 hover:opacity-100 hover:scale-105`}
         />
-      </li>
-    ))}
+      );
+      return (
+        <li key={partner.id}>
+          {partner.website_url ? (
+            <a
+              href={partner.website_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {logo}
+            </a>
+          ) : (
+            logo
+          )}
+        </li>
+      );
+    })}
   </ul>
 );
 
@@ -66,13 +75,10 @@ const FooterLink = ({
 );
 
 const Footer = () => {
-  const { contactInfo, loading } = usePageDataFromDB();
+  const { contactInfo, partners, loading } = usePageDataFromDB();
 
   const hasContactInfo = Boolean(
-    contactInfo?.email ||
-    contactInfo?.phone ||
-    contactInfo?.instagram ||
-    contactInfo?.address
+    contactInfo?.email || contactInfo?.phone || contactInfo?.instagram
   );
 
   return (
@@ -112,22 +118,15 @@ const Footer = () => {
                     {contactInfo.instagram}
                   </FooterLink>
                 )}
-                {contactInfo.address && (
-                  <FooterLink
-                    icon={MapPin}
-                    href={mapsUrl(contactInfo.address)}
-                    external
-                  >
-                    <span className="text-sm">{contactInfo.address}</span>
-                  </FooterLink>
-                )}
               </ul>
             </div>
 
-            <div className="text-center">
-              <h2 className="text-xl mb-6 text-gray-900">Collaboration</h2>
-              <Collaborators />
-            </div>
+            {partners.length > 0 && (
+              <div className="text-center">
+                <h2 className="text-xl mb-6 text-gray-900">Collaboration</h2>
+                <Collaborators partners={partners} />
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex flex-col items-center text-center space-y-12">
@@ -136,10 +135,12 @@ const Footer = () => {
               alt="Aether Art Space"
               className="h-48 w-auto object-contain mx-auto"
             />
-            <div className="w-full">
-              <h2 className="text-2xl mb-10 text-gray-900">Collaboration</h2>
-              <Collaborators large />
-            </div>
+            {partners.length > 0 && (
+              <div className="w-full">
+                <h2 className="text-2xl mb-10 text-gray-900">Collaboration</h2>
+                <Collaborators partners={partners} large />
+              </div>
+            )}
           </div>
         )}
 

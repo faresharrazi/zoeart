@@ -30,9 +30,10 @@ const imageRoutes = require("./routes/images.cjs");
 const heroImageRoutes = require("./routes/hero-images.cjs");
 const aboutBlocksRoutes = require("./routes/about-blocks.cjs");
 const userRoutes = require("./routes/users.cjs");
-const workingHoursRoutes = require("./routes/working-hours.cjs");
 const articlesRoutes = require("./routes/articles.cjs");
 const seoRoutes = require("./routes/seo.cjs");
+const partnerRoutes = require("./routes/partners.cjs");
+const analyticsRoutes = require("./routes/analytics.cjs");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -61,8 +62,9 @@ app.use("/api/files", fileRoutes);
 app.use("/api/images", imageRoutes);
 app.use("/api/hero-images", heroImageRoutes);
 app.use("/api/about-blocks", aboutBlocksRoutes);
-app.use("/api/working-hours", workingHoursRoutes);
 app.use("/api/articles", articlesRoutes);
+app.use("/api/partners", partnerRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Admin API Routes. Everything under /api/admin requires a valid login;
 // routers check req.isAdminRequest to include hidden or unpublished content.
@@ -80,8 +82,9 @@ app.use("/api/admin/files", fileRoutes);
 app.use("/api/admin/images", imageRoutes);
 app.use("/api/admin/hero-images", heroImageRoutes);
 app.use("/api/admin/about-blocks", aboutBlocksRoutes);
-app.use("/api/admin/working-hours", workingHoursRoutes);
 app.use("/api/admin/articles", articlesRoutes);
+app.use("/api/admin/partners", partnerRoutes);
+app.use("/api/admin/analytics", analyticsRoutes);
 
 // Sitemap and link-preview pages for social networks (see routes/seo.cjs)
 app.use(seoRoutes);

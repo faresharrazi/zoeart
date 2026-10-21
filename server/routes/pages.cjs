@@ -9,12 +9,19 @@ const {
 
 const router = express.Router();
 
+// Contact details shown on the site. The address column is kept in the
+// database but no longer published (removed at the client's request).
+const CONTACT_FIELDS = ["email", "phone", "instagram"];
+const PUBLIC_CONTACT_COLUMNS = "id, email, phone, instagram, updated_at";
+
 // Get all page content (public)
 router.get(
   "/",
   asyncHandler(async (req, res) => {
     const pages = await query("SELECT * FROM page_content");
-    const contactInfo = await query("SELECT * FROM contact_info");
+    const contactInfo = await query(
+      `SELECT ${PUBLIC_CONTACT_COLUMNS} FROM contact_info LIMIT 1`
+    );
 
     const pageData = pages.rows.reduce((acc, page) => {
       try {
@@ -37,7 +44,13 @@ router.get(
       return acc;
     }, {});
 
+    const partners = await query(
+      `SELECT id, name, logo_url, website_url FROM partners
+       WHERE is_visible = TRUE ORDER BY sort_order, id`
+    );
+
     const response = {
+      partners: partners.rows,
       pages: pageData,
       contactInfo: contactInfo.rows.length > 0 ? contactInfo.rows[0] : {},
     };
@@ -121,15 +134,15 @@ router.put(
   "/contact/info",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const { email, phone, instagram, address } = req.body;
-
-    const updateData = {
-      email: email || "",
-      phone: phone || "",
-      instagram: instagram || "",
-      address: address || "",
-      updated_at: new Date().toISOString(),
-    };
+    // Only the fields sent are changed (the address is no longer edited
+    // from the admin, but is kept in the database)
+    const updateData = {};
+    for (const field of CONTACT_FIELDS) {
+      if (req.body[field] !== undefined) {
+        updateData[field] = String(req.body[field] ?? "").trim();
+      }
+    }
+    updateData.updated_at = new Date().toISOString();
 
     // Check if contact info exists
     const existing = await query("SELECT id FROM contact_info LIMIT 1");
@@ -143,7 +156,7 @@ router.put(
          .map((key, index) => `${key} = $${index + 1}`)
          .join(", ")}
        WHERE id = $${Object.keys(updateData).length + 1}
-       RETURNING *`,
+       RETURNING ${PUBLIC_CONTACT_COLUMNS}`,
         [...Object.values(updateData), existing.rows[0].id]
       );
     } else {
@@ -153,7 +166,7 @@ router.put(
        VALUES (${Object.keys(updateData)
          .map((_, index) => `$${index + 1}`)
          .join(", ")})
-       RETURNING *`,
+       RETURNING ${PUBLIC_CONTACT_COLUMNS}`,
         Object.values(updateData)
       );
     }
@@ -166,7 +179,9 @@ router.put(
 router.get(
   "/contact/info",
   asyncHandler(async (req, res) => {
-    const contactInfo = await query("SELECT * FROM contact_info LIMIT 1");
+    const contactInfo = await query(
+      `SELECT ${PUBLIC_CONTACT_COLUMNS} FROM contact_info LIMIT 1`
+    );
 
     if (contactInfo.rows.length === 0) {
       return res.json({});

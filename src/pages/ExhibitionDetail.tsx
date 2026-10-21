@@ -24,7 +24,6 @@ import { STATUS_STYLES } from "@/lib/exhibitions";
 import { fetchPriority, imageSrcSet, imageUrl } from "@/lib/images";
 import { renderRichText } from "@/lib/richText";
 import { SITE_NAME, useSeo } from "@/hooks/useSeo";
-import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 
 // Social preview images: 1200x630, cropped to fill
 const shareImage = (url: string | null | undefined) =>
@@ -170,7 +169,6 @@ const ExhibitionDetail = () => {
     [slug]
   );
   const { article } = useArticleByExhibition(exhibition?.id);
-  const { contactInfo } = usePageDataFromDB();
   useSeo({
     title: exhibition?.title || (loading ? undefined : "Exhibition Not Found"),
     description: exhibition?.description,
@@ -189,7 +187,6 @@ const ExhibitionDetail = () => {
       location: {
         "@type": "Place",
         name: exhibition.location || SITE_NAME,
-        address: contactInfo?.address || exhibition.location || undefined,
       },
       organizer: {
         "@type": "Organization",

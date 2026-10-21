@@ -4,9 +4,11 @@ const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const { Pool } = require("pg");
+const migrate = require("./migrate.cjs");
 
-// Applies database/schema.sql, optionally loads the dev seed, and creates the
-// first admin user from ADMIN_USERNAME / ADMIN_PASSWORD when no user exists.
+// Applies database/schema.sql and pending migrations, optionally loads the
+// dev seed, and creates the first admin user from ADMIN_USERNAME /
+// ADMIN_PASSWORD when no user exists.
 //
 //   node scripts/setup-database.cjs          # schema + first admin
 //   node scripts/setup-database.cjs --seed   # also load sample content (dev only)
@@ -30,6 +32,7 @@ async function setupDatabase({ seed = false } = {}) {
   try {
     console.log("Applying schema...");
     await pool.query(readSql("schema.sql"));
+    await migrate(pool);
 
     if (seed) {
       if (process.env.NODE_ENV === "production") {

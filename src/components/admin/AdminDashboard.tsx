@@ -8,6 +8,8 @@ import NewsletterManagement from "./newsletter/NewsletterManagement";
 import PageContentManagement from "./page-content/PageContentManagement";
 import UserManagement from "./UserManagement";
 import UsefulLinks from "./UsefulLinks";
+import PartnersManagement from "./PartnersManagement";
+import AnalyticsDashboard from "./analytics/AnalyticsDashboard";
 import type { SessionUser } from "@/types/api";
 
 interface AdminDashboardProps {
@@ -16,7 +18,7 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
-  const [activeSection, setActiveSection] = useState("exhibitions");
+  const [activeSection, setActiveSection] = useState("analytics");
 
   // Check if user is authenticated on component mount
   useEffect(() => {
@@ -40,6 +42,10 @@ const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
         return <NewsletterManagement />;
       case "pages":
         return <PageContentManagement />;
+      case "analytics":
+        return <AnalyticsDashboard />;
+      case "partners":
+        return <PartnersManagement />;
       case "users":
         return <UserManagement />;
       case "links":

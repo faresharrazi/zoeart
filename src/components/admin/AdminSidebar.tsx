@@ -11,7 +11,8 @@ import {
   UserCog,
   BookOpen,
   Link,
-  // Settings, // Removed theme management
+  BarChart3,
+  Handshake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -23,12 +24,14 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "exhibitions", label: "Exhibitions", icon: Calendar },
   { id: "articles", label: "Articles", icon: BookOpen },
   { id: "artists", label: "Artists", icon: Users },
   { id: "artworks", label: "Artworks", icon: Palette },
   { id: "newsletter", label: "Newsletter", icon: Mail },
   { id: "pages", label: "Page Content", icon: FileText },
+  { id: "partners", label: "Partners", icon: Handshake },
   { id: "users", label: "User Management", icon: UserCog },
   { id: "links", label: "Useful Links", icon: Link },
 ];

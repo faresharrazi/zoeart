@@ -7,8 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
-import WorkingHoursManagement from "../WorkingHoursManagement";
-import { Edit, Save, X, Mail, Phone, MapPin, Instagram } from "lucide-react";
+import { Edit, Save, X, Mail, Phone, Instagram } from "lucide-react";
 import type { ContactInfo, PageEntry, PageFormData } from "@/types/api";
 
 interface ContactPageEditorProps {
@@ -40,7 +39,6 @@ const ContactPageEditor = ({
     email: "",
     phone: "",
     instagram: "",
-    address: "",
   });
 
   const handleContactInfoEdit = () => {
@@ -48,7 +46,6 @@ const ContactPageEditor = ({
       email: contactInfo?.email || "",
       phone: contactInfo?.phone || "",
       instagram: contactInfo?.instagram || "",
-      address: contactInfo?.address || "",
     });
     setEditingContactInfo(true);
   };
@@ -213,22 +210,6 @@ const ContactPageEditor = ({
                 />
               </div>
 
-              <div>
-                <Label htmlFor="contact-address">Address</Label>
-                <Textarea
-                  id="contact-address"
-                  value={contactFormData.address}
-                  onChange={(e) =>
-                    setContactFormData({
-                      ...contactFormData,
-                      address: e.target.value,
-                    })
-                  }
-                  placeholder="Enter address"
-                  rows={3}
-                />
-              </div>
-
               <div className="flex gap-2">
                 <Button onClick={handleContactInfoSave}>
                   <Save className="w-4 h-4 mr-2" />
@@ -274,23 +255,10 @@ const ContactPageEditor = ({
                   </p>
                 </div>
               </div>
-
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-gray-500" />
-                <div>
-                  <h4 className="font-medium">Address</h4>
-                  <p className="text-gray-600">
-                    {contactInfo?.address || "Not set"}
-                  </p>
-                </div>
-              </div>
             </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Working Hours Management */}
-      <WorkingHoursManagement />
     </div>
   );
 };

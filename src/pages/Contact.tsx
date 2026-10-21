@@ -1,10 +1,8 @@
 import { PageHeader, PageLayout } from "@/components/PageLayout";
 import NewsletterForm from "@/components/NewsletterForm";
-import OpeningHours from "@/components/OpeningHours";
-import { Mail, Phone, MapPin, Instagram } from "lucide-react";
+import { Mail, Phone, Instagram } from "lucide-react";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
-import { useWorkingHours } from "@/hooks/useWorkingHours";
-import { instagramUrl, mapsUrl } from "@/lib/contact";
+import { instagramUrl } from "@/lib/contact";
 import { useSeo } from "@/hooks/useSeo";
 
 const cardClass =
@@ -48,17 +46,13 @@ const ContactLink = ({
 
 const Contact = () => {
   const { pageData, contactInfo } = usePageDataFromDB();
-  const { workingHours } = useWorkingHours();
   useSeo({
     title: "Contact",
     description: pageData.contact?.description,
   });
 
   const hasContactInfo = Boolean(
-    contactInfo?.email ||
-    contactInfo?.phone ||
-    contactInfo?.instagram ||
-    contactInfo?.address
+    contactInfo?.email || contactInfo?.phone || contactInfo?.instagram
   );
 
   return (
@@ -79,7 +73,7 @@ const Contact = () => {
           <div
             className={
               hasContactInfo
-                ? "grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch"
+                ? "grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch"
                 : "max-w-md mx-auto"
             }
           >
@@ -95,55 +89,32 @@ const Contact = () => {
             </div>
 
             {hasContactInfo && contactInfo && (
-              <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-                <div className={cardClass}>
-                  <CardHeading>Contact Us</CardHeading>
-                  <ul className="space-y-4">
-                    {contactInfo.email && (
-                      <ContactLink
-                        icon={Mail}
-                        href={`mailto:${contactInfo.email}`}
-                      >
-                        {contactInfo.email}
-                      </ContactLink>
-                    )}
-                    {contactInfo.phone && (
-                      <ContactLink
-                        icon={Phone}
-                        href={`tel:${contactInfo.phone}`}
-                      >
-                        {contactInfo.phone}
-                      </ContactLink>
-                    )}
-                    {contactInfo.instagram && (
-                      <ContactLink
-                        icon={Instagram}
-                        href={instagramUrl(contactInfo.instagram)}
-                        external
-                      >
-                        {contactInfo.instagram}
-                      </ContactLink>
-                    )}
-                    {contactInfo.address && (
-                      <ContactLink
-                        icon={MapPin}
-                        href={mapsUrl(contactInfo.address)}
-                        external
-                      >
-                        {contactInfo.address}
-                      </ContactLink>
-                    )}
-                  </ul>
-                </div>
-
-                {workingHours.length > 0 && (
-                  <div className="bg-white rounded-2xl p-6 lg:p-8 shadow-lg border border-gray-100 w-full h-full flex flex-col">
-                    <h2 className="text-xl font-bold text-center text-gray-900 mb-6">
-                      Gallery Hours
-                    </h2>
-                    <OpeningHours hours={workingHours} />
-                  </div>
-                )}
+              <div className={cardClass}>
+                <CardHeading>Contact Us</CardHeading>
+                <ul className="space-y-4">
+                  {contactInfo.email && (
+                    <ContactLink
+                      icon={Mail}
+                      href={`mailto:${contactInfo.email}`}
+                    >
+                      {contactInfo.email}
+                    </ContactLink>
+                  )}
+                  {contactInfo.phone && (
+                    <ContactLink icon={Phone} href={`tel:${contactInfo.phone}`}>
+                      {contactInfo.phone}
+                    </ContactLink>
+                  )}
+                  {contactInfo.instagram && (
+                    <ContactLink
+                      icon={Instagram}
+                      href={instagramUrl(contactInfo.instagram)}
+                      external
+                    >
+                      {contactInfo.instagram}
+                    </ContactLink>
+                  )}
+                </ul>
               </div>
             )}
           </div>

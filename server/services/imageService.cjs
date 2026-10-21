@@ -12,6 +12,7 @@ const CLOUDINARY_OPTIONS_BY_CATEGORY = {
   artwork: uploadOptions.artwork,
   artist_profile: uploadOptions.artist,
   hero_image: uploadOptions.hero,
+  partner: uploadOptions.partner,
 };
 
 // Images stored in Postgres are referenced as /api/files/<id> (older records
@@ -108,6 +109,7 @@ class ImageService {
          UNION ALL SELECT 1 FROM artworks WHERE featured_image = $1 OR images @> jsonb_build_array($1::text)
          UNION ALL SELECT 1 FROM artists WHERE profile_image = $1
          UNION ALL SELECT 1 FROM hero_images WHERE cloudinary_url = $1
+         UNION ALL SELECT 1 FROM partners WHERE logo_url = $1
          UNION ALL SELECT 1 FROM articles WHERE featured_image = $1 OR position($1 in content) > 0
          UNION ALL SELECT 1 FROM about_blocks WHERE position($1 in content) > 0
        ) AS used`,

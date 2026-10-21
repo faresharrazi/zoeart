@@ -48,7 +48,13 @@ const PageContentManagement = () => {
     if (!editingPage) return;
 
     try {
-      await apiClient.updatePageContent(editingPage, formData);
+      // Only the editable fields: sending the whole page object back used
+      // to nest old copies of the page inside its own content
+      await apiClient.updatePageContent(editingPage, {
+        title: formData.title,
+        description: formData.description,
+        isVisible: formData.isVisible,
+      });
       await refreshPageData();
       setEditingPage(null);
       setFormData({});
@@ -77,7 +83,6 @@ const PageContentManagement = () => {
 
     try {
       await apiClient.updatePageContent(pageId, {
-        ...currentData,
         isVisible: !currentData.isVisible,
       });
       await refreshPageData();

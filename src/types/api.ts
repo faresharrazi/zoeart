@@ -119,13 +119,6 @@ export interface AboutBlock {
   updated_at: string;
 }
 
-export interface WorkingHour {
-  id: number | string;
-  day: string;
-  time_frame: string;
-  is_active: boolean;
-}
-
 export interface PageEntry {
   page_name?: string;
   title: string;
@@ -140,11 +133,22 @@ export interface ContactInfo {
   email: string;
   phone: string;
   instagram: string;
-  address: string;
   updated_at: string;
 }
 
+/** A logo in the footer's "Collaboration" section */
+export interface Partner {
+  id: number;
+  name: string;
+  logo_url: string;
+  website_url: string | null;
+  sort_order?: number;
+  is_visible?: boolean;
+}
+
 export interface PageContentResponse {
+  /** Visible partners, in display order */
+  partners: Partner[];
   pages: Record<string, PageEntry>;
   /** {} when no contact info has been saved yet */
   contactInfo: ContactInfo | Record<string, never>;
@@ -216,5 +220,28 @@ export interface PageFormData {
   email?: string;
   phone?: string;
   instagram?: string;
-  address?: string;
+}
+
+export type AnalyticsRange = "7d" | "30d" | "90d" | "12m";
+
+export interface AnalyticsSummary {
+  range: AnalyticsRange;
+  /** Size of each point in `series` */
+  bucket: "day" | "week" | "month";
+  totals: {
+    views: number;
+    /** Visitors are counted once per day, then summed over the range */
+    visitors: number;
+    previous_views: number;
+    previous_visitors: number;
+    newsletter_signups: number;
+    /** Distinct visitors in the last 30 minutes */
+    visitors_now: number;
+  };
+  /** One point per bucket; `date` is "YYYY-MM-DD", the bucket's first day */
+  series: { date: string; views: number; visitors: number }[];
+  pages: { path: string; title: string; views: number; visitors: number }[];
+  sources: { source: string; views: number }[];
+  devices: { device: "mobile" | "tablet" | "desktop"; views: number }[];
+  countries: { country: string; views: number }[];
 }

@@ -11,8 +11,10 @@ npm i
 # Configure local environment (Postgres URL, JWT secret, first admin)
 cp .env.example .env.local
 
-# Create tables, load sample content and the first admin user
-npm run db:seed
+# Create tables and the first admin user, then copy the live site's
+# public content (or use `npm run db:seed` for sample content)
+npm run db:setup
+npm run db:import-live
 
 # Start the API (port 3001) and the frontend (port 8080) together
 npm run dev:full

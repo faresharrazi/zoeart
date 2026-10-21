@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useApi } from "@/hooks/useApi";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, normalizeImageUrl } from "@/lib/apiClient";
 import { PageDataContext, type PageDataValue } from "./pageDataContextValue";
 import type { ContactInfo } from "@/types/api";
 
@@ -25,6 +25,10 @@ export const PageDataProvider = ({
     return {
       pageData: pages,
       contactInfo: isContactInfo(contact) ? contact : null,
+      partners: (data?.partners ?? []).map((partner) => ({
+        ...partner,
+        logo_url: normalizeImageUrl(partner.logo_url),
+      })),
       homeSettings: pages.home
         ? {
             title: pages.home.title,

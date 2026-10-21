@@ -1,5 +1,7 @@
 import type {
   AboutBlock,
+  AnalyticsRange,
+  AnalyticsSummary,
   AdminUser,
   Article,
   Artist,
@@ -13,23 +15,25 @@ import type {
   HeroImage,
   NewsletterSubscriber,
   PageContentResponse,
+  Partner,
   SessionUser,
   UploadedImage,
-  WorkingHour,
 } from "@/types/api";
 
 // In development Vite proxies /api to the Express server (see vite.config.ts).
 const API_BASE_URL = "/api";
 
-// Images are stored either as full Cloudinary URLs or as references to files
-// kept in Postgres (/api/file/<id>, /api/files/<id> or a bare id).
+// Images are stored as full Cloudinary URLs, as references to files kept in
+// Postgres (/api/file/<id>, /api/files/<id> or a bare id), or as paths to
+// files in public/.
 export const normalizeImageUrl = (value: unknown): string => {
   if (typeof value !== "string" || !value) return "";
   if (value.startsWith("http")) return value;
   if (value.startsWith("/api/file/")) {
     return `${API_BASE_URL}/files/${value.slice("/api/file/".length)}`;
   }
-  if (value.startsWith("/api/files/")) return value;
+  // Other site paths (e.g. /collaborators/1.webp in public/) are used as is
+  if (value.startsWith("/")) return value;
   return `${API_BASE_URL}/files/${value}`;
 };
 
@@ -426,17 +430,42 @@ class ApiClient {
     return this.send("/admin/about-blocks/reorder", "PATCH", { blocks });
   }
 
-  // Opening hours
-  getWorkingHours() {
-    return this.request<WorkingHour[]>("/working-hours");
+  // Partners (footer logos)
+  getAdminPartners() {
+    return this.request<Partner[]>("/admin/partners");
   }
 
-  getAdminWorkingHours() {
-    return this.request<WorkingHour[]>("/admin/working-hours");
+  createPartner(data: Pick<Partner, "name" | "logo_url"> & Partial<Partner>) {
+    return this.send<Partner>("/admin/partners", "POST", data);
   }
 
-  updateWorkingHours(workingHours: Omit<WorkingHour, "id">[]) {
-    return this.send("/admin/working-hours", "PUT", { workingHours });
+  updatePartner(id: number, data: Partial<Partner>) {
+    return this.send<Partner>(`/admin/partners/${id}`, "PUT", data);
+  }
+
+  deletePartner(id: number) {
+    return this.send(`/admin/partners/${id}`, "DELETE");
+  }
+
+  reorderPartners(ids: number[]) {
+    return this.send("/admin/partners/reorder", "PATCH", { ids });
+  }
+
+  // Analytics
+  /** Records a page view (see src/components/PageViewTracker.tsx) */
+  trackPageView(data: { path: string; referrer?: string; utm_source?: string }) {
+    return fetch(`${API_BASE_URL}/analytics/pageview`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      keepalive: true,
+    }).catch(() => undefined);
+  }
+
+  getAnalytics(range: AnalyticsRange) {
+    return this.request<AnalyticsSummary>(`/admin/analytics?range=${range}`, {
+      cache: "no-store",
+    });
   }
 
   // Admin users
