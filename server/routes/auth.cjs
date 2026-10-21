@@ -9,6 +9,39 @@ const {
 
 const router = express.Router();
 
+// Best-effort brute-force protection: at most MAX_ATTEMPTS failed logins per
+// IP and username within the window. Kept in memory, so it resets when a
+// serverless instance is recycled, but it still slows down guessing.
+const MAX_ATTEMPTS = 10;
+const ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+const failedAttempts = new Map();
+
+const attemptKey = (req, username) =>
+  `${req.headers["x-forwarded-for"] || req.ip}|${String(username).toLowerCase()}`;
+
+const isLockedOut = (key) => {
+  const entry = failedAttempts.get(key);
+  if (!entry) return false;
+  if (Date.now() - entry.firstAt > ATTEMPT_WINDOW_MS) {
+    failedAttempts.delete(key);
+    return false;
+  }
+  return entry.count >= MAX_ATTEMPTS;
+};
+
+const recordFailure = (key) => {
+  const entry = failedAttempts.get(key);
+  if (!entry || Date.now() - entry.firstAt > ATTEMPT_WINDOW_MS) {
+    failedAttempts.set(key, { count: 1, firstAt: Date.now() });
+  } else {
+    entry.count++;
+  }
+};
+
+// Compared against when the username doesn't exist, so both cases take the
+// same time and usernames can't be discovered by timing.
+const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", 12);
+
 // Login endpoint
 router.post(
   "/login",
@@ -19,81 +52,45 @@ router.post(
       throw new ValidationError("Username and password are required");
     }
 
-    console.log("Login attempt:", { username, password: "provided" });
-    console.log("Request headers:", req.headers);
-    console.log("Request host:", req.get('host'));
-    console.log("Request origin:", req.get('origin'));
+    const key = attemptKey(req, username);
+    if (isLockedOut(key)) {
+      return res
+        .status(429)
+        .json({ error: "Too many failed attempts. Try again in 15 minutes." });
+    }
 
-    // Check environment variables
-    console.log("Environment variables check:");
-    console.log("DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Not set");
-    console.log("POSTGRES_URL:", process.env.POSTGRES_URL ? "Set" : "Not set");
-    console.log("NODE_ENV:", process.env.NODE_ENV);
-    console.log("JWT_SECRET:", process.env.JWT_SECRET ? "Set" : "Not set");
+    const users = await query("SELECT * FROM users WHERE username = $1", [
+      username,
+    ]);
+    const user = users.rows[0];
 
-    try {
-      // Get user from database
-      const users = await query("SELECT * FROM users WHERE username = $1", [
-        username,
-      ]);
-      console.log("Found users:", users.rows.length);
+    const isValidPassword = await bcrypt.compare(
+      String(password),
+      user ? user.password_hash : DUMMY_HASH
+    );
 
-      if (users.rows.length === 0) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
+    if (!user || !isValidPassword) {
+      recordFailure(key);
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
 
-      const user = users.rows[0];
+    failedAttempts.delete(key);
 
-      // Test database connection
-      console.log("Testing database connection...");
-      console.log(
-        "DATABASE_URL:",
-        process.env.DATABASE_URL ? "Set" : "Not set"
-      );
-      console.log(
-        "POSTGRES_URL:",
-        process.env.POSTGRES_URL ? "Set" : "Not set"
-      );
+    const token = generateToken({
+      id: user.id,
+      username: user.username,
+      role: user.role || "admin",
+    });
 
-      // Verify password
-      const isValidPassword = await bcrypt.compare(
-        password,
-        user.password_hash
-      );
-
-      if (!isValidPassword) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-
-      // Generate JWT token
-      const token = generateToken({
+    res.json({
+      success: true,
+      token,
+      user: {
         id: user.id,
         username: user.username,
         role: user.role || "admin",
-      });
-
-      res.json({
-        success: true,
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          role: user.role || "admin",
-        },
-      });
-    } catch (error) {
-      console.error("Login error:", error);
-      console.error("Error details:", {
-        message: error.message,
-        code: error.code,
-        stack: error.stack,
-        name: error.name
-      });
-      res.status(500).json({ 
-        error: "Login failed",
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      });
-    }
+      },
+    });
   })
 );
 
@@ -147,9 +144,9 @@ router.post(
       );
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 10) {
       throw new ValidationError(
-        "New password must be at least 6 characters long"
+        "New password must be at least 10 characters long"
       );
     }
 
@@ -173,7 +170,7 @@ router.post(
     }
 
     // Hash new password
-    const saltRounds = 10;
+    const saltRounds = 12;
     const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
 
     // Update password

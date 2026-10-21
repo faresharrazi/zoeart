@@ -1,32 +1,40 @@
 import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import AdminLogin from "@/components/admin/AdminLogin";
 import AdminDashboard from "@/components/admin/AdminDashboard";
+import { apiClient } from "@/lib/apiClient";
+import { useSeo } from "@/hooks/useSeo";
+import type { SessionUser } from "@/types/api";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
+  useSeo({ title: "Admin", noIndex: true });
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Restore a previous login only if the server still accepts the token
     const token = localStorage.getItem("adminToken");
-    const userData = localStorage.getItem("adminUser");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
+    apiClient
+      .verifySession()
+      .then(({ user }) => {
+        localStorage.setItem("adminUser", JSON.stringify(user));
+        setUser(user);
         setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Error parsing user data:", error);
+      })
+      .catch(() => {
         localStorage.removeItem("adminToken");
         localStorage.removeItem("adminUser");
-      }
-    }
-    setLoading(false);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleLogin = (token: string, userData: any) => {
+  const handleLogin = (token: string, userData: SessionUser) => {
     setUser(userData);
     setIsAuthenticated(true);
   };
@@ -40,11 +48,12 @@ const Admin = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-theme-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary mx-auto"></div>
-          <p className="mt-2 text-theme-text-muted">Loading...</p>
-        </div>
+      <div
+        role="status"
+        className="flex min-h-screen items-center justify-center gap-3 bg-canvas text-sm text-mist"
+      >
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        Loading…
       </div>
     );
   }

@@ -8,6 +8,10 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      "/api": "http://localhost:3001",
+      "/sitemap.xml": "http://localhost:3001",
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(
     Boolean
@@ -15,6 +19,17 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // React and the router change rarely; keep them in their own
+        // long-cached file
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom"],
+        },
+      },
     },
   },
 }));

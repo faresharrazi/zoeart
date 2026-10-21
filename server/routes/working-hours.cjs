@@ -1,54 +1,31 @@
 const express = require("express");
-const { query } = require("../config/database.cjs");
+const { query, transaction } = require("../config/database.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
 const {
   asyncHandler,
   ValidationError,
-  NotFoundError,
 } = require("../middleware/errorHandler.cjs");
 
+// Opening hours: a list of rows ("Monday – Friday" / "10:00 – 18:00") in the
+// order the admin set. The site shows the rows switched on; admin requests
+// get every row.
 const router = express.Router();
 
-// Get all working hours (public)
+const COLUMNS = "id, day, time_frame, is_active, sort_order";
+
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    console.log("Fetching working hours...");
-
-    try {
-      const result = await query(
-        "SELECT * FROM working_hours WHERE is_active = true ORDER BY id"
-      );
-
-      console.log("Working hours found:", result.rows.length);
-      res.json(result.rows);
-    } catch (error) {
-      console.error("Error fetching working hours:", error);
-      throw error;
-    }
+    const result = await query(
+      `SELECT ${COLUMNS} FROM working_hours
+       ${req.isAdminRequest ? "" : "WHERE is_active = TRUE"}
+       ORDER BY sort_order, id`
+    );
+    res.json(result.rows);
   })
 );
 
-// Get all working hours (admin only)
-router.get(
-  "/admin",
-  authenticateToken,
-  asyncHandler(async (req, res) => {
-    console.log("Fetching all working hours for admin...");
-
-    try {
-      const result = await query("SELECT * FROM working_hours ORDER BY id");
-
-      console.log("All working hours found:", result.rows.length);
-      res.json(result.rows);
-    } catch (error) {
-      console.error("Error fetching admin working hours:", error);
-      throw error;
-    }
-  })
-);
-
-// Update working hours (admin only)
+// Replace the whole list (admin only), in the order given
 router.put(
   "/",
   authenticateToken,
@@ -56,69 +33,38 @@ router.put(
     const { workingHours } = req.body;
 
     if (!Array.isArray(workingHours)) {
-      throw new ValidationError("Working hours must be an array");
+      throw new ValidationError("Opening hours must be a list");
+    }
+    const rows = workingHours.map((row) => ({
+      day: String(row.day ?? "").trim(),
+      time_frame: String(row.time_frame ?? "").trim(),
+      is_active: row.is_active !== false,
+    }));
+    for (const row of rows) {
+      if (!row.day || !row.time_frame) {
+        throw new ValidationError("Each row needs a day and its hours");
+      }
+      if (row.day.length > 60 || row.time_frame.length > 120) {
+        throw new ValidationError("A day or hours entry is too long");
+      }
     }
 
-    console.log("Updating working hours:", workingHours);
-
-    try {
-      // Clear existing working hours
-      console.log("Clearing existing working hours...");
-      await query("DELETE FROM working_hours");
-
-      // Insert new working hours
-      console.log("Inserting new working hours...");
-      for (const hour of workingHours) {
-        if (!hour.day || !hour.time_frame) {
-          throw new ValidationError(
-            "Each working hour must have day and time_frame"
-          );
-        }
-
-        console.log(`Inserting: ${hour.day} - ${hour.time_frame} (active: ${hour.is_active})`);
-        await query(
-          "INSERT INTO working_hours (day, time_frame, is_active) VALUES ($1, $2, $3)",
-          [hour.day, hour.time_frame, hour.is_active !== false]
+    // All-or-nothing, so a failure can't leave the hours half-deleted
+    const saved = await transaction(async (client) => {
+      await client.query("DELETE FROM working_hours");
+      for (const [index, row] of rows.entries()) {
+        await client.query(
+          "INSERT INTO working_hours (day, time_frame, is_active, sort_order) VALUES ($1, $2, $3, $4)",
+          [row.day, row.time_frame, row.is_active, index + 1]
         );
       }
+      const result = await client.query(
+        `SELECT ${COLUMNS} FROM working_hours ORDER BY sort_order, id`
+      );
+      return result.rows;
+    });
 
-      // Return updated working hours
-      console.log("Fetching updated working hours...");
-      const result = await query("SELECT * FROM working_hours ORDER BY id");
-
-      console.log("Successfully updated working hours:", result.rows.length);
-      res.json(result.rows);
-    } catch (error) {
-      console.error("Error updating working hours:", error);
-      throw error;
-    }
-  })
-);
-
-// Update single working hour (admin only)
-router.put(
-  "/:id",
-  authenticateToken,
-  asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { day, time_frame, is_active } = req.body;
-
-    if (!day || !time_frame) {
-      throw new ValidationError("Day and time_frame are required");
-    }
-
-    console.log(`Updating working hour ${id}:`, { day, time_frame, is_active });
-
-    const result = await query(
-      "UPDATE working_hours SET day = $1, time_frame = $2, is_active = $3 WHERE id = $4 RETURNING *",
-      [day, time_frame, is_active !== false, id]
-    );
-
-    if (result.rows.length === 0) {
-      throw new NotFoundError("Working hour not found");
-    }
-
-    res.json(result.rows[0]);
+    res.json(saved);
   })
 );
 

@@ -1,129 +1,246 @@
-import { useState, useEffect } from "react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Search, X } from "lucide-react";
 import ArtworkCard from "@/components/ArtworkCard";
-import { Loader2 } from "lucide-react";
+import {
+  Container,
+  LoadingState,
+  PageHeader,
+  PageLayout,
+  RequireVisiblePage,
+} from "@/components/PageLayout";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useApi } from "@/hooks/useApi";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
+import { useSeo } from "@/hooks/useSeo";
 import { apiClient } from "@/lib/apiClient";
+import {
+  filterArtworks,
+  filterOptions,
+  SORT_ORDERS,
+  type CollectionFilters,
+  type SortOrder,
+} from "@/lib/collection";
+
+// Radix Select items can't have an empty value
+const ALL = "all";
+
+// Underlined fields, matching the site's forms
+const fieldClass =
+  "h-11 rounded-none border-0 border-b border-ink/40 bg-transparent px-0 shadow-none focus:border-ink focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0";
+
+const FilterSelect = ({
+  id,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (value: string) => void;
+}) => (
+  <div className="flex flex-col gap-1.5">
+    <label htmlFor={id} className="text-sm text-mist">
+      {label}
+    </label>
+    <Select
+      value={value || ALL}
+      onValueChange={(v) => onChange(v === ALL ? "" : v)}
+    >
+      <SelectTrigger id={id} className={fieldClass}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ALL}>All</SelectItem>
+        {options.map((option) => (
+          <SelectItem key={option} value={option}>
+            {option}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+);
 
 const Collection = () => {
-  const [artworks, setArtworks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const { pageData } = usePageDataFromDB();
+  const { data: artworks = [], loading } = useApi(
+    () => apiClient.getArtworks(),
+    []
+  );
+  useSeo({
+    title: pageData.gallery?.title || "Collection",
+    description: pageData.gallery?.description,
+  });
 
-  // Check if page is visible
-  const isPageVisible = pageData.gallery?.isVisible;
-
-  // If page is not visible, redirect to home
-  useEffect(() => {
-    if (pageData && isPageVisible === false) {
-      window.location.href = "/";
-    }
-  }, [pageData, isPageVisible]);
-
-  // Don't render anything if page is not visible
-  if (pageData && isPageVisible === false) {
-    return null;
-  }
-
-  useEffect(() => {
-    const fetchArtworks = async () => {
-      try {
-        const [artworksData, artistsData] = await Promise.all([
-          apiClient.getArtworks(),
-          apiClient.getArtists(),
-        ]);
-
-        // Enrich artworks with artist names
-        const enrichedArtworks = (artworksData as any[]).map((artwork) => {
-          if (artwork.artist_id) {
-            const artist = (artistsData as any[]).find(
-              (artist: any) => artist.id.toString() === artwork.artist_id.toString()
-            );
-            if (artist && artist.name) {
-              artwork.artist_name = artist.name;
-            }
-          }
-          return artwork;
-        });
-
-        setArtworks(enrichedArtworks);
-      } catch (error) {
-        console.error("Error fetching artworks:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArtworks();
-  }, []);
-
-
-  const handleArtworkClick = (artworkSlug: string) => {
-    window.location.href = `/artwork/${artworkSlug}`;
+  // Filters live in the URL so a filtered view can be shared or bookmarked
+  const [params, setParams] = useSearchParams();
+  const sortParam = params.get("sort") || "";
+  const filters: CollectionFilters = {
+    q: params.get("q") || "",
+    artist: params.get("artist") || "",
+    year: params.get("year") || "",
+    medium: params.get("medium") || "",
+    sort: sortParam in SORT_ORDERS ? (sortParam as SortOrder) : "newest",
   };
+  const setFilter = (key: keyof CollectionFilters, value: string) => {
+    const next = new URLSearchParams(params);
+    if (value && !(key === "sort" && value === "newest")) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: true });
+  };
+  const isFiltered = Boolean(
+    filters.q || filters.artist || filters.year || filters.medium
+  );
 
-  if (loading) {
-    return (
-      <div className="min-h-screen">
-        <Navigation />
-        <section className="pt-24 pb-16 bg-[#0f0f0f] relative">
-          <div className="container mx-auto px-6 text-center relative z-10">
-            <div className="max-w-4xl mx-auto my-24">
-              <h1 className="text-5xl md:text-7xl text-white mb-6 drop-shadow-lg">
-                {pageData.gallery?.title || "Gallery"}
-              </h1>
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-white" />
-                <span className="ml-2 text-white/95">
-                  Loading collection...
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-        <Footer />
-      </div>
-    );
-  }
+  const options = useMemo(() => filterOptions(artworks), [artworks]);
+  const results = useMemo(
+    () => filterArtworks([...artworks], filters),
+    // filters is derived from params
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [artworks, params.toString()]
+  );
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
+    <RequireVisiblePage page="gallery">
+      <PageLayout>
+        <PageHeader
+          title={pageData.gallery?.title?.trim() || "Collection"}
+          description={
+            pageData.gallery?.description && (
+              <p>{pageData.gallery.description}</p>
+            )
+          }
+        />
 
-      {/* Hero Section */}
-      <section className="bg-[#0f0f0f] relative">
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="max-w-4xl mx-auto py-8">
-            <h1 className="text-4xl md:text-6xl text-white mb-6 drop-shadow-lg">
-              {pageData.gallery?.title || "Gallery"}
-            </h1>
-            <p className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-              {pageData.gallery?.description || "Explore our collection"}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Artworks Grid */}
-      {artworks.length > 0 && (
-        <section className="py-20 bg-theme-background">
-          <div className="container mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {artworks.map((artwork) => (
-                <ArtworkCard
-                  key={artwork.id}
-                  artwork={artwork}
-                  onArtworkClick={handleArtworkClick}
+        <Container className="pb-16 md:pb-20">
+          {loading ? (
+            <LoadingState label="Loading collection…" />
+          ) : artworks.length === 0 ? (
+            <p className="text-center text-mist">No artworks to show yet.</p>
+          ) : (
+            <>
+              <form
+                role="search"
+                aria-label="Filter artworks"
+                onSubmit={(e) => e.preventDefault()}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-6 border-t border-line pt-10 mb-8"
+              >
+                <div className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
+                  <label
+                    htmlFor="collection-search"
+                    className="text-sm text-mist"
+                  >
+                    Search
+                  </label>
+                  <div className="relative">
+                    <Search
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-mist"
+                      aria-hidden="true"
+                    />
+                    <Input
+                      id="collection-search"
+                      type="search"
+                      value={filters.q}
+                      onChange={(e) => setFilter("q", e.target.value)}
+                      placeholder="Title, artist, medium…"
+                      className={`${fieldClass} pl-7`}
+                    />
+                  </div>
+                </div>
+                <FilterSelect
+                  id="filter-artist"
+                  label="Artist"
+                  value={filters.artist}
+                  options={options.artists}
+                  onChange={(v) => setFilter("artist", v)}
                 />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+                <FilterSelect
+                  id="filter-year"
+                  label="Year"
+                  value={filters.year}
+                  options={options.years}
+                  onChange={(v) => setFilter("year", v)}
+                />
+                <FilterSelect
+                  id="filter-medium"
+                  label="Medium"
+                  value={filters.medium}
+                  options={options.mediums}
+                  onChange={(v) => setFilter("medium", v)}
+                />
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="filter-sort" className="text-sm text-mist">
+                    Sort by
+                  </label>
+                  <Select
+                    value={filters.sort}
+                    onValueChange={(v) => setFilter("sort", v)}
+                  >
+                    <SelectTrigger id="filter-sort" className={fieldClass}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(SORT_ORDERS).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </form>
 
-      <Footer />
-    </div>
+              <div className="flex items-center justify-between gap-4 mb-10 min-h-10">
+                <p className="text-mist" role="status" aria-live="polite">
+                  {isFiltered
+                    ? `${results.length} of ${artworks.length} artworks`
+                    : `${artworks.length} artworks`}
+                </p>
+                {isFiltered && (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 text-sm border-b border-ink pb-0.5 hover:text-stone"
+                    onClick={() =>
+                      setParams(new URLSearchParams(), { replace: true })
+                    }
+                  >
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
+                    Clear filters
+                  </button>
+                )}
+              </div>
+
+              {results.length > 0 ? (
+                <div className="grid grid-cols-1 gap-x-7 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">
+                  {results.map((artwork) => (
+                    <ArtworkCard
+                      key={artwork.id}
+                      artwork={artwork}
+                      headingLevel="h2"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-mist py-12">
+                  No artworks match these filters.
+                </p>
+              )}
+            </>
+          )}
+        </Container>
+      </PageLayout>
+    </RequireVisiblePage>
   );
 };
 

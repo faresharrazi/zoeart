@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import { useArtistData } from "@/hooks/useArtistData";
 import ArtistList from "./ArtistList";
 import ArtistForm from "./ArtistForm";
+import { AdminPage, LoadingPanel } from "../AdminUI";
 
 interface Artist {
   id: string;
@@ -25,27 +26,26 @@ const ArtistManagement = () => {
   const { toast } = useToast();
   const { transformArtistsData } = useArtistData();
 
-  useEffect(() => {
-    fetchArtists();
-  }, [transformArtistsData]);
-
-  const fetchArtists = async () => {
+  const fetchArtists = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await apiClient.getArtists();
-      const transformedArtists = transformArtistsData(data as any[]);
+      const data = await apiClient.getAdminArtists();
+      const transformedArtists = transformArtistsData(data);
       setArtists(transformedArtists);
     } catch (error) {
       console.error("Error fetching artists:", error);
       toast({
-        title: "Error",
-        description: "Failed to fetch artists",
+        title: "Couldn't load the artists",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, transformArtistsData]);
+
+  useEffect(() => {
+    fetchArtists();
+  }, [fetchArtists]);
 
   const handleAdd = () => {
     setEditingArtist(undefined);
@@ -57,25 +57,16 @@ const ArtistManagement = () => {
     setIsEditing(true);
   };
 
-  const handleSave = (artist: Artist) => {
-    if (editingArtist) {
-      // Update existing artist
-      setArtists((prev) => prev.map((a) => (a.id === artist.id ? artist : a)));
-    } else {
-      // Add new artist
-      setArtists((prev) => [...prev, artist]);
-    }
+  const handleSave = () => {
     setIsEditing(false);
     setEditingArtist(null);
+    // Reload so a new artist gets its id and web address from the server
+    fetchArtists();
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setEditingArtist(null);
-  };
-
-  const handleDelete = (id: string) => {
-    setArtists((prev) => prev.filter((a) => a.id !== id));
   };
 
   const handleToggleVisibility = (id: string, isVisible: boolean) => {
@@ -86,15 +77,9 @@ const ArtistManagement = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Artist Management</h2>
-        </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          <span className="ml-3 text-gray-600">Loading artists...</span>
-        </div>
-      </div>
+      <AdminPage title="Artists">
+        <LoadingPanel label="Loading artists…" />
+      </AdminPage>
     );
   }
 

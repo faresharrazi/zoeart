@@ -1,130 +1,143 @@
 const express = require("express");
-const { ArtistService } = require("../services/database.cjs");
+const { DatabaseService } = require("../services/database.cjs");
+const { query, transaction } = require("../config/database.cjs");
+const imageService = require("../services/imageService.cjs");
+const { uniqueSlug } = require("../services/slug.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
-const { asyncHandler, ValidationError, NotFoundError } = require("../middleware/errorHandler.cjs");
+const {
+  asyncHandler,
+  ValidationError,
+  NotFoundError,
+} = require("../middleware/errorHandler.cjs");
 
 const router = express.Router();
 
-// Get visible artists only (public)
-router.get("/", asyncHandler(async (req, res) => {
-  const artists = await ArtistService.findVisible();
-  
-  // Transform data for frontend
-  const transformedArtists = artists.map(artist => ({
-    id: artist.id,
-    name: artist.name,
-    slug: artist.slug,
-    specialty: artist.specialty || "",
-    bio: artist.bio || "",
-    profile_image: artist.profile_image || "",
-    social_media: artist.social_media || {},
-    assigned_artworks: artist.assigned_artworks || [],
-    is_visible: artist.is_visible !== false,
-    created_at: artist.created_at,
-    updated_at: artist.updated_at,
-  }));
+const toArtist = (artist) => ({
+  id: artist.id,
+  name: artist.name,
+  slug: artist.slug,
+  specialty: artist.specialty || "",
+  bio: artist.bio || "",
+  profile_image: artist.profile_image || "",
+  social_media: artist.social_media || {},
+  assigned_artworks: artist.assigned_artworks || [],
+  is_visible: artist.is_visible !== false,
+  created_at: artist.created_at,
+  updated_at: artist.updated_at,
+});
 
-  res.json(transformedArtists);
-}));
+// List artists. Hidden ones are only included for admin requests.
+router.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const { rows } = await query(
+      `SELECT * FROM artists
+       ${req.isAdminRequest ? "" : "WHERE is_visible = TRUE"}
+       ORDER BY name ASC`
+    );
+    res.json(rows.map(toArtist));
+  })
+);
 
-// Get single artist (public)
-router.get("/:id", asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const artist = await ArtistService.getById(id);
-  
-  if (!artist) {
-    throw new NotFoundError("Artist not found");
-  }
+// Single artist by id or slug
+router.get(
+  "/:key",
+  asyncHandler(async (req, res) => {
+    const { key } = req.params;
+    const { rows } = await query(
+      `SELECT * FROM artists WHERE ${/^\d+$/.test(key) ? "id" : "slug"} = $1`,
+      [key]
+    );
+    const artist = rows[0];
 
-  // Transform data for frontend
-  const transformedArtist = {
-    id: artist.id,
-    name: artist.name,
-    slug: artist.slug,
-    specialty: artist.specialty || "",
-    bio: artist.bio || "",
-    profile_image: artist.profile_image || "",
-    social_media: artist.social_media || {},
-    assigned_artworks: artist.assigned_artworks || [],
-    is_visible: artist.is_visible !== false,
-    created_at: artist.created_at,
-    updated_at: artist.updated_at,
-  };
+    if (!artist || (!artist.is_visible && !req.isAdminRequest)) {
+      throw new NotFoundError("Artist not found");
+    }
 
-  res.json(transformedArtist);
-}));
+    res.json(toArtist(artist));
+  })
+);
 
 // Create artist (admin only)
-router.post("/", authenticateToken, asyncHandler(async (req, res) => {
-  const {
-    name,
-    slug,
-    specialty,
-    bio,
-    profile_image,
-    social_media,
-    assigned_artworks,
-    is_visible,
-  } = req.body;
+router.post(
+  "/",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const data = { ...req.body };
 
-  if (!name) {
-    throw new ValidationError("Name is required");
-  }
+    if (!data.name) {
+      throw new ValidationError("Name is required");
+    }
 
-  const artistData = {
-    name,
-    slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
-    specialty: specialty || "",
-    bio: bio || "",
-    profile_image: profile_image || "",
-    social_media: social_media || {},
-    assigned_artworks: assigned_artworks || [],
-    is_visible: is_visible !== false,
-  };
-
-  const artist = await ArtistService.create(artistData);
-  res.status(201).json(artist);
-}));
+    const artist = await DatabaseService.create("artists", {
+      ...data,
+      slug: await uniqueSlug("artists", data.slug || data.name),
+      social_media: data.social_media || {},
+      assigned_artworks: data.assigned_artworks || [],
+      is_visible: data.is_visible !== false,
+    });
+    res.status(201).json(toArtist(artist));
+  })
+);
 
 // Update artist (admin only)
-router.put("/:id", authenticateToken, asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const updateData = req.body;
+router.put(
+  "/:id",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const before = await DatabaseService.findById("artists", id);
+    if (!before) {
+      throw new NotFoundError("Artist not found");
+    }
 
-  const artist = await ArtistService.update(id, updateData);
-  
-  if (!artist) {
-    throw new NotFoundError("Artist not found");
-  }
+    const data = { ...req.body };
+    if (data.slug !== undefined) {
+      data.slug = await uniqueSlug(
+        "artists",
+        data.slug || data.name || before.name,
+        before.id
+      );
+    }
 
-  res.json(artist);
-}));
+    const artist = await DatabaseService.update("artists", id, data);
+    await imageService.deleteUnusedImages(
+      imageService.removedImageUrls(before, artist)
+    );
+    res.json(toArtist(artist));
+  })
+);
 
-// Delete artist (admin only)
-router.delete("/:id", authenticateToken, asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  
-  const artist = await ArtistService.delete(id);
-  
-  if (!artist) {
-    throw new NotFoundError("Artist not found");
-  }
+// Delete artist (admin only). Their artworks stay, without an artist.
+router.delete(
+  "/:id",
+  authenticateToken,
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
 
-  res.json({ message: "Artist deleted successfully" });
-}));
+    const artist = await transaction(async (client) => {
+      const { rows } = await client.query(
+        "DELETE FROM artists WHERE id = $1 RETURNING *",
+        [id]
+      );
+      if (rows[0]) {
+        await DatabaseService.removeIdFromLists(
+          "exhibitions",
+          "assigned_artists",
+          id,
+          client
+        );
+      }
+      return rows[0];
+    });
 
-// Get visible artists only
-router.get("/visible/only", asyncHandler(async (req, res) => {
-  const artists = await ArtistService.findAll("artists", { is_visible: true }, "name ASC");
-  res.json(artists);
-}));
+    if (!artist) {
+      throw new NotFoundError("Artist not found");
+    }
 
-// Get artists by specialty
-router.get("/specialty/:specialty", asyncHandler(async (req, res) => {
-  const { specialty } = req.params;
-  
-  const artists = await ArtistService.findAll("artists", { specialty }, "name ASC");
-  res.json(artists);
-}));
+    await imageService.deleteUnusedImages(imageService.imageUrlsOf(artist));
+    res.json({ message: "Artist deleted successfully" });
+  })
+);
 
 module.exports = router;

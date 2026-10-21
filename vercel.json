@@ -24,7 +24,40 @@
       "destination": "server/index.cjs"
     },
     {
-      "source": "/admin/(.*)",
+      "source": "/sitemap.xml",
+      "destination": "server/index.cjs"
+    },
+    {
+      "source": "/:kind(exhibition|artist|artwork)/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|WhatsApp|TelegramBot|Discordbot|Pinterest|redditbot|Embedly|SkypeUriPreview|vkShare|Iframely|Mastodon).*"
+        }
+      ],
+      "destination": "server/index.cjs"
+    },
+    {
+      "source": "/:page(exhibitions|artists|collection|about|contact)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|WhatsApp|TelegramBot|Discordbot|Pinterest|redditbot|Embedly|SkypeUriPreview|vkShare|Iframely|Mastodon).*"
+        }
+      ],
+      "destination": "server/index.cjs"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|WhatsApp|TelegramBot|Discordbot|Pinterest|redditbot|Embedly|SkypeUriPreview|vkShare|Iframely|Mastodon).*"
+        }
+      ],
       "destination": "server/index.cjs"
     },
     {
@@ -33,7 +66,26 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production",
-    "JWT_SECRET": "aether-art-space-jwt-secret-2024"
-  }
+    "NODE_ENV": "production"
+  },
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(logo|collaborators)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800"
+        }
+      ]
+    }
+  ]
 }

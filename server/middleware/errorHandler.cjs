@@ -1,54 +1,45 @@
 // Global error handler
 const errorHandler = (err, req, res, next) => {
-  console.error("Global error handler:", {
-    message: err.message,
-    stack: err.stack,
-    url: req.url,
-    method: req.method,
-    body: req.body,
-    query: req.query,
-    params: req.params
-  });
+  // Errors raised on purpose (validation, not found...) carry their own status
+  // and a message that is safe to show to the user.
+  let statusCode = err.statusCode || 500;
+  let message = err.isOperational ? err.message : "Internal server error";
 
-  // Default error response
-  let statusCode = 500;
-  let message = "Internal server error";
-
-  // Handle specific error types
-  if (err.name === "ValidationError") {
-    statusCode = 400;
-    message = "Validation error";
-  } else if (err.name === "UnauthorizedError") {
-    statusCode = 401;
-    message = "Unauthorized";
-  } else if (err.name === "ForbiddenError") {
-    statusCode = 403;
-    message = "Forbidden";
-  } else if (err.name === "NotFoundError") {
-    statusCode = 404;
-    message = "Not found";
-  } else if (err.code === "23505") { // PostgreSQL unique violation
+  if (err.code === "23505") {
+    // PostgreSQL unique violation
     statusCode = 409;
     message = "Resource already exists";
-  } else if (err.code === "23503") { // PostgreSQL foreign key violation
+  } else if (err.code === "23503") {
+    // PostgreSQL foreign key violation
     statusCode = 400;
     message = "Referenced resource does not exist";
-  } else if (err.code === "23502") { // PostgreSQL not null violation
+  } else if (err.code === "23502") {
+    // PostgreSQL not null violation
     statusCode = 400;
     message = "Required field is missing";
+  } else if (err.code === "22P02") {
+    // PostgreSQL invalid input syntax (e.g. "abc" where an id is expected)
+    statusCode = 400;
+    message = "Invalid value";
+  } else if (err.code === "22001") {
+    // PostgreSQL value too long for column
+    statusCode = 400;
+    message = "A value is too long";
+  } else if (err.type === "entity.too.large") {
+    statusCode = 413;
+    message = "Request is too large";
+  } else if (err.type === "entity.parse.failed") {
+    statusCode = 400;
+    message = "Invalid JSON";
   }
 
-  // Don't expose internal errors in production
-  if (process.env.NODE_ENV === "production" && statusCode === 500) {
-    message = "Internal server error";
+  if (statusCode >= 500) {
+    console.error(`Error in ${req.method} ${req.path}:`, err);
   }
 
   res.status(statusCode).json({
     error: message,
-    ...(process.env.NODE_ENV !== "production" && { 
-      details: err.message,
-      stack: err.stack 
-    })
+    ...(process.env.NODE_ENV !== "production" && { details: err.message }),
   });
 };
 

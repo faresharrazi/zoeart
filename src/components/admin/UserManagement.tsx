@@ -1,115 +1,98 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Loader2, Pencil, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, User, Mail, Shield, Calendar, Save } from "lucide-react";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, errorMessage } from "@/lib/apiClient";
+import type { AdminUser } from "@/types/api";
+import {
+  AdminPage,
+  EmptyState,
+  FormSection,
+  IconAction,
+  ListPanel,
+  ListRow,
+  LoadingPanel,
+  StatusBadge,
+} from "./AdminUI";
 
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-  created_at: string;
-  updated_at: string;
-}
+const EMPTY_FORM = {
+  username: "",
+  email: "",
+  password: "",
+  currentPassword: "",
+};
+
+const formatDate = (dateString: string) =>
+  new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    currentPassword: "",
-  });
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        console.log("UserManagement: Fetching users...");
-        const data = await apiClient.getUsers();
-        console.log("UserManagement: Received users data:", data);
-        setUsers(data);
-      } catch (error) {
+    apiClient
+      .getUsers()
+      .then(setUsers)
+      .catch((error) => {
         console.error("UserManagement: Error fetching users:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load users",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
+        toast({ title: "Couldn't load the users", variant: "destructive" });
+      })
+      .finally(() => setLoading(false));
   }, [toast]);
 
-  const handleEdit = (user: User) => {
+  const handleEdit = (user: AdminUser) => {
     setEditingUser(user);
-    setFormData({
-      username: user.username,
-      email: user.email,
-      password: "",
-      currentPassword: "",
-    });
+    setFormData({ ...EMPTY_FORM, username: user.username, email: user.email });
   };
 
   const handleCancel = () => {
     setEditingUser(null);
-    setFormData({
-      username: "",
-      email: "",
-      password: "",
-      currentPassword: "",
-    });
+    setFormData(EMPTY_FORM);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!editingUser) return;
 
     setSaving(true);
     try {
-      const updateData: any = {
+      const updateData: Parameters<typeof apiClient.updateUser>[1] = {
         username: formData.username,
         email: formData.email,
       };
 
-      // Only include password if it's provided
+      // The password changes only when a new one is typed
       if (formData.password) {
         updateData.password = formData.password;
         updateData.currentPassword = formData.currentPassword;
       }
 
-      console.log("UserManagement: Updating user with data:", updateData);
       await apiClient.updateUser(editingUser.id, updateData);
 
-      // Update local state
-      setUsers(
-        users.map((user) =>
+      setUsers((list) =>
+        list.map((user) =>
           user.id === editingUser.id
             ? { ...user, username: formData.username, email: formData.email }
             : user
         )
       );
-
-      toast({
-        title: "Success",
-        description: "User updated successfully",
-      });
-
+      toast({ title: "User saved" });
       handleCancel();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating user:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to update user",
+        title: "Couldn't save the user",
+        description: errorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -117,193 +100,149 @@ const UserManagement = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  const set =
+    (field: keyof typeof EMPTY_FORM) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      setFormData((data) => ({ ...data, [field]: e.target.value }));
 
-  if (loading) {
+  if (editingUser) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-theme-primary" />
-          <span className="ml-2 text-theme-text-muted">Loading users...</span>
-        </div>
-      </div>
+      <form onSubmit={handleSave}>
+        <AdminPage
+          title={`Edit ${editingUser.username}`}
+          description="Change the sign-in details for this account."
+          onBack={handleCancel}
+          backLabel="Back to admin users"
+          actions={
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleCancel}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {saving && (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                )}
+                {saving ? "Saving…" : "Save changes"}
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-10 pt-2">
+            <FormSection
+              title="Account"
+              description="The username is used to sign in."
+            >
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="user-username">Username</Label>
+                  <Input
+                    id="user-username"
+                    autoComplete="username"
+                    value={formData.username}
+                    onChange={set("username")}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="user-email">Email</Label>
+                  <Input
+                    id="user-email"
+                    type="email"
+                    autoComplete="email"
+                    value={formData.email}
+                    onChange={set("email")}
+                  />
+                </div>
+              </div>
+            </FormSection>
+
+            <FormSection
+              title="Password"
+              description="Leave both fields empty to keep the current password."
+            >
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="user-current-password">
+                    Current password
+                  </Label>
+                  <Input
+                    id="user-current-password"
+                    type="password"
+                    autoComplete="current-password"
+                    value={formData.currentPassword}
+                    onChange={set("currentPassword")}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="user-new-password">New password</Label>
+                  <Input
+                    id="user-new-password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={formData.password}
+                    onChange={set("password")}
+                  />
+                </div>
+              </div>
+            </FormSection>
+          </div>
+        </AdminPage>
+      </form>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl  mb-2 text-theme-text-primary">
-          User Management
-        </h2>
-        <p className="text-theme-text-muted">
-          Manage admin user accounts and credentials
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* User List */}
-        <Card className="shadow-elegant">
-          <CardHeader>
-            <CardTitle className="text-theme-text-primary">
-              Admin Users
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {users.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between p-4 border border-theme-border rounded-lg"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-theme-primary/10 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-theme-primary" />
-                    </div>
-                    <div>
-                      <p className=" text-theme-text-primary">
-                        {user.username}
-                      </p>
-                      <p className="text-sm text-theme-text-muted">
-                        {user.email}
-                      </p>
-                      <p className="text-xs text-theme-text-muted">
-                        Role: {user.role} • Created:{" "}
-                        {formatDate(user.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
+    <AdminPage
+      title="Admin users"
+      description="The accounts that can sign in to this admin."
+    >
+      {loading ? (
+        <LoadingPanel label="Loading users…" />
+      ) : users.length === 0 ? (
+        <EmptyState icon={UserCog} title="No admin users found" />
+      ) : (
+        <ListPanel>
+          {users.map((user) => (
+            <ListRow key={user.id}>
+              <span
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold uppercase text-stone"
+                aria-hidden="true"
+              >
+                {user.username.charAt(0)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                  <button
+                    type="button"
                     onClick={() => handleEdit(user)}
-                    variant="outline"
-                    size="sm"
+                    className="min-w-0 truncate text-left text-sm font-medium text-ink hover:underline focus-visible:underline focus-visible:outline-none"
                   >
-                    Edit
-                  </Button>
+                    {user.username}
+                  </button>
+                  <StatusBadge tone="neutral" className="capitalize">
+                    {user.role}
+                  </StatusBadge>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Edit Form */}
-        {editingUser && (
-          <Card className="shadow-elegant">
-            <CardHeader>
-              <CardTitle className="text-theme-text-primary">
-                Edit {editingUser.username}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="username" className="text-theme-text-primary">
-                    Username
-                  </Label>
-                  <Input
-                    id="username"
-                    value={formData.username}
-                    onChange={(e) =>
-                      setFormData({ ...formData, username: e.target.value })
-                    }
-                    placeholder="Enter username"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email" className="text-theme-text-primary">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    placeholder="Enter email"
-                  />
-                </div>
-
-                <div>
-                  <Label
-                    htmlFor="currentPassword"
-                    className="text-theme-text-primary"
-                  >
-                    Current Password
-                  </Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    value={formData.currentPassword}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        currentPassword: e.target.value,
-                      })
-                    }
-                    placeholder="Enter current password"
-                  />
-                  <p className="text-xs text-theme-text-muted mt-1">
-                    Required only if changing password
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="password" className="text-theme-text-primary">
-                    New Password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    placeholder="Enter new password (leave empty to keep current)"
-                  />
-                </div>
-
-                <div className="flex space-x-2">
-                  <Button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="flex-1"
-                  >
-                    {saving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Save Changes
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    onClick={handleCancel}
-                    variant="outline"
-                    disabled={saving}
-                  >
-                    Cancel
-                  </Button>
-                </div>
+                <p className="mt-1 truncate text-[13px] text-mist">
+                  {[user.email, `Added ${formatDate(user.created_at)}`]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
+              <IconAction
+                label="Edit"
+                icon={Pencil}
+                onClick={() => handleEdit(user)}
+              />
+            </ListRow>
+          ))}
+        </ListPanel>
+      )}
+    </AdminPage>
   );
 };
 

@@ -1,127 +1,43 @@
 const cors = require("cors");
 const express = require("express");
 
-// CORS configuration
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
+// CORS configuration. The site calls its own API from the same origin, so
+// cross-origin access is only needed for the production domains and any
+// extra origins listed in ALLOWED_ORIGINS.
+const ALLOWED_ORIGINS = [
+  "https://aetherartspace.com",
+  "https://www.aetherartspace.com",
+  ...(process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean),
+];
 
-    // Allow localhost in development
-    if (process.env.NODE_ENV !== "production") {
-      return callback(null, true);
-    }
-
-    // In production, allow specific domains and Vercel preview URLs
-    const allowedOrigins = [
-      "https://zoeart.vercel.app",
-      "https://www.zoeart.vercel.app",
-      "https://aetherartspace.com",
-      "https://www.aetherartspace.com",
-    ];
-
-    // Check if it's an allowed origin
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    // Allow Vercel preview URLs (dynamic subdomains)
-    // Pattern: https://zoeart-[hash]-[username].vercel.app
-    const vercelPreviewPattern =
-      /^https:\/\/zoeart-[a-zA-Z0-9]+-[a-zA-Z0-9-]+\.vercel\.app$/;
-    if (vercelPreviewPattern.test(origin)) {
-      console.log(`Allowing Vercel preview URL: ${origin}`);
-      return callback(null, true);
-    }
-
-    // Allow any Vercel preview URL for this project
-    // Pattern: https://[project-name]-[hash]-[username].vercel.app
-    const vercelProjectPattern =
-      /^https:\/\/[a-zA-Z0-9-]+-[a-zA-Z0-9]+-[a-zA-Z0-9-]+\.vercel\.app$/;
-    if (vercelProjectPattern.test(origin)) {
-      console.log(`Allowing Vercel project URL: ${origin}`);
-      return callback(null, true);
-    }
-
-    // Allow additional origins from environment variable (comma-separated)
-    const additionalOrigins = process.env.ALLOWED_ORIGINS;
-    if (additionalOrigins) {
-      const origins = additionalOrigins.split(",").map((o) => o.trim());
-      if (origins.includes(origin)) {
-        console.log(`Allowing additional origin: ${origin}`);
-        return callback(null, true);
-      }
-    }
-
-    console.log(`CORS blocked origin: ${origin}`);
-    callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+const isAllowedOrigin = (origin, req) => {
+  // Same-origin requests (production, Vercel previews, local proxy)
+  if (origin === `https://${req.headers.host}`) return true;
+  if (ALLOWED_ORIGINS.includes(origin)) return true;
+  return (
+    process.env.NODE_ENV !== "production" &&
+    /^http:\/\/localhost(:\d+)?$/.test(origin)
+  );
 };
 
-// JSON parsing with size limits
-const jsonParser = express.json({
-  limit: "4mb",
-  verify: (req, res, buf) => {
-    // Log large payloads for debugging
-    if (buf.length > 2 * 1024 * 1024) {
-      // 2MB
-      console.log(`Large payload received: ${buf.length} bytes`);
-    }
-  },
-});
-
-// URL encoded parsing with size limits
-const urlEncodedParser = express.urlencoded({
-  limit: "4mb",
-  extended: true,
-});
-
-// Request timeout middleware
-const requestTimeout = (timeout = 30000) => {
-  return (req, res, next) => {
-    // Set higher limits for specific routes
-    if (req.path === "/api/upload") {
-      req.setTimeout(timeout);
-    }
-    next();
-  };
-};
-
-// Request logging middleware
-const requestLogger = (req, res, next) => {
-  const start = Date.now();
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    console.log(
-      `${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`
-    );
+const corsOptionsDelegate = (req, callback) => {
+  const origin = req.headers.origin;
+  callback(null, {
+    origin: !origin || isAllowedOrigin(origin, req),
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   });
-
-  next();
 };
 
-// Error logging middleware
-const errorLogger = (err, req, res, next) => {
-  console.error(`Error in ${req.method} ${req.path}:`, {
-    message: err.message,
-    stack: err.stack,
-    body: req.body,
-    query: req.query,
-    params: req.params,
-  });
-  next(err);
-};
+// Body parsers with size limits
+const jsonParser = express.json({ limit: "4mb" });
+const urlEncodedParser = express.urlencoded({ limit: "4mb", extended: true });
 
 module.exports = {
-  corsOptions,
-  cors: cors(corsOptions),
+  cors: cors(corsOptionsDelegate),
   jsonParser,
   urlEncodedParser,
-  requestTimeout,
-  requestLogger,
-  errorLogger,
 };

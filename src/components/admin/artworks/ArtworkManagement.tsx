@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
-import { Loader2 } from "lucide-react";
 import ArtworkList from "./ArtworkList";
 import ArtworkForm from "./ArtworkForm";
+import { AdminPage, LoadingPanel } from "../AdminUI";
+import type { Artist } from "@/types/api";
 
 interface Artwork {
   id: string;
@@ -22,29 +23,22 @@ interface Artwork {
 
 const ArtworkManagement = () => {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
-  const [artists, setArtists] = useState<any[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArtwork, setEditingArtwork] = useState<Artwork | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [artworksData, artistsData] = await Promise.all([
-        apiClient.getArtworks(),
-        apiClient.getArtists(),
+        apiClient.getAdminArtworks(),
+        apiClient.getAdminArtists(),
       ]);
 
-      console.log("Raw artworks data:", artworksData);
-      console.log("Raw artists data:", artistsData);
-
       // Transform artworks data to match our interface
-      const transformedArtworks = artworksData.map((artwork: any) => ({
+      const transformedArtworks = artworksData.map((artwork) => ({
         id: artwork.id.toString(),
         title: artwork.title,
         slug: artwork.slug,
@@ -59,20 +53,22 @@ const ArtworkManagement = () => {
         isVisible: artwork.is_visible !== false,
       }));
 
-      console.log("Transformed artworks:", transformedArtworks);
       setArtworks(transformedArtworks);
       setArtists(artistsData);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({
-        title: "Error",
-        description: "Failed to load artworks data",
+        title: "Couldn't load the artworks",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleAdd = () => {
     setEditingArtwork(undefined);
@@ -84,18 +80,11 @@ const ArtworkManagement = () => {
     setIsEditing(true);
   };
 
-  const handleSave = (artwork: Artwork) => {
-    if (editingArtwork) {
-      // Update existing artwork
-      setArtworks((prev) =>
-        prev.map((a) => (a.id === artwork.id ? artwork : a))
-      );
-    } else {
-      // Add new artwork
-      setArtworks((prev) => [...prev, artwork]);
-    }
+  const handleSave = () => {
     setIsEditing(false);
     setEditingArtwork(null);
+    // Reload so a new artwork gets its id and web address from the server
+    fetchData();
   };
 
   const handleCancel = () => {
@@ -115,12 +104,9 @@ const ArtworkManagement = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Loading artworks...</span>
-        </div>
-      </div>
+      <AdminPage title="Artworks">
+        <LoadingPanel label="Loading artworks…" />
+      </AdminPage>
     );
   }
 

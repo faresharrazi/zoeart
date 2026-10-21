@@ -1,4 +1,8 @@
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
+
+// Return DATE columns as "YYYY-MM-DD" strings instead of JS Dates at
+// midnight server time, which shift by a day in other time zones.
+types.setTypeParser(1082, (value) => value);
 
 // Database configuration
 const dbConfig = {
@@ -16,7 +20,6 @@ const pool = new Pool(dbConfig);
 const testConnection = async () => {
   try {
     const client = await pool.connect();
-    console.log("✅ Database connected successfully");
     client.release();
     return true;
   } catch (error) {
@@ -36,23 +39,19 @@ const query = async (sql, params = []) => {
   }
 };
 
-// Get database statistics
-const getDbStats = async () => {
+// Run fn(client) inside a transaction; rolls back if it throws.
+const transaction = async (fn) => {
+  const client = await pool.connect();
   try {
-    const stats = await query(`
-      SELECT 
-        schemaname,
-        tablename,
-        n_tup_ins as inserts,
-        n_tup_upd as updates,
-        n_tup_del as deletes
-      FROM pg_stat_user_tables 
-      ORDER BY schemaname, tablename
-    `);
-    return stats.rows;
+    await client.query("BEGIN");
+    const result = await fn(client);
+    await client.query("COMMIT");
+    return result;
   } catch (error) {
-    console.error("Error getting database stats:", error);
-    return [];
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
   }
 };
 
@@ -60,7 +59,6 @@ const getDbStats = async () => {
 const closeConnections = async () => {
   try {
     await pool.end();
-    console.log("Database connections closed");
   } catch (error) {
     console.error("Error closing database connections:", error);
   }
@@ -69,7 +67,7 @@ const closeConnections = async () => {
 module.exports = {
   pool,
   query,
+  transaction,
   testConnection,
-  getDbStats,
   closeConnections,
 };

@@ -1,260 +1,157 @@
 const {
   uploadToCloudinary,
   deleteFromCloudinary,
-  getOptimizedUrl,
+  uploadOptions,
 } = require("../config/cloudinary.cjs");
+const FileService = require("./fileService.cjs");
 const { query } = require("../config/database.cjs");
 
+// Cloudinary folder options for each upload category (see multer getFileCategory)
+const CLOUDINARY_OPTIONS_BY_CATEGORY = {
+  exhibition: uploadOptions.exhibition,
+  artwork: uploadOptions.artwork,
+  artist_profile: uploadOptions.artist,
+  hero_image: uploadOptions.hero,
+  partner: uploadOptions.partner,
+};
+
+// Images stored in Postgres are referenced as /api/files/<id> (older records
+// use /api/file/<id>).
+const DATABASE_FILE_URL = /^\/api\/files?\/(\d+)$/;
+
 class ImageService {
-  constructor() {
-    this.useCloudinary =
+  get useCloudinary() {
+    return Boolean(
       process.env.CLOUDINARY_CLOUD_NAME &&
       process.env.CLOUDINARY_API_KEY &&
-      process.env.CLOUDINARY_API_SECRET;
+      process.env.CLOUDINARY_API_SECRET
+    );
   }
 
-  // Check if an image URL is from Cloudinary
   isCloudinaryUrl(url) {
-    return url && url.includes("cloudinary.com");
+    return typeof url === "string" && url.includes("res.cloudinary.com/");
   }
 
-  // Extract public_id from Cloudinary URL
+  // Public id of an asset in this site's own Cloudinary account, or null.
+  // e.g. https://res.cloudinary.com/<cloud>/image/upload/v123/zoeart/artworks/abc.jpg
+  //      -> zoeart/artworks/abc
   extractPublicId(url) {
     if (!this.isCloudinaryUrl(url)) return null;
-
-    const parts = url.split("/");
-    const filename = parts[parts.length - 1];
-    const publicId = filename.split(".")[0];
-
-    // Reconstruct public_id with folder path
-    const folderIndex = parts.findIndex((part) => part === "zoeart");
-    if (folderIndex !== -1) {
-      const folderParts = parts.slice(folderIndex, -1);
-      return folderParts.join("/") + "/" + publicId;
-    }
-
-    return publicId;
+    const match = url.match(
+      /res\.cloudinary\.com\/([^/]+)\/image\/upload\/(?:.*?\/)?(zoeart\/[^?#]+?)(?:\.[a-z0-9]+)?(?:[?#].*)?$/i
+    );
+    if (!match || match[1] !== process.env.CLOUDINARY_CLOUD_NAME) return null;
+    return match[2];
   }
 
-  // Upload image (Cloudinary or database)
-  async uploadImage(file, options = {}) {
-    if (this.useCloudinary) {
-      return await this.uploadToCloudinary(file, options);
-    } else {
-      return await this.uploadToDatabase(file, options);
-    }
-  }
-
-  // Upload to Cloudinary
-  async uploadToCloudinary(file, options = {}) {
-    try {
-      const result = await uploadToCloudinary(file, options);
-
-      if (result.success) {
-        return {
-          success: true,
-          url: result.url,
-          public_id: result.public_id,
-          width: result.width,
-          height: result.height,
-          format: result.format,
-          bytes: result.bytes,
-          source: "cloudinary",
-        };
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (error) {
-      console.error("Cloudinary upload failed:", error);
-      // Fallback to database upload
-      return await this.uploadToDatabase(file, options);
-    }
-  }
-
-  // Upload to database (legacy method)
-  async uploadToDatabase(file, options = {}) {
-    try {
-      const { originalname, buffer, mimetype, size } = file;
-
-      // Generate unique filename
-      const filename = `${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2)}-${originalname}`;
-
-      // Insert into database
-      const result = await query(
-        `INSERT INTO uploaded_files (original_name, filename, file_path, file_data, file_size, mime_type, category, uploaded_by)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-        [
-          originalname,
-          filename,
-          filename, // Use filename as file_path for legacy compatibility
-          buffer,
-          size,
-          mimetype,
-          options.category || "general",
-          options.uploadedBy || "system",
-        ]
-      );
-
-      const fileId = result.rows[0].id;
-
+  // Uploads to Cloudinary when configured, otherwise stores the file in
+  // Postgres (local development).
+  async uploadImage(file, { category, uploadedBy }) {
+    if (!this.useCloudinary) {
+      const result = await FileService.uploadFile(file, category, uploadedBy);
       return {
         success: true,
-        url: `/api/files/${fileId}`,
-        id: fileId,
-        filename: filename,
-        originalName: originalname,
-        fileSize: size,
-        mimeType: mimetype,
+        url: `/api/files/${result.file.id}`,
+        id: result.file.id,
         source: "database",
       };
-    } catch (error) {
-      console.error("Database upload failed:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
     }
+
+    const result = await uploadToCloudinary(
+      file,
+      CLOUDINARY_OPTIONS_BY_CATEGORY[category] || uploadOptions.default
+    );
+    if (!result.success) {
+      throw new Error(result.error || "Cloudinary upload failed");
+    }
+    return {
+      success: true,
+      url: result.url,
+      public_id: result.public_id,
+      width: result.width,
+      height: result.height,
+      format: result.format,
+      bytes: result.bytes,
+      source: "cloudinary",
+    };
   }
 
-  // Get image URL (handles both Cloudinary and database images)
-  getImageUrl(imageData) {
-    if (typeof imageData === "string") {
-      // If it's already a URL, return as is
-      return imageData;
+  // Deletes an image the site uploaded, given the URL stored on a record.
+  // URLs pointing anywhere else are ignored.
+  async deleteImage(url) {
+    if (!url || typeof url !== "string") return false;
+
+    const fileMatch = url.match(DATABASE_FILE_URL);
+    if (fileMatch) {
+      return Boolean(await FileService.deleteFile(Number(fileMatch[1])));
     }
 
-    if (imageData && imageData.url) {
-      return imageData.url;
-    }
-
-    if (imageData && imageData.id) {
-      // Database image
-      return `/api/files/${imageData.id}`;
-    }
-
-    return null;
-  }
-
-  // Get optimized image URL (Cloudinary only)
-  getOptimizedImageUrl(imageData, options = {}) {
-    if (this.isCloudinaryUrl(this.getImageUrl(imageData))) {
-      const publicId = this.extractPublicId(this.getImageUrl(imageData));
-      if (publicId) {
-        return getOptimizedUrl(publicId, options);
-      }
-    }
-
-    // Fallback to regular URL
-    return this.getImageUrl(imageData);
-  }
-
-  // Delete image (Cloudinary or database)
-  async deleteImage(imageData) {
-    if (this.isCloudinaryUrl(this.getImageUrl(imageData))) {
-      return await this.deleteFromCloudinary(imageData);
-    } else {
-      return await this.deleteFromDatabase(imageData);
-    }
-  }
-
-  // Delete from Cloudinary
-  async deleteFromCloudinary(imageData) {
-    try {
-      const publicId = this.extractPublicId(this.getImageUrl(imageData));
-      if (!publicId) {
-        throw new Error("Invalid Cloudinary URL");
-      }
-
+    // Cloudinary assets are only deleted by the production API: a local copy
+    // of the site can point at the same Cloudinary account with a different
+    // database, where "unused" would be wrong.
+    const publicId = this.extractPublicId(url);
+    if (
+      publicId &&
+      this.useCloudinary &&
+      process.env.NODE_ENV === "production"
+    ) {
       const result = await deleteFromCloudinary(publicId);
-      return {
-        success: result.success,
-        source: "cloudinary",
-      };
-    } catch (error) {
-      console.error("Cloudinary delete failed:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
+      return result.success;
     }
+    return false;
   }
 
-  // Delete from database
-  async deleteFromDatabase(imageData) {
-    try {
-      if (imageData && imageData.id) {
-        await query("DELETE FROM uploaded_files WHERE id = $1", [imageData.id]);
-        return {
-          success: true,
-          source: "database",
-        };
-      }
-
-      throw new Error("Invalid image data");
-    } catch (error) {
-      console.error("Database delete failed:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+  // True if any record still uses this image URL.
+  async isReferenced(url) {
+    const { rows } = await query(
+      `SELECT EXISTS (
+         SELECT 1 FROM exhibitions WHERE featured_image = $1 OR gallery_images @> jsonb_build_array($1::text)
+         UNION ALL SELECT 1 FROM artworks WHERE featured_image = $1 OR images @> jsonb_build_array($1::text)
+         UNION ALL SELECT 1 FROM artists WHERE profile_image = $1
+         UNION ALL SELECT 1 FROM hero_images WHERE cloudinary_url = $1
+         UNION ALL SELECT 1 FROM partners WHERE logo_url = $1
+         UNION ALL SELECT 1 FROM articles WHERE featured_image = $1 OR position($1 in content) > 0
+         UNION ALL SELECT 1 FROM about_blocks WHERE position($1 in content) > 0
+       ) AS used`,
+      [url]
+    );
+    return rows[0].used;
   }
 
-  // Migrate image from database to Cloudinary
-  async migrateToCloudinary(imageData, options = {}) {
-    try {
-      if (imageData && imageData.id) {
-        // Get image data from database
-        const result = await query(
-          "SELECT file_data, mime_type, original_name FROM uploaded_files WHERE id = $1",
-          [imageData.id]
-        );
-
-        if (result.rows.length === 0) {
-          throw new Error("Image not found in database");
+  // Deletes the images in `urls` that no record uses any more. Call it after
+  // the record itself was deleted or updated. Failures are logged, not thrown,
+  // so saving a record never fails because of image cleanup.
+  async deleteUnusedImages(urls) {
+    const unique = [...new Set((urls || []).filter(Boolean))];
+    await Promise.all(
+      unique.map(async (url) => {
+        try {
+          if (!(await this.isReferenced(url))) {
+            await this.deleteImage(url);
+          }
+        } catch (error) {
+          console.error(`Failed to delete image ${url}:`, error.message);
         }
+      })
+    );
+  }
 
-        const { file_data, mime_type, original_name } = result.rows[0];
+  // Image URLs used by a record of any content type.
+  imageUrlsOf(record) {
+    if (!record) return [];
+    const list = (value) => (Array.isArray(value) ? value : []);
+    return [
+      record.featured_image,
+      record.profile_image,
+      ...list(record.gallery_images),
+      ...list(record.images),
+    ].filter((url) => typeof url === "string" && url);
+  }
 
-        // Create file-like object for Cloudinary
-        const file = {
-          originalname: original_name,
-          buffer: file_data,
-          mimetype: mime_type,
-          size: file_data.length,
-        };
-
-        // Upload to Cloudinary
-        const cloudinaryResult = await this.uploadToCloudinary(file, options);
-
-        if (cloudinaryResult.success) {
-          // Update database record with Cloudinary URL
-          await query(
-            "UPDATE uploaded_files SET url = $1, cloudinary_public_id = $2 WHERE id = $3",
-            [cloudinaryResult.url, cloudinaryResult.public_id, imageData.id]
-          );
-
-          return {
-            success: true,
-            cloudinaryUrl: cloudinaryResult.url,
-            publicId: cloudinaryResult.public_id,
-            originalId: imageData.id,
-          };
-        } else {
-          throw new Error(cloudinaryResult.error);
-        }
-      }
-
-      throw new Error("Invalid image data");
-    } catch (error) {
-      console.error("Migration failed:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+  // Images a record used before an update that it no longer uses.
+  removedImageUrls(before, after) {
+    const kept = new Set(this.imageUrlsOf(after));
+    return this.imageUrlsOf(before).filter((url) => !kept.has(url));
   }
 }
 

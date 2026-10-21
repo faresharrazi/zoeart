@@ -14,11 +14,6 @@ const router = express.Router();
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    console.log("=== HERO IMAGES API CALL ===");
-    console.log("Request headers:", req.headers);
-    console.log("Request IP:", req.ip);
-    console.log("Request user-agent:", req.get('User-Agent'));
-    console.log("Fetching hero images...");
     
     try {
       const heroImages = await query(
@@ -42,13 +37,6 @@ router.get(
          ORDER BY COALESCE(display_order, id) ASC, COALESCE(created_at, CURRENT_TIMESTAMP) DESC`
       );
 
-      console.log(`Found ${heroImages.rows.length} hero images`);
-      console.log("Hero images data:", heroImages.rows.map(img => ({
-        id: img.id,
-        cloudinary_url: img.cloudinary_url,
-        is_active: img.is_active,
-        display_order: img.display_order
-      })));
 
       res.json({
         success: true,
@@ -92,8 +80,6 @@ router.post(
   "/upload",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    console.log("=== HERO IMAGE UPLOAD ===");
-    console.log("Request body:", req.body);
 
     const { cloudinary_url, cloudinary_public_id, original_name, file_size, mime_type, width, height, format, display_order } = req.body;
 
@@ -103,18 +89,6 @@ router.post(
 
     const uploadedBy = req.user?.id || null;
 
-    console.log("Hero image data:", {
-      cloudinary_url,
-      cloudinary_public_id,
-      original_name,
-      file_size,
-      mime_type,
-      width,
-      height,
-      format,
-      display_order: display_order || 0,
-      uploaded_by: uploadedBy,
-    });
 
     const result = await query(
       `INSERT INTO hero_images 
@@ -135,7 +109,6 @@ router.post(
       ]
     );
 
-    console.log("Hero image created:", result.rows[0]);
 
     res.json({
       success: true,
@@ -203,7 +176,7 @@ router.delete(
 
     // Get the hero image first to delete from Cloudinary
     const heroImage = await query(
-      "SELECT cloudinary_public_id FROM hero_images WHERE id = $1",
+      "SELECT cloudinary_url FROM hero_images WHERE id = $1",
       [id]
     );
 
@@ -211,19 +184,8 @@ router.delete(
       throw new NotFoundError("Hero image not found");
     }
 
-    // Delete from Cloudinary
-    if (heroImage.rows[0].cloudinary_public_id) {
-      try {
-        await imageService.deleteImage({
-          id: heroImage.rows[0].cloudinary_public_id,
-          url: `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${heroImage.rows[0].cloudinary_public_id}`
-        });
-        console.log("Hero image deleted from Cloudinary:", heroImage.rows[0].cloudinary_public_id);
-      } catch (error) {
-        console.error("Error deleting from Cloudinary:", error);
-        // Continue with database deletion even if Cloudinary deletion fails
-      }
-    }
+    // Remove the image file too (failures are logged, not fatal)
+    await imageService.deleteUnusedImages([heroImage.rows[0].cloudinary_url]);
 
     // Delete from database
     const result = await query(
@@ -244,8 +206,6 @@ router.post(
   "/bulk-upload",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    console.log("=== BULK HERO IMAGE UPLOAD ===");
-    console.log("Request body:", req.body);
 
     const { images } = req.body;
 

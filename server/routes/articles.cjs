@@ -1,7 +1,6 @@
 const express = require("express");
-const {
-  DatabaseService,
-} = require("../services/database.cjs");
+const { DatabaseService } = require("../services/database.cjs");
+const { query } = require("../config/database.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
 const {
   asyncHandler,
@@ -11,44 +10,18 @@ const {
 
 const router = express.Router();
 
-
 // GET /api/articles - Get all published articles (public)
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    // Check if this is an admin request
-    const isAdminRequest = req.originalUrl.includes('/admin/');
-    
-    let whereClause = {};
-    let orderBy = "created_at DESC";
-    
-    if (!isAdminRequest) {
-      whereClause = { is_published: true };
-      orderBy = "published_at DESC";
-    }
-
-    const articles = await DatabaseService.findAll(
-      "articles",
-      whereClause,
-      orderBy
-    );
-
-    // Get exhibition details for each article
-    const articlesWithExhibitions = await Promise.all(
-      articles.map(async (article) => {
-        let exhibition = null;
-        if (article.exhibition_id) {
-          exhibition = await DatabaseService.findById("exhibitions", article.exhibition_id);
-        }
-        
-        return {
-          ...article,
-          exhibition_title: exhibition?.title || null,
-          exhibition_slug: exhibition?.slug || null,
-          start_date: exhibition?.start_date || null,
-          end_date: exhibition?.end_date || null,
-        };
-      })
+    // Drafts are only listed for logged-in requests through /api/admin
+    const { rows: articlesWithExhibitions } = await query(
+      `SELECT a.*, e.title AS exhibition_title, e.slug AS exhibition_slug,
+              e.start_date, e.end_date
+       FROM articles a
+       LEFT JOIN exhibitions e ON e.id = a.exhibition_id
+       ${req.isAdminRequest ? "" : "WHERE a.is_published = TRUE"}
+       ORDER BY ${req.isAdminRequest ? "a.created_at" : "a.published_at"} DESC`
     );
 
     res.json({
@@ -169,7 +142,7 @@ router.post(
       title,
       content,
       featured_image: featured_image || null,
-      media_files: media_files ? JSON.stringify(media_files) : null,
+      media_files: media_files || null,
       author: author || null,
       is_published: is_published || false,
       published_at: is_published ? new Date() : null
@@ -206,24 +179,21 @@ router.put(
       throw new NotFoundError("Article not found");
     }
 
-    const currentPublished = existingArticle.is_published;
-    const newPublished = is_published || false;
-    
-    // Set published_at if publishing for the first time
+    // Set published_at when an article is published for the first time
     let publishedAt = existingArticle.published_at;
-    if (!currentPublished && newPublished) {
+    if (!existingArticle.is_published && is_published === true && !publishedAt) {
       publishedAt = new Date();
     }
 
+    // Fields left out keep their value; empty optional fields are cleared
     const updateData = {
-      title: title || existingArticle.title,
-      content: content || existingArticle.content,
-      featured_image: featured_image || existingArticle.featured_image,
-      media_files: media_files ? JSON.stringify(media_files) : existingArticle.media_files,
-      author: author || existingArticle.author,
-      is_published: is_published !== undefined ? is_published : existingArticle.is_published,
+      title: title || undefined,
+      content: content || undefined,
+      featured_image: featured_image === undefined ? undefined : featured_image || null,
+      media_files: media_files === undefined ? undefined : media_files,
+      author: author === undefined ? undefined : author || null,
+      is_published,
       published_at: publishedAt,
-      updated_at: new Date()
     };
 
     const updatedArticle = await DatabaseService.update("articles", id, updateData);

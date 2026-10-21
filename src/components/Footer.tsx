@@ -1,306 +1,164 @@
-import { Instagram, MapPin, Phone, Mail } from "lucide-react";
-const logoFooter = "/logo/logo-footer.png";
+import { Link } from "react-router-dom";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
+import { instagramUrl, mapsUrl } from "@/lib/contact";
+import { imageUrl } from "@/lib/images";
 
+const FooterHeading = ({ children }: { children: React.ReactNode }) => (
+  <h2 className="eyebrow text-mist mb-4">{children}</h2>
+);
+
+const linkClass = "hover:underline underline-offset-4 decoration-1";
+
+/**
+ * Contact details, opening hours and partner logos, all set in the admin.
+ * Centered on phones and tablets, in columns on desktop.
+ */
 const Footer = () => {
-  const { homeSettings, contactInfo, loading } = usePageDataFromDB();
+  const { contactInfo, openingHours, partners, homeSettings } =
+    usePageDataFromDB();
 
-  // Show loading state while data is being fetched
-  if (loading) {
-    return (
-      <footer className="bg-gradient-to-b from-white to-gray-50 text-gray-900 py-20 border-t border-gray-200 shadow-lg">
-        <div className="container mx-auto px-6">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
-          </div>
-        </div>
-      </footer>
-    );
-  }
+  const contactItems = [
+    contactInfo?.email && {
+      key: "email",
+      node: (
+        <a href={`mailto:${contactInfo.email}`} className={linkClass}>
+          {contactInfo.email}
+        </a>
+      ),
+    },
+    contactInfo?.phone && {
+      key: "phone",
+      node: (
+        <a
+          href={`tel:${contactInfo.phone.replace(/\s+/g, "")}`}
+          className={linkClass}
+        >
+          {contactInfo.phone}
+        </a>
+      ),
+    },
+    contactInfo?.instagram && {
+      key: "instagram",
+      node: (
+        <a
+          href={instagramUrl(contactInfo.instagram)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={linkClass}
+        >
+          Instagram · @{contactInfo.instagram.replace(/^@/, "")}
+        </a>
+      ),
+    },
+    contactInfo?.address && {
+      key: "address",
+      node: (
+        <a
+          href={mapsUrl(contactInfo.address)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${linkClass} whitespace-pre-line`}
+        >
+          {contactInfo.address}
+        </a>
+      ),
+    },
+  ].filter(Boolean) as { key: string; node: React.ReactNode }[];
 
   return (
-    <footer className="bg-gradient-to-b from-white to-gray-50 text-gray-900 py-20 border-t border-gray-200 shadow-lg">
-      <div className="container mx-auto px-6">
-        {/* Check if there's contact info to determine layout */}
-        {contactInfo?.email ||
-        contactInfo?.phone ||
-        contactInfo?.instagram ||
-        contactInfo?.address ? (
-          <>
-            {/* Mobile Logo Section - Only show when contact info exists */}
-            <div className="md:hidden text-center mb-12 px-4">
+    <footer className="border-t border-line bg-paper text-ink">
+      <div className="mx-auto max-w-[1360px] px-6 md:px-10 pt-12 pb-8 lg:pt-14">
+        <div className="grid gap-10 text-center lg:grid-cols-12 lg:gap-12 lg:text-left">
+          <div className="flex flex-col items-center gap-4 lg:col-span-4 lg:items-start">
+            <Link to="/" aria-label="Aether Art Space, home">
               <img
-                src={logoFooter}
-                alt="Aether Art Space"
-                className="h-40 sm:h-44 w-auto object-contain mx-auto"
+                src="/logo/logo-menu.png"
+                alt=""
+                width={245}
+                height={144}
+                className="h-9 w-auto"
               />
-            </div>
-            {/* Three-column layout when contact info exists */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="text-center md:text-left">
-                {/* Desktop Logo */}
-                <div className="hidden md:block mb-6">
-                  <img
-                    src={logoFooter}
-                    alt="Aether Art Space"
-                    className="h-32 w-auto object-contain"
-                  />
-                </div>
-              </div>
-
-              <div className="text-center md:text-left">
-                <h4 className="text-xl mb-6 text-gray-900 font-medium">
-                  Contact Information
-                </h4>
-                <div className="space-y-5">
-                  {contactInfo?.email && (
-                    <div className="flex items-center justify-center md:justify-start space-x-3 group">
-                      <Mail className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 flex-shrink-0" />
-                      <a
-                        href={`mailto:${contactInfo.email}`}
-                        className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
-                      >
-                        {contactInfo.email}
-                      </a>
-                    </div>
-                  )}
-                  {contactInfo?.phone && (
-                    <div className="flex items-center justify-center md:justify-start space-x-3 group">
-                      <Phone className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 flex-shrink-0" />
-                      <a
-                        href={`tel:${contactInfo.phone}`}
-                        className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
-                      >
-                        {contactInfo.phone}
-                      </a>
-                    </div>
-                  )}
-                  {contactInfo?.instagram && (
-                    <div className="flex items-center justify-center md:justify-start space-x-3 group">
-                      <Instagram className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 flex-shrink-0" />
-                      <a
-                        href={`https://instagram.com/${contactInfo.instagram.replace(
-                          "@",
-                          ""
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-900 transition-colors duration-200"
-                      >
-                        {contactInfo.instagram}
-                      </a>
-                    </div>
-                  )}
-                  {contactInfo?.address && (
-                    <div className="flex items-start justify-center md:justify-start space-x-3 group">
-                      <MapPin className="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors duration-200 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <a
-                          href="https://maps.google.com/?q=Mark.+Mpostsari+7+Glyfada+16675"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-gray-900 transition-colors duration-200 text-sm whitespace-pre-line"
-                        >
-                          {contactInfo.address}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="text-center">
-                <h4 className="text-xl mb-6 text-gray-900">Collaboration</h4>
-                {/* Desktop: Elegant horizontal alignment */}
-                <div className="hidden lg:flex items-center justify-center gap-12">
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <div key={num} className="group">
-                      <img
-                        src={`/collaborators/${num}.png`}
-                        alt={`Partner ${num}`}
-                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                {/* Medium screens: 2-row layout for better visibility */}
-                <div className="hidden md:flex lg:hidden flex-col items-center gap-8">
-                  {/* Top row: 3 logos */}
-                  <div className="flex items-center justify-center gap-12">
-                    {[1, 2, 3].map((num) => (
-                      <div key={num} className="group">
-                        <img
-                          src={`/collaborators/${num}.png`}
-                          alt={`Partner ${num}`}
-                          className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  {/* Bottom row: 2 centered logos */}
-                  <div className="flex items-center justify-center gap-16">
-                    {[4, 5].map((num) => (
-                      <div key={num} className="group">
-                        <img
-                          src={`/collaborators/${num}.png`}
-                          alt={`Partner ${num}`}
-                          className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Mobile: 2-row layout with bigger logos */}
-                <div className="md:hidden flex flex-col items-center gap-6">
-                  {/* Top row: 3 logos */}
-                  <div className="flex items-center justify-center gap-6">
-                    {[1, 2, 3].map((num) => (
-                      <div key={num} className="group">
-                        <img
-                          src={`/collaborators/${num}.png`}
-                          alt={`Collaborator ${num}`}
-                          className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  {/* Bottom row: 2 centered logos */}
-                  <div className="flex items-center justify-center gap-8">
-                    {[4, 5].map((num) => (
-                      <div key={num} className="group">
-                        <img
-                          src={`/collaborators/${num}.png`}
-                          alt={`Collaborator ${num}`}
-                          className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-105"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
-          /* Centered layout when no contact info */
-          <div className="flex flex-col items-center text-center space-y-12">
-            {/* Logo - Bigger when no contact info */}
-            <div>
-              <img
-                src={logoFooter}
-                alt="Aether Art Space"
-                className="h-48 w-auto object-contain mx-auto"
-              />
-            </div>
-
-            {/* Footer description and gallery hours - centered */}
-            {(homeSettings?.footerDescription ||
-              homeSettings?.galleryHours) && (
-              <div className="max-w-2xl">
-                {homeSettings?.footerDescription && (
-                  <p className="text-gray-600 leading-relaxed mb-6 whitespace-pre-line text-lg">
-                    {homeSettings.footerDescription}
-                  </p>
-                )}
-                {homeSettings?.galleryHours && (
-                  <div>
-                    <p className="text-gray-900  text-xl mb-3">Gallery Hours</p>
-                    <p className="text-gray-600 whitespace-pre-line">
-                      {homeSettings.galleryHours}
-                    </p>
-                  </div>
-                )}
-              </div>
+            </Link>
+            {homeSettings?.description && (
+              <p className="max-w-xs text-sm leading-relaxed text-stone">
+                {homeSettings.description.split("\n")[0]}
+              </p>
             )}
+          </div>
 
-            {/* Partners - Centered and elegant */}
-            <div className="w-full">
-              <h4 className="text-2xl mb-10 text-gray-900">Collaboration</h4>
-              {/* Desktop: Elegant horizontal alignment with premium spacing */}
-              <div className="hidden lg:flex items-center justify-center gap-16">
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <div key={num} className="group">
-                    <img
-                      src={`/collaborators/${num}.png`}
-                      alt={`Partner ${num}`}
-                      className="h-28 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
-                    />
+          {contactItems.length > 0 && (
+            <div className="lg:col-span-4">
+              <FooterHeading>Contact</FooterHeading>
+              <ul className="space-y-2 text-sm">
+                {contactItems.map((item) => (
+                  <li key={item.key}>{item.node}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {openingHours.length > 0 && (
+            <div className="lg:col-span-4">
+              <FooterHeading>Opening hours</FooterHeading>
+              <dl className="mx-auto max-w-xs space-y-2 text-sm lg:mx-0">
+                {openingHours.map((row) => (
+                  <div
+                    key={row.id ?? row.day}
+                    className="flex justify-between gap-4"
+                  >
+                    <dt className="text-stone">{row.day}</dt>
+                    <dd className="text-right whitespace-pre-line">
+                      {row.time_frame}
+                    </dd>
                   </div>
                 ))}
-              </div>
-
-              {/* Medium screens: 2-row layout for better visibility */}
-              <div className="hidden md:flex lg:hidden flex-col items-center gap-10">
-                {/* Top row: 3 logos */}
-                <div className="flex items-center justify-center gap-16">
-                  {[1, 2, 3].map((num) => (
-                    <div key={num} className="group">
-                      <img
-                        src={`/collaborators/${num}.png`}
-                        alt={`Partner ${num}`}
-                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
-                      />
-                    </div>
-                  ))}
-                </div>
-                {/* Bottom row: 2 centered logos */}
-                <div className="flex items-center justify-center gap-20">
-                  {[4, 5].map((num) => (
-                    <div key={num} className="group">
-                      <img
-                        src={`/collaborators/${num}.png`}
-                        alt={`Partner ${num}`}
-                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Mobile: 2-row layout with bigger logos */}
-              <div className="md:hidden flex flex-col items-center gap-6">
-                {/* Top row: 3 logos */}
-                <div className="flex items-center justify-center gap-6">
-                  {[1, 2, 3].map((num) => (
-                    <div key={num} className="group">
-                      <img
-                        src={`/collaborators/${num}.png`}
-                        alt={`Collaborator ${num}`}
-                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
-                      />
-                    </div>
-                  ))}
-                </div>
-                {/* Bottom row: 2 centered logos */}
-                <div className="flex items-center justify-center gap-8">
-                  {[4, 5].map((num) => (
-                    <div key={num} className="group">
-                      <img
-                        src={`/collaborators/${num}.png`}
-                        alt={`Collaborator ${num}`}
-                        className="h-24 w-auto object-contain filter grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100 group-hover:scale-110"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              </dl>
             </div>
+          )}
+        </div>
+
+        {partners.length > 0 && (
+          <div className="mt-10 border-t border-line pt-8 flex flex-col items-center gap-5 lg:flex-row lg:gap-10">
+            <h2 className="eyebrow text-mist shrink-0">
+              In collaboration with
+            </h2>
+            <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 lg:justify-start">
+              {partners.map((partner) => {
+                const logo = (
+                  <img
+                    src={imageUrl(partner.logo_url, {
+                      width: 200,
+                      height: 200,
+                    })}
+                    alt={partner.name}
+                    title={partner.name}
+                    loading="lazy"
+                    className="h-11 w-auto object-contain grayscale opacity-75 transition hover:grayscale-0 hover:opacity-100 md:h-12"
+                  />
+                );
+                return (
+                  <li key={partner.id}>
+                    {partner.website_url ? (
+                      <a
+                        href={partner.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {logo}
+                      </a>
+                    ) : (
+                      logo
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
 
-        <div className="border-t border-gray-200 mt-16 pt-8 text-center">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-            <p className="text-gray-500 text-sm">
-              © 2025 Aether Art Space. All rights reserved.
-            </p>
-            <p className="text-gray-400 text-xs">
-              Crafted with passion for contemporary art
-            </p>
-          </div>
-        </div>
+        <p className="mt-8 text-center text-xs text-mist lg:text-left">
+          © {new Date().getFullYear()} Aether Art Space
+        </p>
       </div>
     </footer>
   );

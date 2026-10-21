@@ -44,6 +44,14 @@ const uploadOptions = {
     // No transformations - keep original dimensions and format
   },
 
+  // Options for partner logos
+  partner: {
+    folder: "zoeart/partners",
+    resource_type: "auto",
+    quality: "auto",
+    fetch_format: "auto",
+  },
+
   // Options for hero images
   hero: {
     folder: "zoeart/hero",
@@ -113,21 +121,9 @@ const deleteFromCloudinary = async (publicId) => {
   }
 };
 
-// Helper function to generate optimized URL
-const getOptimizedUrl = (publicId, options = {}) => {
-  const defaultOptions = {
-    quality: "auto",
-    fetch_format: "auto",
-    ...options,
-  };
-
-  return cloudinary.url(publicId, defaultOptions);
-};
-
 module.exports = {
   cloudinary,
   uploadToCloudinary,
   deleteFromCloudinary,
-  getOptimizedUrl,
   uploadOptions,
 };

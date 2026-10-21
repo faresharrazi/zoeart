@@ -1,267 +1,265 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight, ImagePlus, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, X, Image as ImageIcon, Trash2 } from "lucide-react";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient, errorMessage } from "@/lib/apiClient";
+import { imageUrl } from "@/lib/images";
+import { cn } from "@/lib/utils";
+import type { HeroImage } from "@/types/api";
+import { ConfirmDelete, IconAction } from "./AdminUI";
 
-interface HeroImage {
-  id: number;
-  cloudinary_url: string;
-  cloudinary_public_id: string;
-  original_name: string;
-  file_size?: number;
-  mime_type?: string;
-  width?: number;
-  height?: number;
-  format?: string;
-  display_order: number;
-  is_active: boolean;
-  created_at: string;
-}
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
-interface HeroImageUploadProps {
-  onImagesChange?: (images: HeroImage[]) => void;
-}
-
-const HeroImageUpload: React.FC<HeroImageUploadProps> = ({ onImagesChange }) => {
+/**
+ * The home page photos: upload (pick or drop files), reorder and delete.
+ * Changes are saved straight away.
+ */
+const HeroImageUpload = () => {
   const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [moving, setMoving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Fetch existing hero images
-  useEffect(() => {
-    fetchHeroImages();
-  }, []);
-
-  const fetchHeroImages = async () => {
+  const fetchHeroImages = useCallback(async () => {
     try {
-      setLoading(true);
-      console.log("HeroImageUpload: Fetching hero images...");
       const response = await apiClient.getHeroImages();
-      console.log("HeroImageUpload: API response:", response);
-      if (response.success) {
-        setHeroImages(response.data);
-        onImagesChange?.(response.data);
-        console.log("HeroImageUpload: Set hero images:", response.data);
-      }
+      if (response.success) setHeroImages(response.data);
     } catch (error) {
       console.error("Error fetching hero images:", error);
       toast({
-        title: "Error",
-        description: "Failed to fetch hero images",
+        title: "Couldn't load the photos",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+  useEffect(() => {
+    fetchHeroImages();
+  }, [fetchHeroImages]);
+
+  const uploadFiles = async (files: File[]) => {
+    const images = files.filter((file) => file.type.startsWith("image/"));
+    const tooBig = images.filter((file) => file.size > MAX_FILE_SIZE);
+    const toUpload = images.filter((file) => file.size <= MAX_FILE_SIZE);
+    if (tooBig.length > 0) {
+      toast({
+        title: "Some photos are too large",
+        description: `${tooBig.map((f) => f.name).join(", ")}: the limit is 4 MB per photo.`,
+        variant: "destructive",
+      });
+    }
+    if (toUpload.length === 0) return;
 
     setUploading(true);
-
     try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        // Check file size (4MB limit)
-        const maxFileSize = 4 * 1024 * 1024; // 4MB
-        if (file.size > maxFileSize) {
-          throw new Error(`File ${file.name} exceeds 4MB limit`);
-        }
-
-        // Upload to Cloudinary first
-        const uploadResponse = await apiClient.uploadImage(file, "hero");
-        
-        // Then save to hero_images table
-        const heroImageData = {
-          cloudinary_url: uploadResponse.file.url,
-          cloudinary_public_id: uploadResponse.file.publicId || uploadResponse.file.id,
-          original_name: file.name,
-          file_size: file.size,
-          mime_type: file.type,
-          width: uploadResponse.file.width,
-          height: uploadResponse.file.height,
-          format: uploadResponse.file.format,
-          display_order: heroImages.length, // Add to end
-        };
-
-        return await apiClient.uploadHeroImage(heroImageData);
-      });
-
-      const results = await Promise.all(uploadPromises);
-      const successful = results.filter(r => r.success);
-      
-      if (successful.length > 0) {
-        await fetchHeroImages(); // Refresh the list
-        toast({
-          title: "Success",
-          description: `${successful.length} hero image(s) uploaded to Cloudinary successfully`,
-        });
+      const results = await Promise.allSettled(
+        toUpload.map(async (file, index) => {
+          // Upload the file, then add it to the slider (at the end)
+          const uploadResponse = await apiClient.uploadImage(file, "hero");
+          return apiClient.uploadHeroImage({
+            cloudinary_url: uploadResponse.file.url,
+            cloudinary_public_id: String(
+              uploadResponse.file.publicId || uploadResponse.file.id
+            ),
+            original_name: file.name,
+            file_size: file.size,
+            mime_type: file.type,
+            width: uploadResponse.file.width,
+            height: uploadResponse.file.height,
+            format: uploadResponse.file.format,
+            display_order: heroImages.length + index,
+          });
+        })
+      );
+      const added = results.filter(
+        (r) => r.status === "fulfilled" && r.value.success
+      ).length;
+      await fetchHeroImages();
+      if (added > 0) {
+        toast({ title: added === 1 ? "Photo added" : `${added} photos added` });
       }
-
-      if (results.length !== successful.length) {
+      if (added < toUpload.length) {
+        const failure = results.find((r) => r.status === "rejected");
         toast({
-          title: "Partial Success",
-          description: `Some images failed to upload`,
+          title:
+            added === 0
+              ? "Couldn't upload the photos"
+              : "Some photos couldn't be uploaded",
+          description:
+            failure?.status === "rejected"
+              ? errorMessage(failure.reason, "Please try again.")
+              : "Please try again.",
           variant: "destructive",
         });
       }
-
-    } catch (error) {
-      console.error("Error uploading hero images:", error);
-      toast({
-        title: "Error",
-        description: `Failed to upload hero images: ${error.message}`,
-        variant: "destructive",
-      });
     } finally {
       setUploading(false);
-      // Reset the input
-      if (event.target) {
-        event.target.value = "";
-      }
     }
   };
 
-  const handleDeleteImage = async (id: number) => {
+  const handleDelete = async (image: HeroImage) => {
     try {
-      await apiClient.deleteHeroImage(id);
-      await fetchHeroImages(); // Refresh the list
-      toast({
-        title: "Success",
-        description: "Hero image deleted successfully",
-      });
+      await apiClient.deleteHeroImage(image.id);
+      await fetchHeroImages();
+      toast({ title: "Photo deleted" });
     } catch (error) {
       console.error("Error deleting hero image:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete hero image",
+        title: "Couldn't delete the photo",
         variant: "destructive",
       });
     }
   };
 
-  // handleMoveImage function removed - no longer needed
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  // Swap two neighbours, then save the new position of every photo that moved
+  const move = async (index: number, by: -1 | 1) => {
+    const reordered = [...heroImages];
+    [reordered[index], reordered[index + by]] = [
+      reordered[index + by],
+      reordered[index],
+    ];
+    setHeroImages(reordered);
+    setMoving(true);
+    try {
+      await Promise.all(
+        reordered
+          .map((image, position) => ({ image, position }))
+          .filter(({ image, position }) => image.display_order !== position)
+          .map(({ image, position }) =>
+            apiClient.updateHeroImage(image.id, { display_order: position })
+          )
+      );
+    } catch (error) {
+      console.error("Error reordering hero images:", error);
+      toast({
+        title: "Couldn't change the order",
+        variant: "destructive",
+      });
+    } finally {
+      await fetchHeroImages();
+      setMoving(false);
+    }
   };
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center">Loading hero images...</div>
-        </CardContent>
-      </Card>
+      <p role="status" className="flex items-center gap-2 text-sm text-mist">
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        Loading photos…
+      </p>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Upload Area */}
-      <Card className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors">
-        <CardContent className="p-6">
-          <div className="text-center">
-            <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-            <div className="space-y-2">
-              <p className="text-lg font-medium text-gray-900">Upload Hero Images</p>
-              <p className="text-sm text-gray-500">
-                Drag and drop images here, or click to select files
-              </p>
-              <p className="text-xs text-gray-400">
-                Up to 4MB each, JPG format preferred
-              </p>
-              <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded border">
-                <p className="font-medium mb-1">💡 Hero Image Tips:</p>
-                <p>• Images will be optimized to 1920x1080 with auto-crop</p>
-                <p>• Use landscape orientation for best results</p>
-                <p>• Images will appear in the home page slider</p>
-              </div>
+    <div className="space-y-4">
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {heroImages.map((image, index) => (
+          <li
+            key={image.id}
+            className="overflow-hidden rounded-lg border bg-white"
+          >
+            <div className="relative aspect-[16/9] bg-secondary">
+              <img
+                src={imageUrl(image.cloudinary_url, {
+                  width: 640,
+                  height: 360,
+                  crop: "fill",
+                })}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 size-full object-cover"
+              />
+              <span className="absolute left-2 top-2 rounded-md bg-ink/75 px-2 py-0.5 text-xs font-medium tabular-nums text-paper">
+                {index + 1}
+              </span>
             </div>
-            <Button
-              onClick={() => document.getElementById("hero-upload")?.click()}
-              disabled={uploading}
-              className="mt-4"
-            >
-              {uploading ? "Uploading..." : "Select Images"}
-            </Button>
-            <Input
-              id="hero-upload"
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Hero Images List */}
-      {heroImages.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ImageIcon className="w-5 h-5" />
-              Hero Images ({heroImages.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {heroImages.map((image, index) => (
-                <div
-                  key={image.id}
-                  className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50"
-                >
-                  {/* Thumbnail */}
-                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                    <img
-                      src={image.cloudinary_url}
-                      alt={image.original_name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Image Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">
-                      {image.original_name}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {image.width} × {image.height} • {formatFileSize(image.file_size || 0)}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      Order: {image.display_order} • Format: {image.format?.toUpperCase()}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    {/* Delete */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteImage(image.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center gap-2 py-1.5 pl-3 pr-1.5">
+              <p
+                className="min-w-0 flex-1 truncate text-[13px] text-stone"
+                title={image.original_name}
+              >
+                {image.original_name}
+              </p>
+              <IconAction
+                label="Move earlier"
+                icon={ArrowLeft}
+                disabled={index === 0 || moving}
+                onClick={() => move(index, -1)}
+              />
+              <IconAction
+                label="Move later"
+                icon={ArrowRight}
+                disabled={index === heroImages.length - 1 || moving}
+                onClick={() => move(index, 1)}
+              />
+              <ConfirmDelete
+                title="Delete this photo?"
+                description="It will be removed from the home page. This can't be undone."
+                onConfirm={() => handleDelete(image)}
+              />
             </div>
-          </CardContent>
-        </Card>
+          </li>
+        ))}
+
+        <li
+          className={cn(
+            "flex min-h-[12rem] rounded-lg border border-dashed transition-colors",
+            dragOver ? "border-ink bg-secondary" : "bg-white"
+          )}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            if (!uploading) uploadFiles(Array.from(e.dataTransfer.files));
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg px-4 py-6 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait"
+          >
+            <span className="flex size-10 items-center justify-center rounded-full bg-secondary text-stone">
+              {uploading ? (
+                <Loader2 className="size-5 animate-spin" aria-hidden="true" />
+              ) : (
+                <ImagePlus className="size-5" aria-hidden="true" />
+              )}
+            </span>
+            <span className="text-sm font-medium text-ink">
+              {uploading ? "Uploading…" : "Add photos"}
+            </span>
+            <span className="text-xs text-mist">
+              Click or drop files here. Landscape photos, up to 4 MB each.
+            </span>
+          </button>
+          <input
+            ref={inputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
+              e.target.value = "";
+              uploadFiles(files);
+            }}
+          />
+        </li>
+      </ul>
+      {heroImages.length === 0 && (
+        <p className="text-sm text-mist">
+          No photos yet: the home page shows a plain dark background.
+        </p>
       )}
     </div>
   );

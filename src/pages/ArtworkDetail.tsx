@@ -1,395 +1,235 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
-import ArtworkZoom from "@/components/ArtworkZoom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import ImageViewer from "@/components/ImageViewer";
+import ImageWithFallback from "@/components/ImageWithFallback";
 import {
-  ArrowLeft,
-  Calendar,
-  Palette,
-  Ruler,
-  User,
-  Loader2,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+  BackLink,
+  Container,
+  LoadingState,
+  NotFoundState,
+  PageLayout,
+} from "@/components/PageLayout";
+import { useApi } from "@/hooks/useApi";
+import { useSeo } from "@/hooks/useSeo";
 import { apiClient } from "@/lib/apiClient";
+import { imageSrcSet, imageUrl } from "@/lib/images";
+
+// Social preview images: 1200x630, cropped to fill
+const shareImage = (url: string | null | undefined) =>
+  url ? imageUrl(url, { width: 1200, height: 630, crop: "fill" }) : null;
+
+const arrowClass =
+  "absolute top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-paper/90 text-ink shadow-sm transition hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink";
 
 const ArtworkDetail = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
-  const [artwork, setArtwork] = useState<any>(null);
-  const [artist, setArtist] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [isZoomOpen, setIsZoomOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchArtwork = async () => {
-      try {
-        const [artworks, artists] = await Promise.all([
-          apiClient.getArtworks(),
-          apiClient.getArtists(),
-        ]);
-
-        const foundArtwork = (artworks as any[]).find(
-          (art: any) => art.slug === slug
-        );
-        setArtwork(foundArtwork);
-
-        // Find the artist for this artwork
-        if (foundArtwork?.artist_id) {
-          const foundArtist = (artists as any[]).find(
-            (artist: any) =>
-              artist.id.toString() === foundArtwork.artist_id.toString()
-          );
-          setArtist(foundArtist);
-          
-          // Update the artwork's artist_name with the found artist's name
-          if (foundArtist && foundArtist.name) {
-            foundArtwork.artist_name = foundArtist.name;
-            setArtwork(foundArtwork);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching artwork:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (slug) {
-      fetchArtwork();
-    }
-  }, [slug]);
-
-  const handleImageClick = (index: number) => {
-    setSelectedImageIndex(index);
-    setIsZoomOpen(true);
-  };
-
-  const handlePrevImage = () => {
-    if (artwork.images && artwork.images.length > 1) {
-      setSelectedImageIndex((prev) =>
-        prev === 0 ? artwork.images.length - 1 : prev - 1
-      );
-    }
-  };
-
-  const handleNextImage = () => {
-    if (artwork.images && artwork.images.length > 1) {
-      setSelectedImageIndex((prev) =>
-        prev === artwork.images.length - 1 ? 0 : prev + 1
-      );
-    }
-  };
+  const { slug = "" } = useParams<{ slug: string }>();
+  const { data: artwork, loading } = useApi(
+    () => apiClient.getArtwork(slug),
+    [slug]
+  );
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  useSeo({
+    title: artwork?.title || (loading ? undefined : "Artwork Not Found"),
+    description:
+      artwork?.description ||
+      (artwork &&
+        [
+          artwork.artist_name && `by ${artwork.artist_name}`,
+          artwork.year,
+          artwork.medium,
+        ]
+          .filter(Boolean)
+          .join(", ")),
+    image: shareImage(artwork?.featured_image || artwork?.images?.[0]),
+    noIndex: !loading && !artwork,
+    jsonLd: artwork && {
+      "@context": "https://schema.org",
+      "@type": "VisualArtwork",
+      name: artwork.title,
+      description: artwork.description || undefined,
+      image: artwork.images,
+      dateCreated: artwork.year ? String(artwork.year) : undefined,
+      artMedium: artwork.medium || undefined,
+      size: artwork.size || undefined,
+      creator: artwork.artist_name
+        ? { "@type": "Person", name: artwork.artist_name }
+        : undefined,
+    },
+  });
 
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <Navigation />
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
-          <div className="absolute inset-0 bg-black"></div>
-
-          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-            <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-white" />
-                <span className="ml-2 text-white/95">Loading artwork...</span>
-              </div>
-            </div>
-          </div>
-        </section>
-        <Footer />
-      </div>
+      <PageLayout>
+        <LoadingState label="Loading artwork…" />
+      </PageLayout>
     );
   }
 
   if (!artwork) {
     return (
-      <div className="min-h-screen">
-        <Navigation />
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
-          <div className="absolute inset-0 bg-black"></div>
-
-          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-            <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
-              <h1 className="text-4xl md:text-6xl mb-6 text-white drop-shadow-lg">
-                Artwork Not Found
-              </h1>
-              <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-                The artwork you're looking for doesn't exist or has been
-                removed.
-              </p>
-              <Button
-                onClick={() => navigate("/collection")}
-                className="mt-6"
-                variant="secondary"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Collection
-              </Button>
-            </div>
-          </div>
-        </section>
-        <Footer />
-      </div>
+      <PageLayout>
+        <NotFoundState
+          title="Artwork not found"
+          message="The artwork you're looking for doesn't exist or has been removed."
+          backTo="/collection"
+          backLabel="Collection"
+        />
+      </PageLayout>
     );
   }
 
-  const hasImages = artwork.images && artwork.images.length > 0;
-  const hasValidImages =
-    hasImages &&
-    artwork.images.some((img: string) => img && !img.startsWith("blob:"));
+  const images = artwork.images;
+  const title = artwork.title?.trim() || "Untitled";
+  const artist = artwork.artist;
+  const byline = artwork.artist_name || "Unknown artist";
+  const current = images[selectedIndex] ?? images[0];
+  const step = (delta: number) =>
+    setSelectedIndex((i) => (i + delta + images.length) % images.length);
+
+  const facts = [
+    { label: "Year", value: artwork.year },
+    { label: "Medium", value: artwork.medium?.trim() },
+    { label: "Size", value: artwork.size?.trim() },
+  ].filter((fact) => fact.value);
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
-
-      {/* Hero Section */}
-      <section className="relative bg-black">
-        <div className="absolute inset-0 bg-black"></div>
-
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          {/* Consistent text overlay background for all cases */}
-          <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-2xl">
-            <h1 className="text-4xl md:text-6xl mb-6 text-white drop-shadow-lg">
-              {artwork.title || "Untitled"}
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-white/95 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-              by {artwork.artist_name || "Unknown Artist"}
-            </p>
+    <PageLayout>
+      <Container className="grid gap-12 py-12 md:py-20 lg:grid-cols-12 lg:gap-16">
+        <div className="lg:col-span-7 space-y-4">
+          <div className="relative bg-sand">
+            <button
+              type="button"
+              className="block w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+              onClick={() => current && setViewerIndex(selectedIndex)}
+              aria-label={`Enlarge image of ${title}`}
+              disabled={!current}
+            >
+              <ImageWithFallback
+                src={imageUrl(current, { width: 1400 })}
+                srcSet={imageSrcSet(current, [700, 1000, 1400, 1800])}
+                sizes="(min-width: 1024px) 55vw, 100vw"
+                alt={`${title} by ${byline}`}
+                className="w-full max-h-[80vh] object-contain"
+                fallback={
+                  <div className="aspect-[4/5] flex items-center justify-center">
+                    <span
+                      className="font-display text-7xl text-mist"
+                      aria-hidden="true"
+                    >
+                      {title.charAt(0)}
+                    </span>
+                  </div>
+                }
+              />
+            </button>
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => step(-1)}
+                  aria-label="Previous image"
+                  className={`${arrowClass} left-4`}
+                >
+                  <ChevronLeft className="w-5 h-5" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => step(1)}
+                  aria-label="Next image"
+                  className={`${arrowClass} right-4`}
+                >
+                  <ChevronRight className="w-5 h-5" aria-hidden="true" />
+                </button>
+              </>
+            )}
           </div>
-        </div>
-      </section>
 
-      {/* Artwork Content */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div className="container mx-auto px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Artwork Images */}
-              <div className="space-y-6">
-                {/* Main Image */}
-                {hasValidImages ? (
-                  <div className="relative group">
+          {images.length > 1 && (
+            <ul className="grid grid-cols-5 gap-3">
+              {images.map((image, index) => (
+                <li key={image + index}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIndex(index)}
+                    aria-label={`Show image ${index + 1}`}
+                    aria-current={index === selectedIndex ? "true" : undefined}
+                    className={`block w-full aspect-square overflow-hidden transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink ${
+                      index === selectedIndex
+                        ? "ring-1 ring-ink"
+                        : "opacity-60 hover:opacity-100"
+                    }`}
+                  >
                     <img
-                      src={artwork.images[selectedImageIndex]}
-                      alt={artwork.title}
-                      className="w-full h-auto rounded-lg shadow-elegant cursor-pointer"
-                      onClick={() => handleImageClick(selectedImageIndex)}
+                      src={imageUrl(image, {
+                        width: 200,
+                        height: 200,
+                        crop: "fill",
+                      })}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover"
                     />
-
-                    {/* Navigation arrows for multiple images */}
-                    {artwork.images.length > 1 && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="lg"
-                          onClick={handlePrevImage}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
-                        >
-                          <ChevronLeft className="w-6 h-6" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="lg"
-                          onClick={handleNextImage}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
-                        >
-                          <ChevronRight className="w-6 h-6" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <div className="w-full h-96 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg shadow-elegant flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center mx-auto mb-4">
-                        <span className="text-4xl text-slate-600 font-semibold">
-                          {artwork.title?.charAt(0) || "A"}
-                        </span>
-                      </div>
-                      <p className="text-slate-500">No image available</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Thumbnail Gallery */}
-                {hasValidImages && artwork.images.length > 1 && (
-                  <div className="grid grid-cols-4 gap-3">
-                    {artwork.images.map((image: string, index: number) => (
-                      <img
-                        key={index}
-                        src={image}
-                        alt={`${artwork.title} detail ${index + 1}`}
-                        className={`w-full h-24 object-cover rounded-lg cursor-pointer transition-all duration-300 ${
-                          index === selectedImageIndex
-                            ? "ring-2 ring-blue-500 shadow-lg"
-                            : "hover:shadow-md"
-                        }`}
-                        onClick={() => setSelectedImageIndex(index)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Artwork Information */}
-              <div className="space-y-6">
-                <Card className="shadow-elegant">
-                  <CardContent className="p-8">
-                    <div className="space-y-6">
-                      {/* Title and Artist */}
-                      <div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                          {artwork.title || "Untitled"}
-                        </h2>
-                        <p className="text-xl text-gray-600">
-                          by {artwork.artist_name || "Unknown Artist"}
-                        </p>
-                      </div>
-
-                      {/* Metadata */}
-                      <div className="space-y-4">
-                        {artwork.year && (
-                          <div className="flex items-center gap-3">
-                            <Calendar className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">
-                              {artwork.year}
-                            </span>
-                          </div>
-                        )}
-
-                        {artwork.medium && (
-                          <div className="flex items-center gap-3">
-                            <Palette className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">
-                              {artwork.medium}
-                            </span>
-                          </div>
-                        )}
-
-                        {artwork.size && (
-                          <div className="flex items-center gap-3">
-                            <Ruler className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">
-                              {artwork.size}
-                            </span>
-                          </div>
-                        )}
-
-                        {artwork.artist_name && (
-                          <div className="flex items-center gap-3">
-                            <User className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">
-                              {artwork.artist_name}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Description */}
-                      {artwork.description && (
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                            About This Work
-                          </h3>
-                          <p className="text-gray-600 leading-relaxed">
-                            {artwork.description}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Artist Section */}
-                {artist && (
-                  <Card className="mb-8">
-                    <CardContent className="p-6">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                        Artist
-                      </h3>
-                      <div className="flex justify-center">
-                        <div
-                          className={`text-center w-32 ${
-                            artist.is_visible !== false
-                              ? "cursor-pointer hover:opacity-80 transition-opacity"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            if (artist.is_visible !== false && artist.slug) {
-                              navigate(`/artist/${artist.slug}`);
-                            }
-                          }}
-                        >
-                          {artist.profile_image ? (
-                            <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden">
-                              <img
-                                src={artist.profile_image}
-                                alt={artist.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-gray-200 flex items-center justify-center">
-                              <User className="w-8 h-8 text-gray-600" />
-                            </div>
-                          )}
-                          <p className="text-gray-900 font-semibold text-lg">
-                            {artist.name}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex gap-4">
-                  <Button
-                    onClick={() => navigate("/collection")}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Collection
-                  </Button>
-                  <Button
-                    onClick={() =>
-                      navigate(
-                        `/artist/${artwork.artist_name
-                          ?.toLowerCase()
-                          .replace(/\s+/g, "-")}`
-                      )
-                    }
-                    className="flex-1"
-                  >
-                    View Artist Profile
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-      </section>
 
-      {/* Image Zoom Modal */}
-      {hasValidImages && (
-        <ArtworkZoom
-          images={artwork.images}
-          isOpen={isZoomOpen}
-          onClose={() => setIsZoomOpen(false)}
-          initialIndex={selectedImageIndex}
-        />
-      )}
+        <div className="lg:col-span-5 lg:sticky lg:top-28 lg:self-start space-y-8">
+          <BackLink to="/collection">Collection</BackLink>
+          <div className="space-y-4">
+            <h1 className="font-display text-5xl md:text-6xl leading-[1.02]">
+              {title}
+            </h1>
+            {artist ? (
+              <Link
+                to={`/artist/${artist.slug}`}
+                className="inline-block text-lg text-stone hover:text-ink underline-offset-4 decoration-1 hover:underline"
+              >
+                {artist.name.trim()}
+              </Link>
+            ) : (
+              <p className="text-lg text-stone">{byline}</p>
+            )}
+          </div>
 
-      <Footer />
-    </div>
+          {facts.length > 0 && (
+            <dl className="border-t border-line">
+              {facts.map((fact) => (
+                <div
+                  key={fact.label}
+                  className="grid grid-cols-[120px_1fr] gap-4 border-b border-line py-4 text-sm"
+                >
+                  <dt className="text-mist">{fact.label}</dt>
+                  <dd>{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+
+          {artwork.description && (
+            <p className="text-lg leading-relaxed text-stone whitespace-pre-line">
+              {artwork.description.trim()}
+            </p>
+          )}
+        </div>
+      </Container>
+
+      <ImageViewer
+        images={images.map((src, i) => ({
+          src,
+          alt: `${title} by ${byline}, image ${i + 1}`,
+        }))}
+        index={viewerIndex}
+        onIndexChange={setViewerIndex}
+        label={title}
+        downloadName={artwork.slug}
+        allowRotate
+      />
+    </PageLayout>
   );
 };
 

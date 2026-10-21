@@ -1,8 +1,9 @@
 import { useCallback } from "react";
+import type { Artist } from "@/types/api";
 
 export const useArtistData = () => {
   const transformArtistData = useCallback(
-    (artist: any) => ({
+    (artist: Artist) => ({
       id: artist.id.toString(),
       name: artist.name,
       slug: artist.slug,
@@ -17,7 +18,7 @@ export const useArtistData = () => {
   );
 
   const transformArtistsData = useCallback(
-    (artists: any[]) => artists.map(transformArtistData),
+    (artists: Artist[]) => artists.map(transformArtistData),
     [transformArtistData]
   );
 

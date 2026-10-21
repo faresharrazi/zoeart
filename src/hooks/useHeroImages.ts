@@ -1,74 +1,36 @@
-import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/apiClient";
+import { useApi } from "./useApi";
 
-interface HeroImage {
+export interface HeroImage {
   id: number;
-  originalName: string;
-  filename: string;
-  url: string;
-  fileSize: number;
-  mimeType: string;
+  cloudinary_url: string;
+  cloudinary_public_id: string;
+  original_name: string;
+  file_size?: number;
+  mime_type?: string;
+  width?: number;
+  height?: number;
+  format?: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
 }
 
+/** Active home page slider images, in display order. */
 export const useHeroImages = () => {
-  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, loading, error, refetch } = useApi(async () => {
+    const response = await apiClient.getHeroImages();
+    return [...(response.data as HeroImage[])].sort(
+      (a, b) =>
+        a.display_order - b.display_order ||
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+  }, []);
 
-  const fetchHeroImages = async () => {
-    try {
-      setLoading(true);
-      // Add cache-busting parameter to ensure fresh data
-      const response = await apiClient.getHeroImages();
-      
-      // Handle the response structure: { success: true, data: [...] }
-      const images = response.data || response || [];
-
-      // Ensure images is an array
-      if (!Array.isArray(images)) {
-        console.warn("Hero images response is not an array:", images);
-        setHeroImages([]);
-        return;
-      }
-
-      // Map file_path to url and convert snake_case to camelCase
-      const mappedImages = images.map((image: any) => ({
-        id: image.id,
-        originalName: image.original_name,
-        filename: image.filename,
-        url: `/api/files/${image.id}`, // Use API endpoint to serve files from database
-        fileSize: image.file_size,
-        mimeType: image.mime_type,
-      }));
-      setHeroImages(mappedImages);
-    } catch (error) {
-      console.error("Error fetching hero images:", error);
-      // Fallback to placeholder images
-      setHeroImages([
-        {
-          id: 0,
-          originalName: "placeholder",
-          filename: "placeholder",
-          url: "https://via.placeholder.com/1920x1080/393E46/FFFFFF?text=Aether+Art+Space",
-          fileSize: 0,
-          mimeType: "image/png",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
+  return {
+    heroImages: data ?? [],
+    loading,
+    error: error?.message ?? null,
+    refetch,
   };
-
-  useEffect(() => {
-    fetchHeroImages();
-  }, []);
-
-  // Force refresh when component mounts to clear any cached data
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchHeroImages();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return { heroImages, loading, refreshHeroImages: fetchHeroImages };
 };

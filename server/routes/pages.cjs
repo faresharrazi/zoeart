@@ -9,24 +9,19 @@ const {
 
 const router = express.Router();
 
+// Contact details shown on the site (an empty field isn't shown), with the
+// longest value each column holds
+const CONTACT_FIELDS = { email: 100, phone: 20, instagram: 100, address: 300 };
+const PUBLIC_CONTACT_COLUMNS =
+  "id, email, phone, instagram, address, updated_at";
+
 // Get all page content (public)
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    console.log("Fetching page content...");
-
     const pages = await query("SELECT * FROM page_content");
-    const contactInfo = await query("SELECT * FROM contact_info");
-
-    console.log("Pages found:", pages.rows.length);
-    console.log("Contact info found:", contactInfo.rows.length);
-    console.log(
-      "Raw pages data:",
-      pages.rows.map((p) => ({
-        page_name: p.page_name,
-        is_visible: p.is_visible,
-        type: typeof p.is_visible,
-      }))
+    const contactInfo = await query(
+      `SELECT ${PUBLIC_CONTACT_COLUMNS} FROM contact_info LIMIT 1`
     );
 
     const pageData = pages.rows.reduce((acc, page) => {
@@ -50,18 +45,23 @@ router.get(
       return acc;
     }, {});
 
+    // Visible opening hours and partners travel with the page settings, so
+    // the footer and contact page need no extra requests
+    const openingHours = await query(
+      `SELECT id, day, time_frame FROM working_hours
+       WHERE is_active = TRUE ORDER BY sort_order, id`
+    );
+    const partners = await query(
+      `SELECT id, name, logo_url, website_url FROM partners
+       WHERE is_visible = TRUE ORDER BY sort_order, id`
+    );
+
     const response = {
+      partners: partners.rows,
+      openingHours: openingHours.rows,
       pages: pageData,
       contactInfo: contactInfo.rows.length > 0 ? contactInfo.rows[0] : {},
     };
-
-    console.log("Page data keys:", Object.keys(pageData));
-    console.log("Response structure:", {
-      hasPages: !!response.pages,
-      hasHome: !!response.pages.home,
-      hasContactInfo: !!response.contactInfo,
-      keys: Object.keys(response),
-    });
 
     res.json(response);
   })
@@ -104,14 +104,20 @@ router.put(
     const { pageName } = req.params;
     const { content, is_visible, title, description } = req.body;
 
-    const updateData = {
-      content: typeof content === "object" ? JSON.stringify(content) : content,
-      is_visible: is_visible !== false,
-      updated_at: new Date().toISOString(),
-    };
-
+    // Only change what was sent: an editor that saves the title alone must
+    // not wipe the page's content or visibility.
+    const updateData = {};
+    if (content !== undefined) {
+      updateData.content =
+        typeof content === "object" ? JSON.stringify(content) : content;
+    }
+    if (is_visible !== undefined) updateData.is_visible = is_visible !== false;
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
+
+    if (Object.keys(updateData).length === 0) {
+      throw new ValidationError("Nothing to update");
+    }
 
     const result = await query(
       `UPDATE page_content 
@@ -136,15 +142,19 @@ router.put(
   "/contact/info",
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const { email, phone, instagram, address } = req.body;
-
-    const updateData = {
-      email: email || "",
-      phone: phone || "",
-      instagram: instagram || "",
-      address: address || "",
-      updated_at: new Date().toISOString(),
-    };
+    // Only the fields sent are changed
+    const updateData = {};
+    for (const [field, maxLength] of Object.entries(CONTACT_FIELDS)) {
+      if (req.body[field] !== undefined) {
+        updateData[field] = String(req.body[field] ?? "").trim();
+        if (updateData[field].length > maxLength) {
+          throw new ValidationError(
+            `The ${field} can be at most ${maxLength} characters`
+          );
+        }
+      }
+    }
+    updateData.updated_at = new Date().toISOString();
 
     // Check if contact info exists
     const existing = await query("SELECT id FROM contact_info LIMIT 1");
@@ -158,7 +168,7 @@ router.put(
          .map((key, index) => `${key} = $${index + 1}`)
          .join(", ")}
        WHERE id = $${Object.keys(updateData).length + 1}
-       RETURNING *`,
+       RETURNING ${PUBLIC_CONTACT_COLUMNS}`,
         [...Object.values(updateData), existing.rows[0].id]
       );
     } else {
@@ -168,7 +178,7 @@ router.put(
        VALUES (${Object.keys(updateData)
          .map((_, index) => `$${index + 1}`)
          .join(", ")})
-       RETURNING *`,
+       RETURNING ${PUBLIC_CONTACT_COLUMNS}`,
         Object.values(updateData)
       );
     }
@@ -181,60 +191,15 @@ router.put(
 router.get(
   "/contact/info",
   asyncHandler(async (req, res) => {
-    const contactInfo = await query("SELECT * FROM contact_info LIMIT 1");
+    const contactInfo = await query(
+      `SELECT ${PUBLIC_CONTACT_COLUMNS} FROM contact_info LIMIT 1`
+    );
 
     if (contactInfo.rows.length === 0) {
       return res.json({});
     }
 
     res.json(contactInfo.rows[0]);
-  })
-);
-
-// Admin contact info routes
-// Update contact info (admin only) - alternative endpoint
-router.put(
-  "/contact-info",
-  authenticateToken,
-  asyncHandler(async (req, res) => {
-    const { email, phone, instagram, address } = req.body;
-
-    const updateData = {
-      email: email || "",
-      phone: phone || "",
-      instagram: instagram || "",
-      address: address || "",
-      updated_at: new Date().toISOString(),
-    };
-
-    // Check if contact info exists
-    const existing = await query("SELECT id FROM contact_info LIMIT 1");
-
-    let result;
-    if (existing.rows.length > 0) {
-      // Update existing
-      result = await query(
-        `UPDATE contact_info 
-       SET ${Object.keys(updateData)
-         .map((key, index) => `${key} = $${index + 1}`)
-         .join(", ")}
-       WHERE id = $${Object.keys(updateData).length + 1}
-       RETURNING *`,
-        [...Object.values(updateData), existing.rows[0].id]
-      );
-    } else {
-      // Create new
-      result = await query(
-        `INSERT INTO contact_info (${Object.keys(updateData).join(", ")})
-       VALUES (${Object.keys(updateData)
-         .map((_, index) => `$${index + 1}`)
-         .join(", ")})
-       RETURNING *`,
-        Object.values(updateData)
-      );
-    }
-
-    res.json(result.rows[0]);
   })
 );
 
