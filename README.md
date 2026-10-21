@@ -8,9 +8,19 @@ A modern art gallery website built with React, TypeScript, and Tailwind CSS.
 # Install dependencies
 npm i
 
-# Start development server
-npm run dev
+# Configure local environment (Postgres URL, JWT secret, first admin)
+cp .env.example .env.local
+
+# Create tables, load sample content and the first admin user
+npm run db:seed
+
+# Start the API (port 3001) and the frontend (port 8080) together
+npm run dev:full
 ```
+
+The frontend calls `/api`, which Vite proxies to the Express server in development.
+`npm run db:setup` applies `database/schema.sql` without sample content; use it for a
+fresh production database.
 
 ## Project Structure
 

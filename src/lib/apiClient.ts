@@ -1,6 +1,5 @@
-const API_BASE_URL = import.meta.env.PROD
-  ? "/api"
-  : "http://localhost:3001/api";
+// In development Vite proxies /api to the Express server (see vite.config.ts).
+const API_BASE_URL = "/api";
 
 class ApiClient {
   private cache = new Map<string, { data: unknown; timestamp: number }>();

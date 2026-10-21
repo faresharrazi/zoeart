@@ -9,8 +9,10 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "api": "node server.cjs",
-    "dev:full": "concurrently \"npm run api\" \"npm run dev\""
+    "api": "node --watch server/index.cjs",
+    "dev:full": "concurrently \"npm run api\" \"npm run dev\"",
+    "db:setup": "node scripts/setup-database.cjs",
+    "db:seed": "node scripts/setup-database.cjs --seed"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

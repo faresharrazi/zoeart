@@ -1,3 +1,5 @@
+require("dotenv").config({ path: [".env.local", ".env"], quiet: true });
+
 const express = require("express");
 const path = require("path");
 
@@ -102,22 +104,12 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Minimal API Server running on port ${PORT}`);
-  console.log(`📊 API available at http://localhost:${PORT}/api`);
-  console.log(`🌐 Frontend available at http://localhost:${PORT}`);
-});
-
-// Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("SIGTERM received, shutting down gracefully");
-  process.exit(0);
-});
-
-process.on("SIGINT", () => {
-  console.log("SIGINT received, shutting down gracefully");
-  process.exit(0);
-});
+// Start a standalone server when run directly (local dev). On Vercel the
+// exported app is used as the serverless handler instead.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`API server running on http://localhost:${PORT}/api`);
+  });
+}
 
 module.exports = app;

@@ -1,70 +1,74 @@
+require("dotenv").config({ path: [".env.local", ".env"], quiet: true });
+
+const fs = require("fs");
+const path = require("path");
+const bcrypt = require("bcrypt");
 const { Pool } = require("pg");
 
-// Database setup script for Neon PostgreSQL
-async function setupDatabase() {
+// Applies database/schema.sql, optionally loads the dev seed, and creates the
+// first admin user from ADMIN_USERNAME / ADMIN_PASSWORD when no user exists.
+//
+//   node scripts/setup-database.cjs          # schema + first admin
+//   node scripts/setup-database.cjs --seed   # also load sample content (dev only)
+async function setupDatabase({ seed = false } = {}) {
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
+    connectionString,
     ssl:
       process.env.NODE_ENV === "production"
         ? { rejectUnauthorized: false }
         : false,
   });
 
+  const readSql = (file) =>
+    fs.readFileSync(path.join(__dirname, "../database", file), "utf8");
+
   try {
-    console.log("🔗 Connecting to database...");
+    console.log("Applying schema...");
+    await pool.query(readSql("schema.sql"));
 
-    // Read the schema file
-    const fs = require("fs");
-    const schema = fs.readFileSync("./database-schema-postgres.sql", "utf8");
+    if (seed) {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("Refusing to load sample content in production");
+      }
+      console.log("Loading sample content...");
+      await pool.query(readSql("seed-dev.sql"));
+    }
 
-    console.log("📋 Executing database schema...");
-
-    // Split by semicolon and execute each statement
-    const statements = schema
-      .split(";")
-      .filter((stmt) => stmt.trim().length > 0);
-
-    for (const statement of statements) {
-      if (statement.trim()) {
-        try {
-          await pool.query(statement);
-          console.log("✅ Executed:", statement.substring(0, 50) + "...");
-        } catch (error) {
-          // Ignore errors for statements that might already exist
-          if (
-            !error.message.includes("already exists") &&
-            !error.message.includes("duplicate key")
-          ) {
-            console.log("⚠️  Warning:", error.message);
-          }
-        }
+    const { rows } = await pool.query("SELECT COUNT(*)::int AS count FROM users");
+    if (rows[0].count === 0) {
+      const { ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_EMAIL } = process.env;
+      if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
+        console.log(
+          "No users yet. Set ADMIN_USERNAME and ADMIN_PASSWORD and run again to create the first admin."
+        );
+      } else if (ADMIN_PASSWORD.length < 12) {
+        throw new Error("ADMIN_PASSWORD must be at least 12 characters");
+      } else {
+        const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
+        await pool.query(
+          "INSERT INTO users (username, email, password_hash, role) VALUES ($1, $2, $3, 'admin')",
+          [ADMIN_USERNAME, ADMIN_EMAIL || `${ADMIN_USERNAME}@localhost`, passwordHash]
+        );
+        console.log(`Created admin user "${ADMIN_USERNAME}"`);
       }
     }
 
-    console.log("🎉 Database setup completed successfully!");
-
-    // Test the connection
-    const result = await pool.query("SELECT COUNT(*) FROM users");
-    console.log("👤 Users table has", result.rows[0].count, "records");
-  } catch (error) {
-    console.error("❌ Database setup failed:", error);
-    throw error;
+    console.log("Database ready");
   } finally {
     await pool.end();
   }
 }
 
-// Run if called directly
 if (require.main === module) {
-  setupDatabase()
-    .then(() => {
-      console.log("✅ Setup complete!");
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error("❌ Setup failed:", error);
-      process.exit(1);
-    });
+  setupDatabase({ seed: process.argv.includes("--seed") }).catch((error) => {
+    console.error("Setup failed:", error.message);
+    process.exit(1);
+  });
 }
 
 module.exports = setupDatabase;
