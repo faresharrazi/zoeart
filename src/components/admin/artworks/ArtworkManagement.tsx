@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
-import { Loader2 } from "lucide-react";
 import ArtworkList from "./ArtworkList";
 import ArtworkForm from "./ArtworkForm";
+import { AdminPage, LoadingPanel } from "../AdminUI";
 import type { Artist } from "@/types/api";
 
 interface Artwork {
@@ -29,7 +29,6 @@ const ArtworkManagement = () => {
   const [editingArtwork, setEditingArtwork] = useState<Artwork | null>(null);
   const { toast } = useToast();
 
-
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -37,7 +36,6 @@ const ArtworkManagement = () => {
         apiClient.getAdminArtworks(),
         apiClient.getAdminArtists(),
       ]);
-
 
       // Transform artworks data to match our interface
       const transformedArtworks = artworksData.map((artwork) => ({
@@ -60,8 +58,7 @@ const ArtworkManagement = () => {
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({
-        title: "Error",
-        description: "Failed to load artworks data",
+        title: "Couldn't load the artworks",
         variant: "destructive",
       });
     } finally {
@@ -83,18 +80,11 @@ const ArtworkManagement = () => {
     setIsEditing(true);
   };
 
-  const handleSave = (artwork: Artwork) => {
-    if (editingArtwork) {
-      // Update existing artwork
-      setArtworks((prev) =>
-        prev.map((a) => (a.id === artwork.id ? artwork : a))
-      );
-    } else {
-      // Add new artwork
-      setArtworks((prev) => [...prev, artwork]);
-    }
+  const handleSave = () => {
     setIsEditing(false);
     setEditingArtwork(null);
+    // Reload so a new artwork gets its id and web address from the server
+    fetchData();
   };
 
   const handleCancel = () => {
@@ -114,12 +104,9 @@ const ArtworkManagement = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Loading artworks...</span>
-        </div>
-      </div>
+      <AdminPage title="Artworks">
+        <LoadingPanel label="Loading artworks…" />
+      </AdminPage>
     );
   }
 

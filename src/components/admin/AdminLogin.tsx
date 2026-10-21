@@ -38,7 +38,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   };
 
   return (
-    <main className="flex min-h-screen bg-theme-background px-4">
+    <main className="flex min-h-screen bg-canvas px-4">
       <div className="m-auto w-full max-w-sm py-12">
         <div className="mb-8 flex flex-col items-center text-center">
           <img

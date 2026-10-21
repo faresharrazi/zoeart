@@ -2,31 +2,29 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ArrowDownRight,
   ArrowUpRight,
+  BarChart3,
   ExternalLink,
   Loader2,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, errorMessage } from "@/lib/apiClient";
+import { cn } from "@/lib/utils";
 import type { AnalyticsRange, AnalyticsSummary } from "@/types/api";
+import {
+  AdminPage,
+  EmptyState,
+  LoadingPanel,
+  Panel,
+  StatStrip,
+} from "../AdminUI";
 import ViewsChart from "./ViewsChart";
 
 const RANGES: { value: AnalyticsRange; label: string; previous: string }[] = [
-  { value: "7d", label: "Last 7 days", previous: "previous 7 days" },
-  { value: "30d", label: "Last 30 days", previous: "previous 30 days" },
-  { value: "90d", label: "Last 90 days", previous: "previous 90 days" },
-  { value: "12m", label: "Last 12 months", previous: "previous 12 months" },
+  { value: "7d", label: "7 days", previous: "previous 7 days" },
+  { value: "30d", label: "30 days", previous: "previous 30 days" },
+  { value: "90d", label: "90 days", previous: "previous 90 days" },
+  { value: "12m", label: "12 months", previous: "previous 12 months" },
 ];
-
-// Dataviz reference palette: magnitude in one hue; devices are 3 categories
-const BAR = "#2a78d6";
-const DEVICE_COLORS = {
-  mobile: "#2a78d6",
-  desktop: "#eb6834",
-  tablet: "#1baf7a",
-};
-const GOOD = "#006300";
-const BAD = "#d03b3b";
 
 const number = new Intl.NumberFormat("en");
 const compact = (n: number) =>
@@ -45,6 +43,7 @@ const countryName = (code: string) => {
   }
 };
 
+/** Change against the previous period; arrow and sign, not colour alone. */
 const Delta = ({
   current,
   previous,
@@ -56,76 +55,57 @@ const Delta = ({
 }) => {
   if (previous === 0) return null;
   const change = Math.round(((current - previous) / previous) * 100);
-  if (change === 0) {
-    return <p className="text-sm text-theme-text-muted">Same as {period}</p>;
-  }
+  if (change === 0) return <>Same as the {period}</>;
   const up = change > 0;
   const Icon = up ? ArrowUpRight : ArrowDownRight;
   return (
-    <p
-      className="flex items-center gap-1 text-sm"
-      style={{ color: up ? GOOD : BAD }}
-    >
-      <Icon className="w-4 h-4" aria-hidden="true" />
-      <span>
+    <span className="inline-flex flex-wrap items-center gap-x-1">
+      <span
+        className={cn(
+          "inline-flex items-center gap-0.5 font-medium",
+          up ? "text-[hsl(145_55%_26%)]" : "text-destructive"
+        )}
+      >
+        <Icon className="size-3.5" aria-hidden="true" />
         {up ? "+" : "−"}
         {Math.abs(change)}%
       </span>
-      <span className="text-theme-text-muted">vs {period}</span>
-    </p>
+      vs {period}
+    </span>
   );
 };
-
-const StatTile = ({
-  label,
-  value,
-  children,
-}: {
-  label: string;
-  value: string;
-  children?: React.ReactNode;
-}) => (
-  <Card>
-    <CardContent className="p-5 space-y-1">
-      <p className="text-sm text-theme-text-muted">{label}</p>
-      <p className="text-3xl font-semibold text-theme-text-primary">{value}</p>
-      {children}
-    </CardContent>
-  </Card>
-);
 
 /** Ranked list with a bar for each value (one hue, longest = largest). */
 const BarList = ({
   rows,
   emptyText,
 }: {
-  rows: { key: string; label: React.ReactNode; value: number }[];
+  rows: {
+    key: string;
+    label: React.ReactNode;
+    value: number;
+    display?: React.ReactNode;
+  }[];
   emptyText: string;
 }) => {
   if (rows.length === 0) {
-    return <p className="text-sm text-theme-text-muted">{emptyText}</p>;
+    return <p className="text-sm text-mist">{emptyText}</p>;
   }
   const max = Math.max(...rows.map((r) => r.value));
   return (
-    <ul className="space-y-3">
+    <ul className="space-y-3.5">
       {rows.map((row) => (
-        <li key={row.key} className="space-y-1">
+        <li key={row.key} className="space-y-1.5">
           <div className="flex justify-between gap-4 text-sm">
-            <span className="truncate">{row.label}</span>
-            <span
-              className="font-medium"
-              style={{ fontVariantNumeric: "tabular-nums" }}
-            >
-              {number.format(row.value)}
+            <span className="truncate text-ink">{row.label}</span>
+            <span className="shrink-0 tabular-nums text-ink">
+              {row.display ?? number.format(row.value)}
             </span>
           </div>
           <div
             aria-hidden="true"
-            className="h-2 rounded-r"
-            style={{
-              width: `${Math.max(2, (row.value / max) * 100)}%`,
-              background: BAR,
-            }}
+            className="h-1.5 rounded-r-full bg-ink"
+            style={{ width: `${Math.max(2, (row.value / max) * 100)}%` }}
           />
         </li>
       ))}
@@ -146,8 +126,8 @@ const AnalyticsDashboard = () => {
         setData(await apiClient.getAnalytics(selected));
       } catch (error) {
         toast({
-          title: "Error",
-          description: errorMessage(error, "Failed to load statistics"),
+          title: "Couldn't load the statistics",
+          description: errorMessage(error, "Please try again."),
           variant: "destructive",
         });
       } finally {
@@ -165,21 +145,18 @@ const AnalyticsDashboard = () => {
   const totals = data?.totals;
   const deviceTotal = data?.devices.reduce((sum, d) => sum + d.views, 0) ?? 0;
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-theme-text-primary">
-          Analytics
-        </h1>
-        <p className="text-theme-text-muted">
-          Visits to the website, without cookies.
-        </p>
-      </div>
-
+  const rangePicker = (
+    <div className="flex items-center gap-3">
+      {loading && data && (
+        <Loader2
+          className="size-4 animate-spin text-mist"
+          aria-label="Loading"
+        />
+      )}
       <div
-        className="flex flex-wrap gap-2"
+        className="inline-flex rounded-lg border bg-white p-0.5 shadow-[0_1px_2px_hsl(var(--ink)/0.04)]"
         role="group"
-        aria-label="Date range"
+        aria-label="Period"
       >
         {RANGES.map((option) => (
           <button
@@ -187,228 +164,187 @@ const AnalyticsDashboard = () => {
             type="button"
             onClick={() => setRange(option.value)}
             aria-pressed={range === option.value}
-            className={`px-4 py-2 rounded-md text-sm border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary ${
+            aria-label={`Last ${option.label}`}
+            className={cn(
+              "h-8 whitespace-nowrap rounded-md px-3 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               range === option.value
-                ? "bg-theme-primary text-white border-theme-primary"
-                : "bg-white border-theme-border hover:bg-gray-50"
-            }`}
+                ? "bg-ink text-paper"
+                : "text-stone hover:bg-accent hover:text-ink"
+            )}
           >
             {option.label}
           </button>
         ))}
-        {loading && (
-          <Loader2
-            className="w-5 h-5 animate-spin self-center ml-2"
-            aria-label="Loading"
-          />
-        )}
       </div>
+    </div>
+  );
 
-      {!data ? null : totals &&
-        totals.views === 0 &&
-        totals.previous_views === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center text-theme-text-muted">
-            No visits recorded yet. Statistics start from the day this feature
-            went live.
-          </CardContent>
-        </Card>
+  return (
+    <AdminPage
+      title="Analytics"
+      description="Visits to the website, counted without cookies."
+      actions={rangePicker}
+    >
+      {!data ? (
+        loading && <LoadingPanel label="Loading statistics…" />
+      ) : totals && totals.views === 0 && totals.previous_views === 0 ? (
+        <EmptyState
+          icon={BarChart3}
+          title="No visits recorded yet"
+          description="Statistics start from the day this feature went live."
+        />
       ) : (
         <div
-          className={`space-y-6 transition-opacity ${loading ? "opacity-60" : ""}`}
+          className={cn(
+            "space-y-6 transition-opacity",
+            loading && "opacity-60"
+          )}
         >
           {totals && (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <StatTile label="Page views" value={compact(totals.views)}>
-                <Delta
-                  current={totals.views}
-                  previous={totals.previous_views}
-                  period={period}
-                />
-              </StatTile>
-              <StatTile label="Visitors" value={compact(totals.visitors)}>
-                <Delta
-                  current={totals.visitors}
-                  previous={totals.previous_visitors}
-                  period={period}
-                />
-              </StatTile>
-              <StatTile
-                label="Newsletter sign-ups"
-                value={number.format(totals.newsletter_signups)}
-              >
-                <p className="text-sm text-theme-text-muted">in this period</p>
-              </StatTile>
-              <StatTile
-                label="On the site right now"
-                value={number.format(totals.visitors_now)}
-              >
-                <p className="text-sm text-theme-text-muted">
-                  visitors in the last 30 minutes
-                </p>
-              </StatTile>
-            </div>
+            <StatStrip
+              items={[
+                {
+                  label: "Page views",
+                  value: compact(totals.views),
+                  hint: (
+                    <Delta
+                      current={totals.views}
+                      previous={totals.previous_views}
+                      period={period}
+                    />
+                  ),
+                },
+                {
+                  label: "Visitors",
+                  value: compact(totals.visitors),
+                  hint: (
+                    <Delta
+                      current={totals.visitors}
+                      previous={totals.previous_visitors}
+                      period={period}
+                    />
+                  ),
+                },
+                {
+                  label: "Newsletter sign-ups",
+                  value: number.format(totals.newsletter_signups),
+                  hint: "In this period",
+                },
+                {
+                  label: "On the site right now",
+                  value: number.format(totals.visitors_now),
+                  hint: "Visitors in the last 30 minutes",
+                },
+              ]}
+            />
           )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                Page views per {data.bucket}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ViewsChart series={data.series} bucket={data.bucket} />
-            </CardContent>
-          </Card>
+          <Panel title={`Page views per ${data.bucket}`}>
+            <ViewsChart series={data.series} bucket={data.bucket} />
+          </Panel>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Most visited pages</CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              {data.pages.length === 0 ? (
-                <p className="text-sm text-theme-text-muted">
-                  No visits in this period.
-                </p>
-              ) : (
-                <table className="w-full text-sm text-left">
-                  <thead className="text-theme-text-muted">
+          <Panel title="Most visited pages" bodyClassName="p-0">
+            {data.pages.length === 0 ? (
+              <p className="p-5 text-sm text-mist">No visits in this period.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="text-xs text-mist">
                     <tr>
-                      <th className="py-2 font-medium">Page</th>
-                      <th className="py-2 font-medium text-right">
-                        Page views
+                      <th className="py-2.5 pl-5 pr-2 font-medium">Page</th>
+                      <th className="w-px whitespace-nowrap px-3 py-2.5 text-right font-medium sm:px-5">
+                        <span className="sm:hidden">Views</span>
+                        <span className="hidden sm:inline">Page views</span>
                       </th>
-                      <th className="py-2 font-medium text-right">Visitors</th>
+                      <th className="w-px whitespace-nowrap py-2.5 pl-3 pr-5 text-right font-medium sm:pl-5">
+                        Visitors
+                      </th>
                     </tr>
                   </thead>
-                  <tbody style={{ fontVariantNumeric: "tabular-nums" }}>
+                  <tbody className="tabular-nums">
                     {data.pages.map((page) => (
-                      <tr key={page.path} className="border-t border-black/5">
-                        <td className="py-2 pr-4">
+                      <tr key={page.path} className="border-t">
+                        <td className="py-2.5 pl-5 pr-2">
                           <a
                             href={page.path}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 hover:underline"
+                            className="break-words text-ink hover:underline"
                           >
                             {page.title}
                             <ExternalLink
-                              className="w-3 h-3 text-theme-text-muted"
+                              className="ml-1.5 inline size-3 text-mist"
                               aria-hidden="true"
                             />
                           </a>
-                          <span className="block text-xs text-theme-text-muted">
+                          <span className="block break-all text-xs text-mist">
                             {page.path}
                           </span>
                         </td>
-                        <td className="py-2 text-right font-medium">
+                        <td className="px-3 py-2.5 text-right font-medium text-ink sm:px-5">
                           {number.format(page.views)}
                         </td>
-                        <td className="py-2 text-right">
+                        <td className="py-2.5 pl-3 pr-5 text-right text-stone sm:pl-5">
                           {number.format(page.visitors)}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+            )}
+          </Panel>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  Where visitors come from
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <BarList
-                  emptyText="No visits in this period."
-                  rows={data.sources.map((s) => ({
-                    key: s.source,
-                    label: s.source,
-                    value: s.views,
-                  }))}
-                />
-              </CardContent>
-            </Card>
+            <Panel title="Where visitors come from">
+              <BarList
+                emptyText="No visits in this period."
+                rows={data.sources.map((s) => ({
+                  key: s.source,
+                  label: s.source,
+                  value: s.views,
+                }))}
+              />
+            </Panel>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Devices</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {deviceTotal === 0 ? (
-                  <p className="text-sm text-theme-text-muted">
-                    No visits in this period.
-                  </p>
-                ) : (
-                  <>
-                    {/* One stacked bar, 2px white gaps between segments */}
-                    <div className="flex h-4 gap-[2px]" aria-hidden="true">
-                      {data.devices.map((d, i) => (
-                        <div
-                          key={d.device}
-                          title={`${d.device}: ${number.format(d.views)}`}
-                          className={`${i === 0 ? "rounded-l" : ""} ${
-                            i === data.devices.length - 1 ? "rounded-r" : ""
-                          }`}
-                          style={{
-                            width: `${(d.views / deviceTotal) * 100}%`,
-                            background: DEVICE_COLORS[d.device],
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <ul className="space-y-2 text-sm">
-                      {data.devices.map((d) => (
-                        <li
-                          key={d.device}
-                          className="flex items-center justify-between gap-4"
-                        >
-                          <span className="flex items-center gap-2 capitalize">
-                            <span
-                              aria-hidden="true"
-                              className="w-3 h-3 rounded-sm"
-                              style={{ background: DEVICE_COLORS[d.device] }}
-                            />
-                            {d.device}
-                          </span>
-                          <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                            <strong className="font-medium">
+            <Panel title="Devices">
+              <BarList
+                emptyText="No visits in this period."
+                rows={
+                  deviceTotal === 0
+                    ? []
+                    : data.devices.map((d) => ({
+                        key: d.device,
+                        label: <span className="capitalize">{d.device}</span>,
+                        value: d.views,
+                        display: (
+                          <>
+                            <span className="font-medium">
                               {Math.round((d.views / deviceTotal) * 100)}%
-                            </strong>{" "}
-                            <span className="text-theme-text-muted">
+                            </span>{" "}
+                            <span className="text-mist">
                               ({number.format(d.views)})
                             </span>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                          </>
+                        ),
+                      }))
+                }
+              />
+            </Panel>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Countries</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <BarList
-                  emptyText="Countries appear once the site is live on Vercel."
-                  rows={data.countries.map((c) => ({
-                    key: c.country,
-                    label: countryName(c.country),
-                    value: c.views,
-                  }))}
-                />
-              </CardContent>
-            </Card>
+            <Panel title="Countries">
+              <BarList
+                emptyText="Countries appear once the site is live on Vercel."
+                rows={data.countries.map((c) => ({
+                  key: c.country,
+                  label: countryName(c.country),
+                  value: c.views,
+                }))}
+              />
+            </Panel>
           </div>
 
-          <p className="text-sm text-theme-text-muted max-w-3xl">
+          <p className="max-w-3xl text-sm text-mist">
             How visits are counted: no cookies are used and no personal data is
             stored. A visitor is counted once per day, so someone who comes back
             on three different days counts as three visitors. Visits by search
@@ -417,7 +353,7 @@ const AnalyticsDashboard = () => {
           </p>
         </div>
       )}
-    </div>
+    </AdminPage>
   );
 };
 

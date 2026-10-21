@@ -1,92 +1,79 @@
-import { ExternalLink, Image, FileImage } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { ArrowUpRight, FileImage, Image as ImageIcon } from "lucide-react";
 import GoogleDriveConverter from "./GoogleDriveConverter";
+import { AdminPage, Panel } from "./AdminUI";
 
-const UsefulLinks = () => {
-  const links = [
-    {
-      title: "Compress JPEG Images",
-      description: "Reduce the file size of your JPEG images while maintaining quality",
-      url: "https://compressjpeg.com/",
-      icon: Image,
-      category: "Image Optimization"
-    },
-    {
-      title: "Convert PNG to JPG",
-      description: "Convert PNG images to JPEG format with proper compression",
-      url: "https://png2jpg.com/",
-      icon: FileImage,
-      category: "Image Optimization"
-    }
-  ];
+const LINKS = [
+  {
+    title: "Compress JPEG images",
+    description:
+      "Make photos smaller before uploading them, without visible loss of quality.",
+    url: "https://compressjpeg.com/",
+    icon: ImageIcon,
+  },
+  {
+    title: "Convert PNG to JPG",
+    description:
+      "Turn PNG images into lighter JPG files when they don't need a transparent background.",
+    url: "https://png2jpg.com/",
+    icon: FileImage,
+  },
+];
 
-  const openLink = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
+const TIPS = [
+  "Use JPG for photographs and artwork images.",
+  "Compress images before uploading: pages load faster.",
+  "Convert PNG to JPG when transparency isn't needed.",
+  "Aim for images under 1 MB.",
+];
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-theme-text-primary mb-2">
-          Useful Links
-        </h1>
-        <p className="text-theme-text-muted">
-          Quick access to helpful tools for image optimization and file management.
-        </p>
-      </div>
+const UsefulLinks = () => (
+  <AdminPage
+    title="Useful links"
+    description="Handy tools for preparing images and files before you upload them."
+  >
+    <ul className="grid gap-4 sm:grid-cols-2">
+      {LINKS.map(({ title, description, url, icon: Icon }) => (
+        <li key={url}>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex h-full gap-4 rounded-xl border bg-white p-5 shadow-[0_1px_2px_hsl(var(--ink)/0.04)] transition-colors hover:border-ink/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-stone">
+              <Icon className="size-5" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-1.5 text-[15px] font-semibold text-ink">
+                {title}
+                <ArrowUpRight
+                  className="size-4 text-mist transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </span>
+              <span className="mt-1 block text-sm text-mist">
+                {description}
+              </span>
+              <span className="mt-3 block text-xs text-stone">
+                {new URL(url).hostname}
+                <span className="sr-only"> (opens in a new tab)</span>
+              </span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {links.map((link, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-theme-primary/10 rounded-lg">
-                  <link.icon className="w-5 h-5 text-theme-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">{link.title}</CardTitle>
-                  <p className="text-sm text-theme-text-muted font-normal">
-                    {link.category}
-                  </p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <p className="text-theme-text-muted text-sm mb-4">
-                {link.description}
-              </p>
-              <Button
-                onClick={() => openLink(link.url)}
-                className="w-full"
-                variant="outline"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Open Link
-              </Button>
-            </CardContent>
-          </Card>
+    <GoogleDriveConverter />
+
+    <Panel title="Tips for images">
+      <ul className="list-disc space-y-1.5 pl-5 text-sm text-stone marker:text-mist">
+        {TIPS.map((tip) => (
+          <li key={tip}>{tip}</li>
         ))}
-      </div>
-
-      {/* Google Drive Converter */}
-      <div className="mt-8">
-        <GoogleDriveConverter />
-      </div>
-
-      <div className="mt-8 p-4 bg-theme-surface rounded-lg border border-theme-border">
-        <h3 className="text-lg font-semibold text-theme-text-primary mb-2">
-          💡 Tips for Image Optimization
-        </h3>
-        <ul className="text-sm text-theme-text-muted space-y-1">
-          <li>• Use JPEG format for photographs and complex images</li>
-          <li>• Compress images before uploading to reduce loading times</li>
-          <li>• Convert PNG to JPG when transparency isn't needed</li>
-          <li>• Aim for file sizes under 1MB for web use</li>
-        </ul>
-      </div>
-    </div>
-  );
-};
+      </ul>
+    </Panel>
+  </AdminPage>
+);
 
 export default UsefulLinks;

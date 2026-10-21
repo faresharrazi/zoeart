@@ -1,62 +1,41 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Download, Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
-import { Loader2 } from "lucide-react";
+import type { NewsletterSubscriber } from "@/types/api";
+import { AdminPage, LoadingPanel } from "../AdminUI";
 import NewsletterStats from "./NewsletterStats";
 import SubscriberList from "./SubscriberList";
 
-interface Subscriber {
-  id: number;
-  email: string;
-  name: string | null;
-  subscribed_at: string;
-  status: "active" | "unsubscribed";
-  source: string;
-}
+// Quote every field, and neutralise values a spreadsheet would run as a
+// formula (subscribers choose their own name and email).
+const csvField = (value: string) => {
+  const text = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return `"${text.replace(/"/g, '""')}"`;
+};
 
 const NewsletterManagement = () => {
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
 
   const fetchSubscribers = async (isRefresh = false) => {
+    const setBusy = isRefresh ? setRefreshing : setLoading;
+    setBusy(true);
     try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-
-      // Check if user is authenticated
-      const token = localStorage.getItem("adminToken");
-      if (!token) {
+      if (!localStorage.getItem("adminToken")) {
         console.error("No admin token found");
-        if (isRefresh) {
-          setRefreshing(false);
-        } else {
-          setLoading(false);
-        }
         return;
       }
-
-      // Clear cache if refreshing
-      if (isRefresh) {
-        apiClient.clearCache();
-      }
-
-      const data = await apiClient.getNewsletterSubscribers();
-      setSubscribers(data);
+      if (isRefresh) apiClient.clearCache();
+      setSubscribers(await apiClient.getNewsletterSubscribers());
     } catch (error) {
       console.error("Error fetching subscribers:", error);
-      // Don't show error toast immediately, just log it
       setSubscribers([]);
     } finally {
-      if (isRefresh) {
-        setRefreshing(false);
-      } else {
-        setLoading(false);
-      }
+      setBusy(false);
     }
   };
 
@@ -80,7 +59,7 @@ const NewsletterManagement = () => {
           subscriber.source || "",
         ]),
       ]
-        .map((row) => row.map((field) => `"${field}"`).join(","))
+        .map((row) => row.map(csvField).join(","))
         .join("\n");
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -95,42 +74,56 @@ const NewsletterManagement = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
 
       toast({
-        title: "Success",
-        description: "Subscribers exported successfully",
+        title: "List exported",
+        description: `${subscribers.length} subscribers saved as a CSV file.`,
       });
     } catch (error) {
       console.error("Error exporting subscribers:", error);
-      toast({
-        title: "Error",
-        description: "Failed to export subscribers",
-        variant: "destructive",
-      });
+      toast({ title: "Couldn't export the list", variant: "destructive" });
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-600">Loading subscribers...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <NewsletterStats
-        onRefresh={() => fetchSubscribers(true)}
-        onExport={handleExport}
-        refreshing={refreshing}
-      />
-
-      <SubscriberList subscribers={subscribers} onDelete={handleDelete} />
-    </div>
+    <AdminPage
+      title="Newsletter"
+      description="People who signed up on the website. Export the list to use it in your email tool."
+      actions={
+        <>
+          <Button
+            variant="outline"
+            onClick={() => fetchSubscribers(true)}
+            disabled={loading || refreshing}
+          >
+            {refreshing ? (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            ) : (
+              <RefreshCw aria-hidden="true" />
+            )}
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={loading || subscribers.length === 0}
+          >
+            <Download aria-hidden="true" />
+            Export CSV
+          </Button>
+        </>
+      }
+    >
+      {loading ? (
+        <LoadingPanel label="Loading subscribers…" />
+      ) : (
+        <>
+          <NewsletterStats subscribers={subscribers} />
+          <SubscriberList subscribers={subscribers} onDelete={handleDelete} />
+        </>
+      )}
+    </AdminPage>
   );
 };
 

@@ -1,44 +1,31 @@
-import { Button } from "@/components/ui/button";
-import { Download, RefreshCw, Loader2 } from "lucide-react";
+import type { NewsletterSubscriber } from "@/types/api";
+import { StatStrip } from "../AdminUI";
 
-interface NewsletterStatsProps {
-  onRefresh: () => void;
-  onExport: () => void;
-  refreshing: boolean;
-}
+const DAY = 24 * 60 * 60 * 1000;
 
+/** Key numbers about the mailing list. */
 const NewsletterStats = ({
-  onRefresh,
-  onExport,
-  refreshing,
-}: NewsletterStatsProps) => {
+  subscribers,
+}: {
+  subscribers: NewsletterSubscriber[];
+}) => {
+  const active = subscribers.filter((s) => s.status !== "unsubscribed");
+  const since = Date.now() - 30 * DAY;
+  const recent = active.filter(
+    (s) => new Date(s.subscribed_at).getTime() >= since
+  );
+
   return (
-    <div className="flex items-center justify-between mb-6">
-      <h2 className="text-2xl font-bold">Newsletter Subscribers</h2>
-      <div className="flex items-center gap-2">
-        <Button
-          onClick={onRefresh}
-          disabled={refreshing}
-          variant="outline"
-          size="sm"
-        >
-          {refreshing ? (
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          ) : (
-            <RefreshCw className="w-4 h-4 mr-2" />
-          )}
-          Refresh
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onExport}
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export
-        </Button>
-      </div>
-    </div>
+    <StatStrip
+      items={[
+        { label: "Subscribers", value: active.length },
+        { label: "New in the last 30 days", value: recent.length },
+        {
+          label: "Unsubscribed",
+          value: subscribers.length - active.length,
+        },
+      ]}
+    />
   );
 };
 

@@ -155,7 +155,7 @@ const OpeningHoursEditor = () => {
                 <li
                   key={row.key}
                   className={cn(
-                    "grid grid-cols-[minmax(0,1fr)_auto] gap-2 rounded-lg border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_9.5rem] sm:items-center sm:gap-3 sm:border-0 sm:p-0",
+                    "grid gap-2 rounded-lg border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_9.5rem] sm:items-center sm:gap-3 sm:border-0 sm:p-0",
                     !row.is_active && "[&_input]:text-mist"
                   )}
                 >
@@ -166,10 +166,7 @@ const OpeningHoursEditor = () => {
                     placeholder="e.g. Tuesday – Saturday"
                     aria-invalid={missing(row.day) || undefined}
                     onChange={(e) => update(row.key, { day: e.target.value })}
-                    className={cn(
-                      "col-span-2 sm:col-span-1",
-                      missing(row.day) && "border-destructive"
-                    )}
+                    className={cn(missing(row.day) && "border-destructive")}
                   />
                   <Input
                     aria-label={`Hours, row ${n}`}
@@ -185,14 +182,18 @@ const OpeningHoursEditor = () => {
                     )}
                   />
                   <div className="flex items-center gap-0.5">
-                    <Switch
-                      checked={row.is_active}
-                      onCheckedChange={(checked) =>
-                        update(row.key, { is_active: checked })
-                      }
-                      aria-label={`Show row ${n} on the website`}
-                      className="mr-2"
-                    />
+                    <label className="mr-auto flex items-center gap-2.5 text-sm text-stone sm:mr-2">
+                      <Switch
+                        checked={row.is_active}
+                        onCheckedChange={(checked) =>
+                          update(row.key, { is_active: checked })
+                        }
+                        aria-label={`Show row ${n} on the website`}
+                      />
+                      <span className="sm:hidden" aria-hidden="true">
+                        {row.is_active ? "Shown" : "Hidden"}
+                      </span>
+                    </label>
                     <IconAction
                       label="Move up"
                       icon={ArrowUp}

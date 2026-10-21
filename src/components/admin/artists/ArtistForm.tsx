@@ -1,14 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Globe, Loader2, Plus, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
-import { apiClient, errorMessage } from "@/lib/apiClient";
-import { Save, X, Image, Upload, Plus, Globe, ChevronDown } from "lucide-react";
-import { getSocialMediaIcon } from "@/lib/socialMediaIcons";
 import {
   Select,
   SelectContent,
@@ -16,6 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { apiClient, errorMessage } from "@/lib/apiClient";
+import { imageUrl } from "@/lib/images";
+import { getSocialMediaIcon } from "@/lib/socialMediaIcons";
+import { AdminPage, FormSection, IconAction } from "../AdminUI";
 
 interface Artist {
   id: string;
@@ -36,6 +37,25 @@ interface ArtistFormProps {
   isEditing: boolean;
 }
 
+const PLATFORMS = [
+  { name: "Instagram", icon: "instagram" },
+  { name: "X", icon: "twitter" },
+  { name: "LinkedIn", icon: "linkedin" },
+  { name: "YouTube", icon: "youtube" },
+  { name: "Website", icon: "website" },
+  { name: "Email", icon: "email" },
+];
+
+const PLACEHOLDERS: Record<string, string> = {
+  email: "artist@example.com",
+  website: "https://www.example.com",
+  instagram: "@username or https://instagram.com/username",
+  twitter: "@username or https://x.com/username",
+  x: "@username or https://x.com/username",
+  linkedin: "https://linkedin.com/in/username",
+  youtube: "https://youtube.com/@username",
+};
+
 const ArtistForm = ({
   artist,
   onSave,
@@ -43,6 +63,7 @@ const ArtistForm = ({
   isEditing,
 }: ArtistFormProps) => {
   const { toast } = useToast();
+  const fileInput = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<Partial<Artist>>(
     artist || {
       name: "",
@@ -56,13 +77,16 @@ const ArtistForm = ({
     }
   );
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
+
+  const update = (change: Partial<Artist>) =>
+    setFormData((data) => ({ ...data, ...change }));
 
   const handleSave = async () => {
     if (!formData.name?.trim()) {
       toast({
-        title: "Error",
-        description: "Name is required",
+        title: "The artist needs a name",
         variant: "destructive",
       });
       return;
@@ -90,16 +114,12 @@ const ArtistForm = ({
       }
 
       onSave(formData as Artist);
-      toast({
-        title: "Success",
-        description: `Artist ${isEditing ? "updated" : "created"} successfully`,
-      });
+      toast({ title: isEditing ? "Artist saved" : "Artist created" });
     } catch (error) {
       console.error("Error saving artist:", error);
-      const message = errorMessage(error, "Failed to save artist");
       toast({
-        title: "Error",
-        description: message,
+        title: "Couldn't save the artist",
+        description: errorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -108,292 +128,300 @@ const ArtistForm = ({
   };
 
   const handleProfileImageUpload = async (file: File) => {
+    setUploading(true);
     try {
-      // Use new Cloudinary-enabled upload method
       const response = await apiClient.uploadImage(file, "artist");
-
-      // The response now contains the Cloudinary URL directly
-      const imageUrl = response.file.url;
-
-      setFormData({
-        ...formData,
-        profileImage: imageUrl,
-      });
-
-      toast({
-        title: "Success",
-        description: "Profile image uploaded to Cloudinary successfully",
-      });
+      update({ profileImage: response.file.url });
+      toast({ title: "Photo uploaded" });
     } catch (error) {
       console.error("Error uploading image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload image",
-        variant: "destructive",
-      });
+      toast({ title: "Couldn't upload the photo", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInput.current) fileInput.current.value = "";
     }
   };
 
-  const updateSocialMedia = (platform: string, value: string) => {
-    setFormData({
-      ...formData,
-      socialMedia: {
-        ...formData.socialMedia,
-        [platform]: value,
-      },
-    });
-  };
+  const updateSocialMedia = (platform: string, value: string) =>
+    setFormData((data) => ({
+      ...data,
+      socialMedia: { ...data.socialMedia, [platform]: value },
+    }));
 
-  const removeSocialMedia = (platform: string) => {
-    const newSocialMedia = { ...formData.socialMedia };
-    delete newSocialMedia[platform];
-    setFormData({
-      ...formData,
-      socialMedia: newSocialMedia,
+  const removeSocialMedia = (platform: string) =>
+    setFormData((data) => {
+      const socialMedia = { ...data.socialMedia };
+      delete socialMedia[platform];
+      return { ...data, socialMedia };
     });
-  };
-
-  const predefinedPlatforms = [
-    { name: "Instagram", icon: "instagram" },
-    { name: "X", icon: "twitter" },
-    { name: "LinkedIn", icon: "linkedin" },
-    { name: "YouTube", icon: "youtube" },
-    { name: "Website", icon: "website" },
-    { name: "Email", icon: "email" },
-  ];
 
   const addSocialMedia = () => {
-    if (selectedPlatform) {
-      setFormData({
-        ...formData,
-        socialMedia: {
-          ...formData.socialMedia,
-          [selectedPlatform]: "",
-        },
-      });
-      setSelectedPlatform(""); // Reset selection
-    }
+    if (!selectedPlatform) return;
+    updateSocialMedia(selectedPlatform, "");
+    setSelectedPlatform("");
   };
 
+  const links = Object.entries(formData.socialMedia || {});
+  const availablePlatforms = PLATFORMS.filter(
+    (platform) =>
+      !links.some(([key]) => key.toLowerCase() === platform.name.toLowerCase())
+  );
+
+  const actions = (
+    <>
+      <Button variant="ghost" onClick={onCancel} disabled={saving}>
+        Cancel
+      </Button>
+      <Button onClick={handleSave} disabled={saving || uploading}>
+        {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
+        {saving ? "Saving…" : isEditing ? "Save changes" : "Create artist"}
+      </Button>
+    </>
+  );
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{isEditing ? "Edit Artist" : "Add New Artist"}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
-              value={formData.name || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="Enter artist name"
-              maxLength={100}
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="slug">Slug</Label>
-            <Input
-              id="slug"
-              value={formData.slug || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, slug: e.target.value })
-              }
-              placeholder="Auto-generated from name"
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="specialty">Specialty</Label>
-          <Input
-            id="specialty"
-            value={formData.specialty || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, specialty: e.target.value })
-            }
-            placeholder="Enter artist specialty"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="bio">Biography</Label>
-          <Textarea
-            id="bio"
-            value={formData.bio || ""}
-            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-            placeholder="Enter artist biography..."
-            rows={4}
-          />
-        </div>
-
-        <div>
-          <Label>Profile Image</Label>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleProfileImageUpload(file);
-                  }}
-                  className="hidden"
-                  id="profile-image-upload"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    document.getElementById("profile-image-upload")?.click()
-                  }
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Image
-                </Button>
-              </div>
+    <AdminPage
+      title={isEditing ? artist?.name || "Edit artist" : "New artist"}
+      description={
+        isEditing
+          ? "Changes show on the website as soon as you save."
+          : "Add an artist to show them on the Artists page."
+      }
+      onBack={onCancel}
+      backLabel="Back to artists"
+      actions={actions}
+    >
+      <div className="space-y-10 pt-2">
+        <FormSection
+          title="Profile"
+          description="The name, specialty and biography shown on the artist's page."
+        >
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={formData.name || ""}
+                onChange={(e) => update({ name: e.target.value })}
+                placeholder="e.g. Eleni Markou"
+                maxLength={100}
+                required
+                aria-required="true"
+              />
             </div>
-
-            {formData.profileImage && (
-              <div className="aspect-square w-32 overflow-hidden rounded-lg">
-                <img
-                  src={formData.profileImage}
-                  alt="Profile"
-                  className="h-full w-full object-cover"
+            <div className="space-y-2">
+              <Label htmlFor="specialty">Specialty</Label>
+              <Input
+                id="specialty"
+                value={formData.specialty || ""}
+                onChange={(e) => update({ specialty: e.target.value })}
+                placeholder="e.g. Painter, Sculptor"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bio">Biography</Label>
+              <Textarea
+                id="bio"
+                value={formData.bio || ""}
+                onChange={(e) => update({ bio: e.target.value })}
+                placeholder="A few paragraphs about the artist and their work"
+                rows={6}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="slug">Web address</Label>
+              <div className="flex items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                <span className="shrink-0 pl-3 text-sm text-mist">
+                  /artist/
+                </span>
+                <Input
+                  id="slug"
+                  value={formData.slug || ""}
+                  onChange={(e) => update({ slug: e.target.value })}
+                  placeholder="made-from-the-name"
+                  aria-describedby="slug-hint"
+                  className="h-[38px] border-0 pl-0.5 focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
               </div>
-            )}
+              <p id="slug-hint" className="text-xs text-mist">
+                Leave empty to create it from the name.
+              </p>
+            </div>
           </div>
-        </div>
+        </FormSection>
 
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <Label className="text-base font-semibold">
-              Social Media Links
-            </Label>
-            <div className="flex items-center gap-2">
-              <Select
-                value={selectedPlatform}
-                onValueChange={setSelectedPlatform}
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select platform" />
-                </SelectTrigger>
-                <SelectContent>
-                  {predefinedPlatforms.map((platform) => (
-                    <SelectItem key={platform.name} value={platform.name}>
-                      <div className="flex items-center gap-2">
-                        {getSocialMediaIcon(platform.icon, "sm")}
-                        {platform.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <FormSection
+          title="Photo"
+          description="A portrait or studio photo, shown on the Artists page and the artist's page."
+        >
+          <div className="flex flex-wrap items-center gap-5">
+            {formData.profileImage ? (
+              <img
+                src={imageUrl(formData.profileImage, {
+                  width: 192,
+                  height: 192,
+                  crop: "fill",
+                })}
+                alt=""
+                className="size-24 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <div
+                className="size-24 shrink-0 rounded-full bg-secondary"
+                aria-hidden="true"
+              />
+            )}
+            <div className="flex flex-wrap gap-2">
+              <input
+                ref={fileInput}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleProfileImageUpload(file);
+                }}
+                className="hidden"
+                id="profile-image-upload"
+              />
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
-                onClick={addSocialMedia}
-                disabled={!selectedPlatform}
-                className="flex items-center gap-2"
+                onClick={() => fileInput.current?.click()}
+                disabled={uploading}
               >
-                <Plus className="w-4 h-4" />
-                Add
+                {uploading ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Upload aria-hidden="true" />
+                )}
+                {uploading
+                  ? "Uploading…"
+                  : formData.profileImage
+                    ? "Replace photo"
+                    : "Upload photo"}
               </Button>
+              {formData.profileImage && !uploading && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => update({ profileImage: "" })}
+                >
+                  Remove
+                </Button>
+              )}
             </div>
           </div>
+        </FormSection>
 
-          <div className="space-y-3">
-            {Object.entries(formData.socialMedia || {}).map(
-              ([platform, handle]) => (
-                <div
-                  key={platform}
-                  className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
-                    {getSocialMediaIcon(platform, "md")}
-                    <span className="text-sm font-medium text-gray-700 capitalize">
-                      {platform}
-                    </span>
-                  </div>
-                  <Input
-                    placeholder={
-                      platform.toLowerCase() === "email"
-                        ? "artist@example.com"
-                        : platform.toLowerCase() === "website"
-                        ? "https://www.example.com"
-                        : platform.toLowerCase() === "instagram"
-                        ? "@username or https://instagram.com/username"
-                        : platform.toLowerCase() === "twitter" ||
-                          platform.toLowerCase() === "x"
-                        ? "@username or https://x.com/username"
-                        : platform.toLowerCase() === "linkedin"
-                        ? "https://linkedin.com/in/username"
-                        : platform.toLowerCase() === "youtube"
-                        ? "https://youtube.com/@username"
-                        : `Enter ${platform.toLowerCase()} handle or URL`
-                    }
-                    value={handle}
-                    onChange={(e) =>
-                      updateSocialMedia(platform, e.target.value)
-                    }
-                    className="flex-1 border-0 bg-white shadow-sm focus:ring-2 focus:ring-blue-500"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeSocialMedia(platform)}
-                    className="text-gray-400 hover:text-red-500 hover:bg-red-50 flex-shrink-0"
+        <FormSection
+          title="Links"
+          description="Website, email and social profiles, shown on the artist's page."
+        >
+          <div className="space-y-4">
+            {links.length === 0 ? (
+              <p className="flex items-center justify-center gap-2 rounded-lg bg-secondary px-4 py-6 text-center text-sm text-mist">
+                <Globe className="size-4" aria-hidden="true" />
+                No links yet
+              </p>
+            ) : (
+              <ul className="space-y-4 sm:space-y-2">
+                {links.map(([platform, handle]) => (
+                  <li
+                    key={platform}
+                    className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
                   >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              )
+                    <div className="flex items-center justify-between sm:w-32 sm:shrink-0">
+                      <span className="flex items-center gap-2 text-sm font-medium capitalize text-ink">
+                        <span className="text-mist">
+                          {getSocialMediaIcon(platform, "md")}
+                        </span>
+                        {platform}
+                      </span>
+                      <IconAction
+                        label={`Remove ${platform}`}
+                        icon={X}
+                        tone="danger"
+                        onClick={() => removeSocialMedia(platform)}
+                        className="sm:hidden"
+                      />
+                    </div>
+                    <Input
+                      aria-label={platform}
+                      placeholder={
+                        PLACEHOLDERS[platform.toLowerCase()] ??
+                        `${platform} handle or link`
+                      }
+                      value={handle}
+                      onChange={(e) =>
+                        updateSocialMedia(platform, e.target.value)
+                      }
+                      className="flex-1"
+                    />
+                    <IconAction
+                      label={`Remove ${platform}`}
+                      icon={X}
+                      tone="danger"
+                      onClick={() => removeSocialMedia(platform)}
+                      className="hidden sm:inline-flex"
+                    />
+                  </li>
+                ))}
+              </ul>
             )}
 
-            {Object.keys(formData.socialMedia || {}).length === 0 && (
-              <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                <Globe className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm">No social media links added yet</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Click "Add Platform" to get started
-                </p>
+            {availablePlatforms.length > 0 && (
+              <div className="flex gap-2">
+                <Select
+                  value={selectedPlatform}
+                  onValueChange={setSelectedPlatform}
+                >
+                  <SelectTrigger className="sm:w-48" aria-label="Link type">
+                    <SelectValue placeholder="Choose a link type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availablePlatforms.map((platform) => (
+                      <SelectItem key={platform.name} value={platform.name}>
+                        <span className="flex items-center gap-2">
+                          {getSocialMediaIcon(platform.icon, "sm")}
+                          {platform.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addSocialMedia}
+                  disabled={!selectedPlatform}
+                >
+                  <Plus aria-hidden="true" />
+                  Add link
+                </Button>
               </div>
             )}
           </div>
-        </div>
+        </FormSection>
 
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="isVisible"
-            checked={formData.isVisible !== false}
-            onCheckedChange={(checked) =>
-              setFormData({ ...formData, isVisible: checked })
-            }
-          />
-          <Label htmlFor="isVisible">Visible on Frontend</Label>
-        </div>
+        <FormSection
+          title="Visibility"
+          description="Hidden artists stay in the admin but don't appear on the website."
+        >
+          <div className="flex items-center justify-between gap-4">
+            <Label htmlFor="isVisible" className="leading-snug">
+              Show on the website
+            </Label>
+            <Switch
+              id="isVisible"
+              checked={formData.isVisible !== false}
+              onCheckedChange={(checked) => update({ isVisible: checked })}
+            />
+          </div>
+        </FormSection>
 
-        <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={saving}>
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? "Saving..." : isEditing ? "Update Artist" : "Add Artist"}
-          </Button>
-          <Button variant="outline" onClick={onCancel}>
-            <X className="w-4 h-4 mr-2" />
-            Cancel
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        <div className="flex justify-end gap-2 border-t pt-6">{actions}</div>
+      </div>
+    </AdminPage>
   );
 };
 

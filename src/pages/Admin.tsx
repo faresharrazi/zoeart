@@ -50,7 +50,7 @@ const Admin = () => {
     return (
       <div
         role="status"
-        className="flex min-h-screen items-center justify-center gap-3 bg-theme-background text-sm text-mist"
+        className="flex min-h-screen items-center justify-center gap-3 bg-canvas text-sm text-mist"
       >
         <Loader2 className="size-4 animate-spin" aria-hidden="true" />
         Loading…

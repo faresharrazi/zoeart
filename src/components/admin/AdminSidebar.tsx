@@ -114,9 +114,6 @@ const SidebarContent = ({
 const AdminSidebar = (props: AdminSidebarProps) => {
   const [open, setOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const current = SECTION_GROUPS.flatMap<{ id: SectionId; label: string }>(
-    (g) => g.items
-  ).find((item) => item.id === props.active);
 
   useEffect(() => {
     if (!open) return;
@@ -150,9 +147,7 @@ const AdminSidebar = (props: AdminSidebarProps) => {
         >
           <Menu className="size-5" aria-hidden="true" />
         </button>
-        <span className="truncate text-sm font-semibold text-ink">
-          {current?.label}
-        </span>
+        <Brand />
       </header>
 
       {open && (

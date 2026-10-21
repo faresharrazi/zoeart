@@ -42,28 +42,8 @@
     --ring: var(--ink);
     --radius: 0.5rem;
 
-    /* Older admin screens use these names */
-    --theme-primary: var(--ink);
-    --theme-primary-text: 0 0% 100%;
-    --theme-primary-hover: 40 5% 24%;
-    --theme-background: 45 20% 97.5%; /* admin canvas */
-    --theme-surface: 0 0% 100%;
-    --theme-overlay: var(--ink);
-    --theme-text-primary: var(--ink);
-    --theme-text-secondary: var(--stone);
-    --theme-text-on-dark: 0 0% 100%;
-    --theme-text-muted: var(--mist);
-    --theme-border: 45 8% 88%;
-    --theme-border-hover: 40 4% 62%;
-    --theme-focus: var(--ink);
-    --theme-success: 145 55% 30%;
-    --theme-warning: 35 85% 40%;
-    --theme-error: 0 68% 44%;
-
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(var(--sand)));
-    --shadow-elegant: 0 1px 2px hsl(var(--ink) / 0.05);
-    --shadow-artwork: 0 8px 24px -8px hsl(var(--ink) / 0.12);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Admin panel background */
+    --canvas: 45 20% 97.5%;
   }
 }
 

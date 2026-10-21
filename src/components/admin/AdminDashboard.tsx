@@ -53,7 +53,7 @@ const AdminDashboard = ({ onLogout, user }: AdminDashboardProps) => {
   }, [active]);
 
   return (
-    <div className="min-h-screen bg-theme-background text-ink">
+    <div className="min-h-screen bg-canvas text-ink">
       <AdminSidebar active={active} user={user} onLogout={onLogout} />
       <main className="lg:pl-64">
         <div className="px-4 py-6 sm:px-6 lg:px-10 lg:py-10">

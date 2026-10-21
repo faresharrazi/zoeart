@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { AnalyticsSummary } from "@/types/api";
 
-// Colors from the dataviz reference palette (single series: blue)
-const BAR = "#2a78d6";
-const BAR_ACTIVE = "#5598e7";
-const GRID = "#e1e0d9";
-const BASELINE = "#c3c2b7";
-const AXIS_TEXT = "#6a707c";
+// Single series in the site's ink; the hovered bar steps down to stone.
+// Grid and axis use the hairline and muted text tokens (Tailwind classes).
+const AXIS_TEXT = "fill-mist";
 
 const HEIGHT = 240;
 const PAD = { top: 12, right: 8, bottom: 28, left: 44 };
@@ -114,7 +111,7 @@ const ViewsChart = ({
     <div>
       <div
         ref={containerRef}
-        className="relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-theme-primary rounded"
+        className="relative rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4"
         tabIndex={0}
         role="group"
         aria-label="Page views chart. Use the left and right arrow keys to read each value."
@@ -131,7 +128,9 @@ const ViewsChart = ({
                 x2={width - PAD.right}
                 y1={yOf(tick)}
                 y2={yOf(tick)}
-                stroke={tick === 0 ? BASELINE : GRID}
+                className={
+                  tick === 0 ? "stroke-[hsl(40_4%_76%)]" : "stroke-line"
+                }
                 strokeWidth={1}
               />
               <text
@@ -140,7 +139,7 @@ const ViewsChart = ({
                 dy="0.32em"
                 textAnchor="end"
                 fontSize={11}
-                fill={AXIS_TEXT}
+                className={AXIS_TEXT}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
                 {compact.format(tick)}
@@ -156,7 +155,7 @@ const ViewsChart = ({
                 {h > 0 && (
                   <path
                     d={columnPath(x, PAD.top + plotH - h, barW, h)}
-                    fill={i === active ? BAR_ACTIVE : BAR}
+                    className={i === active ? "fill-stone" : "fill-ink"}
                   />
                 )}
                 {i % labelEvery === 0 && (
@@ -165,7 +164,7 @@ const ViewsChart = ({
                     y={HEIGHT - 8}
                     textAnchor="middle"
                     fontSize={11}
-                    fill={AXIS_TEXT}
+                    className={AXIS_TEXT}
                   >
                     {formatBucket(point.date, bucket)}
                   </text>
@@ -186,41 +185,40 @@ const ViewsChart = ({
 
         {activePoint && (
           <div
-            className="pointer-events-none absolute top-0 -translate-x-1/2 rounded-md border border-black/10 bg-white px-3 py-2 shadow-md text-sm whitespace-nowrap"
+            className="pointer-events-none absolute top-0 -translate-x-1/2 whitespace-nowrap rounded-md border bg-white px-3 py-2 text-sm text-ink shadow-md"
             style={{ left: tooltipLeft }}
             role="status"
           >
-            <p className="text-xs text-theme-text-muted">
+            <p className="text-xs text-mist">
               {formatBucket(activePoint.date, bucket, true)}
             </p>
             <p className="flex items-center gap-2">
               <span
                 aria-hidden="true"
-                className="inline-block w-3 h-0.5 rounded"
-                style={{ background: BAR }}
+                className="inline-block h-0.5 w-3 rounded bg-ink"
               />
               <strong className="font-semibold">
                 {number.format(activePoint.views)}
               </strong>
-              <span className="text-theme-text-muted">page views</span>
+              <span className="text-mist">page views</span>
             </p>
             <p className="pl-5">
               <strong className="font-semibold">
                 {number.format(activePoint.visitors)}
               </strong>{" "}
-              <span className="text-theme-text-muted">visitors</span>
+              <span className="text-mist">visitors</span>
             </p>
           </div>
         )}
       </div>
 
       <details className="mt-3 text-sm">
-        <summary className="cursor-pointer text-theme-text-muted hover:text-theme-text-primary">
+        <summary className="cursor-pointer text-mist hover:text-ink">
           Show as a table
         </summary>
         <div className="mt-2 max-h-64 overflow-auto">
           <table className="w-full text-left">
-            <thead className="text-theme-text-muted">
+            <thead className="text-xs text-mist">
               <tr>
                 <th className="py-1 font-medium">Period</th>
                 <th className="py-1 font-medium text-right">Page views</th>
@@ -229,7 +227,7 @@ const ViewsChart = ({
             </thead>
             <tbody style={{ fontVariantNumeric: "tabular-nums" }}>
               {series.map((point) => (
-                <tr key={point.date} className="border-t border-black/5">
+                <tr key={point.date} className="border-t">
                   <td className="py-1">
                     {formatBucket(point.date, bucket, true)}
                   </td>

@@ -2,33 +2,34 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
-  Edit,
-  ExternalLink,
+  Eye,
+  EyeOff,
+  Handshake,
+  ImageIcon,
   Loader2,
+  Pencil,
   Plus,
-  Save,
-  Trash2,
   Upload,
-  X,
 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, errorMessage, normalizeImageUrl } from "@/lib/apiClient";
+import { cn } from "@/lib/utils";
 import type { Partner } from "@/types/api";
+import {
+  AdminPage,
+  ConfirmDelete,
+  EmptyState,
+  IconAction,
+  ListPanel,
+  ListRow,
+  LoadingPanel,
+  Panel,
+  StatusBadge,
+} from "./AdminUI";
 
 interface PartnerForm {
   id?: number;
@@ -47,7 +48,7 @@ const EMPTY_FORM: PartnerForm = {
 
 const MAX_LOGO_SIZE = 4 * 1024 * 1024; // matches the server upload limit
 
-/** Logos shown in the website footer under "Collaboration". */
+/** Logos shown in the website footer under "In collaboration with". */
 const PartnersManagement = () => {
   const { toast } = useToast();
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -55,7 +56,6 @@ const PartnersManagement = () => {
   const [form, setForm] = useState<PartnerForm | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [toDelete, setToDelete] = useState<Partner | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const fetchPartners = useCallback(async () => {
@@ -63,8 +63,8 @@ const PartnersManagement = () => {
       setPartners(await apiClient.getAdminPartners());
     } catch (error) {
       toast({
-        title: "Error",
-        description: errorMessage(error, "Failed to load partners"),
+        title: "Couldn't load the partners",
+        description: errorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -84,8 +84,8 @@ const PartnersManagement = () => {
       return true;
     } catch (error) {
       toast({
-        title: "Error",
-        description: errorMessage(error, "Something went wrong"),
+        title: "Couldn't save the change",
+        description: errorMessage(error, "Please try again."),
         variant: "destructive",
       });
       return false;
@@ -105,11 +105,13 @@ const PartnersManagement = () => {
     setUploading(true);
     try {
       const response = await apiClient.uploadImage(file, "partner");
-      setForm({ ...form, logo_url: response.file.url });
+      setForm((current) =>
+        current ? { ...current, logo_url: response.file.url } : current
+      );
     } catch (error) {
       toast({
-        title: "Upload failed",
-        description: errorMessage(error, "Could not upload the logo"),
+        title: "Couldn't upload the logo",
+        description: errorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -122,8 +124,8 @@ const PartnersManagement = () => {
     if (!form) return;
     if (!form.name.trim() || !form.logo_url) {
       toast({
-        title: "Missing information",
-        description: "A partner needs a name and a logo.",
+        title: "Add a name and a logo",
+        description: "A partner needs both to appear on the website.",
         variant: "destructive",
       });
       return;
@@ -140,7 +142,7 @@ const PartnersManagement = () => {
         form.id
           ? apiClient.updatePartner(form.id, data)
           : apiClient.createPartner(data),
-      form.id ? "Partner updated" : "Partner added"
+      form.id ? "Partner saved" : "Partner added"
     );
     setSaving(false);
     if (saved) setForm(null);
@@ -150,37 +152,90 @@ const PartnersManagement = () => {
     const ids = partners.map((p) => p.id);
     const [moved] = ids.splice(index, 1);
     ids.splice(index + step, 0, moved);
-    run(() => apiClient.reorderPartners(ids), "Order updated");
+    run(() => apiClient.reorderPartners(ids), "Order saved");
   };
 
+  // The form opens above the list, so bring it into view
+  const edit = (partner: Partner) => {
+    setForm({
+      id: partner.id,
+      name: partner.name,
+      website_url: partner.website_url || "",
+      logo_url: partner.logo_url,
+      is_visible: partner.is_visible !== false,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const visibleCount = partners.filter((p) => p.is_visible !== false).length;
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-theme-text-primary">
-            Partners
-          </h1>
-          <p className="text-theme-text-muted">
-            Logos shown in the website footer under “Collaboration”.
-          </p>
-        </div>
-        {!form && (
+    <AdminPage
+      title="Partners"
+      description="Logos shown at the bottom of every page under “In collaboration with”, in this order."
+      actions={
+        !form && (
           <Button onClick={() => setForm({ ...EMPTY_FORM })}>
-            <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
+            <Plus aria-hidden="true" />
             Add partner
           </Button>
-        )}
-      </div>
-
+        )
+      }
+    >
       {form && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{form.id ? "Edit partner" : "Add partner"}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+        <Panel
+          title={form.id ? "Edit partner" : "New partner"}
+          bodyClassName="p-5 sm:p-6"
+        >
+          <div className="grid gap-6 sm:grid-cols-[10rem_minmax(0,1fr)]">
+            <div className="space-y-2">
+              <span className="text-sm font-medium text-ink">Logo</span>
+              <div className="flex h-32 w-40 items-center justify-center rounded-lg border border-dashed bg-white p-3">
+                {form.logo_url ? (
+                  <img
+                    src={normalizeImageUrl(form.logo_url)}
+                    alt="Logo preview"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <ImageIcon className="size-6 text-mist" aria-hidden="true" />
+                )}
+              </div>
+              <input
+                ref={fileInput}
+                id="partner-logo"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+                onChange={(e) => handleLogoSelected(e.target.files?.[0])}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-40"
+                disabled={uploading}
+                onClick={() => fileInput.current?.click()}
+              >
+                {uploading ? (
+                  <Loader2 className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <Upload aria-hidden="true" />
+                )}
+                {form.logo_url ? "Replace logo" : "Upload logo"}
+              </Button>
+              <p className="w-40 text-xs text-mist">
+                A PNG with a transparent background works best. Max 4 MB.
+              </p>
+            </div>
+
+            <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="partner-name">Name *</Label>
+                <Label htmlFor="partner-name">
+                  Name <span className="text-mist">(required)</span>
+                </Label>
                 <Input
                   id="partner-name"
                   value={form.name}
@@ -189,7 +244,7 @@ const PartnersManagement = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="partner-website">Website (optional)</Label>
+                <Label htmlFor="partner-website">Website</Label>
                 <Input
                   id="partner-website"
                   value={form.website_url}
@@ -198,223 +253,161 @@ const PartnersManagement = () => {
                   }
                   placeholder="https://…"
                 />
+                <p className="text-xs text-mist">
+                  Optional. The logo links to it.
+                </p>
+              </div>
+              <div className="flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
+                <Label htmlFor="partner-visible" className="cursor-pointer">
+                  Show on the website
+                </Label>
+                <Switch
+                  id="partner-visible"
+                  checked={form.is_visible}
+                  onCheckedChange={(checked) =>
+                    setForm({ ...form, is_visible: checked })
+                  }
+                />
               </div>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <span className="text-sm font-medium">Logo *</span>
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="w-28 h-28 rounded-md border border-dashed border-theme-border flex items-center justify-center bg-white">
-                  {form.logo_url ? (
-                    <img
-                      src={normalizeImageUrl(form.logo_url)}
-                      alt="Logo preview"
-                      className="max-w-full max-h-full object-contain p-2"
-                    />
-                  ) : (
-                    <span className="text-xs text-theme-text-muted">
-                      No logo yet
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <input
-                    ref={fileInput}
-                    id="partner-logo"
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
-                    className="sr-only"
-                    onChange={(e) => handleLogoSelected(e.target.files?.[0])}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={uploading}
-                    onClick={() => fileInput.current?.click()}
-                  >
-                    {uploading ? (
-                      <Loader2
-                        className="w-4 h-4 mr-2 animate-spin"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <Upload className="w-4 h-4 mr-2" aria-hidden="true" />
-                    )}
-                    {form.logo_url ? "Replace logo" : "Upload logo"}
-                  </Button>
-                  <p className="text-xs text-theme-text-muted">
-                    PNG with a transparent background works best. Max 4 MB.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Switch
-                id="partner-visible"
-                checked={form.is_visible}
-                onCheckedChange={(checked) =>
-                  setForm({ ...form, is_visible: checked })
-                }
-              />
-              <Label htmlFor="partner-visible">Show on the website</Label>
-            </div>
-
-            <div className="flex gap-2">
-              <Button onClick={handleSave} disabled={saving || uploading}>
-                <Save className="w-4 h-4 mr-2" aria-hidden="true" />
-                {saving ? "Saving…" : "Save"}
-              </Button>
-              <Button variant="outline" onClick={() => setForm(null)}>
-                <X className="w-4 h-4 mr-2" aria-hidden="true" />
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="mt-6 flex justify-end gap-2 border-t pt-5">
+            <Button
+              variant="ghost"
+              onClick={() => setForm(null)}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={saving || uploading}>
+              {saving && (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              )}
+              {saving ? "Saving…" : form.id ? "Save changes" : "Add partner"}
+            </Button>
+          </div>
+        </Panel>
       )}
 
       {loading ? (
-        <div className="flex justify-center py-12" role="status">
-          <Loader2 className="w-6 h-6 animate-spin" aria-hidden="true" />
-          <span className="sr-only">Loading partners</span>
-        </div>
+        <LoadingPanel label="Loading partners…" />
       ) : partners.length === 0 ? (
-        <p className="text-theme-text-muted">
-          No partners yet. The “Collaboration” section is hidden until you add
-          one.
-        </p>
+        <EmptyState
+          icon={Handshake}
+          title="No partners yet"
+          description="The partners row is hidden on the website until you add one."
+          action={
+            !form && (
+              <Button onClick={() => setForm({ ...EMPTY_FORM })}>
+                <Plus aria-hidden="true" />
+                Add partner
+              </Button>
+            )
+          }
+        />
       ) : (
-        <ul className="space-y-3">
-          {partners.map((partner, index) => (
-            <li key={partner.id}>
-              <Card>
-                <CardContent className="p-4 flex flex-wrap items-center gap-4">
-                  <img
-                    src={normalizeImageUrl(partner.logo_url)}
-                    alt=""
-                    className={`w-16 h-16 object-contain ${
-                      partner.is_visible ? "" : "opacity-40"
-                    }`}
-                  />
-                  <div className="flex-1 min-w-[12rem]">
-                    <p className="font-medium">{partner.name}</p>
+        <div className="space-y-3">
+          <p className="text-sm text-mist">
+            {visibleCount} of {partners.length} shown on the website
+          </p>
+          <ListPanel>
+            {partners.map((partner, index) => {
+              const visible = partner.is_visible !== false;
+              return (
+                <ListRow
+                  key={partner.id}
+                  className="flex-wrap gap-y-2 sm:flex-nowrap"
+                >
+                  <div className="flex h-12 w-20 shrink-0 items-center justify-center rounded-md border bg-white p-1.5">
+                    <img
+                      src={normalizeImageUrl(partner.logo_url)}
+                      alt=""
+                      className={cn(
+                        "max-h-full max-w-full object-contain",
+                        !visible && "opacity-40"
+                      )}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <button
+                        type="button"
+                        onClick={() => edit(partner)}
+                        className="min-w-0 truncate text-left text-sm font-medium text-ink hover:underline focus-visible:underline focus-visible:outline-none"
+                      >
+                        {partner.name}
+                      </button>
+                      {!visible && (
+                        <StatusBadge tone="muted" icon={EyeOff}>
+                          Hidden
+                        </StatusBadge>
+                      )}
+                    </div>
                     {partner.website_url ? (
                       <a
                         href={partner.website_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-theme-text-muted hover:underline inline-flex items-center gap-1"
+                        className="mt-1 block truncate text-[13px] text-mist hover:text-ink hover:underline"
                       >
                         {partner.website_url.replace(/^https?:\/\//, "")}
-                        <ExternalLink className="w-3 h-3" aria-hidden="true" />
                       </a>
                     ) : (
-                      <p className="text-sm text-theme-text-muted">
-                        No website
-                      </p>
+                      <p className="mt-1 text-[13px] text-mist">No website</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={partner.is_visible !== false}
-                      onCheckedChange={(checked) =>
+                  <div className="-mt-1 flex w-full shrink-0 items-center justify-end sm:mt-0 sm:w-auto">
+                    <IconAction
+                      label="Move up"
+                      icon={ArrowUp}
+                      disabled={index === 0}
+                      onClick={() => move(index, -1)}
+                    />
+                    <IconAction
+                      label="Move down"
+                      icon={ArrowDown}
+                      disabled={index === partners.length - 1}
+                      onClick={() => move(index, 1)}
+                    />
+                    <IconAction
+                      label={visible ? "Hide from website" : "Show on website"}
+                      icon={visible ? EyeOff : Eye}
+                      onClick={() =>
                         run(
                           () =>
                             apiClient.updatePartner(partner.id, {
-                              is_visible: checked,
+                              is_visible: !visible,
                             }),
-                          checked ? "Partner shown" : "Partner hidden"
+                          visible
+                            ? `${partner.name} is now hidden`
+                            : `${partner.name} is now on the website`
                         )
                       }
-                      aria-label={`Show ${partner.name} on the website`}
                     />
-                    <span className="text-sm text-theme-text-muted w-14">
-                      {partner.is_visible ? "Visible" : "Hidden"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={index === 0}
-                      onClick={() => move(index, -1)}
-                      aria-label={`Move ${partner.name} up`}
-                    >
-                      <ArrowUp className="w-4 h-4" aria-hidden="true" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={index === partners.length - 1}
-                      onClick={() => move(index, 1)}
-                      aria-label={`Move ${partner.name} down`}
-                    >
-                      <ArrowDown className="w-4 h-4" aria-hidden="true" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        setForm({
-                          id: partner.id,
-                          name: partner.name,
-                          website_url: partner.website_url || "",
-                          logo_url: partner.logo_url,
-                          is_visible: partner.is_visible !== false,
-                        })
+                    <IconAction
+                      label="Edit"
+                      icon={Pencil}
+                      onClick={() => edit(partner)}
+                    />
+                    <ConfirmDelete
+                      title={`Delete ${partner.name}?`}
+                      description="The logo is removed from the website footer. To take it off for now, hide it instead."
+                      onConfirm={() =>
+                        run(
+                          () => apiClient.deletePartner(partner.id),
+                          "Partner deleted"
+                        )
                       }
-                      aria-label={`Edit ${partner.name}`}
-                    >
-                      <Edit className="w-4 h-4" aria-hidden="true" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-600 hover:text-red-700"
-                      onClick={() => setToDelete(partner)}
-                      aria-label={`Delete ${partner.name}`}
-                    >
-                      <Trash2 className="w-4 h-4" aria-hidden="true" />
-                    </Button>
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            </li>
-          ))}
-        </ul>
+                </ListRow>
+              );
+            })}
+          </ListPanel>
+        </div>
       )}
-
-      <AlertDialog
-        open={toDelete !== null}
-        onOpenChange={(open) => !open && setToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete {toDelete?.name}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              The logo is removed from the website footer. To hide it for now
-              instead, use the visibility switch.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
-              onClick={() =>
-                toDelete &&
-                run(
-                  () => apiClient.deletePartner(toDelete.id),
-                  "Partner deleted"
-                ).then(() => setToDelete(null))
-              }
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    </AdminPage>
   );
 };
 

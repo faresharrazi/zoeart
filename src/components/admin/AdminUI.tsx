@@ -100,8 +100,8 @@ export const Panel = ({
     )}
   >
     {(title || actions) && (
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b px-5 py-4">
-        <div className="min-w-0">
+      <div className="flex items-start gap-4 border-b px-5 py-4">
+        <div className="min-w-0 flex-1">
           {title && (
             <h2 className="text-[15px] font-semibold text-ink">{title}</h2>
           )}
@@ -110,7 +110,9 @@ export const Panel = ({
           )}
         </div>
         {actions && (
-          <div className="flex shrink-0 items-center gap-2">{actions}</div>
+          <div className="-my-1 flex shrink-0 items-center gap-2">
+            {actions}
+          </div>
         )}
       </div>
     )}

@@ -1,7 +1,6 @@
 import { useState } from "react";
+import { ExternalLink, Eye, EyeOff, Pencil, Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -11,8 +10,19 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
-import { Plus, Search, Filter, User } from "lucide-react";
-import ArtistCard from "./ArtistCard";
+import {
+  AdminPage,
+  ConfirmDelete,
+  EmptyState,
+  IconAction,
+  IconLink,
+  ListPanel,
+  ListRow,
+  ResultCount,
+  SearchField,
+  StatusBadge,
+  Thumb,
+} from "../AdminUI";
 
 interface Artist {
   id: string;
@@ -34,55 +44,77 @@ interface ArtistListProps {
   onToggleVisibility: (id: string, isVisible: boolean) => void;
 }
 
-const ArtistList = ({ artists, onEdit, onAdd, onRefresh, onToggleVisibility }: ArtistListProps) => {
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+/** Profile photo, or the artist's initials when there is none. */
+const ArtistAvatar = ({ artist }: { artist: Artist }) =>
+  artist.profileImage ? (
+    <Thumb src={artist.profileImage} shape="round" />
+  ) : (
+    <span
+      className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-mist"
+      aria-hidden="true"
+    >
+      {initials(artist.name)}
+    </span>
+  );
+
+const ArtistList = ({
+  artists,
+  onEdit,
+  onAdd,
+  onRefresh,
+  onToggleVisibility,
+}: ArtistListProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [visibilityFilter, setVisibilityFilter] = useState<string>("all");
   const [specialtyFilter, setSpecialtyFilter] = useState<string>("all");
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (artist: Artist) => {
     try {
-      await apiClient.deleteArtist(parseInt(id));
+      await apiClient.deleteArtist(parseInt(artist.id));
       onRefresh();
-      toast({
-        title: "Success",
-        description: "Artist deleted successfully",
-      });
+      toast({ title: `${artist.name} deleted` });
     } catch (error) {
       console.error("Error deleting artist:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete artist",
-        variant: "destructive",
-      });
+      toast({ title: "Couldn't delete the artist", variant: "destructive" });
     }
   };
 
-  const handleToggleVisibility = async (id: string, isVisible: boolean) => {
+  const handleToggleVisibility = async (artist: Artist) => {
+    const isVisible = !artist.isVisible;
     try {
-      await apiClient.updateArtist(parseInt(id), {
+      await apiClient.updateArtist(parseInt(artist.id), {
         is_visible: isVisible,
       });
-      onToggleVisibility(id, isVisible);
+      onToggleVisibility(artist.id, isVisible);
       toast({
-        title: "Success",
-        description: `Artist ${isVisible ? "shown" : "hidden"} successfully`,
+        title: isVisible
+          ? `${artist.name} is now on the website`
+          : `${artist.name} is now hidden`,
       });
     } catch (error) {
       console.error("Error toggling artist visibility:", error);
       toast({
-        title: "Error",
-        description: "Failed to update artist visibility",
+        title: "Couldn't change the visibility",
         variant: "destructive",
       });
     }
   };
 
+  const search = searchTerm.toLowerCase();
   const filteredArtists = artists.filter((artist) => {
-    const matchesSearch =
-      artist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      artist.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      artist.bio.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = [artist.name, artist.specialty, artist.bio].some(
+      (text) => text.toLowerCase().includes(search)
+    );
 
     const matchesVisibility =
       visibilityFilter === "all" ||
@@ -96,147 +128,167 @@ const ArtistList = ({ artists, onEdit, onAdd, onRefresh, onToggleVisibility }: A
     return matchesSearch && matchesVisibility && matchesSpecialty;
   });
 
-  const visibleCount = artists.filter((a) => a.isVisible).length;
-  const hiddenCount = artists.filter((a) => !a.isVisible).length;
   const specialties = [
     ...new Set(artists.map((a) => a.specialty).filter(Boolean)),
-  ];
+  ].sort((a, b) => a.localeCompare(b));
+  const filtered =
+    searchTerm !== "" ||
+    visibilityFilter !== "all" ||
+    specialtyFilter !== "all";
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Artist Management</h2>
-          <p className="text-gray-600">
-            Manage your artists and their profiles
-          </p>
-        </div>
-        <Button onClick={onAdd} className="w-full sm:w-auto">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Artist
+    <AdminPage
+      title="Artists"
+      description="The artists shown on the Artists page, each with their own profile."
+      actions={
+        <Button onClick={onAdd}>
+          <Plus aria-hidden="true" />
+          New artist
         </Button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <div className="text-2xl font-bold text-blue-600">
-            {artists.length}
-          </div>
-          <div className="text-sm text-blue-600">Total Artists</div>
-        </div>
-        <div className="bg-green-50 p-4 rounded-lg">
-          <div className="text-2xl font-bold text-green-600">
-            {visibleCount}
-          </div>
-          <div className="text-sm text-green-600">Visible</div>
-        </div>
-        <div className="bg-red-50 p-4 rounded-lg">
-          <div className="text-2xl font-bold text-red-600">{hiddenCount}</div>
-          <div className="text-sm text-red-600">Hidden</div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search artists..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2">
+      }
+    >
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <SearchField
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search artists"
+        />
+        <div className="grid grid-cols-2 gap-3 sm:flex">
           <Select value={visibilityFilter} onValueChange={setVisibilityFilter}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Visibility" />
+            <SelectTrigger className="bg-white sm:w-40" aria-label="Visibility">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="visible">Visible</SelectItem>
+              <SelectItem value="all">Any visibility</SelectItem>
+              <SelectItem value="visible">Shown</SelectItem>
               <SelectItem value="hidden">Hidden</SelectItem>
             </SelectContent>
           </Select>
-
-          <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Specialty" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Specialties</SelectItem>
-              {specialties.map((specialty) => (
-                <SelectItem key={specialty} value={specialty}>
-                  {specialty}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Results */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600">
-            Showing {filteredArtists.length} of {artists.length} artists
-          </p>
-          {(searchTerm ||
-            visibilityFilter !== "all" ||
-            specialtyFilter !== "all") && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSearchTerm("");
-                setVisibilityFilter("all");
-                setSpecialtyFilter("all");
-              }}
-            >
-              Clear Filters
-            </Button>
+          {specialties.length > 0 && (
+            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+              <SelectTrigger
+                className="bg-white sm:w-44"
+                aria-label="Specialty"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any specialty</SelectItem>
+                {specialties.map((specialty) => (
+                  <SelectItem key={specialty} value={specialty}>
+                    {specialty}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
         </div>
+      </div>
+
+      <div className="space-y-3">
+        <ResultCount
+          shown={filteredArtists.length}
+          total={artists.length}
+          noun="artists"
+          onClear={
+            filtered
+              ? () => {
+                  setSearchTerm("");
+                  setVisibilityFilter("all");
+                  setSpecialtyFilter("all");
+                }
+              : undefined
+          }
+        />
 
         {filteredArtists.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <User className="w-12 h-12 mx-auto" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No artists found
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {artists.length === 0
-                ? "Get started by adding your first artist."
-                : "Try adjusting your search or filter criteria."}
-            </p>
-            {artists.length === 0 && (
-              <Button onClick={onAdd}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Artist
-              </Button>
-            )}
-          </div>
+          <EmptyState
+            icon={Users}
+            title={artists.length === 0 ? "No artists yet" : "No artists match"}
+            description={
+              artists.length === 0
+                ? "Add the first artist to show them on the website."
+                : "Try another search or filter."
+            }
+            action={
+              artists.length === 0 && (
+                <Button onClick={onAdd}>
+                  <Plus aria-hidden="true" />
+                  New artist
+                </Button>
+              )
+            }
+          />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredArtists.map((artist) => (
-              <ArtistCard
-                key={artist.id}
-                artist={artist}
-                onEdit={onEdit}
-                onDelete={handleDelete}
-                onToggleVisibility={handleToggleVisibility}
-              />
-            ))}
-          </div>
+          <ListPanel>
+            {filteredArtists.map((artist) => {
+              const detail = artist.specialty || artist.bio;
+              return (
+                <ListRow key={artist.id}>
+                  <ArtistAvatar artist={artist} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <button
+                        type="button"
+                        onClick={() => onEdit(artist)}
+                        className="min-w-0 truncate text-left text-sm font-medium text-ink hover:underline focus-visible:underline focus-visible:outline-none"
+                      >
+                        {artist.name}
+                      </button>
+                      {!artist.isVisible && (
+                        <StatusBadge tone="muted" icon={EyeOff}>
+                          Hidden
+                        </StatusBadge>
+                      )}
+                    </div>
+                    {detail && (
+                      <p className="mt-1 truncate text-[13px] text-mist">
+                        {detail}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center">
+                    {artist.isVisible && artist.slug && (
+                      <span className="hidden sm:inline-flex">
+                        <IconLink
+                          label="View on website"
+                          icon={ExternalLink}
+                          href={`/artist/${artist.slug}`}
+                        />
+                      </span>
+                    )}
+                    <IconAction
+                      label={
+                        artist.isVisible
+                          ? "Hide from website"
+                          : "Show on website"
+                      }
+                      icon={artist.isVisible ? EyeOff : Eye}
+                      onClick={() => handleToggleVisibility(artist)}
+                    />
+                    <IconAction
+                      label="Edit"
+                      icon={Pencil}
+                      onClick={() => onEdit(artist)}
+                    />
+                    <ConfirmDelete
+                      title="Delete this artist?"
+                      description={
+                        <>
+                          {artist.name} will be removed from the website and the
+                          admin. This can't be undone.
+                        </>
+                      }
+                      onConfirm={() => handleDelete(artist)}
+                    />
+                  </div>
+                </ListRow>
+              );
+            })}
+          </ListPanel>
         )}
       </div>
-    </div>
+    </AdminPage>
   );
 };
 

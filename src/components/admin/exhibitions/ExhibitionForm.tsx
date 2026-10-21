@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
+import { ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,9 +14,10 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, errorMessage } from "@/lib/apiClient";
-import { Save, X, Image, Upload } from "lucide-react";
-import FeaturedImageSelector from "../FeaturedImageSelector";
+import { imageUrl } from "@/lib/images";
+import { cn } from "@/lib/utils";
 import type { Artist, Artwork } from "@/types/api";
+import { AdminPage, FormSection, IconAction } from "../AdminUI";
 
 interface Exhibition {
   id: string;
@@ -49,6 +49,116 @@ interface ExhibitionFormProps {
   isEditing: boolean;
 }
 
+/** Label, control and an optional hint underneath. */
+const Field = ({
+  id,
+  label,
+  hint,
+  className,
+  children,
+}: {
+  id?: string;
+  label: ReactNode;
+  hint?: ReactNode;
+  className?: string;
+  children: ReactNode;
+}) => (
+  <div className={cn("space-y-2", className)}>
+    <Label htmlFor={id}>{label}</Label>
+    {children}
+    {hint && <p className="text-xs text-mist">{hint}</p>}
+  </div>
+);
+
+/** Scrollable list of checkboxes with a filter once the list gets long. */
+const ChecklistField = ({
+  label,
+  options,
+  selected,
+  onChange,
+  emptyText,
+}: {
+  label: string;
+  options: { id: string; label: string; detail?: string }[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  emptyText: string;
+}) => {
+  const id = useId();
+  const [filter, setFilter] = useState("");
+  const visible = options.filter((option) =>
+    option.label.toLowerCase().includes(filter.trim().toLowerCase())
+  );
+
+  return (
+    <fieldset className="space-y-2">
+      <legend className="flex w-full items-center justify-between gap-3 text-sm font-medium text-ink">
+        {label}
+        <span className="text-xs font-normal text-mist">
+          {selected.length} selected
+        </span>
+      </legend>
+      <div className="overflow-hidden rounded-lg border">
+        {options.length > 8 && (
+          <div className="border-b p-2">
+            <Input
+              type="search"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder={`Filter ${label.toLowerCase()}`}
+              aria-label={`Filter ${label.toLowerCase()}`}
+              className="h-8 border-0 bg-secondary shadow-none focus-visible:ring-1"
+            />
+          </div>
+        )}
+        {options.length === 0 ? (
+          <p className="px-3 py-4 text-sm text-mist">{emptyText}</p>
+        ) : (
+          <ul className="max-h-56 overflow-y-auto py-1">
+            {visible.map((option) => {
+              const inputId = `${id}-${option.id}`;
+              const checked = selected.includes(option.id);
+              return (
+                <li key={option.id}>
+                  <label
+                    htmlFor={inputId}
+                    className="flex cursor-pointer items-center gap-3 px-3 py-1.5 text-sm hover:bg-secondary"
+                  >
+                    <input
+                      id={inputId}
+                      type="checkbox"
+                      checked={checked}
+                      onChange={(e) =>
+                        onChange(
+                          e.target.checked
+                            ? [...selected, option.id]
+                            : selected.filter((s) => s !== option.id)
+                        )
+                      }
+                      className="size-4 shrink-0 accent-[hsl(var(--ink))]"
+                    />
+                    <span className="min-w-0 flex-1 truncate text-ink">
+                      {option.label}
+                    </span>
+                    {option.detail && (
+                      <span className="shrink-0 truncate text-xs text-mist">
+                        {option.detail}
+                      </span>
+                    )}
+                  </label>
+                </li>
+              );
+            })}
+            {visible.length === 0 && (
+              <li className="px-3 py-3 text-sm text-mist">No matches.</li>
+            )}
+          </ul>
+        )}
+      </div>
+    </fieldset>
+  );
+};
+
 const ExhibitionForm = ({
   exhibition,
   artists,
@@ -79,12 +189,18 @@ const ExhibitionForm = ({
     }
   );
   const [saving, setSaving] = useState(false);
+  const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const posterInput = useRef<HTMLInputElement>(null);
+  const galleryInput = useRef<HTMLInputElement>(null);
+
+  const update = (change: Partial<Exhibition>) =>
+    setFormData((data) => ({ ...data, ...change }));
 
   const handleSave = async () => {
     if (!formData.title?.trim()) {
       toast({
-        title: "Error",
-        description: "Title is required",
+        title: "Add a title before saving",
         variant: "destructive",
       });
       return;
@@ -92,7 +208,6 @@ const ExhibitionForm = ({
 
     try {
       setSaving(true);
-
 
       const exhibitionData = {
         title: formData.title,
@@ -115,7 +230,6 @@ const ExhibitionForm = ({
         is_visible: formData.isVisible !== false,
       };
 
-
       if (isEditing && exhibition?.id) {
         await apiClient.updateExhibition(
           parseInt(exhibition.id),
@@ -126,18 +240,12 @@ const ExhibitionForm = ({
       }
 
       onSave(formData as Exhibition);
-      toast({
-        title: "Success",
-        description: `Exhibition ${
-          isEditing ? "updated" : "created"
-        } successfully`,
-      });
+      toast({ title: isEditing ? "Exhibition saved" : "Exhibition created" });
     } catch (error) {
       console.error("Error saving exhibition:", error);
-      const message = errorMessage(error, "Failed to save exhibition");
       toast({
-        title: "Error",
-        description: message,
+        title: "Couldn't save the exhibition",
+        description: errorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -145,567 +253,458 @@ const ExhibitionForm = ({
     }
   };
 
-  const handleImageUpload = async (file: File) => {
+  const handlePosterUpload = async (file: File) => {
+    setUploadingPoster(true);
     try {
-      // Use new Cloudinary-enabled upload method
       const response = await apiClient.uploadImage(file, "exhibition");
-
-      // The response now contains the Cloudinary URL directly
-      const imageUrl = response.file.url;
-
-      setFormData({
-        ...formData,
-        featuredImage: imageUrl,
-      });
-
-      toast({
-        title: "Success",
-        description: "Featured image uploaded to Cloudinary successfully",
-      });
+      update({ featuredImage: response.file.url });
+      toast({ title: "Image uploaded" });
     } catch (error) {
       console.error("Error uploading featured image:", error);
       toast({
-        title: "Error",
-        description: "Failed to upload featured image",
+        title: "Couldn't upload the image",
+        description: errorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
-      // Reset the file input to prevent infinite loops
-      const fileInput = document.getElementById(
-        "image-upload"
-      ) as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = "";
-      }
+      setUploadingPoster(false);
+      // Reset so choosing the same file again still triggers a change
+      if (posterInput.current) posterInput.current.value = "";
     }
   };
 
-  const handleGalleryImageUpload = async (file: File) => {
+  const handleGalleryUpload = async (files: FileList) => {
+    setUploadingGallery(true);
     try {
-      // Use new Cloudinary-enabled upload method
-      const response = await apiClient.uploadImage(file, "exhibition");
-
-      // The response now contains the Cloudinary URL directly
-      const imageUrl = response.file.url;
-
-      setFormData({
-        ...formData,
-        galleryImages: [...(formData.galleryImages || []), imageUrl],
-      });
-
-      toast({
-        title: "Success",
-        description: "Gallery image uploaded to Cloudinary successfully",
-      });
-    } catch (error) {
-      console.error("Error uploading gallery image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload gallery image",
-        variant: "destructive",
-      });
-    } finally {
-      // Reset the file input to prevent infinite loops
-      const fileInput = document.getElementById(
-        "gallery-upload"
-      ) as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = "";
-      }
-    }
-  };
-
-  const handleBulkGalleryUpload = async (files: FileList) => {
-    try {
-      const uploadPromises = Array.from(files).map((file) =>
-        apiClient.uploadImage(file, "exhibition")
+      const responses = await Promise.all(
+        Array.from(files).map((file) =>
+          apiClient.uploadImage(file, "exhibition")
+        )
       );
-
-      const responses = await Promise.all(uploadPromises);
-
-      // Extract Cloudinary URLs from responses
-      const imageUrls = responses.map((response) => response.file.url);
-
-      setFormData({
-        ...formData,
-        galleryImages: [...(formData.galleryImages || []), ...imageUrls],
-      });
-
+      const urls = responses.map((response) => response.file.url);
+      setFormData((data) => ({
+        ...data,
+        galleryImages: [...(data.galleryImages || []), ...urls],
+      }));
       toast({
-        title: "Success",
-        description: `${files.length} gallery images uploaded to Cloudinary successfully`,
+        title:
+          urls.length === 1
+            ? "Image uploaded"
+            : `${urls.length} images uploaded`,
       });
     } catch (error) {
-      console.error("Error bulk uploading gallery images:", error);
+      console.error("Error uploading gallery images:", error);
       toast({
-        title: "Error",
-        description: "Failed to upload gallery images",
+        title: "Couldn't upload the images",
+        description: errorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
-      // Reset the file input to prevent infinite loops
-      const fileInput = document.getElementById(
-        "gallery-upload"
-      ) as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = "";
-      }
+      setUploadingGallery(false);
+      if (galleryInput.current) galleryInput.current.value = "";
     }
   };
 
+  const gallery = formData.galleryImages || [];
+
+  const actions = (
+    <>
+      <Button variant="ghost" onClick={onCancel} disabled={saving}>
+        Cancel
+      </Button>
+      <Button onClick={handleSave} disabled={saving}>
+        {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
+        {saving ? "Saving…" : isEditing ? "Save changes" : "Create exhibition"}
+      </Button>
+    </>
+  );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {isEditing ? "Edit Exhibition" : "Add New Exhibition"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="title">Title *</Label>
-            <Input
+    <AdminPage
+      onBack={onCancel}
+      backLabel="Back to exhibitions"
+      title={isEditing ? "Edit exhibition" : "New exhibition"}
+      description={
+        isEditing
+          ? exhibition?.title
+          : "Fill in the details, then create the exhibition."
+      }
+      actions={actions}
+    >
+      <div className="space-y-10 pt-2">
+        <FormSection
+          title="Basics"
+          description="The status and dates decide where the exhibition appears: upcoming and on-view exhibitions are also shown on the home page."
+        >
+          <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+            <Field
               id="title"
-              value={formData.title || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
+              label={
+                <>
+                  Title <span className="text-mist">(required)</span>
+                </>
               }
-              placeholder="Enter exhibition title"
-              required
-            />
-          </div>
+              className="sm:col-span-2"
+            >
+              <Input
+                id="title"
+                value={formData.title || ""}
+                onChange={(e) => update({ title: e.target.value })}
+                placeholder="e.g. Grace in Threads"
+                required
+              />
+            </Field>
 
-          <div>
-            <Label htmlFor="slug">Slug</Label>
-            <Input
+            <Field
               id="slug"
-              value={formData.slug || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, slug: e.target.value })
-              }
-              placeholder="Auto-generated from title"
-            />
-          </div>
-        </div>
+              label="Web address"
+              hint="Leave empty to create it from the title."
+              className="sm:col-span-2"
+            >
+              <div className="relative">
+                <span
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-mist"
+                  aria-hidden="true"
+                >
+                  /exhibition/
+                </span>
+                <Input
+                  id="slug"
+                  value={formData.slug || ""}
+                  onChange={(e) => update({ slug: e.target.value })}
+                  placeholder="grace-in-threads"
+                  className="pl-[5.6rem]"
+                />
+              </div>
+            </Field>
 
-        <div>
-          <Label htmlFor="description">Description</Label>
+            <Field id="status" label="Status">
+              <Select
+                value={formData.status || "upcoming"}
+                onValueChange={(value: "upcoming" | "current" | "past") =>
+                  update({ status: value })
+                }
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upcoming">Upcoming</SelectItem>
+                  <SelectItem value="current">On view now</SelectItem>
+                  <SelectItem value="past">Past</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <div className="flex items-center justify-between gap-4 rounded-lg border px-4 py-3 sm:self-end">
+              <Label htmlFor="isVisible" className="cursor-pointer">
+                Show on the website
+              </Label>
+              <Switch
+                id="isVisible"
+                checked={formData.isVisible !== false}
+                onCheckedChange={(checked) => update({ isVisible: checked })}
+              />
+            </div>
+
+            <Field id="startDate" label="Opens">
+              <Input
+                id="startDate"
+                type="date"
+                value={(formData.startDate || "").slice(0, 10)}
+                onChange={(e) => update({ startDate: e.target.value })}
+              />
+            </Field>
+
+            <Field id="endDate" label="Closes">
+              <Input
+                id="endDate"
+                type="date"
+                value={(formData.endDate || "").slice(0, 10)}
+                onChange={(e) => update({ endDate: e.target.value })}
+              />
+            </Field>
+
+            <Field id="location" label="Location">
+              <Input
+                id="location"
+                value={formData.location || ""}
+                onChange={(e) => update({ location: e.target.value })}
+                placeholder="e.g. Aether Art Space"
+              />
+            </Field>
+
+            <Field id="curator" label="Curator">
+              <Input
+                id="curator"
+                value={formData.curator || ""}
+                onChange={(e) => update({ curator: e.target.value })}
+                placeholder="Name of the curator"
+              />
+            </Field>
+          </div>
+        </FormSection>
+
+        <FormSection
+          title="Description"
+          description="The introduction shown on the exhibition page and in the Cards view of the Exhibitions page."
+        >
+          <Label htmlFor="description" className="sr-only">
+            Description
+          </Label>
           <Textarea
             id="description"
             value={formData.description || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            placeholder="Enter exhibition description"
-            rows={4}
+            onChange={(e) => update({ description: e.target.value })}
+            placeholder="What the exhibition is about"
+            rows={7}
           />
-        </div>
+        </FormSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="startDate">Start Date</Label>
-            <Input
-              id="startDate"
-              type="date"
-              value={(formData.startDate || "").slice(0, 10)}
-              onChange={(e) =>
-                setFormData({ ...formData, startDate: e.target.value })
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="endDate">End Date</Label>
-            <Input
-              id="endDate"
-              type="date"
-              value={(formData.endDate || "").slice(0, 10)}
-              onChange={(e) =>
-                setFormData({ ...formData, endDate: e.target.value })
-              }
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              value={formData.location || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
-              }
-              placeholder="Enter exhibition location"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="curator">Curator</Label>
-            <Input
-              id="curator"
-              value={formData.curator || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, curator: e.target.value })
-              }
-              placeholder="Enter curator name"
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="status">Status</Label>
-          <Select
-            value={formData.status || "upcoming"}
-            onValueChange={(value: "upcoming" | "current" | "past") =>
-              setFormData({ ...formData, status: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="upcoming">Upcoming</SelectItem>
-              <SelectItem value="current">Current</SelectItem>
-              <SelectItem value="past">Past</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label>Featured Image</Label>
-          <p className="text-sm text-gray-600 mb-4">
-            This image will be displayed prominently on the exhibition detail
-            page and in exhibition cards.
-          </p>
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleImageUpload(file);
-                  }}
-                  className="hidden"
-                  id="image-upload"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    document.getElementById("image-upload")?.click()
-                  }
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Featured Image
-                </Button>
+        <FormSection
+          title="Images"
+          description="The main image is used on cards and at the top of the exhibition page; a portrait poster works best. Gallery images appear further down the page."
+        >
+          <div className="space-y-8">
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-ink">Main image</p>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                <div className="flex aspect-[3/4] w-40 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-secondary">
+                  {formData.featuredImage ? (
+                    <img
+                      src={imageUrl(formData.featuredImage, { width: 320 })}
+                      alt="Main image"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <ImageIcon
+                      className="size-6 text-mist"
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    ref={posterInput}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handlePosterUpload(file);
+                    }}
+                    className="sr-only"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={uploadingPoster}
+                    onClick={() => posterInput.current?.click()}
+                  >
+                    {uploadingPoster ? (
+                      <Loader2 className="animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Upload aria-hidden="true" />
+                    )}
+                    {uploadingPoster
+                      ? "Uploading…"
+                      : formData.featuredImage
+                        ? "Replace image"
+                        : "Upload image"}
+                  </Button>
+                  {formData.featuredImage && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => update({ featuredImage: "" })}
+                      className="text-mist hover:text-destructive"
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
               </div>
-              {formData.featuredImage && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() =>
-                    setFormData({ ...formData, featuredImage: "" })
-                  }
-                  className="w-full sm:w-auto"
-                >
-                  Remove Image
-                </Button>
-              )}
             </div>
 
-            {formData.featuredImage ? (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">
-                  Current Featured Image:
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-medium text-ink">
+                  Gallery{" "}
+                  <span className="font-normal text-mist">
+                    ({gallery.length})
+                  </span>
                 </p>
-                <div className="w-full max-w-lg overflow-hidden rounded-lg border-2 border-blue-200 bg-gray-50 flex items-center justify-center">
-                  <img
-                    src={formData.featuredImage}
-                    alt="Featured"
-                    className="max-w-full max-h-[400px] object-contain"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="aspect-video w-full max-w-lg border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                  <Image className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500 text-sm">
-                    No featured image selected
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <Label>Gallery Images</Label>
-          <p className="text-sm text-gray-600 mb-4">
-            Additional images that will be displayed in the gallery section of
-            the exhibition detail page.
-          </p>
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="relative">
                 <input
+                  ref={galleryInput}
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={(e) => {
                     const files = e.target.files;
-                    if (files && files.length > 0) {
-                      if (files.length === 1) {
-                        handleGalleryImageUpload(files[0]);
-                      } else {
-                        handleBulkGalleryUpload(files);
-                      }
-                    }
+                    if (files && files.length > 0) handleGalleryUpload(files);
                   }}
-                  className="hidden"
-                  id="gallery-upload"
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
                 />
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() =>
-                    document.getElementById("gallery-upload")?.click()
-                  }
+                  size="sm"
+                  disabled={uploadingGallery}
+                  onClick={() => galleryInput.current?.click()}
                 >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Gallery Images
+                  {uploadingGallery ? (
+                    <Loader2 className="animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Upload aria-hidden="true" />
+                  )}
+                  {uploadingGallery ? "Uploading…" : "Add images"}
                 </Button>
               </div>
-            </div>
-
-            {formData.galleryImages && formData.galleryImages.length > 0 ? (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">
-                  Gallery Images ({formData.galleryImages.length}):
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {formData.galleryImages.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-square overflow-hidden rounded-lg border-2 border-gray-200 bg-gray-50 flex items-center justify-center">
-                        <img
-                          src={image}
-                          alt={`Gallery ${index + 1}`}
-                          className="max-w-full max-h-full object-contain"
-                          onError={(e) => {
-                            console.error("Image failed to load:", image);
-                            e.currentTarget.src = "/placeholder-image.png";
-                          }}
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                        onClick={() => {
-                          const newGalleryImages =
-                            formData.galleryImages.filter(
-                              (_, i) => i !== index
-                            );
-                          setFormData({
-                            ...formData,
-                            galleryImages: newGalleryImages,
-                          });
+              {gallery.length > 0 ? (
+                <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {gallery.map((image, index) => (
+                    <li
+                      key={`${image}-${index}`}
+                      className="group relative aspect-square overflow-hidden rounded-md border bg-secondary"
+                    >
+                      <img
+                        src={imageUrl(image, {
+                          width: 240,
+                          height: 240,
+                          crop: "fill",
+                        })}
+                        alt={`Gallery image ${index + 1}`}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.visibility = "hidden";
                         }}
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </div>
+                      />
+                      <IconAction
+                        label={`Remove gallery image ${index + 1}`}
+                        icon={Trash2}
+                        tone="danger"
+                        onClick={() =>
+                          update({
+                            galleryImages: gallery.filter(
+                              (_, i) => i !== index
+                            ),
+                          })
+                        }
+                        className="absolute right-1.5 top-1.5 bg-white/90 text-ink shadow-sm sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                      />
+                    </li>
                   ))}
-                </div>
-              </div>
-            ) : (
-              <div className="aspect-video w-full max-w-lg border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                  <Image className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500 text-sm">
-                    No gallery images added
+                </ul>
+              ) : (
+                <p className="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-mist">
+                  No gallery images yet. You can select several at once.
+                </p>
+              )}
+            </div>
+          </div>
+        </FormSection>
+
+        <FormSection
+          title="Artists & artworks"
+          description="The artists and works taking part, linked from the exhibition page."
+        >
+          <div className="grid gap-6 xl:grid-cols-2">
+            <ChecklistField
+              label="Artists"
+              emptyText="No artists yet. Add them in the Artists section."
+              options={artists.map((artist) => ({
+                id: artist.id.toString(),
+                label: artist.name,
+              }))}
+              selected={formData.assignedArtists || []}
+              onChange={(assignedArtists) => update({ assignedArtists })}
+            />
+            <ChecklistField
+              label="Artworks"
+              emptyText="No artworks yet. Add them in the Artworks section."
+              options={artworks.map((artwork) => ({
+                id: artwork.id.toString(),
+                label: artwork.title,
+                detail: artwork.artist_name,
+              }))}
+              selected={formData.assignedArtworks || []}
+              onChange={(assignedArtworks) => update({ assignedArtworks })}
+            />
+          </div>
+        </FormSection>
+
+        <FormSection
+          title="Links"
+          description="Optional buttons on the exhibition page: an open call for artists and a press release to download."
+        >
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <Label htmlFor="callForArtists" className="cursor-pointer">
+                    Call for artists
+                  </Label>
+                  <p className="mt-1 text-xs text-mist">
+                    Shows an “Apply as an artist” button linking to the
+                    application form.
                   </p>
                 </div>
+                <Switch
+                  id="callForArtists"
+                  checked={formData.callForArtists || false}
+                  onCheckedChange={(checked) =>
+                    update({ callForArtists: checked })
+                  }
+                />
               </div>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <Label>Assigned Artists</Label>
-            <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded p-2">
-              {artists.map((artist) => (
-                <label
-                  key={artist.id}
-                  className="flex items-center space-x-2 text-sm"
-                >
-                  <input
-                    type="checkbox"
-                    checked={
-                      formData.assignedArtists?.includes(
-                        artist.id.toString()
-                      ) || false
-                    }
-                    onChange={(e) => {
-                      const currentArtists = formData.assignedArtists || [];
-                      if (e.target.checked) {
-                        setFormData({
-                          ...formData,
-                          assignedArtists: [
-                            ...currentArtists,
-                            artist.id.toString(),
-                          ],
-                        });
-                      } else {
-                        setFormData({
-                          ...formData,
-                          assignedArtists: currentArtists.filter(
-                            (id) => id !== artist.id.toString()
-                          ),
-                        });
-                      }
-                    }}
+              {formData.callForArtists && (
+                <Field id="ctaLink" label="Application link">
+                  <Input
+                    id="ctaLink"
+                    value={formData.ctaLink || ""}
+                    onChange={(e) => update({ ctaLink: e.target.value })}
+                    placeholder="https://…"
                   />
-                  <span>{artist.name}</span>
-                </label>
-              ))}
+                </Field>
+              )}
             </div>
-          </div>
 
-          <div>
-            <Label>Assigned Artworks</Label>
-            <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border rounded p-2">
-              {artworks.map((artwork) => (
-                <label
-                  key={artwork.id}
-                  className="flex items-center space-x-2 text-sm"
-                >
-                  <input
-                    type="checkbox"
-                    checked={
-                      formData.assignedArtworks?.includes(
-                        artwork.id.toString()
-                      ) || false
-                    }
-                    onChange={(e) => {
-                      const currentArtworks = formData.assignedArtworks || [];
-                      if (e.target.checked) {
-                        setFormData({
-                          ...formData,
-                          assignedArtworks: [
-                            ...currentArtworks,
-                            artwork.id.toString(),
-                          ],
-                        });
-                      } else {
-                        setFormData({
-                          ...formData,
-                          assignedArtworks: currentArtworks.filter(
-                            (id) => id !== artwork.id.toString()
-                          ),
-                        });
-                      }
-                    }}
-                  />
-                  <span>{artwork.title}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="callForArtists"
-              checked={formData.callForArtists || false}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, callForArtists: checked })
-              }
-            />
-            <Label htmlFor="callForArtists">Call for Artists</Label>
-          </div>
-
-          {formData.callForArtists && (
-            <div>
-              <Label htmlFor="ctaLink">CTA Link</Label>
-              <Input
-                id="ctaLink"
-                value={formData.ctaLink || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, ctaLink: e.target.value })
-                }
-                placeholder="Enter CTA link"
-              />
-            </div>
-          )}
-
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="pressMediaName">Press Release Name</Label>
-              <Input
+            <div className="grid gap-x-4 gap-y-5 border-t pt-6 sm:grid-cols-2">
+              <Field
                 id="pressMediaName"
-                value={formData.pressMediaName || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, pressMediaName: e.target.value })
-                }
-                placeholder="e.g., Press Release - Exhibition Name"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="pressMediaLink">Press Release Download Link</Label>
-              <Input
+                label="Press release button"
+                hint="Leave empty for “Press release”."
+              >
+                <Input
+                  id="pressMediaName"
+                  value={formData.pressMediaName || ""}
+                  onChange={(e) => update({ pressMediaName: e.target.value })}
+                  placeholder="Press release"
+                />
+              </Field>
+              <Field
                 id="pressMediaLink"
-                value={formData.pressMediaLink || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, pressMediaLink: e.target.value })
-                }
-                placeholder="https://example.com/press-release.pdf"
-              />
-              <p className="text-sm text-gray-600 mt-1">
-                Provide a direct link to the press release PDF file
-              </p>
+                label="Press release link"
+                hint="A direct link to the PDF."
+              >
+                <Input
+                  id="pressMediaLink"
+                  value={formData.pressMediaLink || ""}
+                  onChange={(e) => update({ pressMediaLink: e.target.value })}
+                  placeholder="https://example.com/press-release.pdf"
+                />
+              </Field>
             </div>
           </div>
+        </FormSection>
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="isVisible"
-              checked={formData.isVisible !== false}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, isVisible: checked })
-              }
-            />
-            <Label htmlFor="isVisible">Visible on Frontend</Label>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={saving}>
-            <Save className="w-4 h-4 mr-2" />
-            {saving
-              ? "Saving..."
-              : isEditing
-              ? "Update Exhibition"
-              : "Add Exhibition"}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={onCancel}
-          >
-            <X className="w-4 h-4 mr-2" />
-            Cancel
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        <div className="flex justify-end gap-2 border-t pt-6">{actions}</div>
+      </div>
+    </AdminPage>
   );
 };
 

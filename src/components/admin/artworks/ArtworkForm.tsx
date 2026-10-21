@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Loader2, Star, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, errorMessage } from "@/lib/apiClient";
-import { Save, X, Upload, Image, Trash2 } from "lucide-react";
-import FeaturedImageSelector from "../FeaturedImageSelector";
+import { imageUrl } from "@/lib/images";
+import { AdminPage, FormSection } from "../AdminUI";
 import type { Artist } from "@/types/api";
 
 interface Artwork {
@@ -49,6 +49,7 @@ const ArtworkForm = ({
   isEditing,
 }: ArtworkFormProps) => {
   const { toast } = useToast();
+  const fileInput = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<Partial<Artwork>>(
     artwork || {
       title: "",
@@ -65,23 +66,20 @@ const ArtworkForm = ({
     }
   );
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  // Functional updates, so uploads finishing later don't undo other changes
+  const update = (change: Partial<Artwork>) =>
+    setFormData((data) => ({ ...data, ...change }));
 
   const handleSave = async () => {
     if (!formData.title?.trim()) {
-      toast({
-        title: "Error",
-        description: "Title is required",
-        variant: "destructive",
-      });
+      toast({ title: "The artwork needs a title", variant: "destructive" });
       return;
     }
 
     if (!formData.artist_id) {
-      toast({
-        title: "Error",
-        description: "Artist is required",
-        variant: "destructive",
-      });
+      toast({ title: "Choose the artist", variant: "destructive" });
       return;
     }
 
@@ -109,18 +107,12 @@ const ArtworkForm = ({
       }
 
       onSave(formData as Artwork);
-      toast({
-        title: "Success",
-        description: `Artwork ${
-          isEditing ? "updated" : "created"
-        } successfully`,
-      });
+      toast({ title: isEditing ? "Artwork saved" : "Artwork created" });
     } catch (error) {
       console.error("Error saving artwork:", error);
-      const message = errorMessage(error, "Failed to save artwork");
       toast({
-        title: "Error",
-        description: message,
+        title: "Couldn't save the artwork",
+        description: errorMessage(error, "Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -128,295 +120,296 @@ const ArtworkForm = ({
     }
   };
 
-  const handleImageUpload = async (file: File): Promise<string> => {
-    try {
-      // Use new Cloudinary-enabled upload method
-      const response = await apiClient.uploadImage(file, "artwork");
-
-      // The response now contains the Cloudinary URL directly
-      const imageUrl = response.file.url;
-
-      setFormData({
-        ...formData,
-        images: [...(formData.images || []), imageUrl],
-      });
-
-      toast({
-        title: "Success",
-        description: "Image uploaded to Cloudinary successfully",
-      });
-
-      return imageUrl;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload image",
-        variant: "destructive",
-      });
-      throw error;
-    }
+  /** Uploads one image and adds it to the artwork's images. */
+  const uploadImage = async (file: File): Promise<string> => {
+    const response = await apiClient.uploadImage(file, "artwork");
+    const url = response.file.url;
+    setFormData((data) => ({ ...data, images: [...(data.images || []), url] }));
+    return url;
   };
 
   const handleMultipleImageUpload = async (files: FileList) => {
-    try {
-      const uploadPromises = Array.from(files).map((file) =>
-        handleImageUpload(file)
-      );
-      await Promise.all(uploadPromises);
-
+    setUploading(true);
+    const results = await Promise.allSettled(
+      Array.from(files).map((file) => uploadImage(file))
+    );
+    const failed = results.filter((r) => r.status === "rejected").length;
+    if (failed > 0) {
+      console.error("Error uploading images:", results);
       toast({
-        title: "Success",
-        description: `${files.length} images uploaded successfully`,
-      });
-    } catch (error) {
-      console.error("Error uploading multiple images:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload some images",
+        title:
+          failed === files.length
+            ? "Couldn't upload the images"
+            : `${failed} of ${files.length} images couldn't be uploaded`,
         variant: "destructive",
       });
+    } else {
+      toast({
+        title:
+          files.length === 1
+            ? "Image uploaded"
+            : `${files.length} images uploaded`,
+      });
     }
+    setUploading(false);
+    if (fileInput.current) fileInput.current.value = "";
   };
 
-  const removeImage = (index: number) => {
-    const newImages = [...(formData.images || [])];
-    const removedImage = newImages[index];
-    newImages.splice(index, 1);
-
-    // If the removed image was the featured image, clear it
-    const newFeaturedImage =
-      formData.featured_image === removedImage ? "" : formData.featured_image;
-
-    setFormData({
-      ...formData,
-      images: newImages,
-      featured_image: newFeaturedImage,
+  const removeImage = (index: number) =>
+    setFormData((data) => {
+      const images = [...(data.images || [])];
+      const [removed] = images.splice(index, 1);
+      return {
+        ...data,
+        images,
+        // Removing the main image clears it
+        featured_image:
+          data.featured_image === removed ? "" : data.featured_image,
+      };
     });
-  };
 
-  const handleFeaturedImageChange = (imageUrl: string) => {
-    setFormData({
-      ...formData,
-      featured_image: imageUrl,
-    });
-  };
+  const images = formData.images || [];
 
-  const selectedArtist = artists.find((a) => a.id === formData.artist_id);
+  const actions = (
+    <>
+      <Button variant="ghost" onClick={onCancel} disabled={saving}>
+        Cancel
+      </Button>
+      <Button onClick={handleSave} disabled={saving || uploading}>
+        {saving && <Loader2 className="animate-spin" aria-hidden="true" />}
+        {saving ? "Saving…" : isEditing ? "Save changes" : "Create artwork"}
+      </Button>
+    </>
+  );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{isEditing ? "Edit Artwork" : "Add New Artwork"}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              value={formData.title || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-              placeholder="Enter artwork title"
-              required
-            />
-          </div>
+    <AdminPage
+      title={isEditing ? artwork?.title || "Edit artwork" : "New artwork"}
+      description={
+        isEditing
+          ? "Changes show on the website as soon as you save."
+          : "Add a work to the Collection and to its artist's page."
+      }
+      onBack={onCancel}
+      backLabel="Back to artworks"
+      actions={actions}
+    >
+      <div className="space-y-10 pt-2">
+        <FormSection
+          title="Details"
+          description="What visitors read on the artwork's page."
+        >
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={formData.title || ""}
+                onChange={(e) => update({ title: e.target.value })}
+                placeholder="e.g. Under the Sea"
+                required
+                aria-required="true"
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="slug">Slug</Label>
-            <Input
-              id="slug"
-              value={formData.slug || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, slug: e.target.value })
-              }
-              placeholder="Auto-generated from title"
-            />
-          </div>
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="artist">Artist</Label>
+              <Select
+                value={formData.artist_id ? formData.artist_id.toString() : ""}
+                onValueChange={(value) => {
+                  const artistId = parseInt(value);
+                  const artist = artists.find((a) => a.id === artistId);
+                  update({
+                    artist_id: artistId,
+                    artist_name: artist?.name || "",
+                  });
+                }}
+              >
+                <SelectTrigger id="artist" aria-required="true">
+                  <SelectValue placeholder="Choose an artist" />
+                </SelectTrigger>
+                <SelectContent>
+                  {artists.map((artist) => (
+                    <SelectItem key={artist.id} value={artist.id.toString()}>
+                      {artist.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div>
-          <Label htmlFor="artist">Artist *</Label>
-          <Select
-            value={formData.artist_id?.toString() || ""}
-            onValueChange={(value) => {
-              const artistId = parseInt(value);
-              const artist = artists.find((a) => a.id === artistId);
-              setFormData({
-                ...formData,
-                artist_id: artistId,
-                artist_name: artist?.name || "",
-              });
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select an artist" />
-            </SelectTrigger>
-            <SelectContent>
-              {artists.map((artist) => (
-                <SelectItem key={artist.id} value={artist.id.toString()}>
-                  {artist.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="year">Year</Label>
-            <Input
-              id="year"
-              type="number"
-              value={formData.year || ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  year: parseInt(e.target.value) || new Date().getFullYear(),
-                })
-              }
-              placeholder="Enter year"
-              min="1900"
-              max={new Date().getFullYear() + 1}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="medium">Medium</Label>
-            <Input
-              id="medium"
-              value={formData.medium || ""}
-              onChange={(e) =>
-                setFormData({ ...formData, medium: e.target.value })
-              }
-              placeholder="e.g., Oil on canvas, Digital print"
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="size">Size</Label>
-          <Input
-            id="size"
-            value={formData.size || ""}
-            onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-            placeholder="e.g., 24 x 36 inches, 50 x 70 cm"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            value={formData.description || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            placeholder="Enter artwork description..."
-            rows={4}
-          />
-        </div>
-
-        <div>
-          <Label>Images</Label>
-          <div className="space-y-4">
-            {/* Multiple File Upload */}
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => {
-                    const files = e.target.files;
-                    if (files && files.length > 0) {
-                      handleMultipleImageUpload(files);
-                    }
-                  }}
-                  className="hidden"
-                  id="multiple-image-upload"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    document.getElementById("multiple-image-upload")?.click()
+            <div className="grid gap-5 sm:grid-cols-[8rem_minmax(0,1fr)]">
+              <div className="space-y-2">
+                <Label htmlFor="year">Year</Label>
+                <Input
+                  id="year"
+                  type="number"
+                  value={formData.year || ""}
+                  onChange={(e) =>
+                    update({
+                      year:
+                        parseInt(e.target.value) || new Date().getFullYear(),
+                    })
                   }
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Multiple Images
-                </Button>
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="medium">Medium</Label>
+                <Input
+                  id="medium"
+                  value={formData.medium || ""}
+                  onChange={(e) => update({ medium: e.target.value })}
+                  placeholder="e.g. Oil on canvas"
+                />
               </div>
             </div>
 
-            {/* Featured Image Selector */}
-            <FeaturedImageSelector
-              images={formData.images || []}
-              featuredImage={formData.featured_image || ""}
-              onFeaturedImageChange={handleFeaturedImageChange}
-              onImageUpload={handleImageUpload}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="size">Size</Label>
+              <Input
+                id="size"
+                value={formData.size || ""}
+                onChange={(e) => update({ size: e.target.value })}
+                placeholder="e.g. 50 × 70 cm"
+              />
+            </div>
 
-            {/* Gallery Images */}
-            {formData.images && formData.images.length > 0 && (
-              <div className="space-y-2">
-                <Label>Gallery Images ({formData.images.length})</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-square overflow-hidden rounded-lg">
-                        <img
-                          src={image}
-                          alt={`Artwork ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeImage(index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description || ""}
+                onChange={(e) => update({ description: e.target.value })}
+                placeholder="About the work, its story or technique"
+                rows={5}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="slug">Web address</Label>
+              <div className="flex items-center rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                <span className="shrink-0 pl-3 text-sm text-mist">
+                  /artwork/
+                </span>
+                <Input
+                  id="slug"
+                  value={formData.slug || ""}
+                  onChange={(e) => update({ slug: e.target.value })}
+                  placeholder="made-from-the-title"
+                  aria-describedby="slug-hint"
+                  className="h-[38px] border-0 pl-0.5 focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
               </div>
+              <p id="slug-hint" className="text-xs text-mist">
+                Leave empty to create it from the title.
+              </p>
+            </div>
+          </div>
+        </FormSection>
+
+        <FormSection
+          title="Images"
+          description="Photos of the work, shown on its page. The main image is the one shown in the Collection and in lists; if none is chosen, the first image is used."
+        >
+          <div className="space-y-4">
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) handleMultipleImageUpload(files);
+              }}
+              className="hidden"
+              id="multiple-image-upload"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInput.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Upload aria-hidden="true" />
+              )}
+              {uploading ? "Uploading…" : "Upload images"}
+            </Button>
+
+            {images.length === 0 ? (
+              <p className="rounded-lg bg-secondary px-4 py-6 text-center text-sm text-mist">
+                No images yet
+              </p>
+            ) : (
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {images.map((image, index) => (
+                  <li key={image + index} className="relative">
+                    <img
+                      src={imageUrl(image, {
+                        width: 320,
+                        height: 320,
+                        crop: "fill",
+                      })}
+                      alt={`Image ${index + 1}`}
+                      className="aspect-square w-full rounded-lg bg-secondary object-cover"
+                    />
+                    {formData.featured_image === image ? (
+                      <span className="absolute bottom-2 left-2 inline-flex h-6 items-center gap-1 rounded-full bg-ink px-2 text-xs font-medium text-paper shadow-sm">
+                        <Star
+                          className="size-3 fill-current"
+                          aria-hidden="true"
+                        />
+                        Main
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => update({ featured_image: image })}
+                        aria-label={`Set image ${index + 1} as the main image`}
+                        className="absolute bottom-2 left-2 inline-flex h-6 items-center gap-1 rounded-full bg-white/95 px-2 text-xs font-medium text-ink shadow-sm transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <Star className="size-3" aria-hidden="true" />
+                        Set as main
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      aria-label={`Remove image ${index + 1}`}
+                      className="absolute right-2 top-2 inline-flex size-7 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition-colors hover:bg-white hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <X className="size-4" aria-hidden="true" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
-        </div>
+        </FormSection>
 
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="isVisible"
-            checked={formData.isVisible !== false}
-            onCheckedChange={(checked) =>
-              setFormData({ ...formData, isVisible: checked })
-            }
-          />
-          <Label htmlFor="isVisible">Visible on Frontend</Label>
-        </div>
+        <FormSection
+          title="Visibility"
+          description="Hidden artworks stay in the admin but don't appear on the website."
+        >
+          <div className="flex items-center justify-between gap-4">
+            <Label htmlFor="isVisible" className="leading-snug">
+              Show on the website
+            </Label>
+            <Switch
+              id="isVisible"
+              checked={formData.isVisible !== false}
+              onCheckedChange={(checked) => update({ isVisible: checked })}
+            />
+          </div>
+        </FormSection>
 
-        <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={saving}>
-            <Save className="w-4 h-4 mr-2" />
-            {saving
-              ? "Saving..."
-              : isEditing
-              ? "Update Artwork"
-              : "Add Artwork"}
-          </Button>
-          <Button variant="outline" onClick={onCancel}>
-            <X className="w-4 h-4 mr-2" />
-            Cancel
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        <div className="flex justify-end gap-2 border-t pt-6">{actions}</div>
+      </div>
+    </AdminPage>
   );
 };
 
