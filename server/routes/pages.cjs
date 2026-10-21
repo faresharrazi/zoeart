@@ -9,8 +9,9 @@ const {
 
 const router = express.Router();
 
-// Contact details shown on the site; an empty field isn't shown
-const CONTACT_FIELDS = ["email", "phone", "instagram", "address"];
+// Contact details shown on the site (an empty field isn't shown), with the
+// longest value each column holds
+const CONTACT_FIELDS = { email: 100, phone: 20, instagram: 100, address: 300 };
 const PUBLIC_CONTACT_COLUMNS =
   "id, email, phone, instagram, address, updated_at";
 
@@ -143,9 +144,14 @@ router.put(
   asyncHandler(async (req, res) => {
     // Only the fields sent are changed
     const updateData = {};
-    for (const field of CONTACT_FIELDS) {
+    for (const [field, maxLength] of Object.entries(CONTACT_FIELDS)) {
       if (req.body[field] !== undefined) {
         updateData[field] = String(req.body[field] ?? "").trim();
+        if (updateData[field].length > maxLength) {
+          throw new ValidationError(
+            `The ${field} can be at most ${maxLength} characters`
+          );
+        }
       }
     }
     updateData.updated_at = new Date().toISOString();

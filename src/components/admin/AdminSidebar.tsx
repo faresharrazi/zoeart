@@ -1,159 +1,189 @@
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
-import {
-  Palette,
-  Users,
-  Calendar,
-  FileText,
-  Menu,
-  X,
-  Mail,
-  UserCog,
-  BookOpen,
-  Link,
-  BarChart3,
-  Handshake,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { ExternalLink, LogOut, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { SessionUser } from "@/types/api";
+import { IconAction } from "./AdminUI";
+import { SECTION_GROUPS, type SectionId } from "./adminSections";
 
 interface AdminSidebarProps {
-  activeSection: string;
-  onSectionChange: (section: string) => void;
+  active: SectionId;
+  user: SessionUser | null;
   onLogout: () => void;
 }
 
-const menuItems = [
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
-  { id: "exhibitions", label: "Exhibitions", icon: Calendar },
-  { id: "articles", label: "Articles", icon: BookOpen },
-  { id: "artists", label: "Artists", icon: Users },
-  { id: "artworks", label: "Artworks", icon: Palette },
-  { id: "newsletter", label: "Newsletter", icon: Mail },
-  { id: "pages", label: "Page Content", icon: FileText },
-  { id: "partners", label: "Partners", icon: Handshake },
-  { id: "users", label: "User Management", icon: UserCog },
-  { id: "links", label: "Useful Links", icon: Link },
-];
+const Brand = () => (
+  <Link to="/admin" className="flex items-center gap-3 rounded-md">
+    <img
+      src="/logo/logo-menu.png"
+      alt=""
+      width={245}
+      height={144}
+      className="h-6 w-auto"
+    />
+    <span className="leading-tight">
+      <span className="block text-[13px] font-semibold tracking-tight text-ink">
+        Aether Art Space
+      </span>
+      <span className="block text-xs text-mist">Admin</span>
+    </span>
+  </Link>
+);
 
-const AdminSidebar = ({
-  activeSection,
-  onSectionChange,
+const SidebarContent = ({
+  active,
+  user,
   onLogout,
-}: AdminSidebarProps) => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  onNavigate,
+}: AdminSidebarProps & { onNavigate?: () => void }) => (
+  <div className="flex h-full flex-col">
+    <nav
+      aria-label="Admin"
+      className="flex-1 space-y-6 overflow-y-auto px-3 py-5"
+    >
+      {SECTION_GROUPS.map((group) => (
+        <div key={group.label}>
+          <p className="mb-1.5 px-3 text-[11px] font-medium uppercase tracking-[0.08em] text-mist">
+            {group.label}
+          </p>
+          <ul className="space-y-0.5">
+            {group.items.map(({ id, label, icon: Icon }) => {
+              const current = id === active;
+              return (
+                <li key={id}>
+                  <Link
+                    to={`/admin?section=${id}`}
+                    onClick={onNavigate}
+                    aria-current={current ? "page" : undefined}
+                    className={cn(
+                      "flex h-9 items-center gap-3 rounded-md px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      current
+                        ? "bg-accent font-medium text-ink"
+                        : "text-stone hover:bg-accent/60 hover:text-ink"
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        "size-4 shrink-0",
+                        current ? "text-ink" : "text-mist"
+                      )}
+                      aria-hidden="true"
+                    />
+                    {label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
+
+    <div className="space-y-1 border-t p-3">
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex h-9 items-center gap-3 rounded-md px-3 text-sm text-stone transition-colors hover:bg-accent/60 hover:text-ink"
+      >
+        <ExternalLink className="size-4 text-mist" aria-hidden="true" />
+        View website
+      </a>
+      <div className="flex items-center gap-3 rounded-md px-3 py-2">
+        <span
+          className="flex size-8 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-semibold uppercase text-paper"
+          aria-hidden="true"
+        >
+          {user?.username?.charAt(0) || "?"}
+        </span>
+        <span className="min-w-0 flex-1 leading-tight">
+          <span className="block truncate text-sm font-medium text-ink">
+            {user?.username}
+          </span>
+          <span className="block truncate text-xs capitalize text-mist">
+            {user?.role}
+          </span>
+        </span>
+        <IconAction label="Sign out" icon={LogOut} onClick={onLogout} />
+      </div>
+    </div>
+  </div>
+);
+
+/** Fixed sidebar on large screens; top bar with a slide-in menu below. */
+const AdminSidebar = (props: AdminSidebarProps) => {
+  const [open, setOpen] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const current = SECTION_GROUPS.flatMap<{ id: SectionId; label: string }>(
+    (g) => g.items
+  ).find((item) => item.id === props.active);
+
+  useEffect(() => {
+    if (!open) return;
+    closeRef.current?.focus();
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   return (
     <>
-      {/* Mobile Header */}
-      <div className="lg:hidden bg-theme-surface border-b border-theme-border p-4 flex items-center justify-between">
-        <h1 className="text-xl  text-theme-text-primary">Admin Panel</h1>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onLogout}
-            className="text-xs px-3 py-1 border-theme-error text-theme-error hover:bg-theme-error hover:text-white"
-          >
-            Logout
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2"
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
-          </Button>
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r bg-white lg:flex">
+        <div className="flex h-16 shrink-0 items-center border-b px-6">
+          <Brand />
         </div>
-      </div>
+        <SidebarContent {...props} />
+      </aside>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50"
-          onClick={() => setIsMobileMenuOpen(false)}
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-white px-4 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
+          aria-expanded={open}
+          className="-ml-1.5 inline-flex size-9 items-center justify-center rounded-md text-ink hover:bg-accent"
         >
+          <Menu className="size-5" aria-hidden="true" />
+        </button>
+        <span className="truncate text-sm font-semibold text-ink">
+          {current?.label}
+        </span>
+      </header>
+
+      {open && (
+        <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="fixed left-0 top-0 h-full w-64 bg-theme-surface border-r border-theme-border shadow-lg"
-            onClick={(e) => e.stopPropagation()}
+            className="absolute inset-0 bg-ink/30"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Admin menu"
+            className="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-white shadow-xl"
           >
-            <div className="p-4 border-b border-theme-border">
-              <div className="flex items-center justify-between">
-                <h1 className="text-xl  text-theme-text-primary">
-                  Admin Panel
-                </h1>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
+            <div className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+              <Brand />
+              <button
+                ref={closeRef}
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close menu"
+                className="-mr-1.5 inline-flex size-9 items-center justify-center rounded-md text-ink hover:bg-accent"
+              >
+                <X className="size-5" aria-hidden="true" />
+              </button>
             </div>
-            <nav className="p-4 space-y-2">
-              {menuItems.map((item) => (
-                <Button
-                  key={item.id}
-                  variant={activeSection === item.id ? "default" : "ghost"}
-                  className={cn(
-                    "w-full justify-start px-4",
-                    activeSection === item.id &&
-                      "bg-theme-primary text-theme-primary-text hover:bg-theme-primary-hover"
-                  )}
-                  onClick={() => {
-                    onSectionChange(item.id);
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span className="ml-3">{item.label}</span>
-                </Button>
-              ))}
-            </nav>
+            <SidebarContent {...props} onNavigate={() => setOpen(false)} />
           </div>
         </div>
       )}
-
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:flex-shrink-0 bg-theme-surface border-r border-theme-border">
-        <div className="p-4 border-b border-theme-border">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl  text-theme-text-primary">Admin Panel</h1>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onLogout}
-              className="text-xs px-3 py-1 border-theme-error text-theme-error hover:bg-theme-error hover:text-white"
-            >
-              Logout
-            </Button>
-          </div>
-        </div>
-        <nav className="p-4 space-y-2">
-          {menuItems.map((item) => (
-            <Button
-              key={item.id}
-              variant={activeSection === item.id ? "default" : "ghost"}
-              className={cn(
-                "w-full justify-start px-4",
-                activeSection === item.id &&
-                  "bg-theme-primary text-theme-primary-text hover:bg-theme-primary-hover"
-              )}
-              onClick={() => onSectionChange(item.id)}
-            >
-              <item.icon className="w-4 h-4" />
-              <span className="ml-3">{item.label}</span>
-            </Button>
-          ))}
-        </nav>
-      </div>
     </>
   );
 };

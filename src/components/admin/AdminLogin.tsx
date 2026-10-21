@@ -1,9 +1,8 @@
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { apiClient, ApiError } from "@/lib/apiClient";
 import type { SessionUser } from "@/types/api";
 
@@ -15,102 +14,99 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
       const data = await apiClient.login(username, password);
-
       localStorage.setItem("adminToken", data.token);
       localStorage.setItem("adminUser", JSON.stringify(data.user));
-
       onLogin(data.token, data.user);
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${data.user.username}!`,
-      });
     } catch (error) {
       // 401 bad credentials, 429 too many attempts, 400 missing fields
-      const errorMessage =
+      setError(
         error instanceof ApiError && error.status < 500
           ? error.message
-          : "Server is temporarily unavailable. Please try again.";
-
-      toast({
-        title: "Login Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
+          : "The server is temporarily unavailable. Please try again."
+      );
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-theme-background">
-      <Card className="w-full max-w-md shadow-elegant">
-        <CardHeader className="text-center">
-          <h1 className="text-2xl font-semibold leading-none tracking-tight text-theme-text-primary">
-            Admin Login
-          </h1>
-          <p className="text-theme-text-muted">
-            Sign in to access the admin panel
+    <main className="flex min-h-screen bg-theme-background px-4">
+      <div className="m-auto w-full max-w-sm py-12">
+        <div className="mb-8 flex flex-col items-center text-center">
+          <img
+            src="/logo/logo-menu.png"
+            alt=""
+            width={245}
+            height={144}
+            className="h-9 w-auto"
+          />
+          <p className="mt-4 text-[13px] font-medium tracking-[0.24em] text-ink">
+            AETHER ART SPACE
           </p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm  text-theme-text-primary mb-2"
-              >
-                Username
-              </label>
+        </div>
+
+        <div className="rounded-xl border bg-white p-6 shadow-[0_1px_2px_hsl(var(--ink)/0.04)] sm:p-8">
+          <h1 className="text-xl font-semibold tracking-tight text-ink">
+            Sign in
+          </h1>
+          <p className="mt-1 text-sm text-mist">
+            Manage exhibitions, artists and the website.
+          </p>
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
-                type="text"
                 autoComplete="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
                 required
-                className="w-full"
+                autoFocus
               />
             </div>
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm  text-theme-text-primary mb-2"
-              >
-                Password
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
                 required
-                className="w-full"
               />
             </div>
+            {error && (
+              <p
+                role="alert"
+                className="rounded-md bg-[hsl(0_70%_96%)] px-3 py-2 text-sm text-destructive"
+              >
+                {error}
+              </p>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Signing In...
-                </>
-              ) : (
-                "Sign In"
+              {loading && (
+                <Loader2 className="animate-spin" aria-hidden="true" />
               )}
+              {loading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+
+        <p className="mt-6 text-center text-sm">
+          <a href="/" className="text-mist hover:text-ink">
+            ← Back to the website
+          </a>
+        </p>
+      </div>
     </main>
   );
 };

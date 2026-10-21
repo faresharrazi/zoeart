@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import ExhibitionList from "./ExhibitionList";
 import ExhibitionForm from "./ExhibitionForm";
+import { AdminPage, LoadingPanel } from "../AdminUI";
 import type { Artist, Artwork } from "@/types/api";
 
 interface Exhibition {
@@ -36,7 +37,6 @@ const ExhibitionManagement = () => {
     null
   );
   const { toast } = useToast();
-
 
   const fetchData = useCallback(async () => {
     try {
@@ -135,15 +135,9 @@ const ExhibitionManagement = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Exhibition Management</h2>
-        </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          <span className="ml-3 text-gray-600">Loading exhibitions...</span>
-        </div>
-      </div>
+      <AdminPage title="Exhibitions">
+        <LoadingPanel label="Loading exhibitions…" />
+      </AdminPage>
     );
   }
 

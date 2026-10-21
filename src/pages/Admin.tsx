@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import AdminLogin from "@/components/admin/AdminLogin";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { apiClient } from "@/lib/apiClient";
@@ -47,11 +48,12 @@ const Admin = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-theme-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-theme-primary mx-auto"></div>
-          <p className="mt-2 text-theme-text-muted">Loading...</p>
-        </div>
+      <div
+        role="status"
+        className="flex min-h-screen items-center justify-center gap-3 bg-theme-background text-sm text-mist"
+      >
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        Loading…
       </div>
     );
   }

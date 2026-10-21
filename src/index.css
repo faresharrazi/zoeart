@@ -7,7 +7,8 @@
  *
  * Public site (light "night gallery"): ink on paper, Bodoni Moda for display
  * type and Inter for text, hairlines instead of boxes and shadows.
- * Admin panel: the shadcn/ui variables below, in neutral greys.
+ * Admin panel and shared controls: the shadcn/ui variables below, in the
+ * same warm neutrals.
  */
 @layer base {
   :root {
@@ -21,47 +22,47 @@
 
     /* shadcn/ui (admin panel and shared controls) */
     --background: 0 0% 100%;
-    --foreground: 240 10% 4%;
+    --foreground: var(--ink);
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
+    --card-foreground: var(--ink);
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 4%;
-    --primary: 240 6% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 6% 10%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 40%;
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 6% 10%;
-    --destructive: 0 72% 46%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 6% 90%;
-    --input: 240 6% 88%;
-    --ring: 240 6% 10%;
+    --popover-foreground: var(--ink);
+    --primary: var(--ink);
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 14% 95%;
+    --secondary-foreground: var(--ink);
+    --muted: 45 14% 95%;
+    --muted-foreground: var(--mist);
+    --accent: 45 14% 94%;
+    --accent-foreground: var(--ink);
+    --destructive: 0 68% 44%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 45 8% 88%;
+    --input: 45 6% 84%;
+    --ring: var(--ink);
     --radius: 0.5rem;
 
     /* Older admin screens use these names */
-    --theme-primary: 240 6% 10%;
-    --theme-primary-text: 0 0% 98%;
-    --theme-primary-hover: 240 5% 26%;
-    --theme-background: 240 5% 97%;
-    --theme-surface: 240 5% 96%;
-    --theme-overlay: 240 6% 10%;
-    --theme-text-primary: 240 6% 10%;
-    --theme-text-secondary: 240 4% 26%;
-    --theme-text-on-dark: 0 0% 98%;
-    --theme-text-muted: 240 4% 40%; /* 6.9:1 on white */
-    --theme-border: 240 6% 90%;
-    --theme-border-hover: 240 5% 65%;
-    --theme-focus: 240 6% 10%;
-    --theme-success: 142 72% 29%;
-    --theme-warning: 38 92% 50%;
-    --theme-error: 0 72% 46%;
+    --theme-primary: var(--ink);
+    --theme-primary-text: 0 0% 100%;
+    --theme-primary-hover: 40 5% 24%;
+    --theme-background: 45 20% 97.5%; /* admin canvas */
+    --theme-surface: 0 0% 100%;
+    --theme-overlay: var(--ink);
+    --theme-text-primary: var(--ink);
+    --theme-text-secondary: var(--stone);
+    --theme-text-on-dark: 0 0% 100%;
+    --theme-text-muted: var(--mist);
+    --theme-border: 45 8% 88%;
+    --theme-border-hover: 40 4% 62%;
+    --theme-focus: var(--ink);
+    --theme-success: 145 55% 30%;
+    --theme-warning: 35 85% 40%;
+    --theme-error: 0 68% 44%;
 
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(var(--sand)));
-    --shadow-elegant: 0 1px 2px hsl(240 6% 10% / 0.06);
-    --shadow-artwork: 0 8px 24px -8px hsl(240 6% 10% / 0.12);
+    --shadow-elegant: 0 1px 2px hsl(var(--ink) / 0.05);
+    --shadow-artwork: 0 8px 24px -8px hsl(var(--ink) / 0.12);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
