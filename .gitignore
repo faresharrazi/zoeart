@@ -29,3 +29,8 @@ temp-repo/
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets: local values only; production values live in Vercel
+.env
+.env.*
+!.env.example
