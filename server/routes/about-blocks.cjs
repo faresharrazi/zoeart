@@ -67,7 +67,7 @@ router.patch(
     await transaction(async (client) => {
       for (const block of blocks) {
         await client.query(
-          "UPDATE about_blocks SET sort_order = $2 WHERE id = $1",
+          "UPDATE about_blocks SET sort_order = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1",
           [block.id, block.sort_order]
         );
       }
@@ -90,7 +90,8 @@ router.put(
        SET title = COALESCE($2, title),
            content = COALESCE($3, content),
            is_visible = COALESCE($4, is_visible),
-           sort_order = COALESCE($5, sort_order)
+           sort_order = COALESCE($5, sort_order),
+           updated_at = CURRENT_TIMESTAMP
        WHERE id = $1
        RETURNING *`,
       [id, title, content, is_visible, sort_order]
@@ -117,7 +118,7 @@ router.patch(
     const isVisible = req.body.is_visible !== false;
 
     const result = await query(
-      "UPDATE about_blocks SET is_visible = $2 WHERE id = $1 RETURNING *",
+      "UPDATE about_blocks SET is_visible = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *",
       [id, isVisible]
     );
 
