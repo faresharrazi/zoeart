@@ -4,6 +4,7 @@ const {
   upload,
   handleUploadError,
   getFileCategory,
+  ALLOWED_IMAGE_TYPES,
 } = require("../config/multer.cjs");
 const { authenticateToken } = require("../middleware/auth.cjs");
 const {
@@ -21,30 +22,16 @@ router.post(
   upload.single("file"),
   handleUploadError,
   asyncHandler(async (req, res) => {
-    console.log("=== FILE UPLOAD ===");
-    console.log("Request body:", req.body);
-    console.log("Request file:", req.file ? "File present" : "No file");
-    console.log("Request headers:", req.headers);
-    console.log("Content-Type:", req.headers["content-type"]);
-    console.log("Content-Length:", req.headers["content-length"]);
 
     if (!req.file) {
-      console.log("No file uploaded");
       throw new ValidationError("No file uploaded");
     }
 
     const category = getFileCategory(req);
     const uploadedBy = req.user?.id || null;
 
-    console.log("File details:", {
-      originalname: req.file.originalname,
-      size: req.file.size,
-      mimetype: req.file.mimetype,
-      category: category,
-    });
 
     const result = await FileService.uploadFile(req.file, category, uploadedBy);
-    console.log("File upload result:", result);
 
     res.json(result);
   })
@@ -87,13 +74,22 @@ router.get(
       throw new NotFoundError("File not found");
     }
 
-    // Set appropriate headers
-    res.setHeader("Content-Type", file.mime_type);
+    // Only known image types are shown inline; anything else (e.g. an SVG
+    // uploaded before SVGs were blocked) is downloaded and can't run scripts.
+    const isSafeImage = ALLOWED_IMAGE_TYPES.includes(file.mime_type);
+    const safeName = String(file.original_name).replace(/[^\w.\- ]/g, "_");
+    res.setHeader(
+      "Content-Type",
+      isSafeImage ? file.mime_type : "application/octet-stream"
+    );
     res.setHeader("Content-Length", file.file_size);
     res.setHeader(
       "Content-Disposition",
-      `inline; filename="${file.original_name}"`
+      `${isSafeImage ? "inline" : "attachment"}; filename="${safeName}"`
     );
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Content-Security-Policy", "default-src 'none'; sandbox");
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
 
     // Send binary data
     res.send(file.file_data);

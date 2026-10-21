@@ -157,10 +157,6 @@ router.put(
     const { id } = req.params;
     const updateData = req.body;
 
-    console.log("=== EXHIBITION UPDATE DEBUG ===");
-    console.log("Exhibition ID:", id);
-    console.log("Update data:", updateData);
-    console.log("Update data keys:", Object.keys(updateData));
 
     try {
       const exhibition = await ExhibitionService.update(id, updateData);
@@ -169,7 +165,6 @@ router.put(
         throw new NotFoundError("Exhibition not found");
       }
 
-      console.log("Exhibition updated successfully:", exhibition);
       res.json(exhibition);
     } catch (error) {
       console.error("Error updating exhibition:", error);
@@ -195,12 +190,6 @@ router.delete(
     // Extract file IDs from featured_image and gallery_images
     const fileIdsToDelete = [];
 
-    console.log("=== EXHIBITION DELETE DEBUG ===");
-    console.log("Exhibition data:", {
-      id: exhibition.id,
-      featured_image: exhibition.featured_image,
-      gallery_images: exhibition.gallery_images,
-    });
 
     // Extract file ID from featured_image (format: /api/file/ID)
     if (
@@ -208,7 +197,6 @@ router.delete(
       exhibition.featured_image.startsWith("/api/file/")
     ) {
       const fileId = exhibition.featured_image.replace("/api/file/", "");
-      console.log("Featured image file ID:", fileId);
       if (fileId && !isNaN(fileId)) {
         fileIdsToDelete.push(parseInt(fileId));
       }
@@ -229,32 +217,26 @@ router.delete(
     // Delete the exhibition
     await ExhibitionService.delete(id);
 
-    console.log("File IDs to delete:", fileIdsToDelete);
 
     // Delete associated files
     const deletedFiles = [];
     for (const fileId of fileIdsToDelete) {
       try {
-        console.log(`Attempting to delete file ${fileId}...`);
 
         // First check if file exists
         const existingFile = await FileService.getFileById(fileId);
         if (!existingFile) {
-          console.log(`File ${fileId} does not exist, skipping deletion`);
           continue;
         }
 
         const deletedFile = await FileService.deleteFile(fileId);
         if (deletedFile) {
           deletedFiles.push(deletedFile);
-          console.log(`Successfully deleted file ${fileId}`);
         }
       } catch (error) {
-        console.warn(`Failed to delete file ${fileId}:`, error.message);
       }
     }
 
-    console.log("Deleted files count:", deletedFiles.length);
 
     res.json({
       message: "Exhibition deleted successfully",
@@ -272,10 +254,6 @@ router.patch(
     const { id } = req.params;
     const { is_visible } = req.body;
 
-    console.log("=== TOGGLING EXHIBITION VISIBILITY ===");
-    console.log("Exhibition ID:", id);
-    console.log("Request body:", req.body);
-    console.log("Setting visibility to:", is_visible);
 
     const exhibition = await ExhibitionService.toggleVisibility(id, is_visible);
 
@@ -283,7 +261,6 @@ router.patch(
       throw new NotFoundError("Exhibition not found");
     }
 
-    console.log("Exhibition visibility updated successfully");
     res.json({
       message: "Exhibition visibility updated successfully",
       exhibition,

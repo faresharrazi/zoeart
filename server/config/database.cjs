@@ -16,7 +16,6 @@ const pool = new Pool(dbConfig);
 const testConnection = async () => {
   try {
     const client = await pool.connect();
-    console.log("✅ Database connected successfully");
     client.release();
     return true;
   } catch (error) {
@@ -36,31 +35,10 @@ const query = async (sql, params = []) => {
   }
 };
 
-// Get database statistics
-const getDbStats = async () => {
-  try {
-    const stats = await query(`
-      SELECT 
-        schemaname,
-        tablename,
-        n_tup_ins as inserts,
-        n_tup_upd as updates,
-        n_tup_del as deletes
-      FROM pg_stat_user_tables 
-      ORDER BY schemaname, tablename
-    `);
-    return stats.rows;
-  } catch (error) {
-    console.error("Error getting database stats:", error);
-    return [];
-  }
-};
-
 // Close all connections
 const closeConnections = async () => {
   try {
     await pool.end();
-    console.log("Database connections closed");
   } catch (error) {
     console.error("Error closing database connections:", error);
   }
@@ -70,6 +48,5 @@ module.exports = {
   pool,
   query,
   testConnection,
-  getDbStats,
   closeConnections,
 };

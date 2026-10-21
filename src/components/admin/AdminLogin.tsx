@@ -122,9 +122,6 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
                 "Sign In"
               )}
             </Button>
-            <p className="text-xs text-center text-theme-text-muted mt-4">
-              Default credentials: admin / admin
-            </p>
           </form>
         </CardContent>
       </Card>

@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { useAboutBlocks } from "@/hooks/useAboutBlocks";
 import { useEffect } from "react";
+import { renderRichText } from "@/lib/richText";
 
 const About = () => {
   const { pageData } = usePageDataFromDB();
@@ -38,9 +39,8 @@ const About = () => {
             <div
               className="text-xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md whitespace-pre-line"
               dangerouslySetInnerHTML={{
-                __html: (pageData.about?.description || "").replace(
-                  /\n/g,
-                  "<br>"
+                __html: renderRichText(
+                  (pageData.about?.description || "").replace(/\n/g, "<br>")
                 ),
               }}
             />
@@ -66,7 +66,9 @@ const About = () => {
                     <div
                       className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto whitespace-pre-line"
                       dangerouslySetInnerHTML={{
-                        __html: block.content.replace(/\n/g, "<br>"),
+                        __html: renderRichText(
+                          block.content.replace(/\n/g, "<br>")
+                        ),
                       }}
                     />
                   </CardContent>

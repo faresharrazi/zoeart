@@ -128,11 +128,21 @@ router.get("/stats/summary", authenticateToken, asyncHandler(async (req, res) =>
 router.get("/export/csv", authenticateToken, asyncHandler(async (req, res) => {
   const subscribers = await NewsletterService.getAll();
   
-  // Convert to CSV format
+  // Quote every field, and neutralise values a spreadsheet would run as a
+  // formula (subscribers choose their own name and email).
+  const csvField = (value) => {
+    let text = value == null ? "" : String(value);
+    if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+    return `"${text.replace(/"/g, '""')}"`;
+  };
   const csvHeader = "Email,Name,Status,Subscribed At,Source\n";
-  const csvData = subscribers.map(sub => 
-    `"${sub.email}","${sub.name || ''}","${sub.status}","${sub.subscribed_at}","${sub.source || ''}"`
-  ).join("\n");
+  const csvData = subscribers
+    .map((sub) =>
+      [sub.email, sub.name, sub.status, sub.subscribed_at?.toISOString?.() ?? sub.subscribed_at, sub.source]
+        .map(csvField)
+        .join(",")
+    )
+    .join("\n");
   
   const csv = csvHeader + csvData;
   

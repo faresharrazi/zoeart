@@ -21,17 +21,14 @@ class ApiClient {
       }
     }
 
-    // Add authentication header for admin endpoints
+    // Send the admin token whenever we have one; public endpoints ignore it.
     const token = localStorage.getItem("adminToken");
     const headers: HeadersInit = {
       "Content-Type": "application/json",
       ...options.headers,
     };
 
-    if (
-      token &&
-      (endpoint.includes("/admin/") || endpoint.includes("/files/"))
-    ) {
+    if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
@@ -47,11 +44,13 @@ class ApiClient {
             .json()
             .catch(() => ({ error: "Unknown error" }));
 
-          // Handle token expiration
-          if (response.status === 401 && error.code === "TOKEN_EXPIRED") {
-            // Clear expired token
+          // Expired or revoked login: sign out and go back to the login form
+          if (
+            response.status === 401 &&
+            (error.code === "TOKEN_EXPIRED" || error.code === "INVALID_TOKEN")
+          ) {
             localStorage.removeItem("adminToken");
-            // Redirect to login
+            localStorage.removeItem("adminUser");
             window.location.href = "/admin";
             throw new Error("Session expired. Please login again.");
           }
@@ -633,6 +632,12 @@ class ApiClient {
   }
 
   // Authentication
+  async verifySession() {
+    return this.request<{ success: boolean; user: unknown }>("/auth/verify", {
+      cache: "no-store",
+    });
+  }
+
   async login(username: string, password: string) {
     return this.request("/auth/login", {
       method: "POST",

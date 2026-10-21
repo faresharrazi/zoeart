@@ -1,5 +1,81 @@
 const { query } = require("../config/database.cjs");
 
+// Columns that may be written through create/update. Column names are
+// interpolated into SQL, so anything not listed here is dropped.
+const WRITABLE_COLUMNS = {
+  exhibitions: [
+    "title",
+    "slug",
+    "description",
+    "start_date",
+    "end_date",
+    "location",
+    "curator",
+    "status",
+    "featured_image",
+    "gallery_images",
+    "assigned_artists",
+    "assigned_artworks",
+    "call_for_artists",
+    "cta_link",
+    "press_media_name",
+    "press_media_link",
+    "is_visible",
+  ],
+  artists: [
+    "name",
+    "slug",
+    "bio",
+    "specialty",
+    "profile_image",
+    "social_media",
+    "assigned_artworks",
+    "is_visible",
+  ],
+  artworks: [
+    "title",
+    "slug",
+    "artist_id",
+    "year",
+    "medium",
+    "size",
+    "description",
+    "images",
+    "featured_image",
+    "is_visible",
+  ],
+  articles: [
+    "exhibition_id",
+    "title",
+    "content",
+    "featured_image",
+    "media_files",
+    "author",
+    "published_at",
+    "is_published",
+  ],
+  newsletter_subscribers: [
+    "email",
+    "name",
+    "status",
+    "source",
+    "subscribed_at",
+    "unsubscribed_at",
+  ],
+};
+
+const pickWritable = (tableName, data) => {
+  const allowed = WRITABLE_COLUMNS[tableName];
+  if (!allowed) {
+    throw new Error(`Table ${tableName} is not writable`);
+  }
+  return Object.fromEntries(
+    Object.entries(data || {}).filter(
+      ([key, value]) => allowed.includes(key) && value !== undefined
+    )
+  );
+};
+
 // Generic CRUD operations
 class DatabaseService {
   // Get all records from a table
@@ -44,8 +120,9 @@ class DatabaseService {
 
   // Create a new record
   static async create(tableName, data) {
-    const columns = Object.keys(data);
-    const values = Object.values(data).map(value => {
+    const row = pickWritable(tableName, data);
+    const columns = Object.keys(row);
+    const values = Object.values(row).map(value => {
       // Handle JSON fields - stringify arrays and objects
       if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
         return JSON.stringify(value);
@@ -66,8 +143,12 @@ class DatabaseService {
 
   // Update a record by ID
   static async update(tableName, id, data) {
-    const columns = Object.keys(data);
-    const values = Object.values(data).map(value => {
+    const row = pickWritable(tableName, data);
+    const columns = Object.keys(row);
+    if (columns.length === 0) {
+      return this.findById(tableName, id);
+    }
+    const values = Object.values(row).map(value => {
       // Handle JSON fields - stringify arrays and objects
       if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
         return JSON.stringify(value);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import AdminLogin from "@/components/admin/AdminLogin";
 import AdminDashboard from "@/components/admin/AdminDashboard";
+import { apiClient } from "@/lib/apiClient";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -8,22 +9,25 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Restore a previous login only if the server still accepts the token
     const token = localStorage.getItem("adminToken");
-    const userData = localStorage.getItem("adminUser");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
+    apiClient
+      .verifySession()
+      .then(({ user }) => {
+        localStorage.setItem("adminUser", JSON.stringify(user));
+        setUser(user);
         setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Error parsing user data:", error);
+      })
+      .catch(() => {
         localStorage.removeItem("adminToken");
         localStorage.removeItem("adminUser");
-      }
-    }
-    setLoading(false);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const handleLogin = (token: string, userData: any) => {

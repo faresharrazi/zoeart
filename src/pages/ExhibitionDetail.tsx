@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { useArticleByExhibition } from "@/hooks/useArticles";
+import { renderRichText } from "@/lib/richText";
 
 const ExhibitionDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -443,33 +444,8 @@ const ExhibitionDetail = () => {
                         "--tw-prose-bullets": "#6b7280",
                       } as React.CSSProperties
                     }
-                    dangerouslySetInnerHTML={{ __html: article.content }}
-                    ref={(el) => {
-                      if (el) {
-                        // Convert YouTube markers to actual embeds
-                        const html = el.innerHTML;
-                        const youtubeRegex = /\[YOUTUBE:([^:]+):([^\]]+)\]/g;
-
-                        if (youtubeRegex.test(html)) {
-                          const newHtml = html.replace(
-                            youtubeRegex,
-                            (match, videoId, youtubeUrl) => {
-                              return `
-                              <div class="youtube-embed" data-youtube-url="${youtubeUrl}" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 8px; margin: 1rem 0;">
-                                <iframe 
-                                  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
-                                  src="https://www.youtube.com/embed/${videoId}" 
-                                  frameborder="0" 
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                  allowfullscreen>
-                                </iframe>
-                              </div>
-                            `;
-                            }
-                          );
-                          el.innerHTML = newHtml;
-                        }
-                      }
+                    dangerouslySetInnerHTML={{
+                      __html: renderRichText(article.content),
                     }}
                   />
 

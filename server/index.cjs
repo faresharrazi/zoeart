@@ -8,11 +8,9 @@ const {
   cors,
   jsonParser,
   urlEncodedParser,
-  requestTimeout,
-  requestLogger,
-  errorLogger,
 } = require("./config/middleware.cjs");
 const { testConnection } = require("./config/database.cjs");
+const { authenticateToken } = require("./middleware/auth.cjs");
 
 // Import middleware
 const {
@@ -31,7 +29,6 @@ const newsletterRoutes = require("./routes/newsletter.cjs");
 const fileRoutes = require("./routes/files.cjs");
 const imageRoutes = require("./routes/images.cjs");
 const heroImageRoutes = require("./routes/hero-images.cjs");
-const testCloudinaryRoutes = require("./routes/test-cloudinary.cjs");
 const aboutBlocksRoutes = require("./routes/about-blocks.cjs");
 const userRoutes = require("./routes/users.cjs");
 const workingHoursRoutes = require("./routes/working-hours.cjs");
@@ -42,10 +39,8 @@ const PORT = process.env.PORT || 3001;
 
 // Test database connection on startup
 testConnection().then((connected) => {
-  if (connected) {
-    console.log("✅ Database connection established");
-  } else {
-    console.log("❌ Database connection failed");
+  if (!connected) {
+    console.error("Database connection failed");
   }
 });
 
@@ -53,8 +48,6 @@ testConnection().then((connected) => {
 app.use(cors);
 app.use(jsonParser);
 app.use(urlEncodedParser);
-app.use(requestTimeout(30000));
-app.use(requestLogger);
 
 // Serve uploaded files statically
 app.use("/uploads", express.static("uploads"));
@@ -73,13 +66,17 @@ app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/images", imageRoutes);
 app.use("/api/hero-images", heroImageRoutes);
-app.use("/api/test-cloudinary", testCloudinaryRoutes);
 app.use("/api/about-blocks", aboutBlocksRoutes);
-app.use("/api/admin/user", userRoutes);
 app.use("/api/working-hours", workingHoursRoutes);
 app.use("/api/articles", articlesRoutes);
 
-// Admin API Routes (with authentication)
+// Admin API Routes. Everything under /api/admin requires a valid login;
+// routers check req.isAdminRequest to include hidden or unpublished content.
+app.use("/api/admin", authenticateToken, (req, res, next) => {
+  req.isAdminRequest = true;
+  next();
+});
+app.use("/api/admin/user", userRoutes);
 app.use("/api/admin/newsletter", newsletterRoutes);
 app.use("/api/admin/exhibitions", exhibitionRoutes);
 app.use("/api/admin/artists", artistRoutes);
@@ -89,13 +86,11 @@ app.use("/api/admin/contact-info", pageRoutes);
 app.use("/api/admin/files", fileRoutes);
 app.use("/api/admin/images", imageRoutes);
 app.use("/api/admin/hero-images", heroImageRoutes);
-app.use("/api/admin/test-cloudinary", testCloudinaryRoutes);
 app.use("/api/admin/about-blocks", aboutBlocksRoutes);
 app.use("/api/admin/working-hours", workingHoursRoutes);
 app.use("/api/admin/articles", articlesRoutes);
 
 // Error handling middleware
-app.use(errorLogger);
 app.use(errorHandler);
 app.use(notFoundHandler);
 

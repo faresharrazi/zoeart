@@ -16,13 +16,11 @@ const router = express.Router();
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    // Check if this is an admin request
-    const isAdminRequest = req.originalUrl.includes('/admin/');
-    
+    // Drafts are only listed for logged-in requests through /api/admin
     let whereClause = {};
     let orderBy = "created_at DESC";
-    
-    if (!isAdminRequest) {
+
+    if (!req.isAdminRequest) {
       whereClause = { is_published: true };
       orderBy = "published_at DESC";
     }

@@ -66,6 +66,7 @@
     "concurrently": "^9.2.1",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",
+    "dompurify": "^3.4.16",
     "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.6.0",
     "express": "^5.1.0",

@@ -125,11 +125,6 @@ router.delete("/:id", authenticateToken, asyncHandler(async (req, res) => {
   // Extract file IDs from images array
   const fileIdsToDelete = [];
 
-  console.log("=== ARTWORK DELETE DEBUG ===");
-  console.log("Artwork data:", {
-    id: artwork.id,
-    images: artwork.images,
-  });
 
   // Extract file IDs from images (array of /api/file/ID strings)
   if (artwork.images && Array.isArray(artwork.images)) {
@@ -146,32 +141,26 @@ router.delete("/:id", authenticateToken, asyncHandler(async (req, res) => {
   // Delete the artwork
   await ArtworkService.delete(id);
 
-  console.log("File IDs to delete:", fileIdsToDelete);
 
   // Delete associated files
   const deletedFiles = [];
   for (const fileId of fileIdsToDelete) {
     try {
-      console.log(`Attempting to delete file ${fileId}...`);
 
       // First check if file exists
       const existingFile = await FileService.getFileById(fileId);
       if (!existingFile) {
-        console.log(`File ${fileId} does not exist, skipping deletion`);
         continue;
       }
 
       const deletedFile = await FileService.deleteFile(fileId);
       if (deletedFile) {
         deletedFiles.push(deletedFile);
-        console.log(`Successfully deleted file ${fileId}`);
       }
     } catch (error) {
-      console.warn(`Failed to delete file ${fileId}:`, error.message);
     }
   }
 
-  console.log("Deleted files count:", deletedFiles.length);
 
   res.json({
     message: "Artwork deleted successfully",

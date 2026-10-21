@@ -22,33 +22,14 @@ router.post(
   upload.single("file"),
   handleUploadError,
   asyncHandler(async (req, res) => {
-    console.log("=== IMAGE UPLOAD (Cloudinary-enabled) ===");
-    console.log("Request body:", req.body);
-    console.log("Request file:", req.file ? "File present" : "No file");
-    console.log("Environment check:", {
-      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME
-        ? "Set"
-        : "Not set",
-      CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? "Set" : "Not set",
-      CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET
-        ? "Set"
-        : "Not set",
-    });
 
     if (!req.file) {
-      console.log("No file uploaded");
       throw new ValidationError("No file uploaded");
     }
 
     const category = getFileCategory(req);
     const uploadedBy = req.user?.id || null;
 
-    console.log("File details:", {
-      originalname: req.file.originalname,
-      size: req.file.size,
-      mimetype: req.file.mimetype,
-      category: category,
-    });
 
     // Determine upload options based on category
     let selectedUploadOptions = {};
@@ -73,17 +54,12 @@ router.post(
     selectedUploadOptions.category = category;
     selectedUploadOptions.uploadedBy = uploadedBy;
 
-    console.log("Upload options:", selectedUploadOptions);
 
     let result;
     try {
       result = await imageService.uploadImage(req.file, selectedUploadOptions);
-      console.log("Image upload result:", result);
-      console.log("Result success:", result.success);
-      console.log("Result error:", result.error);
 
       if (!result.success) {
-        console.log("Upload failed, throwing ValidationError");
         throw new ValidationError(result.error || "Image upload failed");
       }
     } catch (error) {
@@ -122,8 +98,6 @@ router.post(
   upload.array("files", 10), // Max 10 files
   handleUploadError,
   asyncHandler(async (req, res) => {
-    console.log("=== MULTIPLE IMAGE UPLOAD ===");
-    console.log("Files count:", req.files ? req.files.length : 0);
 
     if (!req.files || req.files.length === 0) {
       throw new ValidationError("No files uploaded");

@@ -4,22 +4,24 @@ const crypto = require("crypto");
 // Configure multer for file uploads (memory storage for Vercel)
 const storage = multer.memoryStorage();
 
+// Raster images only. SVG is excluded because it can carry scripts.
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/avif",
+];
+
 const upload = multer({
   storage: storage,
   limits: {
     fileSize: 4 * 1024 * 1024, // 4MB limit (Vercel default limit)
   },
   fileFilter: (req, file, cb) => {
-    console.log(
-      "File filter called for:",
-      file.originalname,
-      "MIME type:",
-      file.mimetype
-    );
-    if (file.mimetype.startsWith("image/")) {
+    if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      console.log("File rejected - not an image");
       cb(new Error("Only image files are allowed"), false);
     }
   },
@@ -28,19 +30,6 @@ const upload = multer({
 // Generate unique filename
 const generateUniqueFilename = (originalname) => {
   return `${crypto.randomUUID()}-${originalname}`;
-};
-
-// Validate file type
-const validateFileType = (mimetype) => {
-  const allowedTypes = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/gif",
-    "image/webp",
-    "image/svg+xml",
-  ];
-  return allowedTypes.includes(mimetype);
 };
 
 // Get file category from request
@@ -79,7 +68,7 @@ const handleUploadError = (error, req, res, next) => {
 
   if (error.message === "Only image files are allowed") {
     return res.status(400).json({
-      error: "Only image files are allowed.",
+      error: "Only JPEG, PNG, GIF, WebP or AVIF images are allowed.",
     });
   }
 
@@ -89,7 +78,7 @@ const handleUploadError = (error, req, res, next) => {
 module.exports = {
   upload,
   generateUniqueFilename,
-  validateFileType,
+  ALLOWED_IMAGE_TYPES,
   getFileCategory,
   handleUploadError,
 };

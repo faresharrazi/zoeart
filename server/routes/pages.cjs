@@ -13,21 +13,10 @@ const router = express.Router();
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    console.log("Fetching page content...");
 
     const pages = await query("SELECT * FROM page_content");
     const contactInfo = await query("SELECT * FROM contact_info");
 
-    console.log("Pages found:", pages.rows.length);
-    console.log("Contact info found:", contactInfo.rows.length);
-    console.log(
-      "Raw pages data:",
-      pages.rows.map((p) => ({
-        page_name: p.page_name,
-        is_visible: p.is_visible,
-        type: typeof p.is_visible,
-      }))
-    );
 
     const pageData = pages.rows.reduce((acc, page) => {
       try {
@@ -55,13 +44,6 @@ router.get(
       contactInfo: contactInfo.rows.length > 0 ? contactInfo.rows[0] : {},
     };
 
-    console.log("Page data keys:", Object.keys(pageData));
-    console.log("Response structure:", {
-      hasPages: !!response.pages,
-      hasHome: !!response.pages.home,
-      hasContactInfo: !!response.contactInfo,
-      keys: Object.keys(response),
-    });
 
     res.json(response);
   })
