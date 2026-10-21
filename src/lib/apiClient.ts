@@ -49,6 +49,9 @@ export class ApiError extends Error {
 class ApiClient {
   private cache = new Map<string, { data: unknown; timestamp: number }>();
   private CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  // Reads already on their way, so components asking for the same data at
+  // the same time share one request
+  private inFlight = new Map<string, Promise<unknown>>();
 
   private async request<T>(
     endpoint: string,
@@ -64,8 +67,22 @@ class ApiClient {
       if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
         return cached.data as T;
       }
+      const pending = this.inFlight.get(url);
+      if (pending) return pending as Promise<T>;
+      const promise = this.fetchWithRetries<T>(url, options, true, retries);
+      this.inFlight.set(url, promise);
+      return promise.finally(() => this.inFlight.delete(url));
     }
 
+    return this.fetchWithRetries<T>(url, options, false, 1);
+  }
+
+  private async fetchWithRetries<T>(
+    url: string,
+    options: RequestInit,
+    isRead: boolean,
+    attempts: number
+  ): Promise<T> {
     // Send the admin token whenever we have one; public endpoints ignore it.
     const token = localStorage.getItem("adminToken");
     const headers: Record<string, string> = {
@@ -79,7 +96,6 @@ class ApiClient {
     }
 
     // Only reads are retried: repeating a write could apply it twice.
-    const attempts = isRead ? retries : 1;
     for (let attempt = 1; attempt <= attempts; attempt++) {
       try {
         const response = await fetch(url, { ...options, headers });

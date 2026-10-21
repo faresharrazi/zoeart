@@ -6,15 +6,15 @@ const logoFooter = "/logo/logo-footer.png";
 
 // Logos in public/collaborators
 const COLLABORATORS = [
-  { src: "/collaborators/1.png", name: "Collaborating organisation" },
-  { src: "/collaborators/2.png", name: "Vermillion Neo" },
-  { src: "/collaborators/3.png", name: "Aegean Times International Media" },
+  { src: "/collaborators/1.webp", name: "Collaborating organisation" },
+  { src: "/collaborators/2.webp", name: "Vermillion Neo" },
+  { src: "/collaborators/3.webp", name: "Aegean Times International Media" },
   {
-    src: "/collaborators/4.png",
+    src: "/collaborators/4.webp",
     name: "Sino-Hellenic Performing Arts Alliance",
   },
   {
-    src: "/collaborators/5.png",
+    src: "/collaborators/5.webp",
     name: "Sino-Hellenic International Theatre Festival",
   },
 ];
@@ -28,8 +28,8 @@ const Collaborators = ({ large = false }: { large?: boolean }) => (
           alt={name}
           title={name}
           loading="lazy"
-          width={500}
-          height={500}
+          width={240}
+          height={240}
           className={`${
             large ? "h-28" : "h-24"
           } w-auto object-contain grayscale opacity-70 transition-all duration-300 hover:grayscale-0 hover:opacity-100 hover:scale-105`}
