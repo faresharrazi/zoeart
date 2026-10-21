@@ -10,6 +10,11 @@ import SocialLinks from "@/components/SocialLinks";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/lib/apiClient";
 import { imageUrl } from "@/lib/images";
+import { useSeo } from "@/hooks/useSeo";
+
+// Social preview images: 1200x630, cropped to fill
+const shareImage = (url: string | null | undefined) =>
+  url ? imageUrl(url, { width: 1200, height: 630, crop: "fill" }) : null;
 
 const ArtistDetail = () => {
   const { slug = "" } = useParams<{ slug: string }>();
@@ -18,6 +23,25 @@ const ArtistDetail = () => {
     const artworks = await apiClient.getArtworks({ artist: artist.id });
     return { artist, artworks };
   }, [slug]);
+  const seoArtist = data?.artist;
+  useSeo({
+    title: seoArtist?.name || (loading ? undefined : "Artist Not Found"),
+    description:
+      seoArtist?.bio ||
+      (seoArtist &&
+        `${seoArtist.name}${seoArtist.specialty ? `, ${seoArtist.specialty}` : ""}`),
+    image: shareImage(seoArtist?.profile_image),
+    type: "profile",
+    noIndex: !loading && !seoArtist,
+    jsonLd: seoArtist && {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: seoArtist.name,
+      description: seoArtist.bio || undefined,
+      jobTitle: seoArtist.specialty || undefined,
+      image: seoArtist.profile_image || undefined,
+    },
+  });
 
   if (loading) {
     return (

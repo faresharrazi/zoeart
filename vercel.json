@@ -24,6 +24,43 @@
       "destination": "server/index.cjs"
     },
     {
+      "source": "/sitemap.xml",
+      "destination": "server/index.cjs"
+    },
+    {
+      "source": "/:kind(exhibition|artist|artwork)/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|WhatsApp|TelegramBot|Discordbot|Pinterest|redditbot|Embedly|SkypeUriPreview|vkShare|Iframely|Mastodon).*"
+        }
+      ],
+      "destination": "server/index.cjs"
+    },
+    {
+      "source": "/:page(exhibitions|artists|collection|about|contact)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|WhatsApp|TelegramBot|Discordbot|Pinterest|redditbot|Embedly|SkypeUriPreview|vkShare|Iframely|Mastodon).*"
+        }
+      ],
+      "destination": "server/index.cjs"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|WhatsApp|TelegramBot|Discordbot|Pinterest|redditbot|Embedly|SkypeUriPreview|vkShare|Iframely|Mastodon).*"
+        }
+      ],
+      "destination": "server/index.cjs"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

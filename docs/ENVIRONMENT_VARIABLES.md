@@ -13,6 +13,7 @@ in the Vercel project settings (Settings → Environment Variables).
 | `CLOUDINARY_API_SECRET` | For image hosting | |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` / `ADMIN_EMAIL` | Once | Used by `npm run db:setup` to create the first admin when the database has no users. Password must be at least 12 characters. |
 | `ALLOWED_ORIGINS` | No | Extra origins allowed to call the API cross-origin, comma-separated. The site itself and aetherartspace.com are always allowed. |
+| `SITE_URL` | No | Public address used in the sitemap and link previews, e.g. `https://www.aetherartspace.com`. Defaults to the host of each request. |
 | `NODE_ENV` | Set by Vercel | `production` enables SSL to the database and hides error details. |
 
 Generate a secret with:

@@ -8,6 +8,7 @@ import {
 import { useApi } from "@/hooks/useApi";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { apiClient } from "@/lib/apiClient";
+import { useSeo } from "@/hooks/useSeo";
 
 const Collection = () => {
   const { pageData } = usePageDataFromDB();
@@ -15,6 +16,10 @@ const Collection = () => {
     () => apiClient.getArtworks(),
     []
   );
+  useSeo({
+    title: pageData.gallery?.title || "Collection",
+    description: pageData.gallery?.description,
+  });
 
   return (
     <RequireVisiblePage page="gallery">

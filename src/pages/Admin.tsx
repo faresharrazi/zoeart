@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import AdminLogin from "@/components/admin/AdminLogin";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { apiClient } from "@/lib/apiClient";
+import { useSeo } from "@/hooks/useSeo";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  useSeo({ title: "Admin", noIndex: true });
 
   useEffect(() => {
     // Restore a previous login only if the server still accepts the token

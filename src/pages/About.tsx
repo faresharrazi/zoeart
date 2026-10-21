@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAboutBlocks } from "@/hooks/useAboutBlocks";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { renderRichText } from "@/lib/richText";
+import { useSeo } from "@/hooks/useSeo";
 
 // Admin text keeps its line breaks
 const withLineBreaks = (text: string) =>
@@ -16,6 +17,10 @@ const withLineBreaks = (text: string) =>
 const About = () => {
   const { pageData } = usePageDataFromDB();
   const { visibleBlocks, loading } = useAboutBlocks();
+  useSeo({
+    title: pageData.about?.title || "About",
+    description: pageData.about?.description,
+  });
 
   return (
     <RequireVisiblePage page="about">

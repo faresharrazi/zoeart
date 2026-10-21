@@ -9,6 +9,7 @@ import SocialLinks from "@/components/SocialLinks";
 import { useApi } from "@/hooks/useApi";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { apiClient } from "@/lib/apiClient";
+import { useSeo } from "@/hooks/useSeo";
 
 const Artists = () => {
   const { pageData } = usePageDataFromDB();
@@ -16,6 +17,10 @@ const Artists = () => {
     () => apiClient.getArtists(),
     []
   );
+  useSeo({
+    title: pageData.artists?.title || "Artists",
+    description: pageData.artists?.description,
+  });
 
   return (
     <RequireVisiblePage page="artists">

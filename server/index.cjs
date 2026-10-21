@@ -32,6 +32,7 @@ const aboutBlocksRoutes = require("./routes/about-blocks.cjs");
 const userRoutes = require("./routes/users.cjs");
 const workingHoursRoutes = require("./routes/working-hours.cjs");
 const articlesRoutes = require("./routes/articles.cjs");
+const seoRoutes = require("./routes/seo.cjs");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -81,6 +82,9 @@ app.use("/api/admin/hero-images", heroImageRoutes);
 app.use("/api/admin/about-blocks", aboutBlocksRoutes);
 app.use("/api/admin/working-hours", workingHoursRoutes);
 app.use("/api/admin/articles", articlesRoutes);
+
+// Sitemap and link-preview pages for social networks (see routes/seo.cjs)
+app.use(seoRoutes);
 
 // Error handling middleware
 app.use(errorHandler);

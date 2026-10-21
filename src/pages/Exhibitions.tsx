@@ -4,6 +4,7 @@ import { useApi } from "@/hooks/useApi";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { apiClient } from "@/lib/apiClient";
 import { byStartDateDesc } from "@/lib/dates";
+import { useSeo } from "@/hooks/useSeo";
 
 const Exhibitions = () => {
   const { pageData } = usePageDataFromDB();
@@ -11,6 +12,10 @@ const Exhibitions = () => {
     () => apiClient.getExhibitions(),
     []
   );
+  useSeo({
+    title: pageData.exhibitions?.title || "Exhibitions",
+    description: pageData.exhibitions?.description,
+  });
 
   const withStatus = (status: string) =>
     exhibitions.filter((e) => e.status === status).sort(byStartDateDesc);

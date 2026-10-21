@@ -21,6 +21,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/lib/apiClient";
 import { imageSrcSet, imageUrl } from "@/lib/images";
+import { useSeo } from "@/hooks/useSeo";
+
+// Social preview images: 1200x630, cropped to fill
+const shareImage = (url: string | null | undefined) =>
+  url ? imageUrl(url, { width: 1200, height: 630, crop: "fill" }) : null;
 
 const ArtworkDetail = () => {
   const { slug = "" } = useParams<{ slug: string }>();
@@ -29,6 +34,34 @@ const ArtworkDetail = () => {
     [slug]
   );
   const [selectedIndex, setSelectedIndex] = useState(0);
+  useSeo({
+    title: artwork?.title || (loading ? undefined : "Artwork Not Found"),
+    description:
+      artwork?.description ||
+      (artwork &&
+        [
+          artwork.artist_name && `by ${artwork.artist_name}`,
+          artwork.year,
+          artwork.medium,
+        ]
+          .filter(Boolean)
+          .join(", ")),
+    image: shareImage(artwork?.featured_image || artwork?.images?.[0]),
+    noIndex: !loading && !artwork,
+    jsonLd: artwork && {
+      "@context": "https://schema.org",
+      "@type": "VisualArtwork",
+      name: artwork.title,
+      description: artwork.description || undefined,
+      image: artwork.images,
+      dateCreated: artwork.year ? String(artwork.year) : undefined,
+      artMedium: artwork.medium || undefined,
+      size: artwork.size || undefined,
+      creator: artwork.artist_name
+        ? { "@type": "Person", name: artwork.artist_name }
+        : undefined,
+    },
+  });
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   if (loading) {

@@ -5,6 +5,7 @@ import { Mail, Phone, MapPin, Instagram } from "lucide-react";
 import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
 import { useWorkingHours } from "@/hooks/useWorkingHours";
 import { instagramUrl, mapsUrl } from "@/lib/contact";
+import { useSeo } from "@/hooks/useSeo";
 
 const cardClass =
   "bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 shadow-lg border border-gray-100 w-full h-full flex flex-col";
@@ -48,6 +49,10 @@ const ContactLink = ({
 const Contact = () => {
   const { pageData, contactInfo } = usePageDataFromDB();
   const { workingHours } = useWorkingHours();
+  useSeo({
+    title: "Contact",
+    description: pageData.contact?.description,
+  });
 
   const hasContactInfo = Boolean(
     contactInfo?.email ||

@@ -3,39 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Defaults; each page updates these as it loads (src/hooks/useSeo.ts) -->
     <title>Aether Art Space</title>
     <meta
       name="description"
-      content="Discover extraordinary contemporary artworks from emerging and established artists at Aether Art Space. Experience art that challenges, inspires, and transforms."
+      content="Contemporary art gallery in Glyfada, Athens: exhibitions, artists and a collection of works from emerging and established artists."
     />
     <meta name="author" content="Aether Art Space" />
-    <meta
-      name="keywords"
-      content="art gallery, contemporary art, modern paintings, sculptures, exhibitions, art collection, aether art space"
-    />
 
+    <meta property="og:site_name" content="Aether Art Space" />
     <meta property="og:title" content="Aether Art Space" />
     <meta
       property="og:description"
-      content="Discover extraordinary contemporary artworks from emerging and established artists at Aether Art Space. Experience art that challenges, inspires, and transforms."
+      content="Contemporary art gallery in Glyfada, Athens: exhibitions, artists and a collection of works from emerging and established artists."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/src/assets/gallery-hero.jpg" />
-
+    <meta property="og:url" content="https://www.aetherartspace.com/" />
+    <meta property="og:image" content="https://www.aetherartspace.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@aetherartspace" />
-    <meta name="twitter:image" content="/src/assets/gallery-hero.jpg" />
+    <meta name="twitter:image" content="https://www.aetherartspace.com/og-image.jpg" />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico" />
-    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ArtGallery",
+        "name": "Aether Art Space",
+        "url": "https://www.aetherartspace.com/",
+        "logo": "https://www.aetherartspace.com/apple-touch-icon.png",
+        "image": "https://www.aetherartspace.com/og-image.jpg",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Glyfada",
+          "postalCode": "16675",
+          "addressCountry": "GR"
+        }
+      }
+    </script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://res.cloudinary.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap"
       rel="stylesheet"

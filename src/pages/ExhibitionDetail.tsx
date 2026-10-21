@@ -23,6 +23,12 @@ import { formatDate } from "@/lib/dates";
 import { STATUS_STYLES } from "@/lib/exhibitions";
 import { fetchPriority, imageSrcSet, imageUrl } from "@/lib/images";
 import { renderRichText } from "@/lib/richText";
+import { SITE_NAME, useSeo } from "@/hooks/useSeo";
+import { usePageDataFromDB } from "@/hooks/usePageDataFromDB";
+
+// Social preview images: 1200x630, cropped to fill
+const shareImage = (url: string | null | undefined) =>
+  url ? imageUrl(url, { width: 1200, height: 630, crop: "fill" }) : null;
 
 const BackButton = () => (
   <Button
@@ -164,6 +170,38 @@ const ExhibitionDetail = () => {
     [slug]
   );
   const { article } = useArticleByExhibition(exhibition?.id);
+  const { contactInfo } = usePageDataFromDB();
+  useSeo({
+    title: exhibition?.title || (loading ? undefined : "Exhibition Not Found"),
+    description: exhibition?.description,
+    image: shareImage(exhibition?.featured_image),
+    type: "article",
+    noIndex: !loading && !exhibition,
+    jsonLd: exhibition && {
+      "@context": "https://schema.org",
+      "@type": "ExhibitionEvent",
+      name: exhibition.title,
+      description: exhibition.description || undefined,
+      startDate: exhibition.start_date || undefined,
+      endDate: exhibition.end_date || undefined,
+      image: exhibition.featured_image || undefined,
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      location: {
+        "@type": "Place",
+        name: exhibition.location || SITE_NAME,
+        address: contactInfo?.address || exhibition.location || undefined,
+      },
+      organizer: {
+        "@type": "Organization",
+        name: SITE_NAME,
+        url: window.location.origin,
+      },
+      performer: exhibition.artists?.map((artist: { name: string }) => ({
+        "@type": "Person",
+        name: artist.name,
+      })),
+    },
+  });
 
   if (loading) {
     return (
